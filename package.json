@@ -1,0 +1,47 @@
+{
+  "name": "ARCitect",
+  "version": "v0.0.2",
+  "private": true,
+  "engines": {
+    "node": ">=v16.13",
+    "npm": ">=8.1"
+  },
+  "main": "packages/main/dist/index.cjs",
+  "scripts": {
+    "build": "npm run build:main && npm run build:preload && npm run build:renderer",
+    "build:main": "cd ./packages/main && vite build",
+    "build:preload": "cd ./packages/preload && vite build",
+    "build:renderer": "cd ./packages/renderer && vite build",
+    "compile": "cross-env MODE=production npm run build && electron-builder build --config electron-builder.config.js",
+    "watch": "node scripts/watch.js",
+    "lint": "eslint . --ext js,ts,vue",
+    "typecheck:main": "tsc --noEmit -p packages/main/tsconfig.json",
+    "typecheck:preload": "tsc --noEmit -p packages/preload/tsconfig.json",
+    "typecheck:renderer": "vue-tsc --noEmit -p packages/renderer/tsconfig.json",
+    "typecheck": "npm run typecheck:main && npm run typecheck:preload && npm run typecheck:renderer"
+  },
+  "dependencies": {
+    "@quasar/extras": "1.15.3",
+    "quasar": "2.7.7",
+    "vue": "3.2.31",
+    "chokidar": "3.5.1"
+  },
+  "devDependencies": {
+    "@quasar/vite-plugin": "^1.0.6",
+    "@typescript-eslint/eslint-plugin": "5.12.1",
+    "@vitejs/plugin-vue": "2.2.2",
+    "@vue/test-utils": "2.0.0-rc.18",
+    "cross-env": "7.0.3",
+    "electron": "^20.1.3",
+    "electron-builder": "23.5.1",
+    "electron-devtools-installer": "3.2.0",
+    "eslint": "8.9.0",
+    "eslint-plugin-vue": "8.5.0",
+    "sass": "1.32.12",
+    "typescript": "4.5.5",
+    "vite": "2.9.15",
+    "vitest": "0.5.4",
+    "vue-tsc": "0.31.4",
+    "open": "8.4.0"
+  }
+}
