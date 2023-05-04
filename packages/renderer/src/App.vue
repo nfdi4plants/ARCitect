@@ -1,15 +1,17 @@
 <script lang="ts" setup>
 
 import ToolbarButton from './components/ToolbarButton.vue';
-import ArcTreeView from './components/ArcTreeView.vue';
+import ArcTreeView from './views/ArcTreeView.vue';
 
-import HomeView from './components/HomeView.vue';
+import HomeView from './views/HomeView.vue';
 
-import EditInvestigationView from './components/EditInvestigationView.vue';
-import AssayView from './components/AssayView.vue';
-import StudyView from './components/StudyView.vue';
+import InvestigationView from './views/InvestigationView.vue';
+import AssayView from './views/AssayView.vue';
+import StudyView from './views/StudyView.vue';
+import MarkdownView from './views/MarkdownView.vue';
+import HelpView from './views/HelpView.vue';
 
-import DataHubView from './components/DataHubView.vue';
+import DataHubView from './views/DataHubView.vue';
 
 import logoURL from '../assets/dpLogo2_w.png'
 
@@ -25,7 +27,7 @@ const layoutProperties = reactive({
   showToolbar: true,
   toolbarMinimized: false,
   showHelp: true,
-  splitterModel: 40
+  splitterModel: 300,
 });
 
 const showError = ()=>{
@@ -33,10 +35,13 @@ const showError = ()=>{
 }
 
 const openLocalArc = async path=>{
+  if(!ArcCommanderService.props.ac_state)
+    return;
   if(!path)
     path = await window.ipc.invoke('LocalFileSystemService.selectDir');
   if(!path)
     return;
+  appProperties.state=appProperties.STATES.HOME;
   ArcCommanderService.props.arc_root = path;
   await ArcCommanderService.getArcProperties();
 };
@@ -79,6 +84,9 @@ onMounted(async () => {
 //   }
 //   layoutProperties.drawerWidth = Math.max(200,initialDrawerWidth + e.offset.x);
 // };
+
+const test = async ()=>{
+}
 
 </script>
 
@@ -124,7 +132,8 @@ onMounted(async () => {
 
           <q-separator />
 
-          <ToolbarButton text='Upload ARC' icon='cloud_upload' requiresARC='true' @clicked=''></ToolbarButton>
+          <!--<ToolbarButton text='Upload ARC' icon='cloud_upload' requiresARC='true' @clicked='test()'></ToolbarButton>-->
+          <ToolbarButton text='Upload ARC' icon='cloud_upload' @clicked='test()'></ToolbarButton>
           <ToolbarButton text='Refresh ARC' icon='autorenew' requiresARC='true' @clicked='ArcCommanderService.getArcProperties()'></ToolbarButton>
 
           <q-separator />
@@ -143,25 +152,7 @@ onMounted(async () => {
         class="bg-grey-3"
       >
         <q-scroll-area class='fit' style="height: 100%;width:100%;">
-          <div class='q-pa-md'>
-            <div class='text-h6 text-weight-bold'>Help</div>
-
-            <p>This space can be used for detailed instructions for the current context.</p>
-
-            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. In tempus sit amet metus eu dictum. In hac habitasse platea dictumst. Nunc iaculis, sem feugiat luctus eleifend, odio tortor laoreet turpis, a cursus quam dolor ac justo. Sed vel dui eget diam placerat blandit in sed metus. In metus felis, congue et rutrum ac, aliquet quis urna. Phasellus vel diam eu nunc lacinia interdum eu at lorem. Praesent lacus lacus, facilisis vel lacinia at, iaculis in sem. Nam sed sagittis lorem, sed ultricies dui. Etiam imperdiet ullamcorper purus, sed aliquet elit efficitur et. Mauris a porta magna.</p>
-
-            <p>Vestibulum pretium leo felis, a rutrum dui vulputate id. Duis nec lacus ut ante dapibus varius. Proin vitae turpis in metus posuere auctor. Morbi massa erat, suscipit non elementum sit amet, blandit ut tellus. Cras facilisis, turpis nec vulputate convallis, leo lacus facilisis metus, a eleifend nunc magna vel risus. Fusce non purus id ex ultricies aliquam. Proin fermentum magna nisi, ac gravida nibh elementum at. Vestibulum ligula leo, vestibulum a viverra nec, sollicitudin gravida orci. Praesent pellentesque sapien lorem, at porttitor enim tristique non. Suspendisse dictum quam augue, id iaculis ipsum semper a. Suspendisse ac sollicitudin turpis, a volutpat dolor.</p>
-
-            <p>Aenean et dolor vehicula, hendrerit ante ac, fringilla est. Sed ultrices commodo nunc ac pretium. Donec commodo sem ultrices imperdiet hendrerit. Nam lobortis accumsan luctus. Mauris posuere convallis urna, vitae placerat ante accumsan sit amet. Ut eleifend iaculis erat id tincidunt. Morbi auctor metus risus, sed scelerisque odio convallis in. Ut sollicitudin magna eu orci pretium volutpat. Maecenas vulputate lectus ac justo convallis, eu tempor magna blandit. Cras imperdiet gravida augue, quis aliquam enim volutpat eu. Quisque eu est convallis, luctus purus eu, placerat risus.</p>
-
-
-            <!--<p v-for='(item,i) in Array(100)'>Lorem ipsum dolor sit amet consectetur adipisicing elit. Fugit nihil praesentium molestias a adipisci, dolore vitae odit, quidem consequatur optio voluptates asperiores pariatur eos numquam rerum delectus commodi perferendis voluptate?</p>-->
-            <!--<p v-for='(item,i) in ArcCommanderService.props.log'>-->
-            <!--  {{item}}-->
-            <!--</p>-->
-
-          </div>
-
+          <HelpView></HelpView>
         </q-scroll-area>
       </q-drawer>
 
@@ -170,24 +161,26 @@ onMounted(async () => {
           <q-splitter
             v-model="layoutProperties.splitterModel"
             class='full'
-            :limits='[30,70]'
+            unit='px'
+            :limits='[300,Infinity]'
            >
             <template v-slot:before>
               <q-scroll-area class='fit' style="height: 100%;">
-                <ArcTreeView></ArcTreeView>
+                <ArcTreeView @openArc='openLocalArc'></ArcTreeView>
               </q-scroll-area>
             </template>
 
             <template v-slot:after>
               <q-scroll-area class='fit' style="height: 100%;">
-              <!--<HomeView v-if ='appProperties.state===appProperties.STATES.HOME'></HomeView>-->
-              <DataHubView v-if='appProperties.state===appProperties.STATES.OPEN_DATAHUB'></DataHubView>
+                <!--<HomeView v-if ='appProperties.state===appProperties.STATES.HOME'></HomeView>-->
+                <DataHubView v-if='appProperties.state===appProperties.STATES.OPEN_DATAHUB'></DataHubView>
 
-              <EditInvestigationView v-else-if='appProperties.state===appProperties.STATES.EDIT_INVESTIGATION'></EditInvestigationView>
-              <AssayView v-else-if='appProperties.state===appProperties.STATES.EDIT_ASSAY'></AssayView>
-              <StudyView v-else-if='appProperties.state===appProperties.STATES.EDIT_STUDY'></StudyView>
-              <HomeView v-else></HomeView>
-              <!--<div v-else></div>-->
+                <InvestigationView v-else-if='appProperties.state===appProperties.STATES.EDIT_INVESTIGATION'></InvestigationView>
+                <AssayView v-else-if='appProperties.state===appProperties.STATES.EDIT_ASSAY'></AssayView>
+                <StudyView v-else-if='appProperties.state===appProperties.STATES.EDIT_STUDY'></StudyView>
+                <MarkdownView v-else-if='appProperties.state===appProperties.STATES.EDIT_MARKDOWN'></MarkdownView>
+                <HomeView v-else></HomeView>
+                <!--<div v-else></div>-->
               </q-scroll-area>
             </template>
           </q-splitter>

@@ -13,7 +13,7 @@
     "build:preload": "cd ./packages/preload && vite build",
     "build:renderer": "cd ./packages/renderer && vite build",
     "compile": "cross-env MODE=production npm run build && electron-builder build --config electron-builder.config.js",
-    "watch": "node scripts/watch.js",
+    "debug": "node scripts/debug.js",
     "lint": "eslint . --ext js,ts,vue",
     "typecheck:main": "tsc --noEmit -p packages/main/tsconfig.json",
     "typecheck:preload": "tsc --noEmit -p packages/preload/tsconfig.json",
@@ -22,9 +22,10 @@
   },
   "dependencies": {
     "@quasar/extras": "1.15.3",
-    "quasar": "2.7.7",
+    "quasar": "2.8.0",
     "vue": "3.2.31",
-    "chokidar": "3.5.1"
+    "chokidar": "3.5.1",
+    "vue3-markdown-it": "1.0.10"
   },
   "devDependencies": {
     "@quasar/vite-plugin": "^1.0.6",

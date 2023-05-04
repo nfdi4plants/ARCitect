@@ -4,80 +4,23 @@ import FS from 'fs';
 import chokidar from 'chokidar';
 import util from 'util';
 
-let uniqueLabelCounter = 0;
-
 const changeListeners = {};
 
 export const LocalFileSystemService = {
 
   readDir: (e,path) => {
-    const labels = FS.readdirSync(path);
     const children = [];
-    const parent = path.split('/').pop().toLowerCase();
-    const isSARW = l=>{
-      return ['studies','assays'].includes(l)
-    };
-    const sarwMap = {
-      'studies': 'Study',
-      'assays': 'Assay'
-    };
 
+    const labels = FS.readdirSync(path);
     for(const l of labels){
       const stat = FS.lstatSync(PATH.join(path,l));
       if(l.startsWith('isa.') || l.startsWith('.git') || l.startsWith('.arc'))
         continue;
 
-      stat.label = l;
+      stat.id = path+'/'+l;
       stat.isDirectory = stat.isDirectory();
-      stat.lazy = stat.isDirectory;
-      if(isSARW(parent)){
-        stat.type = 'node_edit_'+sarwMap[parent];
-        stat.icon = 'edit_square';
-        stat.selectable = true;
-      // } else if(isSARW(l)){
-      //   stat.type = 'node_add_'+sarwMap[l];
-      //   stat.icon = 'add_box';
-      //   stat.selectable = true;
-      } else {
-        stat.selectable = false;
-        stat.type = 'node';
-      }
-      stat.id = path+'/'+stat.label;
       children.push(stat);
     }
-
-    if(isSARW(parent)){
-      children.push({
-        type: 'node_add_'+sarwMap[parent],
-        label: 'Add '+sarwMap[parent],
-        isDirectory: false,
-        lazy: false,
-        icon: 'add_box',
-        id: path+'/'+'add$'+(uniqueLabelCounter++),
-        selectable: true
-      });
-    }
-
-    if(children.length<1){
-      children.push({
-        type: 'empty',
-        label: 'empty',
-        isDirectory: false,
-        lazy: false,
-        icon: 'block',
-        id: path+'/'+'empty$'+(uniqueLabelCounter++),
-        selectable: false
-      });
-    }
-
-    children.sort((a,b)=>{
-      if(a.isDirectory && !b.isDirectory){
-        return -1;
-      } else if (!a.isDirectory && b.isDirectory){
-        return 1;
-      }
-      return a.label.localeCompare(b.label);
-    });
 
     return children;
   },
@@ -131,7 +74,7 @@ export const LocalFileSystemService = {
     if(!watcher)
       return;
 
-    await chokidar.unwatch();
+    await watcher.unwatch();
     delete changeListeners[path];
     return;
   },
