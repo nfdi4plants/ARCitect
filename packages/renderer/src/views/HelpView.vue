@@ -78,4 +78,7 @@ onMounted(init);
   font-size:1.2em;
   margin-top: 1em;
 }
+.markdown img{
+  max-width: 100%;
+}
 </style>
