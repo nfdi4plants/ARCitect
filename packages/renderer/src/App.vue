@@ -158,7 +158,7 @@ const test = async ()=>{
           <q-separator />
 
           <!--<ToolbarButton text='Upload ARC' icon='cloud_upload' requiresARC='true' @clicked='test()'></ToolbarButton>-->
-          <ToolbarButton text='Upload ARC' icon='cloud_upload' requiresARC='true' @clicked='syncArc()'></ToolbarButton>
+          <ToolbarButton text='Sync ARC' icon='cloud_upload' requiresARC='true' @clicked='syncArc()'></ToolbarButton>
           <ToolbarButton text='Refresh ARC' icon='autorenew' requiresARC='true' @clicked='ArcCommanderService.getArcProperties()'></ToolbarButton>
 
           <q-separator />
