@@ -97,6 +97,8 @@ const syncArc = async ()=>{
     ],
     true
   );
+
+  await window.ipc.invoke('InternetService.openExternalURL', `https://git.nfdi4plants.org/${appProperties.user.username}/${arcProperties.identifier}`);
 }
 
 onMounted(async () => {
