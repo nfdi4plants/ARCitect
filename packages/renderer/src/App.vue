@@ -173,6 +173,7 @@ const test = async ()=>{
         bordered
         :breakpoint='0'
         class="bg-grey-3"
+        :width="400"
       >
         <q-scroll-area class='fit' style="height: 100%;width:100%;">
           <HelpView></HelpView>
