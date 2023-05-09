@@ -3,6 +3,7 @@ import { reactive, ref, nextTick, watch, onMounted, onUnmounted } from 'vue';
 import appProperties from '../AppProperties.ts';
 import ArcCommanderService from '../ArcCommanderService.ts';
 import StringDialog from '../dialogs/StringDialog.vue';
+import NewAssayDialog from '../dialogs/NewAssayDialog.vue';
 import { useQuasar } from 'quasar'
 const $q = useQuasar();
 
@@ -50,57 +51,98 @@ const addStudy = async ()=>{
       property: 'Identifier',
       icon: 'add_box'
     }
-  }).onOk( async s => {
+  }).onOk( async data => {
     const r = await ArcCommanderService.run({
-        args: ['study','add','--identifier',s],
+        args: ['study','add','--identifier',data],
         title: `Adding Study`,
         silent: false
       },
       true
     );
-    appProperties.active_study = s;
+    appProperties.active_study = data;
   });
 };
 const addAssay = async ()=>{
   $q.dialog({
-    component: StringDialog,
-    componentProps: {
-      title: 'Add Assay',
-      property: 'Identifier',
-      icon: 'add_box'
-    }
-  }).onOk( async s => {
-    const r = await ArcCommanderService.run({
-        args: ['assay','add','--identifier',s],
+    component: NewAssayDialog
+  }).onOk( async data => {
+    const cmds = [];
+    if(data.model.studies.value.length===1 && data.model.studies.value[0]==='Create New Study'){
+      cmds.push({
+        args: ['assay','add','--assayidentifier',data.model.assayIdentifier.value],
         title: `Adding Assay`,
         silent: true
-      },
-      true
-    );
-    console.log(r);
+      });
+    } else {
+      cmds.push({
+        args: ['assay','init','--assayidentifier',data.model.assayIdentifier.value],
+        title: `Adding Assay`,
+        silent: false
+      });
+      for(const s of data.model.studies.value)
+        cmds.push({
+          args: ['assay','register','--assayidentifier',data.model.assayIdentifier.value,'--studyidentifier',s],
+          title: `Registering Assay`,
+          silent: false
+        });
+    }
+    const r = await ArcCommanderService.run(cmds,true);
   });
+};
+
+const addProtocol = async n=>{
+  const path = n.id.split('/').slice(0,-1).join('/');
+  $q.dialog({
+    component: StringDialog,
+    componentProps: {
+      title: 'Add Protocol',
+      property: 'Name',
+      icon: 'add_box'
+    }
+  }).onOk( async data => {
+    await window.ipc.invoke('LocalFileSystemService.createEmptyFile', path+'/'+data);
+  });
+};
+
+const addDataset = async n=>{
+  const path = n.id.split('/').slice(0,-1).join('/');
+  const files = await window.ipc.invoke('LocalFileSystemService.selectAny');
+  for(const fpath of files){
+    await window.ipc.invoke('LocalFileSystemService.copy', [fpath,path]);
+  }
 };
 
 const readDir_ = async path => {
   const nodes = await window.ipc.invoke('LocalFileSystemService.readDir', path);
 
   const parent = path.split('/').pop().toLowerCase();
-  const isSARW = l=>{
-    return ['studies','assays'].includes(l)
+  const needsAddElement = l=>{
+    return ['studies','assays','protocols','dataset'].includes( l.toLowerCase() );
   };
-  const sarwMap = {
-    'studies': 'Study',
-    'assays': 'Assay'
+
+  const isMarkdown = l => {
+    return ['md','txt'].some( i=>new RegExp(`\\.${i}$`,'g').test(l.toLowerCase()))
+  }
+
+  const isEditable = (n,p)=>{
+    return n.isDirectory && ['studies','assays'].includes(p);
+  };
+
+  const elementMap = {
+    'studies': ['Study', addStudy],
+    'assays': ['Assay', addAssay],
+    'protocols': ['Protocol', addProtocol],
+    'dataset': ['Dataset', addDataset]
   };
 
   for(const n of nodes){
     n.label = n.id.split('/').pop();
     n.lazy = n.isDirectory;
-    if(isSARW(parent)){
-      n.type = 'node_edit_'+sarwMap[parent];
+    if(isEditable(n,parent)){
+      n.type = 'node_edit_'+elementMap[parent][0];
       n.icon = 'edit_square';
       n.selectable = true;
-    } else if(n.label.includes('.md')) {
+    } else if(isMarkdown(n.label)){
       n.type = 'node_edit_Markdown';
       n.icon = 'edit_square';
       n.selectable = true;
@@ -110,27 +152,18 @@ const readDir_ = async path => {
     }
   }
 
-  if(isSARW(parent)){
+  if(needsAddElement(parent)){
     nodes.push({
-      type: 'node_add_'+sarwMap[parent],
-      label: 'Add '+sarwMap[parent],
+      type: 'node_add_'+elementMap[parent][0],
+      label: 'Add '+elementMap[parent][0],
       isDirectory: false,
       lazy: false,
       icon: 'add_box',
       id: path+'/'+'add$'+(uniqueLabelCounter++),
       selectable: true,
       tickable: false,
-      handler: parent==='studies' ? addStudy : addAssay
+      handler: elementMap[parent][1]
     });
-    // nodes.push({
-    //   type: 'node_add_'+sarwMap[parent],
-    //   label: 'Add '+sarwMap[parent],
-    //   isDirectory: false,
-    //   lazy: false,
-    //   icon: 'add_box',
-    //   id: path+'/'+'add$'+(uniqueLabelCounter++),
-    //   selectable: true
-    // });
   }
 
   if(nodes.length<1){
@@ -150,6 +183,12 @@ const readDir_ = async path => {
       return -1;
     } else if (!a.isDirectory && b.isDirectory){
       return 1;
+    }
+
+    if(a.type.startsWith('node_add_') && !b.type.startsWith('node_add_')){
+      return 1;
+    } else if (!a.type.startsWith('node_add_') && b.type.startsWith('node_add_')){
+      return -1;
     }
     return a.label.localeCompare(b.label);
   });
@@ -177,8 +216,8 @@ const onSelectionChanged = id=>{
       appProperties.active_markdown = n.id;
       return appProperties.state=appProperties.STATES.EDIT_MARKDOWN;
 
-    default:
-      return appProperties.state=appProperties.STATES.HOME;
+    // default:
+    //   return appProperties.state=appProperties.STATES.HOME;
   }
 }
 

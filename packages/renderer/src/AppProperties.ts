@@ -15,11 +15,15 @@ const appProperties = reactive({
     ADD_STUDY: 301,
     ADD_ASSAY: 302,
 
+    LOGIN: 400,
+
   },
   STATES_I: {},
   state: 100,
   active_study: null,
   active_assay: null,
+
+  user: null
 });
 
 for(let k in appProperties.STATES){

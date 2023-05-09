@@ -44,6 +44,9 @@ const add = async item => {
 };
 
 const remove = async (publication,skipUpdate) => {
+  if(!publication.doi)
+    return console.error('arc commander can only delete publications by doi');
+
   const args = [props.target,'publication','unregister','--doi',publication.doi];
   if(props.target==='s'){
     args.push(`--studyidentifier`);

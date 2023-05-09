@@ -29,8 +29,7 @@ const ArcCommanderService = {
       message: cmds[0].title || ''
     });
 
-    while(cmds.length){
-      const cmd = cmds.pop();
+    for(let cmd of cmds){
       if(cmd.silent){
         cmd.args = ['-v','0'].concat(cmd.args);
       }
@@ -38,9 +37,21 @@ const ArcCommanderService = {
         args: cmd.args,
         cwd: ArcCommanderService.props.arc_root
       });
-
       responses.push(response);
     }
+
+    // while(cmds.length){
+    //   const cmd = cmds.pop();
+    //   if(cmd.silent){
+    //     cmd.args = ['-v','0'].concat(cmd.args);
+    //   }
+    //   const response = await window.ipc.invoke('ArcCommanderService.run', {
+    //     args: cmd.args,
+    //     cwd: ArcCommanderService.props.arc_root
+    //   });
+
+    //   responses.push(response);
+    // }
 
     if(updateArcProperties)
       await ArcCommanderService.getArcProperties();

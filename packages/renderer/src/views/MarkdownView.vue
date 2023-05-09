@@ -17,7 +17,8 @@ class MarkdownSource extends PropertyTree {
 }
 
 const props = reactive({
-  file: ''
+  file: '',
+  tab: 'editor'
 });
 
 const markdownSource = new MarkdownSource();
@@ -33,6 +34,11 @@ const init = async ()=>{
   markdownSource.model.source.loading = false;
 }
 
+const save = async ()=>{
+  await window.ipc.invoke('LocalFileSystemService.writeFile', [props.file,markdownSource.model.source.value]);
+  init();
+}
+
 onMounted(init);
 watch( ()=>appProperties.active_markdown, init );
 
@@ -41,23 +47,52 @@ watch( ()=>appProperties.active_markdown, init );
 <template>
   <q-list>
     <ViewItem
-      icon="biotech"
+      icon="edit_note"
       label="Markdown Editor"
       :caption="props.file"
       group='mgroup'
       defaultOpened
     >
       <q-card flat>
-        <br>
-        <FormInput :property='markdownSource.model.source'></FormInput>
-        <br>
-        <Markdown class='markdown' :source="markdownSource.model.source.value" />
+        <q-tabs
+          v-model="props.tab"
+          dense
+          class="text-grey"
+          active-color="primary"
+          indicator-color="primary"
+          align="justify"
+          narrow-indicator
+        >
+          <q-tab name="editor" label="Editor" />
+          <q-tab name="preview" label="Preview" />
+        </q-tabs>
+
+        <q-separator />
+
+        <q-tab-panels v-model="props.tab" class='q-pa-none'>
+          <q-tab-panel name="editor" class='q-pl-none q-pr-none'>
+            <FormInput :property='markdownSource.model.source' autogrow></FormInput>
+            <q-card-actions align='right' style="padding:0.5em 1em;">
+              <q-btn label="Save" type="submit" icon='check_circle' color="secondary" @click='save'/>
+              <q-btn label="Reset" type="submit" icon='check_circle' color="secondary" @click='init'/>
+            </q-card-actions>
+          </q-tab-panel>
+
+          <q-tab-panel name="preview">
+            <Markdown class='markdown' :source="markdownSource.model.source.value" />
+          </q-tab-panel>
+        </q-tab-panels>
+        <!--<br>-->
+        <!--<FormInput :property='markdownSource.model.source'></FormInput>-->
+        <!--<br>-->
+        <!--<Markdown class='markdown' :source="markdownSource.model.source.value" />-->
       </q-card>
     </ViewItem>
   </q-list>
 </template>
 
 <style>
+
   .markdown * {
     margin: 0.2em 0em;
     line-height: 1.2;

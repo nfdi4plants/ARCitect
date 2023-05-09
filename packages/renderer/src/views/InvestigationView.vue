@@ -16,8 +16,8 @@ const investigationForm = ref(null);
 
 const init = async ()=>{
   investigationForm.value.init(arcProperties);
-  props.people = arcProperties.people;
-  props.publications = arcProperties.publications;
+  props.people = arcProperties.people.filter(i=>i.lastName && i.firstName);
+  props.publications = arcProperties.publications || [];
 };
 
 onMounted( init );

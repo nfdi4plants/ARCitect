@@ -10,6 +10,7 @@ import AssayView from './views/AssayView.vue';
 import StudyView from './views/StudyView.vue';
 import MarkdownView from './views/MarkdownView.vue';
 import HelpView from './views/HelpView.vue';
+import LoginView from './views/LoginView.vue';
 
 import DataHubView from './views/DataHubView.vue';
 
@@ -21,7 +22,15 @@ setCssVar('primary', '#2d3e50');
 import { onMounted, ref, reactive } from 'vue';
 
 import appProperties from './AppProperties.ts';
+import arcProperties from './ArcProperties.ts';
 import ArcCommanderService from './ArcCommanderService.ts';
+
+// import { useQuasar } from 'quasar'
+// const $q = useQuasar()
+// console.log($q.dark.isActive) // true, false
+// $q.dark.set(true) // or false or "auto"
+// // $q.dark.toggle()
+
 
 const layoutProperties = reactive({
   showToolbar: true,
@@ -68,6 +77,28 @@ const newLocalArc = async ()=>{
   openLocalArc(path);
 };
 
+const showHomeView = ()=>{
+  appProperties.state=appProperties.STATES.HOME;
+}
+
+const syncArc = async ()=>{
+  // console.log(`https://git.nfdi4plants.org/${appProperties.user.username}/${arcProperties.identifier}`);
+  const r = await ArcCommanderService.run([
+      {
+        args: ['config','setgituser','-l','-n',appProperties.user.name,'-e',appProperties.user.email],
+        title: `Init Git User`,
+        silent: false
+      },
+      {
+        args: ['sync','-f', '-r', `https://oauth2:${appProperties.user.token.access_token}@git.nfdi4plants.org/${appProperties.user.username}/${arcProperties.identifier}`],
+        title: `Sync Arc`,
+        silent: false
+      }
+    ],
+    true
+  );
+}
+
 onMounted(async () => {
   await ArcCommanderService.init();
   appProperties.state=appProperties.STATES.HOME;
@@ -92,40 +123,32 @@ const test = async ()=>{
 
 <template>
     <q-layout view="hHh LpR fFf" class="no-selection">
-      <q-header>
-        <q-toolbar style="padding:0 0.7em;">
-          <!--<q-icon size="2.5rem" style="margin:0.1em;padding:0.2em;border:0.05em solid white;border-radius:1em;" :name="'img:'+logoURL"></q-icon>-->
-          <q-icon size="2rem" style="padding:0.05em;border:0.05em solid white;border-radius:0.2em;" :name="'img:'+logoURL"></q-icon>
-          <!--<q-toolbar-title>{{appProperties.title}}</q-toolbar-title>-->
-          <q-toolbar-title>
-              <span style="border-bottom:0em solid white;">
-                <div class='logo-text-0'>ARC</div>
-                <div class='logo-text-1'>itect</div>
-              </span>
-            <!--<div class='row' style='height:40px;overflow:hidden;'>-->
-            <!--  <div class='logo-text-0'>ARC</div>-->
-            <!--  <div class='logo-text-1'>itect</div>-->
-            <!--</div>-->
-            <!--<div class='row' style='height:20px;overflow:hidden;'>-->
-            <!--  <div class='logo-text-2'>@nfdi4plants.de</div>-->
-            <!--</div>-->
-          </q-toolbar-title>
-        </q-toolbar>
-      </q-header>
-
       <q-drawer
         v-model='layoutProperties.showToolbar'
         show-if-above
 
         :mini="layoutProperties.toolbarMinimized"
 
-        :width="200"
+        :width="190"
         :breakpoint="500"
         bordered
         class="bg-grey-3"
       >
         <q-scroll-area class="fit" :horizontal-thumb-style="{ opacity: 0 }">
-        <q-list padding>
+        <q-list>
+          <q-item v-ripple clickable class='bg-primary text-white' @click="showHomeView" style="padding-top:1em;padding-bottom:1em;">
+            <q-item-section avatar>
+              <q-icon size="2.5rem" style="margin: 0 -0.20em;" :name="'img:'+logoURL" @click='showHomeView'></q-icon>
+            </q-item-section>
+            <q-item-section style="margin:0.6em 0 0 -1.2em">
+              <q-item-label><b style="font-size:2em">ARC</b><span style="font-size:1.2em">itect</span></q-item-label>
+            </q-item-section>
+          </q-item>
+
+          <LoginView />
+
+          <q-separator />
+
           <ToolbarButton text='New ARC' icon='note_add' @clicked='newLocalArc()'></ToolbarButton>
           <ToolbarButton text='Open ARC' icon='file_open' @clicked='openLocalArc()'></ToolbarButton>
           <ToolbarButton text='Import ARC' icon='cloud_download' @clicked='appProperties.state=appProperties.STATES.OPEN_DATAHUB'></ToolbarButton>
@@ -133,7 +156,7 @@ const test = async ()=>{
           <q-separator />
 
           <!--<ToolbarButton text='Upload ARC' icon='cloud_upload' requiresARC='true' @clicked='test()'></ToolbarButton>-->
-          <ToolbarButton text='Upload ARC' icon='cloud_upload' @clicked='test()'></ToolbarButton>
+          <ToolbarButton text='Upload ARC' icon='cloud_upload' requiresARC='true' @clicked='syncArc()'></ToolbarButton>
           <ToolbarButton text='Refresh ARC' icon='autorenew' requiresARC='true' @clicked='ArcCommanderService.getArcProperties()'></ToolbarButton>
 
           <q-separator />

@@ -26,6 +26,7 @@ const ALLOWED_EXTERNAL_ORIGINS = new Set<`https://${string}`>([
   'https://github.com',
   'https://www.w3schools.com',
   'https://www.google.com',
+  'https://git.nfdi4plants.org',
 ]);
 
 
@@ -108,7 +109,7 @@ app.on('web-contents-created', (_, contents) => {
    */
   contents.on('will-attach-webview', (event, webPreferences, params) => {
     const {origin} = new URL(params.src);
-    if (!ALLOWED_ORIGINS_AND_PERMISSIONS.has(origin)) {
+    if (!ALLOWED_EXTERNAL_ORIGINS.has(origin)) {
 
       if (import.meta.env.DEV) {
         console.warn(`A webview tried to attach ${params.src}, but was blocked.`);

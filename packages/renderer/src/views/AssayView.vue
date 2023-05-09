@@ -15,7 +15,6 @@ const init = async ()=>{
     return console.error('Unable to find assay:',[appProperties.active_assay,arcProperties]);
 
   const studies = Assay.getStudies(assay);
-  console.log(studies);
 
   const config  = {
     assayIdentifier: Assay.getIdentifier(assay),

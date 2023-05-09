@@ -59,29 +59,12 @@ class PropertyTree {
       p.model = model;
       if(p.type==='select'){
         model[p.property].setModel = v => {
-          console.log('xxxx',v);
           model[p.property].value = v;
         }
-        // if(p.multi){
-        //   model[p.property].setModel = p.limit_to_options
-        //     ? v => model[p.property].value = model[p.property].options.includes(v) ? v : ''
-        //     : v => model[p.property].value = v;
-        // } else {
-        //   model[p.property].setModel = p.limit_to_options
-        //     ? v => model[p.property].value = model[p.property].options.includes(v) ? v : ''
-        //     : v => model[p.property].value = v;
-        // }
         model[p.property].filterFn = p.optionsFn
-          ? (val, update, abort)=>{model[p.property].options=p.optionsFn();console.log(model[p.property]);update();}
+          ? (val, update, abort)=>{model[p.property].options=p.optionsFn();update();}
           : (val, update, abort)=>update();
       }
-
-        // model[p.property].filterFn = (val, update, abort)=>update();
-        // model[p.property].filterFn = (val, update, abort)=>{
-        //   model[p.property].options =
-        //   update();
-        // };
-
     }
     this.model = reactive(model);
 

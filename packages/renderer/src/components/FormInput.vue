@@ -17,7 +17,6 @@ const hideDateBoxes = box => {
 </script>
 
 <template>
-  <div>
     <q-input
       v-if='props.property.type!=="select"'
 
@@ -50,7 +49,7 @@ const hideDateBoxes = box => {
       :bg-color="props.property.dirty ? 'teal-1':'grey-3'"
       filled
       v-model="props.property.value"
-      :use-input="!props.property.multi"
+      :use-input="props.property.useInput"
       fill-input
       input-debounce="0"
       :options="props.property.options"
@@ -65,5 +64,5 @@ const hideDateBoxes = box => {
     <!--<q-badge color="secondary" class="q-mb-md">-->
     <!--  {{ props.property.value }}-->
     <!--</q-badge>-->
-  </div>
+
 </template>
