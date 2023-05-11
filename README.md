@@ -1,6 +1,12 @@
 The following quick guide is intended to help content contributors find a starting point.
 
-in the root run once:
+
+## Prerequisites
+
+Please install the latest version of [Node.js](https://nodejs.org/en/download). 
+
+## Installation
+
 1. Download repo.
 2. Run `npm install` in root directory
 3. Run `npm run debug`
