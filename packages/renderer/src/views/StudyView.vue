@@ -26,7 +26,7 @@ const init = async ()=>{
     return console.error('Unable to find study:',[appProperties.active_study,arcProperties.studies]);
 
   studyForm.value.init(study);
-  props.people = study.people.filter(i=>i.lastName && i.firstName) || [];
+  props.people = study.people ? study.people.filter(i=>i.lastName && i.firstName) : [];
   props.publications = study.publications || [];
 };
 

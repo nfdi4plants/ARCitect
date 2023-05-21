@@ -26,7 +26,7 @@ export const DataHubService = {
             output += chunk;
           });
           res.on('end', () => {
-            console.log(output);
+            // console.log(output);
             resolve(JSON.parse(output));
           });
         });
@@ -54,7 +54,7 @@ export const DataHubService = {
       null,
       {
         host: 'git.nfdi4plants.org',
-        path: '/api/v4/projects/',
+        path: '/api/v4/projects/' + (latest_user_data ? `?access_token=${latest_user_data.token.access_token}` : ''),
         port: 443,
         method: 'GET',
         headers: {
@@ -98,7 +98,7 @@ export const DataHubService = {
 
     authApp = express()
     authApp.get('/', async (req, res) => {
-      console.log(req.url);
+      // console.log(req.url);
       if(!req.url || !req.url.startsWith('/?code=')){
         return res.send('Invalid Request.');
       }
@@ -140,9 +140,10 @@ export const DataHubService = {
       user_data.token = token_data;
       latest_user_data = user_data;
 
-      res.send('<h1>Login and Authorization Complete. You can now return to ARCitect.</h1>');
+      res.send('<h1>Login and Authorization Complete. You can now return to ARCitect.</h1><script>window.close()</script>');
       let window = BrowserWindow.getAllWindows().find(w => !w.isDestroyed());
       window.webContents.send('DataHubService.authentificationData', user_data);
+      window.focus();
     });
     authApp.listen(authPort, () => {
       console.log(`Authentification service listening on port ${authPort}`);

@@ -31,6 +31,7 @@ class Property {
     this.label = config.label || autoLabel(property);
     this.dirty = false;
     this.readonly = config.readonly;
+    this.useInput = config.useInput || false;
     this.loading = config.loading || false;
     this.options = Array.isArray(config.options) ? config.options : [];
     this.optionsFn = config.optionsFn || null;
@@ -62,7 +63,10 @@ class PropertyTree {
           model[p.property].value = v;
         }
         model[p.property].filterFn = p.optionsFn
-          ? (val, update, abort)=>{model[p.property].options=p.optionsFn();update();}
+          ? async (val, update, abort)=>{
+            model[p.property].options=await p.optionsFn(val);
+            update();
+          }
           : (val, update, abort)=>update();
       }
     }

@@ -44,12 +44,13 @@ const hideDateBoxes = box => {
 
     <q-select
       v-else
-
-      :style="`margin:0 0.5em ${props.property.hint?2:-0.5}em 0.5em;`"
+      :style="`margin:0 0.5em ${props.property.hint?1:-0.5}em 0.5em;`"
       :bg-color="props.property.dirty ? 'teal-1':'grey-3'"
       filled
       v-model="props.property.value"
       :use-input="props.property.useInput"
+      :hide-selected="props.property.useInput"
+      :hint="props.property.hint"
       fill-input
       input-debounce="0"
       :options="props.property.options"
@@ -58,7 +59,6 @@ const hideDateBoxes = box => {
       :label="props.property.label"
       :loading="props.property.loading"
       :multiple="props.property.multi"
-      hide-buttom-space
     >
     </q-select>
     <!--<q-badge color="secondary" class="q-mb-md">-->

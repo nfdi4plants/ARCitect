@@ -15,7 +15,10 @@ const form = [
   [
     assay.model.assayIdentifier,
     assay.model.studies
-  ]
+  ],
+  [assay.model.measurementtype],
+  [assay.model.technologytype],
+  [assay.model.technologyplatform]
 ];
 
 const init = async config=>{

@@ -12,7 +12,6 @@ export const InternetService = {
   callSwateAPI: (event, data)=>{
     return new Promise(
       (resolve, reject) => {
-
         const options = {
           host: 'swate.nfdi4plants.org',
           port: 443,
@@ -41,7 +40,7 @@ export const InternetService = {
         req.on('error', err => {
           resolve(err);
         });
-        req.write(data.payload);
+        req.write(JSON.stringify(data.payload));
         req.end();
       }
     );

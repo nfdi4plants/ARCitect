@@ -8,7 +8,67 @@ class Assay extends PropertyTree {
       new Property('assayIdentifier', {readonly:true}),
       new Property('studies', {type:'select',multi:true,limit_to_options:true,optionsFn:()=>{
         return [...new Set(arcProperties.studies.map(s=>s.identifier))];
-      }})
+      }}),
+      new Property('measurementtype', {
+        label:'Measurement Type',
+        type:'select',
+        hint: 'A term to qualify the endpoint, or what is being measured, e.g., gene expression profiling or protein identification.',
+        useInput: true,
+        optionsFn: async v=>{
+          const res = await window.ipc.invoke('InternetService.callSwateAPI', {
+            method: 'getTermSuggestionsByParentTerm',
+            payload: [{
+              "n": 5,
+              "query": v,
+              "parent_term": {
+                "Name": "instrument model",
+                "TermAccession": "MS:1000031"
+              }
+            }]
+          });
+          return Array.isArray(res) ? res.map(i=>i.Name) : [];
+        }
+      }),
+      new Property('technologytype', {
+        label:'Technology Type',
+        type:'select',
+        hint: 'Term to identify the technology used to perform the measurement, e.g., DNA microarray, mass spectrometry.',
+        useInput: true,
+        optionsFn: async v=>{
+          const res = await window.ipc.invoke('InternetService.callSwateAPI', {
+            method: 'getTermSuggestionsByParentTerm',
+            payload: [{
+              "n": 5,
+              "query": v,
+              "parent_term": {
+                "Name": "instrument model",
+                "TermAccession": "MS:1000031"
+              }
+            }]
+          });
+          return Array.isArray(res) ? res.map(i=>i.Name) : [];
+        }
+      }),
+      new Property('technologyplatform', {
+        label:'Technology Platform',
+        type:'select',
+        hint: 'Manufacturer and platform name, e.g., Bruker AVANCE.',
+        useInput: true,
+        optionsFn: async v=>{
+          const res = await window.ipc.invoke('InternetService.callSwateAPI', {
+            method: 'getTermSuggestionsByParentTerm',
+            payload: [{
+              "n": 5,
+              "query": v,
+              "parent_term": {
+                "Name": "instrument model",
+                "TermAccession": "MS:1000031"
+              }
+            }]
+          });
+          return Array.isArray(res) ? res.map(i=>i.Name) : [];
+        }
+      })
     ]);
   }
 
