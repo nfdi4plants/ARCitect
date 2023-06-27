@@ -93,7 +93,7 @@ onUnmounted(async () => {
             class="q-ma-md"
             :value='100'
           />
-          <div class="text-h6">Importing Arc</div>
+          <div class="text-h6">Downloading ARC</div>
       </q-card-section>
 
       <q-separator />
@@ -116,8 +116,8 @@ onUnmounted(async () => {
   <q-list bordered class="rounded-borders">
     <ViewItem
       icon="cloud_download"
-      label="Import ARC"
-      caption="Import ARCs from the nfdi4plants DataHUB"
+      label="Download ARC"
+      caption="Download ARCs from the nfdi4plants DataHUB"
       group="datahub"
       defaultOpened
     >

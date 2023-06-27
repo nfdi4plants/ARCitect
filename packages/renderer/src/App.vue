@@ -153,13 +153,13 @@ const test = async ()=>{
 
           <ToolbarButton text='New ARC' icon='note_add' @clicked='newLocalArc()'></ToolbarButton>
           <ToolbarButton text='Open ARC' icon='file_open' @clicked='openLocalArc()'></ToolbarButton>
-          <ToolbarButton text='Import ARC' icon='cloud_download' @clicked='appProperties.state=appProperties.STATES.OPEN_DATAHUB'></ToolbarButton>
+          <ToolbarButton text='Download ARC' icon='cloud_download' @clicked='appProperties.state=appProperties.STATES.OPEN_DATAHUB'></ToolbarButton>
 
           <q-separator />
 
           <!--<ToolbarButton text='Upload ARC' icon='cloud_upload' requiresARC='true' @clicked='test()'></ToolbarButton>-->
           <ToolbarButton text='Sync ARC' icon='cloud_upload' requiresARC='true' @clicked='syncArc()'></ToolbarButton>
-          <ToolbarButton text='Refresh ARC' icon='autorenew' requiresARC='true' @clicked='ArcCommanderService.getArcProperties()'></ToolbarButton>
+          <ToolbarButton text='Reset ARC' icon='autorenew' requiresARC='true' @clicked='ArcCommanderService.getArcProperties()'></ToolbarButton>
 
           <q-separator />
 
