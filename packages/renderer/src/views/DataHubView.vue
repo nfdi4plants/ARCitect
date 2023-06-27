@@ -57,7 +57,7 @@ onMounted(async () => {
   console.log(list);
   if(appProperties.user){
     for(let i of list)
-      i.isOwner = i.owner.username===appProperties.user.username;
+      i.isOwner = i.hasOwnProperty('owner') && i.owner.hasOwnProperty('username') && i.owner.username===appProperties.user.username;
 
     props.list = list.sort( (a,b)=>{
       if(a.isOwner && !b.isOwner)

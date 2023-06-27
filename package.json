@@ -13,6 +13,7 @@
     "build:preload": "cd ./packages/preload && vite build",
     "build:renderer": "cd ./packages/renderer && vite build",
     "compile": "cross-env MODE=production npm run build && electron-builder build --config electron-builder.config.js",
+    "compilew": "cross-env MODE=production npm run build && electron-builder build --config electron-builder.config.js --win",
     "debug": "node scripts/debug.js",
     "lint": "eslint . --ext js,ts,vue",
     "typecheck:main": "tsc --noEmit -p packages/main/tsconfig.json",
@@ -24,11 +25,11 @@
     "@quasar/extras": "1.15.3",
     "chokidar": "3.5.1",
     "express": "latest",
+    "fs-extra": "latest",
     "quasar": "2.8.0",
     "query-string": "latest",
     "vue": "3.2.31",
-    "vue3-markdown-it": "1.0.10",
-    "fs-extra": "latest"
+    "vue3-markdown-it": "1.0.10"
   },
   "devDependencies": {
     "@quasar/vite-plugin": "^1.0.6",
@@ -36,15 +37,15 @@
     "@vitejs/plugin-vue": "2.2.2",
     "@vue/test-utils": "2.0.0-rc.18",
     "cross-env": "7.0.3",
-    "electron": "^24.2.0",
-    "electron-builder": "^24.3.0",
+    "electron": "^25.2.0",
+    "electron-builder": "^23.4.0",
     "electron-devtools-installer": "3.2.0",
     "eslint": "8.9.0",
     "eslint-plugin-vue": "8.5.0",
     "open": "8.4.0",
     "sass": "1.32.12",
     "typescript": "4.5.5",
-    "vite": "2.9.15",
+    "vite": "^2.9.16",
     "vitest": "0.5.4",
     "vue-tsc": "0.31.4"
   }

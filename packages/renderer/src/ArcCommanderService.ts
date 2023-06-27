@@ -12,6 +12,7 @@ import arcProperties from './ArcProperties.ts';
 const ArcCommanderService = {
 
   init: async ()=>{
+    window.ipc.on('ArcCommanderService.MSG', processMsg);
     const status = await window.ipc.invoke('ArcCommanderService.run', '--version');
     ArcCommanderService.props.ac_state = status[0] ? 1 : 0;
   },
@@ -91,14 +92,17 @@ ArcCommanderService.props = reactive({
 
 // Logging
 const processMsg = async msgs=>{
-  for(let msg of msgs.split('\n')){
-    msg = msg.trim();
-    if(msg){
-      ArcCommanderService.props.log.push(msg);
-      console.error(msg);
+  if(typeof msgs === 'string' || msgs instanceof String){
+    for(let msg of msgs.split('\n')){
+      msg = msg.trim();
+      if(msg){
+        ArcCommanderService.props.log.push(msg);
+        console.error(msg);
+      }
     }
+  } else {
+    console.log(msgs);
   }
 };
-window.ipc.on('ArcCommanderService.MSG', processMsg);
 
 export default ArcCommanderService;

@@ -6,18 +6,20 @@ const config = {
   asar: true,
   directories: {
     output: 'dist',
-    buildResources: 'buildResources',
+    buildResources: 'resources',
   },
   files: [
     'packages/**/dist/**',
   ],
   win: {
+    "extraResources": 'bins/win',
     "target": ["portable"],
   },
   mac: {
     "target": ["dmg"],
   },
   linux: {
+    "extraResources": 'bins/linux',
     "target": ["AppImage"]
   }
 };
