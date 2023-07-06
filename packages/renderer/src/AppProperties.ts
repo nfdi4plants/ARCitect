@@ -23,7 +23,8 @@ const appProperties = reactive({
   active_study: null,
   active_assay: null,
 
-  user: null
+  user: null,
+  path_sep: null,
 });
 
 for(let k in appProperties.STATES){

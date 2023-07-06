@@ -222,9 +222,11 @@ const onSelectionChanged = id=>{
 }
 
 const updatePath = async path => {
+  console.log('x',path);
   const n = arcTree._value.getNodeByKey(path);
   if(!n)
     return;
+  console.log('n',n);
   const isExpanded = arcTree._value.isExpanded(path);
   delete n.children;
   if(isExpanded)
@@ -232,22 +234,6 @@ const updatePath = async path => {
 };
 
 window.ipc.on('LocalFileSystemService.updatePath', updatePath);
-// const test = async ()=>{
-//   const path = '/home/jones/external/projects/TEMP/samplearc_rnaseq/studies';
-//   const n = arcTree._value.getNodeByKey(path);
-//   // arcTree._value.setExpanded(path,false);
-//   // n.children = await readDir_(path);
-//   delete n.children;
-//   arcTree._value.setExpanded(path,true);
-
-//   // arcTree._value.setExpanded(path,true);
-//   // console.log(arcTree._value);
-//   // console.log(n);
-// }
-
-// const registerChangeListener = async expanded =>{
-//   console.log('expanded');
-// }
 
 </script>
 

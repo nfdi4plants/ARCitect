@@ -14,6 +14,8 @@ const config = {
   win: {
     "extraResources": 'bins/win',
     "target": ["portable"],
+    // "target": ["dir"],
+    // "target": ["zip"],
   },
   mac: {
     "target": ["dmg"],

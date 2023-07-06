@@ -13,7 +13,7 @@ const PATH = require('path');
 
 export const ArcCommanderService = {
 
-  getExecEnvironment: ()=>{
+  initExecEnvironment: ()=>{
     let env = process.env;
     if(process.env['MODE']){
       switch (os.platform()) {
@@ -39,8 +39,6 @@ export const ArcCommanderService = {
           break;
       }
     }
-
-    return env;
   },
 
   run: (e,options) => {
@@ -48,10 +46,11 @@ export const ArcCommanderService = {
     return new Promise( (resolve, reject) => {
       const args = typeof options === 'string' ? [options] : options.args;
       const o = typeof options === 'string' ? {} : options;
-      o.env = ArcCommanderService.getExecEnvironment();
+      o.env = process.env;
+      o.cwd = (o.cwd || '').split('/').join(PATH.sep);
 
       let window = BrowserWindow.getAllWindows().find(w => !w.isDestroyed());
-      window.webContents.send('ArcCommanderService.MSG', JSON.parse(JSON.stringify(o.env)));
+      // window.webContents.send('ArcCommanderService.MSG', JSON.parse(JSON.stringify(o.env)));
 
       const p = spawn('arc', args, o);
       let error = false;
@@ -95,6 +94,7 @@ export const ArcCommanderService = {
 
   init: async () => {
     // ipcMain.handle('ArcCommanderService.isReady', ArcCommanderService.isReady );
+    ArcCommanderService.initExecEnvironment();
     ipcMain.handle('ArcCommanderService.run', ArcCommanderService.run );
   }
 };

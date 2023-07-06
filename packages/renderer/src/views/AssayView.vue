@@ -21,7 +21,7 @@ const init = async ()=>{
     studies: studies
   };
   for(let p in assay)
-    config[p] = assay[p];
+    config[p.toLowerCase()] = typeof assay[p]==='string' ? assay[p] : assay[p].annotationValue;
 
   assayForm.value.init(config);
 };

@@ -104,6 +104,8 @@ const syncArc = async ()=>{
 onMounted(async () => {
   await ArcCommanderService.init();
   appProperties.state=appProperties.STATES.HOME;
+  appProperties.path_sep = await window.ipc.invoke('LocalFileSystemService.getPathSeparator');
+
   // setTimeout(1000, ()=>{console.log(layoutProperties.showHelp)})
 
   // layoutProperties.showHelp = true;

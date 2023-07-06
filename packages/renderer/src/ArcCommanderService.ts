@@ -97,7 +97,7 @@ const processMsg = async msgs=>{
       msg = msg.trim();
       if(msg){
         ArcCommanderService.props.log.push(msg);
-        console.error(msg);
+        console.log('|',msg);
       }
     }
   } else {
