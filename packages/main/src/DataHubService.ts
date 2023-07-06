@@ -11,7 +11,6 @@ import querystring from 'query-string';
 const express = require('express');
 let authApp = null;
 const authPort = 7890;
-let latest_user_data = null;
 
 export const DataHubService = {
 
@@ -49,12 +48,12 @@ export const DataHubService = {
     return result.filePaths[0];
   },
 
-  getArcs: async e=>{
+  getArcs: async (e,token)=>{
     return await DataHubService.getWebPageAsJson(
       null,
       {
         host: 'git.nfdi4plants.org',
-        path: '/api/v4/projects/' + (latest_user_data ? `?access_token=${latest_user_data.token.access_token}` : ''),
+        path: '/api/v4/projects/?per_page=1000'+ (token ? `&access_token=${token}` : ''),
         port: 443,
         method: 'GET',
         headers: {
@@ -138,7 +137,6 @@ export const DataHubService = {
         }
       );
       user_data.token = token_data;
-      latest_user_data = user_data;
 
       res.send('<h1>Login and Authorization Complete. You can now return to ARCitect.</h1><script>window.close()</script>');
       let window = BrowserWindow.getAllWindows().find(w => !w.isDestroyed());

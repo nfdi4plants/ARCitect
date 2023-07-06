@@ -53,8 +53,8 @@ const importArc = async url =>{
 onMounted(async () => {
   appProperties.title = 'Import ARC from DataHUB';
   window.ipc.on('ArcCommanderService.MSG', processMsg);
-  const list = await window.ipc.invoke('DataHubService.getArcs');
-  console.log(list);
+  const list = await window.ipc.invoke('DataHubService.getArcs', appProperties.user && appProperties.user.token ? appProperties.user.token.access_token : null);
+
   if(appProperties.user){
     for(let i of list)
       i.isOwner = i.hasOwnProperty('owner') && i.owner.hasOwnProperty('username') && i.owner.username===appProperties.user.username;
@@ -68,7 +68,7 @@ onMounted(async () => {
         return a.name.localeCompare(b.name);
     });
   } else {
-    props.list = list;
+    props.list = list.sort( (a,b)=>a.name.localeCompare(b.name) );
   }
 
 });
