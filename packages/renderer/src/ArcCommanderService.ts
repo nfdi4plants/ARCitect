@@ -1,9 +1,6 @@
 import { reactive } from 'vue'
 
-import {
-  Loading,
-  QSpinnerGears
-} from 'quasar'
+import {Loading} from 'quasar'
 
 // Loading.hide()
 

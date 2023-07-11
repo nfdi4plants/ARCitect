@@ -11,6 +11,7 @@ import StudyView from './views/StudyView.vue';
 import MarkdownView from './views/MarkdownView.vue';
 import HelpView from './views/HelpView.vue';
 import LoginView from './views/LoginView.vue';
+import GitView from './views/GitView.vue';
 
 import DataHubView from './views/DataHubView.vue';
 
@@ -47,7 +48,7 @@ const openLocalArc = async path=>{
   if(!ArcCommanderService.props.ac_state)
     return;
   if(!path)
-    path = await window.ipc.invoke('LocalFileSystemService.selectDir');
+    path = await window.ipc.invoke('LocalFileSystemService.selectDir', ['Select local ARC','Select local ARC']);
   if(!path)
     return;
   appProperties.state=appProperties.STATES.HOME;
@@ -66,7 +67,8 @@ const newLocalArc = async ()=>{
   if(!response[0])
     return showError();
 
-  const id = path.split('/').pop();
+  const id = path.split(appProperties.path_sep).pop();
+  console.log(id)
 
   response = await window.ipc.invoke('ArcCommanderService.run', {
     args: [`-p`,path,'i','create','-i',id,'--title',id]
@@ -81,44 +83,11 @@ const showHomeView = ()=>{
   appProperties.state=appProperties.STATES.HOME;
 }
 
-const syncArc = async ()=>{
-  // console.log(`https://git.nfdi4plants.org/${appProperties.user.username}/${arcProperties.identifier}`);
-  const r = await ArcCommanderService.run([
-      {
-        args: ['config','setgituser','-l','-n',appProperties.user.name,'-e',appProperties.user.email],
-        title: `Init Git User`,
-        silent: false
-      },
-      {
-        args: ['sync','-f', '-r', `https://oauth2:${appProperties.user.token.access_token}@git.nfdi4plants.org/${appProperties.user.username}/${arcProperties.identifier}`],
-        title: `Sync Arc`,
-        silent: false
-      }
-    ],
-    true
-  );
-
-  await window.ipc.invoke('InternetService.openExternalURL', `https://git.nfdi4plants.org/${appProperties.user.username}/${arcProperties.identifier}`);
-}
-
 onMounted(async () => {
   await ArcCommanderService.init();
   appProperties.state=appProperties.STATES.HOME;
   appProperties.path_sep = await window.ipc.invoke('LocalFileSystemService.getPathSeparator');
-
-  // setTimeout(1000, ()=>{console.log(layoutProperties.showHelp)})
-
-  // layoutProperties.showHelp = true;
-  // layoutProperties.toolbarMinimized = false;
-
 });
-// let initialDrawerWidth = 0;
-// const resizeDrawer = e=> {
-//   if (e.isFirst === true) {
-//     initialDrawerWidth = layoutProperties.drawerWidth;
-//   }
-//   layoutProperties.drawerWidth = Math.max(200,initialDrawerWidth + e.offset.x);
-// };
 
 const test = async ()=>{
 }
@@ -139,35 +108,35 @@ const test = async ()=>{
         class="bg-grey-3"
       >
         <q-scroll-area class="fit" :horizontal-thumb-style="{ opacity: 0 }">
-        <q-list>
-          <q-item v-ripple clickable class='bg-primary text-white' @click="showHomeView" style="padding-top:1em;padding-bottom:1em;">
-            <q-item-section avatar>
-              <q-icon size="2.5rem" style="margin: 0 -0.20em;" :name="'img:'+logoURL" @click='showHomeView'></q-icon>
-            </q-item-section>
-            <q-item-section style="margin:0.6em 0 0 -1.2em">
-              <q-item-label><b style="font-size:2em">ARC</b><span style="font-size:1.2em">itect</span></q-item-label>
-            </q-item-section>
-          </q-item>
+          <q-list>
+            <q-item v-ripple clickable class='bg-primary text-white' @click="showHomeView" style="padding-top:1em;padding-bottom:1em;">
+              <q-item-section avatar>
+                <q-icon size="2.5rem" style="margin: 0 -0.20em;" :name="'img:'+logoURL" @click='showHomeView'></q-icon>
+              </q-item-section>
+              <q-item-section style="margin:0.6em 0 0 -1.2em">
+                <q-item-label><b style="font-size:2em">ARC</b><span style="font-size:1.2em">itect</span></q-item-label>
+              </q-item-section>
+            </q-item>
 
-          <LoginView />
+            <LoginView />
 
-          <q-separator />
+            <q-separator />
 
-          <ToolbarButton text='New ARC' icon='note_add' @clicked='newLocalArc()'></ToolbarButton>
-          <ToolbarButton text='Open ARC' icon='file_open' @clicked='openLocalArc()'></ToolbarButton>
-          <ToolbarButton text='Download ARC' icon='cloud_download' @clicked='appProperties.state=appProperties.STATES.OPEN_DATAHUB'></ToolbarButton>
+            <ToolbarButton text='New ARC' icon='note_add' @clicked='newLocalArc()'></ToolbarButton>
+            <ToolbarButton text='Open ARC' icon='file_open' @clicked='openLocalArc()'></ToolbarButton>
+            <ToolbarButton text='Download ARC' icon='cloud_download' @clicked='appProperties.state=appProperties.STATES.OPEN_DATAHUB'></ToolbarButton>
 
-          <q-separator />
+            <q-separator />
 
-          <!--<ToolbarButton text='Upload ARC' icon='cloud_upload' requiresARC='true' @clicked='test()'></ToolbarButton>-->
-          <ToolbarButton text='Sync ARC' icon='cloud_upload' requiresARC='true' @clicked='syncArc()'></ToolbarButton>
-          <ToolbarButton text='Reset ARC' icon='autorenew' requiresARC='true' @clicked='ArcCommanderService.getArcProperties()'></ToolbarButton>
+            <!--<ToolbarButton text='Upload ARC' icon='cloud_upload' requiresARC='true' @clicked='test()'></ToolbarButton>-->
+            <ToolbarButton text='Reset ARC' icon='autorenew' requiresARC='true' @clicked='ArcCommanderService.getArcProperties()'></ToolbarButton>
+            <ToolbarButton text='Versioning' icon='update' requiresARC='true' @clicked='appProperties.state=appProperties.STATES.GIT'></ToolbarButton>
 
-          <q-separator />
+            <q-separator />
 
-          <ToolbarButton text='Toggle Help' icon='help' @clicked='layoutProperties.toolbarMinimized=!layoutProperties.toolbarMinimized;layoutProperties.showHelp=!layoutProperties.showHelp;'></ToolbarButton>
-        </q-list>
-      </q-scroll-area>
+            <ToolbarButton text='Toggle Help' icon='help' @clicked='layoutProperties.toolbarMinimized=!layoutProperties.toolbarMinimized;layoutProperties.showHelp=!layoutProperties.showHelp;'></ToolbarButton>
+          </q-list>
+        </q-scroll-area>
       </q-drawer>
 
       <q-drawer
@@ -207,6 +176,7 @@ const test = async ()=>{
                 <AssayView v-else-if='appProperties.state===appProperties.STATES.EDIT_ASSAY'></AssayView>
                 <StudyView v-else-if='appProperties.state===appProperties.STATES.EDIT_STUDY'></StudyView>
                 <MarkdownView v-else-if='appProperties.state===appProperties.STATES.EDIT_MARKDOWN'></MarkdownView>
+                <GitView v-else-if='appProperties.state===appProperties.STATES.GIT'></GitView>
                 <HomeView v-else></HomeView>
                 <!--<div v-else></div>-->
               </q-scroll-area>

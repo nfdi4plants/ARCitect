@@ -5,6 +5,7 @@ import {LocalFileSystemService} from '/@/LocalFileSystemService';
 import {DataHubService} from '/@/DataHubService';
 import {ArcCommanderService} from '/@/ArcCommanderService';
 import {InternetService} from '/@/InternetService';
+import {GitService} from '/@/GitService';
 
 /**
  * Prevent multiple instances
@@ -45,6 +46,7 @@ app.whenReady()
   .then(LocalFileSystemService.init)
   .then(ArcCommanderService.init)
   .then(InternetService.init)
+  .then(GitService.init)
   .then(restoreOrCreateWindow)
   .catch((e) => console.error('Failed create window:', e));
 

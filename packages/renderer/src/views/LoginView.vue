@@ -10,7 +10,7 @@ const showLoginView = ()=>{
 
 window.ipc.on('DataHubService.authentificationData', async user_data=>{
   appProperties.user = user_data;
-  console.log(appProperties.user);
+  appProperties.state=appProperties.STATES.HOME;
   // const r = await ArcCommanderService.run([
   //     {
   //       args: ['config','setgituser','-l','-n',user_data.username,'-e',user_data.email],
@@ -31,7 +31,6 @@ window.ipc.on('DataHubService.authentificationData', async user_data=>{
 
 <template>
 
-    <!--<q-btn flat icon="account_circle" :label='appProperties.user.access_token'/>-->
   <q-item v-if='!appProperties.user' clickable v-ripple @click='showLoginView'>
     <q-item-section avatar>
       <q-icon color='grey-7' name="exit_to_app"></q-icon>

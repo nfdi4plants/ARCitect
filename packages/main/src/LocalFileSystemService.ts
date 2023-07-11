@@ -31,9 +31,11 @@ export const LocalFileSystemService = {
     return children;
   },
 
-  selectDir: async ()=>{
+  selectDir: async (e,[title,message])=>{
     const window = BrowserWindow.getAllWindows().find(w => !w.isDestroyed())
     const result = await dialog.showOpenDialog(window, {
+      title: title,
+      message: message,
       properties: ['openDirectory']
     });
     const path = result.filePaths[0];

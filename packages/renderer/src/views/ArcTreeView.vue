@@ -41,6 +41,16 @@ watch(()=>appProperties.active_study, async (newValue, oldValue) => {
   onSelectionChanged(selected.value);
 });
 
+watch(()=>appProperties.state, async (newValue, oldValue) => {
+  if([
+    appProperties.STATES.HOME,
+    appProperties.STATES.OPEN_DATAHUB,
+    appProperties.STATES.GIT,
+  ].includes(newValue)){
+    selected.value = null
+  }
+});
+
 let uniqueLabelCounter = 0;
 
 const addStudy = async ()=>{
@@ -222,11 +232,9 @@ const onSelectionChanged = id=>{
 }
 
 const updatePath = async path => {
-  console.log('x',path);
   const n = arcTree._value.getNodeByKey(path);
   if(!n)
     return;
-  console.log('n',n);
   const isExpanded = arcTree._value.isExpanded(path);
   delete n.children;
   if(isExpanded)
@@ -239,7 +247,7 @@ window.ipc.on('LocalFileSystemService.updatePath', updatePath);
 
 <template>
   <div class='q-pa-md'>
-    <div class='text-h6' style="border-bottom:0.1em solid #ccc;line-height:1em;padding:0 0 0.7em 0;">{{(props.root || '&nbsp;').split('/').join(' /&nbsp;')}}</div>
+    <div class='text-h6 text-grey-7' style="font-size:0.9em;border-bottom:0.1em solid #ccc;line-height:1em;padding:0 0 0.7em 0;">{{(props.root.replace(' ', '&nbsp;') || '').split('/').join(' /&nbsp;')}}</div>
     <q-tree
       ref='arcTree'
       :nodes="props.nodes"

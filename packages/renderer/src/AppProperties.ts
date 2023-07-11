@@ -17,6 +17,7 @@ const appProperties = reactive({
 
     LOGIN: 400,
 
+    GIT: 500,
   },
   STATES_I: {},
   state: 100,

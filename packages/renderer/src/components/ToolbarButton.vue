@@ -1,23 +1,26 @@
 <script lang="ts" setup>
 
 import ArcCommanderService from '../ArcCommanderService.ts';
+import appProperties from '../AppProperties.ts';
 
 export interface Props {
   icon: String,
   text: String,
-  requiresARC?: Boolean
+  requiresARC?: Boolean,
+  requiresUser?: Boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
   icon: 'help',
   text: 'TODO',
-  requiresARC: false
+  requiresARC: false,
+  requiresUser: false
 });
 
 const emit = defineEmits(['clicked']);
 
 const enabled = ()=>{
-  return ArcCommanderService.props.ac_state && (!props.requiresARC || ArcCommanderService.props.arc_root);
+  return ArcCommanderService.props.ac_state && (!props.requiresARC || ArcCommanderService.props.arc_root) && (!props.requiresUser || appProperties.user);
 }
 
 </script>

@@ -38,16 +38,6 @@ export const DataHubService = {
     );
   },
 
-  selectImportDestination: async ()=>{
-    const window = BrowserWindow.getAllWindows().find(w => !w.isDestroyed());
-    const result = await dialog.showOpenDialog(window, {
-      title: 'Select Destination of ARC Import',
-      message: 'Select Destination of ARC Import',
-      properties: ['openDirectory']
-    });
-    return result.filePaths[0];
-  },
-
   getArcs: async (e,token)=>{
     return await DataHubService.getWebPageAsJson(
       null,
@@ -92,7 +82,6 @@ export const DataHubService = {
   init: async () => {
     ipcMain.handle('DataHubService.getArcs', DataHubService.getArcs );
     ipcMain.handle('DataHubService.inspectArc', DataHubService.inspectArc );
-    ipcMain.handle('DataHubService.selectImportDestination', DataHubService.selectImportDestination );
     ipcMain.handle('DataHubService.authenticate', DataHubService.authenticate );
 
     authApp = express()

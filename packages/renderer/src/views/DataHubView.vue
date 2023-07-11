@@ -4,6 +4,8 @@ import {onMounted,onUnmounted,reactive,ref,nextTick} from 'vue';
 import appProperties from '../AppProperties.ts';
 import ViewItem from '../components/ViewItem.vue';
 
+import ArcCommanderService from '../ArcCommanderService.ts';
+
 const log = ref(null);
 const props = reactive({
   list: [],
@@ -13,9 +15,13 @@ const props = reactive({
   localUrl: ''
 });
 
-const open = ()=>{
-  appProperties.arc_root = props.localUrl+"";
-  appProperties.state = appProperties.STATES.EDIT_ARC;
+const openLocalArc = async ()=>{
+  const path = props.localUrl || null;
+  if(!path)
+    return;
+  appProperties.state=appProperties.STATES.HOME;
+  ArcCommanderService.props.arc_root = path;
+  await ArcCommanderService.getArcProperties();
 };
 
 const inspectArc = url =>{
@@ -34,20 +40,37 @@ const processMsg = async msgs=>{
 };
 
 const importArc = async url =>{
-  const destination = await window.ipc.invoke('DataHubService.selectImportDestination');
+  props.localUrl = '';
+  const destination = await window.ipc.invoke('LocalFileSystemService.selectDir',[
+    'Select Destination of ARC Import',
+    'Select Destination of ARC Import'
+  ]);
   if(!destination)
     return;
 
   props.msgs = [];
   props.state = 0;
   props.showDialog = true;
+
+  let url_with_credentials = url;
+  if(appProperties.user)
+    url_with_credentials = url_with_credentials.replace('https://', `https://oauth2:${appProperties.user.token.access_token}@`)
+
   const status = await window.ipc.invoke('ArcCommanderService.run', {
-    args: [`get`,`-r`,url],
+    args: [`get`,`-r`,url_with_credentials],
     cwd: destination
   });
   props.localUrl = destination + '/' + url.split('/').pop().split('.git')[0];
-  props.state = status[0] ? 1 : 2;
+  await window.ipc.invoke('GitService.run', {
+    args: [`remote`,`remove`,`origin`],
+    cwd: props.localUrl
+  });
+  await window.ipc.invoke('GitService.run', {
+    args: [`remote`,`add`,`origin`,url],
+    cwd: props.localUrl
+  });
 
+  props.state = status[0] ? 1 : 2;
 };
 
 onMounted(async () => {
@@ -107,8 +130,8 @@ onUnmounted(async () => {
       <q-separator />
 
       <q-card-actions align="right">
-        <q-btn class='text-weight-bold' color='secondary' :disable='props.state!==1' v-close-popup v-on:click="open">Open</q-btn>
-        <q-btn class='text-weight-bold' color='secondary' :disable='props.state===0' v-close-popup>Cancel</q-btn>
+        <q-btn class='text-weight-bold' color='secondary' :disable='props.state!==1' v-close-popup v-on:click="openLocalArc">Open</q-btn>
+        <q-btn class='text-weight-bold' color='secondary' :disable='props.state<1' v-close-popup>Close</q-btn>
       </q-card-actions>
     </q-card>
   </q-dialog>

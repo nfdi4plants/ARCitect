@@ -36,13 +36,6 @@ class Property {
     this.options = Array.isArray(config.options) ? config.options : [];
     this.optionsFn = config.optionsFn || null;
     this.limit_to_options = config.limit_to_options || false;
-
-    // if(config.options){
-    //   if()
-
-    // }
-    // this.options = Array.isArray(config.options) ? config.options : [];
-    // this.optionsFilter = config.optionsFilter || ();
   }
 
   setOriginalValue(value){
