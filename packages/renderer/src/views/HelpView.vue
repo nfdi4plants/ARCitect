@@ -9,6 +9,7 @@ import study_help from '../docs/study.ts';
 import home_help from '../docs/home.ts';
 import investigation_help from '../docs/investigation.ts';
 import datahub_help from '../docs/datahub.ts';
+import git_help from '../docs/git.ts';
 
 const props = reactive({
   help: '# Help'
@@ -21,7 +22,8 @@ const init = async () => {
     case appProperties.STATES.EDIT_STUDY: return props.help = study_help;
     case appProperties.STATES.EDIT_ASSAY: return props.help = assay_help;
     case appProperties.STATES.OPEN_DATAHUB: return props.help = datahub_help;
-    default: return props.help = '# Missing Help';
+    case appProperties.STATES.GIT: return props.help = git_help;
+    default: return props.help = '# ';
   }
 };
 

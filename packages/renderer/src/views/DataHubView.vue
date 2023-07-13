@@ -4,7 +4,12 @@ import {onMounted,onUnmounted,reactive,ref,nextTick} from 'vue';
 import appProperties from '../AppProperties.ts';
 import ViewItem from '../components/ViewItem.vue';
 
+import ProgressDialog from '../dialogs/ProgressDialog.vue';
+
 import ArcCommanderService from '../ArcCommanderService.ts';
+
+import { useQuasar } from 'quasar'
+const $q = useQuasar();
 
 const log = ref(null);
 const props = reactive({
@@ -48,18 +53,37 @@ const importArc = async url =>{
   if(!destination)
     return;
 
-  props.msgs = [];
-  props.state = 0;
-  props.showDialog = true;
-
   let url_with_credentials = url;
   if(appProperties.user)
-    url_with_credentials = url_with_credentials.replace('https://', `https://oauth2:${appProperties.user.token.access_token}@`)
+    url_with_credentials = url_with_credentials.replace('https://', `https://oauth2:${appProperties.user.token.access_token}@`);
 
-  const status = await window.ipc.invoke('ArcCommanderService.run', {
-    args: [`get`,`-r`,url_with_credentials],
+  const dialogProps = reactive({
+      title: 'Downloading ARC',
+      ok_title: 'Open',
+      cancel_title: 'Close',
+      error: '',
+      items: [
+        ['Downloading ARC',0]
+      ]
+    })
+
+  $q.dialog({
+    component: ProgressDialog,
+    componentProps: dialogProps
+  }).onOk( () => {
+    openLocalArc();
+  });
+
+  const response = await window.ipc.invoke('GitService.run', {
+    args: [`clone`,url_with_credentials],
     cwd: destination
   });
+  if(response[1].includes('fatal:')){
+    dialogProps.items[0][1] = 2;
+    dialogProps.error = response[1];
+    return;
+  }
+
   props.localUrl = destination + '/' + url.split('/').pop().split('.git')[0];
   await window.ipc.invoke('GitService.run', {
     args: [`remote`,`remove`,`origin`],
@@ -69,8 +93,7 @@ const importArc = async url =>{
     args: [`remote`,`add`,`origin`,url],
     cwd: props.localUrl
   });
-
-  props.state = status[0] ? 1 : 2;
+  dialogProps.items[0][1] = 1;
 };
 
 onMounted(async () => {
@@ -102,40 +125,6 @@ onUnmounted(async () => {
 </script>
 
 <template>
-
-  <q-dialog v-model="props.showDialog" persistent>
-    <q-card class='q-pd-md' style="width:30em;">
-      <q-card-section class="row items-center">
-          <q-circular-progress
-            :indeterminate='props.state<1'
-            rounded
-            size="2em"
-            :thickness="0.7"
-            track-color="grey-3"
-            :color="props.state===2 ? 'red-8' : props.state===1 ? 'green' : 'primary'"
-            class="q-ma-md"
-            :value='100'
-          />
-          <div class="text-h6">Downloading ARC</div>
-      </q-card-section>
-
-      <q-separator />
-
-      <q-scroll-area class='bg-grey-3' style="height: 12em; padding:1.5em;" ref='log' visible>
-        <q-banner rounded v-for="(item,i) in props.msgs" style="margin:0.5em 0;padding:0.5em 1em;min-height:2em;" :class="item.toLowerCase().includes('error') ? 'bg-red-9 text-white' : 'bg-grey-4'">
-          {{item}}
-        </q-banner>
-      </q-scroll-area>
-
-      <q-separator />
-
-      <q-card-actions align="right">
-        <q-btn class='text-weight-bold' color='secondary' :disable='props.state!==1' v-close-popup v-on:click="openLocalArc">Open</q-btn>
-        <q-btn class='text-weight-bold' color='secondary' :disable='props.state<1' v-close-popup>Close</q-btn>
-      </q-card-actions>
-    </q-card>
-  </q-dialog>
-
   <q-list bordered class="rounded-borders">
     <ViewItem
       icon="cloud_download"

@@ -3,6 +3,7 @@ import { reactive, ref, nextTick, watch, onMounted, onUnmounted } from 'vue';
 import appProperties from '../AppProperties.ts';
 import ArcCommanderService from '../ArcCommanderService.ts';
 import StringDialog from '../dialogs/StringDialog.vue';
+import AddProtocolDialog from '../dialogs/AddProtocolDialog.vue';
 import NewAssayDialog from '../dialogs/NewAssayDialog.vue';
 import { useQuasar } from 'quasar'
 const $q = useQuasar();
@@ -103,14 +104,15 @@ const addAssay = async ()=>{
 const addProtocol = async n=>{
   const path = n.id.split('/').slice(0,-1).join('/');
   $q.dialog({
-    component: StringDialog,
-    componentProps: {
-      title: 'Add Protocol',
-      property: 'Name',
-      icon: 'add_box'
-    }
+    component: AddProtocolDialog
   }).onOk( async data => {
-    await window.ipc.invoke('LocalFileSystemService.createEmptyFile', path+'/'+data);
+    if(data[0]){
+      await window.ipc.invoke('LocalFileSystemService.createEmptyFile', path+'/'+data[1]);
+    } else {
+      for(const fpath of data[1]){
+        await window.ipc.invoke('LocalFileSystemService.copy', [fpath,path]);
+      }
+    }
   });
 };
 
