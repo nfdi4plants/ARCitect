@@ -21,7 +21,7 @@ const init = async () => {
     case appProperties.STATES.EDIT_STUDY: return props.help = study_help;
     case appProperties.STATES.EDIT_ASSAY: return props.help = assay_help;
     case appProperties.STATES.OPEN_DATAHUB: return props.help = datahub_help;
-    default: return props.help = '# Missing Help';
+    default: return props.help = '# ';
   }
 };
 
