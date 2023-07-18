@@ -6,8 +6,8 @@ class Study extends PropertyTree {
       new Property('identifier',{readonly:true}),
       new Property('title'),
       new Property('description',{hint:'A textual description of the study'}),
-      new Property('submissionDate',{hint:'The date the study was was released publicly'}),
-      new Property('publicReleaseDate',{hint:'The date the study was was released publicly'}),
+      new Property('submissionDate',{hint:'The date the study was released publicly'}),
+      new Property('publicReleaseDate',{hint:'The date the study was released publicly'}),
     ]);
   }
 }
