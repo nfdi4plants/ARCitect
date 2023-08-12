@@ -12,6 +12,25 @@ const path_to_system = path => path.split('/').join(PATH.sep)
 
 export const LocalFileSystemService = {
 
+  getAllXLSX_: (files,directory) => {
+    const filesInDirectory = FS.readdirSync(directory);
+    for(const file of filesInDirectory) {
+      const absolute = PATH.join(directory, file);
+      if (FS.statSync(absolute).isDirectory()) {
+          LocalFileSystemService.getAllXLSX_(files,absolute);
+      } else if(file.endsWith('.xlsx')) {
+          files.push(absolute);
+      }
+    }
+  },
+
+  getAllXLSX: async (e,root) => {
+    root = path_to_system(root);
+    let xlsx_files = []
+    LocalFileSystemService.getAllXLSX_(xlsx_files,root);
+    return xlsx_files.map( p=>path_to_arcitect(p.replace(root+PATH.sep,'')) );
+  },
+
   readDir: (e,path) => {
     path = path_to_system(path)
     const children = [];
@@ -56,9 +75,18 @@ export const LocalFileSystemService = {
     return path_to_arcitect(result.filePath);
   },
 
-  readFile: (e,path)=>{
+  readFile: (e,parameters)=>{
+    let path=null;
+    let options={encoding:'UTF8'};
+    if(typeof parameters === 'string'){
+      path = parameters;
+    } else {
+      path = parameters[0];
+      options = parameters[1];
+    }
     path = path_to_system(path)
-    return FS.readFileSync(path,{encoding:'UTF-8'});
+    // const file = FS.readFileSync(path,{encoding:encoding});
+    return FS.readFileSync(path,options);
   },
 
   copy: async (e,[src,dst])=>{
@@ -118,9 +146,10 @@ export const LocalFileSystemService = {
     return fpath;
   },
 
-  writeFile: async (e,[path,data])=>{
+  writeFile: async (e,[path,data,options])=>{
+    options = options || {encoding:'UTF-8'};
     path = path_to_system(path)
-    return FS.writeFileSync(path,data,{encoding:'UTF-8'});
+    return FS.writeFileSync(path,data,options);
   },
 
   getPathSeparator: async e=>{
@@ -143,5 +172,6 @@ export const LocalFileSystemService = {
     ipcMain.handle('LocalFileSystemService.registerChangeListener', LocalFileSystemService.registerChangeListener)
     ipcMain.handle('LocalFileSystemService.unregisterChangeListener', LocalFileSystemService.unregisterChangeListener)
     ipcMain.handle('LocalFileSystemService.getPathSeparator', LocalFileSystemService.getPathSeparator)
+    ipcMain.handle('LocalFileSystemService.getAllXLSX', LocalFileSystemService.getAllXLSX)
   }
 }

@@ -12,7 +12,7 @@ const config = {
     'packages/**/dist/**',
   ],
   win: {
-    "extraResources": 'bins/win',
+    "extraResources": ['bins/win'],
     // "target": ["portable"],
     // "target": ["dir"],
     "target": ["zip"],

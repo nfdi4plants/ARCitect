@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 
-import ArcCommanderService from '../ArcCommanderService.ts';
+import ArcControlService from '../ArcControlService.ts';
 import appProperties from '../AppProperties.ts';
 
 export interface Props {
@@ -20,7 +20,7 @@ const props = withDefaults(defineProps<Props>(), {
 const emit = defineEmits(['clicked']);
 
 const enabled = ()=>{
-  return ArcCommanderService.props.ac_state && (!props.requiresARC || ArcCommanderService.props.arc_root) && (!props.requiresUser || appProperties.user);
+  return (!props.requiresARC || ArcControlService.props.arc_root) && (!props.requiresUser || appProperties.user);
 }
 
 </script>

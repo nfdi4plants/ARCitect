@@ -1,51 +1,49 @@
 <script lang="ts" setup>
+import { reactive, onMounted, watch, ref } from 'vue';
 
 import ViewItem from '../components/ViewItem.vue';
 import FormInput from '../components/FormInput.vue';
-import ArcCommanderService from '../ArcCommanderService.ts';
-import Investigation from '../interfaces/Investigation.ts';
+import Property from '../Property.ts';
+
+import ArcControlService from '../ArcControlService.ts';
 
 export interface Props {
   group: String
 };
 const props = defineProps<Props>();
 
-const investigation = new Investigation();
-const form = [
-  [
-    investigation.model.identifier,
-    investigation.model.title
-  ],
-  [investigation.model.description],
-  [
-    investigation.model.submissionDate,
-    investigation.model.publicReleaseDate
-  ],
-];
+const iProps = reactive({
+  form: [[]]
+});
 
-const init = async config=>{
-  investigation.init(config);
+const init = async ()=>{
+  const arc = ArcControlService.props.arc;
+
+  iProps.form = [
+    [
+      Property( arc.ISA, 'Identifier', {readonly:true} ),
+      Property( arc.ISA, 'Title' ),
+    ],
+    [
+      Property( arc.ISA, 'Description', {hint:'A textual description of the investigation'} ),
+    ],
+    [
+      Property(arc.ISA, 'SubmissionDate',{hint:'The date the investigation was was released publicly'}),
+      Property(arc.ISA, 'PublicReleaseDate',{hint:'The date the investigation was was released publicly'}),
+    ]
+  ];
 };
-defineExpose({init});
+onMounted( init );
 
 const onReset = async ()=>{
-  await ArcCommanderService.getArcProperties();
+  await ArcControlService.readARC();
+  init();
 };
 
 const onSubmit = async ()=>{
-  const args = ['i','update'];
-  for(const p in investigation.model){
-    args.push(`--${p.toLowerCase()}`);
-    args.push(investigation.model[p].value);
-  }
-
-  await ArcCommanderService.run({
-      args: args,
-      title: 'Updating Investigation Data',
-      silent: true
-    },
-    true
-  );
+  await ArcControlService.writeARC(ArcControlService.props.arc_root,['ISA_Investigation']);
+  await ArcControlService.readARC();
+  init();
 };
 
 </script>
@@ -64,7 +62,7 @@ const onSubmit = async ()=>{
         @reset="onReset"
       >
         <q-card-section>
-          <div class='row' v-for="(row,i) in form">
+          <div class='row' v-for="(row,i) in iProps.form">
             <div class='col' v-for="(property,j) in row">
               <FormInput :property='property'></FormInput>
             </div>
@@ -72,8 +70,8 @@ const onSubmit = async ()=>{
         </q-card-section>
 
         <q-card-actions align='right' style="padding:2.1em;">
-          <q-btn label="Update" type="submit" icon='check_circle' color="secondary" :disabled='ArcCommanderService.props.busy'/>
-          <q-btn label="Reset" type="reset" icon='change_circle' color="secondary" class="q-ml-sm" :disabled='ArcCommanderService.props.busy'/>
+          <q-btn label="Update" type="submit" icon='check_circle' color="secondary"/>
+          <q-btn label="Reset" type="reset" icon='change_circle' color="secondary" class="q-ml-sm"/>
         </q-card-actions>
       </q-form>
     </q-card>

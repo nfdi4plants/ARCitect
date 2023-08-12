@@ -1,57 +1,57 @@
 <script lang="ts" setup>
+import { reactive, onMounted, watch, ref } from 'vue';
 
 import ViewItem from '../components/ViewItem.vue';
 import FormInput from '../components/FormInput.vue';
-import ArcCommanderService from '../ArcCommanderService.ts';
-import Investigation from '../interfaces/Investigation.ts';
+import Property from '../Property.ts';
+
+import ArcControlService from '../ArcControlService.ts';
 
 export interface Props {
-  group: String
+  group: String,
+  study: Object
 };
 const props = defineProps<Props>();
 
-const investigation = new Investigation();
-const form = [
-  [
-    investigation.model.identifier,
-    investigation.model.title
-  ],
-  [investigation.model.description],
-  [
-    investigation.model.submissionDate,
-    investigation.model.publicReleaseDate
-  ],
-];
+const iProps = reactive({
+  form: [[]]
+});
 
-const init = async config=>{
-  investigation.init(config);
+const init = async ()=>{
+  if(!props.study.Identifier)
+    return;
+
+  iProps.form = [
+    [
+      Property( props.study, 'Identifier', {readonly:true} ),
+      Property( props.study, 'Title' ),
+    ],
+    [
+      Property( props.study, 'Description', {hint:'A textual description of the study'} ),
+    ],
+    [
+      Property( props.study, 'SubmissionDate',{hint:'The date the study was was released publicly'} ),
+      Property( props.study, 'PublicReleaseDate',{hint:'The date the study was was released publicly'} ),
+    ]
+  ];
 };
-defineExpose({init});
+onMounted( init );
+watch( ()=>props.study, init );
 
 const onReset = async ()=>{
-  await ArcCommanderService.getArcProperties();
+  await ArcControlService.readARC();
+  init();
 };
 
 const onSubmit = async ()=>{
-  const args = ['s','update'];
-  for(const p in investigation.model){
-    args.push(`--${p.toLowerCase()}`);
-    args.push(investigation.model[p].value);
-  }
-
-  await ArcCommanderService.run({
-      args: args,
-      title: 'Updating Investigation Data',
-      silent: true
-    },
-    true
-  );
+  await ArcControlService.writeARC(ArcControlService.props.arc_root,['ISA_Study']);
+  await ArcControlService.readARC();
+  init();
 };
 
 </script>
 
 <template>
-
   <ViewItem
     icon="biotech"
     label="Study"
@@ -64,7 +64,7 @@ const onSubmit = async ()=>{
         @reset="onReset"
       >
         <q-card-section>
-          <div class='row' v-for="(row,i) in form">
+          <div class='row' v-for="(row,i) in iProps.form">
             <div class='col' v-for="(property,j) in row">
               <FormInput :property='property'></FormInput>
             </div>
@@ -72,8 +72,8 @@ const onSubmit = async ()=>{
         </q-card-section>
 
         <q-card-actions align='right' style="padding:2.1em;">
-          <q-btn label="Update" type="submit" icon='check_circle' color="secondary" :disabled='ArcCommanderService.props.busy'/>
-          <q-btn label="Reset" type="reset" icon='change_circle' color="secondary" class="q-ml-sm" :disabled='ArcCommanderService.props.busy'/>
+          <q-btn label="Update" type="submit" icon='check_circle' color="secondary"/>
+          <q-btn label="Reset" type="reset" icon='change_circle' color="secondary" class="q-ml-sm"/>
         </q-card-actions>
       </q-form>
     </q-card>

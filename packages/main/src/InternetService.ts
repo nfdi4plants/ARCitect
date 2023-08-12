@@ -13,7 +13,7 @@ export const InternetService = {
     return new Promise(
       (resolve, reject) => {
         const options = {
-          host: 'swate.nfdi4plants.org',
+          host: 'swate-alpha.nfdi4plants.org',
           port: 443,
           path: `/api/IOntologyAPIv2/${data.method}`,
           method: 'POST',
@@ -24,8 +24,10 @@ export const InternetService = {
           }
         };
 
-        if(req)
+        if(req){
           req.destroy();
+          req.resolve([]);
+        }
 
         req = https.request(options, res => {
           let output = '';
@@ -37,6 +39,8 @@ export const InternetService = {
             resolve(JSON.parse(output));
           });
         });
+        req.reject = reject;
+        req.resolve = resolve;
         req.on('error', err => {
           resolve(err);
         });

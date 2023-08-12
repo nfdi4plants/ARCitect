@@ -2,8 +2,6 @@ import { reactive } from 'vue'
 
 import {Loading} from 'quasar'
 
-// Loading.hide()
-
 import arcProperties from './ArcProperties.ts';
 
 const ArcCommanderService = {
@@ -19,6 +17,7 @@ const ArcCommanderService = {
     cmds = Array.isArray(cmds) ? cmds : [cmds];
 
     ArcCommanderService.props.busy = true;
+
     Loading.show({
       spinnerThickness: 40,
       spinnerSize: 200,
@@ -27,6 +26,25 @@ const ArcCommanderService = {
       message: cmds[0].title || ''
     });
 
+    // const items = [];
+    // for(let cmd of cmds)
+    //   items.push(['arc '+cmd.args.join(' '),0]);
+
+    // const dialogProps = reactive({
+    //   title: 'ARC-Commander-Service',
+    //   ok_title: '',
+    //   cancel_title: '',
+    //   auto_close: true,
+    //   error: '',
+    //   items: items
+    // });
+
+    // $q.dialog({
+    //   component: ProgressDialog,
+    //   componentProps: dialogProps
+    // })
+
+    let i = 0;
     for(let cmd of cmds){
       if(cmd.silent){
         cmd.args = ['-v','0'].concat(cmd.args);
@@ -36,20 +54,9 @@ const ArcCommanderService = {
         cwd: ArcCommanderService.props.arc_root
       });
       responses.push(response);
+      // items[i][1] = 1;
+      // i++;
     }
-
-    // while(cmds.length){
-    //   const cmd = cmds.pop();
-    //   if(cmd.silent){
-    //     cmd.args = ['-v','0'].concat(cmd.args);
-    //   }
-    //   const response = await window.ipc.invoke('ArcCommanderService.run', {
-    //     args: cmd.args,
-    //     cwd: ArcCommanderService.props.arc_root
-    //   });
-
-    //   responses.push(response);
-    // }
 
     if(updateArcProperties)
       await ArcCommanderService.getArcProperties();

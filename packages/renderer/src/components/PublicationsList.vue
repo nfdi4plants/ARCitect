@@ -2,73 +2,43 @@
 
 import ViewItem from '../components/ViewItem.vue';
 import List from '../components/List.vue';
-
-import PublicationDialog from '../dialogs/PublicationDialog.vue';
-import ArcCommanderService from '../ArcCommanderService.ts';
-import appProperties from '../AppProperties.ts';
 import { useQuasar } from 'quasar'
 const $q = useQuasar();
 
+import ArcControlService from '../ArcControlService.ts';
+import PublicationDialog from '../dialogs/PublicationDialog.vue';
+
 export interface Props {
   items: Object[],
-  group: String,
-  target: String
+  group: String
 };
 const props = withDefaults(defineProps<Props>(), {
   items: ()=>[],
-  group: '',
-  target: 'i'
+  group: ''
 });
 
 const add = async item => {
-  const args = [props.target,`publication`,'register'];
-  for(const p in item.model){
-    if(!item.model[p])
-      continue;
-    args.push(`--${p.toLowerCase()}`);
-    args.push(item.model[p].value);
-  }
-
-  if(props.target==='s'){
-    args.push(`--studyidentifier`);
-    args.push(appProperties.active_study);
-  }
-
-  await ArcCommanderService.run({
-      args: args,
-      title: 'Registering Publication',
-      silent: true
-    },
-    true
-  );
+  props.items.push(item);
+  await ArcControlService.writeARC(ArcControlService.props.arc_root,['ISA_Investigation','ISA_Study']);
+  await ArcControlService.readARC();
 };
 
-const remove = async (publication,skipUpdate) => {
-  if(!publication.doi)
-    return console.error('arc commander can only delete publications by doi');
+const remove = async (item,skipUpdate) => {
+  props.items.splice(props.items.indexOf(item),1);
+  if(skipUpdate) return;
 
-  const args = [props.target,'publication','unregister','--doi',publication.doi];
-  if(props.target==='s'){
-    args.push(`--studyidentifier`);
-    args.push(appProperties.active_study);
-  }
-  await ArcCommanderService.run({
-      args: args,
-      title: 'Unregistering Publication',
-      silent: true
-    },
-    !skipUpdate
-  );
+  await ArcControlService.writeARC(ArcControlService.props.arc_root,['ISA_Investigation','ISA_Study']);
+  await ArcControlService.readARC();
 };
 
-const showDialog = async o => {
+const showDialog = async item_o => {
   $q.dialog({
     component: PublicationDialog,
-    componentProps: o ? {config: o} : {}
-  }).onOk( async n => {
-    if(o)
-      await remove(o,true);
-    await add(n);
+    componentProps: item_o ? {config: item_o} : {}
+  }).onOk( async item_n => {
+    if(item_o)
+      remove(item_o,true);
+    add(item_n);
   });
 }
 
@@ -84,9 +54,9 @@ const showDialog = async o => {
     <List
         :items='props.items'
         name= 'Publication'
-        :label='item => item.title ? item.title : item.doi ? "DOI: "+item.doi : "PubMed ID: "+item.pubMedID'
-        :caption="item => !item.title ? '' : item.doi ? 'DOI: '+item.doi : item.pubMedID ? 'PubMed ID: '+item.pubMedID : 'Missing DOI and PubMed ID'"
-        :avatar= 'item => item.title ? item.title[0].toUpperCase() : ""'
+        :label='item => item.Title ? item.Title : item.DOI ? "DOI: "+item.DOI : "PubMed ID: "+item.PubMedID'
+        :caption="item => !item.Title ? '' : item.DOI ? 'DOI: '+item.DOI : item.PubMedID ? 'PubMed ID: '+item.PubMedID : 'Missing DOI and PubMed ID'"
+        :avatar= 'item => item.Title ? item.Title[0].toUpperCase() : item.DOI ? "D" : "P"'
         icon_add= 'bookmark_add'
         icon_remove= 'bookmark_remove'
 

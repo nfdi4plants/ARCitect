@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { reactive, ref, nextTick, watch, onMounted, onUnmounted } from 'vue';
-import appProperties from '../AppProperties.ts';
-import ArcCommanderService from '../ArcCommanderService.ts';
+import AppProperties from '../AppProperties.ts';
+import ArcControlService from '../ArcControlService.ts';
 import StringDialog from '../dialogs/StringDialog.vue';
 import AddProtocolDialog from '../dialogs/AddProtocolDialog.vue';
 import NewAssayDialog from '../dialogs/NewAssayDialog.vue';
@@ -17,12 +17,14 @@ const props = reactive({
 const arcTree = ref(null);
 const selected = ref(null);
 
-watch(()=>ArcCommanderService.props.arc_root, async (newValue, oldValue) => {
-  window.ipc.invoke('LocalFileSystemService.unregisterChangeListener', oldValue);
+watch(()=>ArcControlService.props.arc_root, async (newValue, oldValue) => {
+  if(oldValue)
+    window.ipc.invoke('LocalFileSystemService.unregisterChangeListener', oldValue);
+  if(!newValue) return
+
   window.ipc.invoke('LocalFileSystemService.registerChangeListener', newValue);
 
   props.root = newValue;
-
   props.nodes = [{
     header: 'root',
     type: 'node_edit_investigation',
@@ -36,17 +38,17 @@ watch(()=>ArcCommanderService.props.arc_root, async (newValue, oldValue) => {
   arcTree._value.setExpanded(props.root);
 });
 
-watch(()=>appProperties.active_study, async (newValue, oldValue) => {
-  await nextTick();
-  selected.value = `${ArcCommanderService.props.arc_root}/studies/${newValue}`;
-  onSelectionChanged(selected.value);
-});
+// watch(()=>AppProperties.active_study, async (newValue, oldValue) => {
+//   await nextTick();
+//   selected.value = `${ArcCommanderService.props.arc_root}/studies/${newValue}`;
+//   onSelectionChanged(selected.value);
+// });
 
-watch(()=>appProperties.state, async (newValue, oldValue) => {
+watch(()=>AppProperties.state, async (newValue, oldValue) => {
   if([
-    appProperties.STATES.HOME,
-    appProperties.STATES.OPEN_DATAHUB,
-    appProperties.STATES.GIT,
+    AppProperties.STATES.HOME,
+    AppProperties.STATES.OPEN_DATAHUB,
+    AppProperties.STATES.GIT,
   ].includes(newValue)){
     selected.value = null
   }
@@ -55,50 +57,50 @@ watch(()=>appProperties.state, async (newValue, oldValue) => {
 let uniqueLabelCounter = 0;
 
 const addStudy = async ()=>{
-  $q.dialog({
-    component: StringDialog,
-    componentProps: {
-      title: 'Add Study',
-      property: 'Identifier',
-      icon: 'add_box'
-    }
-  }).onOk( async data => {
-    const r = await ArcCommanderService.run({
-        args: ['study','add','--identifier',data],
-        title: `Adding Study`,
-        silent: false
-      },
-      true
-    );
-    appProperties.active_study = data;
-  });
+  // $q.dialog({
+  //   component: StringDialog,
+  //   componentProps: {
+  //     title: 'Add Study',
+  //     property: 'Identifier',
+  //     icon: 'add_box'
+  //   }
+  // }).onOk( async data => {
+  //   const r = await ArcCommanderService.run({
+  //       args: ['study','add','--identifier',data],
+  //       title: `Adding Study`,
+  //       silent: false
+  //     },
+  //     true
+  //   );
+  //   AppProperties.active_study = data;
+  // });
 };
 const addAssay = async ()=>{
-  $q.dialog({
-    component: NewAssayDialog
-  }).onOk( async data => {
-    const cmds = [];
-    if(data.model.studies.value.length===1 && data.model.studies.value[0]==='Create New Study'){
-      cmds.push({
-        args: ['assay','add','--assayidentifier',data.model.assayIdentifier.value],
-        title: `Adding Assay`,
-        silent: true
-      });
-    } else {
-      cmds.push({
-        args: ['assay','init','--assayidentifier',data.model.assayIdentifier.value],
-        title: `Adding Assay`,
-        silent: false
-      });
-      for(const s of data.model.studies.value)
-        cmds.push({
-          args: ['assay','register','--assayidentifier',data.model.assayIdentifier.value,'--studyidentifier',s],
-          title: `Registering Assay`,
-          silent: false
-        });
-    }
-    const r = await ArcCommanderService.run(cmds,true);
-  });
+  // $q.dialog({
+  //   component: NewAssayDialog
+  // }).onOk( async data => {
+  //   const cmds = [];
+  //   if(data.model.studies.value.length===1 && data.model.studies.value[0]==='Create New Study'){
+  //     cmds.push({
+  //       args: ['assay','add','--assayidentifier',data.model.assayIdentifier.value],
+  //       title: `Adding Assay`,
+  //       silent: true
+  //     });
+  //   } else {
+  //     cmds.push({
+  //       args: ['assay','init','--assayidentifier',data.model.assayIdentifier.value],
+  //       title: `Adding Assay`,
+  //       silent: false
+  //     });
+  //     for(const s of data.model.studies.value)
+  //       cmds.push({
+  //         args: ['assay','register','--assayidentifier',data.model.assayIdentifier.value,'--studyidentifier',s],
+  //         title: `Registering Assay`,
+  //         silent: false
+  //       });
+  //   }
+  //   const r = await ArcCommanderService.run(cmds,true);
+  // });
 };
 
 const addProtocol = async n=>{
@@ -217,19 +219,19 @@ const onSelectionChanged = id=>{
 
   switch (type) {
     case 'node_edit_investigation':
-      return appProperties.state=appProperties.STATES.EDIT_INVESTIGATION;
+      return AppProperties.state=AppProperties.STATES.EDIT_INVESTIGATION;
     case 'node_edit_Study':
-      appProperties.active_study = n.label;
-      return appProperties.state=appProperties.STATES.EDIT_STUDY;
+      AppProperties.active_study = n.label;
+      return AppProperties.state=AppProperties.STATES.EDIT_STUDY;
     case 'node_edit_Assay':
-      appProperties.active_assay = n.label;
-      return appProperties.state=appProperties.STATES.EDIT_ASSAY;
+      AppProperties.active_assay = n.label;
+      return AppProperties.state=AppProperties.STATES.EDIT_ASSAY;
     case 'node_edit_Markdown':
-      appProperties.active_markdown = n.id;
-      return appProperties.state=appProperties.STATES.EDIT_MARKDOWN;
+      AppProperties.active_markdown = n.id;
+      return AppProperties.state=AppProperties.STATES.EDIT_MARKDOWN;
 
     // default:
-    //   return appProperties.state=appProperties.STATES.HOME;
+    //   return AppProperties.state=AppProperties.STATES.HOME;
   }
 }
 

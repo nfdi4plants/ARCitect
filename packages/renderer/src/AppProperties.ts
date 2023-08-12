@@ -1,6 +1,6 @@
 import { reactive } from 'vue'
 
-const appProperties = reactive({
+const AppProperties = reactive({
   STATES: {
     HOME: 0,
 
@@ -26,10 +26,12 @@ const appProperties = reactive({
 
   user: null,
   path_sep: null,
+
+  arc_root: null
 });
 
-for(let k in appProperties.STATES){
-  appProperties.STATES_I[appProperties.STATES[k]] = k;
+for(let k in AppProperties.STATES){
+  AppProperties.STATES_I[AppProperties.STATES[k]] = k;
 }
 
-export default appProperties;
+export default AppProperties;

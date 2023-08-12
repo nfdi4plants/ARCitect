@@ -22,9 +22,10 @@ setCssVar('primary', '#2d3e50');
 
 import { onMounted, ref, reactive } from 'vue';
 
-import appProperties from './AppProperties.ts';
-import arcProperties from './ArcProperties.ts';
-import ArcCommanderService from './ArcCommanderService.ts';
+import AppProperties from './AppProperties.ts';
+import ArcControlService from './ArcControlService.ts';
+// import arcProperties from './ArcProperties.ts';
+// import ArcCommanderService from './ArcCommanderService.ts';
 
 // import { useQuasar } from 'quasar'
 // const $q = useQuasar()
@@ -45,33 +46,36 @@ const showError = ()=>{
 }
 
 const openLocalArc = async path=>{
-  if(!ArcCommanderService.props.ac_state)
-    return;
-  if(!path)
-    path = await window.ipc.invoke('LocalFileSystemService.selectDir', ['Select local ARC','Select local ARC']);
-  if(!path)
-    return;
-  appProperties.state=appProperties.STATES.HOME;
-  ArcCommanderService.props.arc_root = path;
-  await ArcCommanderService.getArcProperties();
+  if(!path) path = await window.ipc.invoke('LocalFileSystemService.selectDir', ['Select local ARC','Select local ARC']);
+  if(!path) return;
+
+  await ArcControlService.readARC(path);
+  // const isArc = await window.ipc.invoke('LocalFileSystemService.isARC', path);
+  // if(!isARC)
+  //   return;
+  // AppProperties.state=AppProperties.STATES.HOME;
+  // AppProperties.arc_root = path;
+  // await window.ipc.invoke('ArcControlService.OpenARC',path)
+  // await ArcCommanderService.getArcProperties();
 };
 
 const newLocalArc = async ()=>{
-  const path = await window.ipc.invoke('LocalFileSystemService.saveFile');
+  let path = await window.ipc.invoke('LocalFileSystemService.saveFile');
   if(!path)
     return;
 
+  const systemPath = path.split('/').join(AppProperties.path_sep);
+
   let response = await window.ipc.invoke('ArcCommanderService.run', {
-    args: [`-p`,path,'init']
+    args: [`-p`,systemPath,'init']
   });
   if(!response[0])
     return showError();
 
-  const id = path.split(appProperties.path_sep).pop();
-  console.log(id)
+  const id = path.split('/').pop();
 
   response = await window.ipc.invoke('ArcCommanderService.run', {
-    args: [`-p`,path,'i','create','-i',id,'--title',id]
+    args: [`-p`,systemPath,'i','create','-i',id,'--title',id]
   });
   if(!response[0])
     return showError();
@@ -80,13 +84,18 @@ const newLocalArc = async ()=>{
 };
 
 const showHomeView = ()=>{
-  appProperties.state=appProperties.STATES.HOME;
+  AppProperties.state=AppProperties.STATES.HOME;
 }
 
 onMounted(async () => {
-  await ArcCommanderService.init();
-  appProperties.state=appProperties.STATES.HOME;
-  appProperties.path_sep = await window.ipc.invoke('LocalFileSystemService.getPathSeparator');
+  openLocalArc('/home/jones/external/projects/TEMP/ArcPrototype');
+  // await ArcCommanderService.init();
+  // AppProperties.state=AppProperties.STATES.HOME;
+  // AppProperties.path_sep = await window.ipc.invoke('LocalFileSystemService.getPathSeparator');
+
+  // // TODO
+  // await window.ipc.invoke('ArcControlService.open', '/home/jones/external/projects/TEMP/GeoSampleArc/');
+  // // await window.ipc.invoke('ArcControlService.open', '/home/jones/external/projects/TEMP/test3/');
 });
 
 const test = async ()=>{
@@ -124,13 +133,13 @@ const test = async ()=>{
 
             <ToolbarButton text='New ARC' icon='note_add' @clicked='newLocalArc()'></ToolbarButton>
             <ToolbarButton text='Open ARC' icon='file_open' @clicked='openLocalArc()'></ToolbarButton>
-            <ToolbarButton text='Download ARC' icon='cloud_download' @clicked='appProperties.state=appProperties.STATES.OPEN_DATAHUB'></ToolbarButton>
+            <ToolbarButton text='Download ARC' icon='cloud_download' @clicked='AppProperties.state=AppProperties.STATES.OPEN_DATAHUB'></ToolbarButton>
 
             <q-separator />
 
             <!--<ToolbarButton text='Upload ARC' icon='cloud_upload' requiresARC='true' @clicked='test()'></ToolbarButton>-->
-            <ToolbarButton text='Reset ARC' icon='autorenew' requiresARC='true' @clicked='ArcCommanderService.getArcProperties()'></ToolbarButton>
-            <ToolbarButton text='Versions' icon='update' requiresARC='true' @clicked='appProperties.state=appProperties.STATES.GIT'></ToolbarButton>
+            <ToolbarButton text='Reset ARC' icon='autorenew' requiresARC='true' @clicked='ArcControlService.readARC()'></ToolbarButton>
+            <ToolbarButton text='Versions' icon='update' requiresARC='true' @clicked='AppProperties.state=AppProperties.STATES.GIT'></ToolbarButton>
 
             <q-separator />
 
@@ -168,18 +177,18 @@ const test = async ()=>{
             </template>
 
             <template v-slot:after>
-              <q-scroll-area class='fit' style="height: 100%;">
-                <!--<HomeView v-if ='appProperties.state===appProperties.STATES.HOME'></HomeView>-->
-                <DataHubView v-if='appProperties.state===appProperties.STATES.OPEN_DATAHUB'></DataHubView>
+              <!--<q-scroll-area class='fit' style="height: 100%;">-->
+                <!--<HomeView v-if ='AppProperties.state===AppProperties.STATES.HOME'></HomeView>-->
+                <DataHubView v-if='AppProperties.state===AppProperties.STATES.OPEN_DATAHUB'></DataHubView>
 
-                <InvestigationView v-else-if='appProperties.state===appProperties.STATES.EDIT_INVESTIGATION'></InvestigationView>
-                <AssayView v-else-if='appProperties.state===appProperties.STATES.EDIT_ASSAY'></AssayView>
-                <StudyView v-else-if='appProperties.state===appProperties.STATES.EDIT_STUDY'></StudyView>
-                <MarkdownView v-else-if='appProperties.state===appProperties.STATES.EDIT_MARKDOWN'></MarkdownView>
-                <GitView v-else-if='appProperties.state===appProperties.STATES.GIT'></GitView>
+                <InvestigationView v-else-if='AppProperties.state===AppProperties.STATES.EDIT_INVESTIGATION'></InvestigationView>
+                <AssayView v-else-if='AppProperties.state===AppProperties.STATES.EDIT_ASSAY'></AssayView>
+                <StudyView v-else-if='AppProperties.state===AppProperties.STATES.EDIT_STUDY'></StudyView>
+                <MarkdownView v-else-if='AppProperties.state===AppProperties.STATES.EDIT_MARKDOWN'></MarkdownView>
+                <GitView v-else-if='AppProperties.state===AppProperties.STATES.GIT'></GitView>
                 <HomeView v-else></HomeView>
                 <!--<div v-else></div>-->
-              </q-scroll-area>
+              <!--</q-scroll-area>-->
             </template>
           </q-splitter>
         </q-page>

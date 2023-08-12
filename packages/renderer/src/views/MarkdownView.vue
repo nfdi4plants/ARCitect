@@ -5,42 +5,35 @@ import { reactive, watch, onMounted } from 'vue';
 import Markdown from 'vue3-markdown-it';
 import ViewItem from '../components/ViewItem.vue';
 import FormInput from '../components/FormInput.vue';
-import {Property,PropertyTree} from '../interfaces/Property.ts';
-import appProperties from '../AppProperties.ts';
+import AppProperties from '../AppProperties.ts';
+import Property from '../Property.ts';
 
-class MarkdownSource extends PropertyTree {
-  constructor(){
-    super([
-      new Property('source', {type:'textarea',label:' '})
-    ]);
-  }
-}
-
-const props = reactive({
-  file: '',
-  tab: 'editor'
+const iProps = reactive({
+  path: '',
+  text: '',
+  tab: 'editor',
+  property: null
 });
-
-const markdownSource = new MarkdownSource();
+iProps.property = Property(iProps,'text',{type:'textarea',label:' '});
 
 const init = async ()=>{
-  markdownSource.model.source.value = '';
-  markdownSource.model.source.loading = true;
-  const path = appProperties.active_markdown;
-  const s = await window.ipc.invoke('LocalFileSystemService.readFile', path);
+  iProps.text = '';
+  iProps.property.loading = true;
 
-  markdownSource.model.source.setOriginalValue(s);
-  props.file = path;
-  markdownSource.model.source.loading = false;
-}
+  iProps.path = AppProperties.active_markdown;
+  iProps.text = await window.ipc.invoke('LocalFileSystemService.readFile', iProps.path);
+  iProps.property.org_value = iProps.text;
+
+  iProps.property.loading = false;
+};
 
 const save = async ()=>{
-  await window.ipc.invoke('LocalFileSystemService.writeFile', [props.file,markdownSource.model.source.value]);
+  await window.ipc.invoke('LocalFileSystemService.writeFile', [iProps.path,iProps.text]);
   init();
-}
+};
 
 onMounted(init);
-watch( ()=>appProperties.active_markdown, init );
+watch( ()=>AppProperties.active_markdown, init );
 
 </script>
 
@@ -49,13 +42,13 @@ watch( ()=>appProperties.active_markdown, init );
     <ViewItem
       icon="edit_note"
       label="Markdown Editor"
-      :caption="props.file"
+      :caption="iProps.path"
       group='mgroup'
       defaultOpened
     >
       <q-card flat>
         <q-tabs
-          v-model="props.tab"
+          v-model="iProps.tab"
           dense
           class="text-grey"
           active-color="primary"
@@ -69,9 +62,9 @@ watch( ()=>appProperties.active_markdown, init );
 
         <q-separator />
 
-        <q-tab-panels v-model="props.tab" class='q-pa-none'>
+        <q-tab-panels v-model="iProps.tab" class='q-pa-none'>
           <q-tab-panel name="editor" class='q-pl-none q-pr-none'>
-            <FormInput :property='markdownSource.model.source' autogrow></FormInput>
+            <FormInput class='toppad' :property='iProps.property' autogrow></FormInput>
             <q-card-actions align='right' style="padding:0.5em 1em;">
               <q-btn label="Save" type="submit" icon='check_circle' color="secondary" @click='save'/>
               <q-btn label="Reset" type="submit" icon='check_circle' color="secondary" @click='init'/>
@@ -79,19 +72,19 @@ watch( ()=>appProperties.active_markdown, init );
           </q-tab-panel>
 
           <q-tab-panel name="preview">
-            <Markdown class='markdown' :source="markdownSource.model.source.value" />
+            <Markdown class='markdown' :source="iProps.text" />
           </q-tab-panel>
         </q-tab-panels>
-        <!--<br>-->
-        <!--<FormInput :property='markdownSource.model.source'></FormInput>-->
-        <!--<br>-->
-        <!--<Markdown class='markdown' :source="markdownSource.model.source.value" />-->
       </q-card>
     </ViewItem>
   </q-list>
 </template>
 
 <style>
+
+  .toppad .q-field__control-container {
+    padding-top:0.6em !important;
+  }
 
   .markdown * {
     margin: 0.2em 0em;

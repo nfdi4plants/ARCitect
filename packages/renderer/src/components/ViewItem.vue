@@ -5,7 +5,8 @@ export interface Props {
   caption: String,
   icon: String,
   group: String,
-  defaultOpened?: Boolean
+  defaultOpened?: Boolean,
+  fullWidth?: Boolean,
 };
 const props = defineProps<Props>();
 
@@ -21,11 +22,12 @@ const props = defineProps<Props>();
     :group='props.group'
     :default-opened='props.defaultOpened'
   >
-    <div style="display:block;margin:0 auto;max-width:700px;">
+
+    <div v-if='props.fullWidth' style="display:block;margin:0 auto;">
+      <slot></slot>
+    </div>
+    <div v-else style="display:block;margin:0 auto;max-width:700px;">
       <slot></slot>
     </div>
   </q-expansion-item>
 </template>
-
-<style>
-</style>

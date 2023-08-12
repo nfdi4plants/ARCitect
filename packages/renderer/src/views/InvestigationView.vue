@@ -5,32 +5,28 @@ import InvestigationForm from '../components/InvestigationForm.vue';
 import PeopleList from '../components/PeopleList.vue';
 import PublicationsList from '../components/PublicationsList.vue';
 
-import arcProperties from '../ArcProperties.ts';
+import ArcControlService from '../ArcControlService.ts';
 
 const props = reactive({
   people: [],
   publications: [],
 });
 
-const investigationForm = ref(null);
-
-const init = async ()=>{
-  investigationForm.value.init(arcProperties);
-  props.people = arcProperties.people.filter(i=>i.lastName && i.firstName);
-  props.publications = arcProperties.publications || [];
+const init = async()=>{
+  props.people = ArcControlService.props.arc.ISA.Contacts;
+  props.publications = ArcControlService.props.arc.ISA.Publications;
 };
 
-onMounted( init );
-watch( arcProperties, init );
+onMounted(init)
 
 </script>
 
 <template>
   <q-list>
-    <InvestigationForm ref='investigationForm' group="igroup" defaultOpened></InvestigationForm>
+    <InvestigationForm group="igroup" defaultOpened></InvestigationForm>
     <q-separator />
-    <PeopleList :items='props.people' target='i' group="igroup"></PeopleList>
+    <PeopleList :items='props.people' group="igroup"></PeopleList>
     <q-separator />
-    <PublicationsList :items='props.publications' target='i' group="igroup"></PublicationsList>
+    <PublicationsList :items='props.publications' group="igroup"></PublicationsList>
   </q-list>
 </template>

@@ -6,7 +6,7 @@ import ViewItem from '../components/ViewItem.vue';
 import FormInput from '../components/FormInput.vue';
 import ArcCommanderService from '../ArcCommanderService.ts';
 
-import {Property,PropertyTree} from '../interfaces/Property.ts';
+import Property from '../interfaces/Property.ts';
 
 import appProperties from '../AppProperties.ts';
 
@@ -17,14 +17,14 @@ const iProps = reactive({
 });
 
 class CommitProperties extends PropertyTree {
-  constructor(){
-    super([
-      new Property('name',{label:'Full Name'}),
-      new Property('email',{label:'eMail'}),
-      new Property('remote',{label:'Remote'}),
-      new Property('msg',{label:'Commit Message',hint:'A short description of the made changes',type:'textarea'}),
-    ])
-  }
+  // constructor(){
+  //   super([
+  //     new Property('name',{label:'Full Name'}),
+  //     new Property('email',{label:'eMail'}),
+  //     new Property('remote',{label:'Remote'}),
+  //     new Property('msg',{label:'Commit Message',hint:'A short description of the made changes',type:'textarea'}),
+  //   ])
+  // }
 };
 
 const raiseError = err => {

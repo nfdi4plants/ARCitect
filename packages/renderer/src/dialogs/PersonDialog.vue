@@ -2,51 +2,66 @@
 import { useDialogPluginComponent } from 'quasar';
 import { reactive, onMounted } from 'vue';
 import FormInput from '../components/FormInput.vue';
-import Person from '../interfaces/Person.ts';
+import Property from '../Property.ts';
 
-const item = new Person();
+import {Person} from '../../../../dist/ARCC/ISA/ISA/JsonTypes/Person.js';
+
 const props = defineProps<{config?:Object}>();
 const iProps = reactive({
+  form: [[]],
   valid: true,
-  mode: 'Add'
+  mode: 'Add',
+  person: new Person()
 });
-
-const form = [
-  [item.model.ORCID],
-  [item.model.firstName, item.model.lastName],
-  [item.model.email],
-  [item.model.phone, item.model.fax],
-  [item.model.address],
-  [item.model.affiliation]
-];
-
-defineEmits([
-  ...useDialogPluginComponent.emits
-]);
 
 const { dialogRef, onDialogHide, onDialogOK, onDialogCancel } = useDialogPluginComponent();
 
 const onSubmit = async () => {
-  iProps.valid = item.model.firstName.value && item.model.lastName.value;
+  iProps.valid = iProps.person.FirstName && iProps.person.LastName;
   if(!iProps.valid)
     return;
 
-  onDialogOK(item);
+  onDialogOK(iProps.person);
 };
 
-onMounted(async ()=>{
+const init = async ()=>{
   iProps.valid = true;
-  iProps.mode = 'Add';
+  iProps.mode = props.config ? 'Edit' : 'Add';
 
-  const config = props.config;
-  if(config){
-    iProps.mode = 'Edit';
-    item.init(config);
-  } else {
-    for(const k in item)
-      item[k].value = '';
+  if(props.config){
+    iProps.person.ID = props.config.ID;
+    iProps.person.LastName = props.config.LastName;
+    iProps.person.FirstName = props.config.FirstName;
+    iProps.person.MidInitials = props.config.MidInitials;
+    iProps.person.EMail = props.config.EMail;
+    iProps.person.Phone = props.config.Phone;
+    iProps.person.Fax = props.config.Fax;
+    iProps.person.Address = props.config.Address;
+    iProps.person.Affiliation = props.config.Affiliation;
+    iProps.person.Roles = props.config.Roles;
   }
-});
+
+  iProps.form = [
+    [
+      Property( iProps.person, 'FirstName'),
+      Property( iProps.person, 'LastName' ),
+    ],
+    [
+      Property( iProps.person, 'EMail' ),
+    ],
+    [
+      Property(iProps.person, 'Phone' ),
+      Property(iProps.person, 'Fax' ),
+    ],
+    [
+      Property(iProps.person, 'Address' ),
+    ],
+    [
+      Property(iProps.person, 'Affiliation' ),
+    ],
+  ];
+};
+onMounted( init );
 
 </script>
 
@@ -62,7 +77,7 @@ onMounted(async ()=>{
 
         <q-card-section>
 
-          <div class='row' v-for="(row,i) in form">
+          <div class='row' v-for="(row,i) in iProps.form">
             <div class='col' v-for="(property,j) in row">
               <FormInput :property='property'></FormInput>
             </div>

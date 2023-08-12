@@ -2,70 +2,44 @@
 
 import ViewItem from '../components/ViewItem.vue';
 import List from '../components/List.vue';
-
-import PersonDialog from '../dialogs/PersonDialog.vue';
-import ArcCommanderService from '../ArcCommanderService.ts';
-import appProperties from '../AppProperties.ts';
 import { useQuasar } from 'quasar'
 const $q = useQuasar();
 
+import ArcControlService from '../ArcControlService.ts';
+import PersonDialog from '../dialogs/PersonDialog.vue';
+
 export interface Props {
   items: Object[],
-  group: String,
-  target: String
+  group: String
 };
 const props = withDefaults(defineProps<Props>(), {
   items: ()=>[],
-  group: '',
-  target: 'i'
+  group: ''
 });
 
 const add = async item => {
-  const args = [props.target,`person`,'register'];
-  for(const p in item.model){
-    if(!item.model[p])
-      continue;
-    args.push(`--${p.toLowerCase()}`);
-    args.push(item.model[p].value);
-  }
-
-  if(props.target==='s'){
-    args.push(`--studyidentifier`);
-    args.push(appProperties.active_study);
-  }
-
-  await ArcCommanderService.run({
-      args: args,
-      title: 'Registering Person',
-      silent: true
-    },
-    true
-  );
+  props.items.push(item);
+  console.log(ArcControlService.props.arc.ISA);
+  await ArcControlService.writeARC(ArcControlService.props.arc_root,['ISA_Investigation','ISA_Study']);
+  // await ArcControlService.readARC();
 };
 
-const remove = async (person,skipUpdate) => {
-  const args = [props.target,'person','unregister','-f',person.firstName,'-l',person.lastName];
-  if(props.target==='s'){
-    args.push(`--studyidentifier`);
-    args.push(appProperties.active_study);
-  }
-  await ArcCommanderService.run({
-      args: args,
-      title: 'Unregistering Person',
-      silent: true
-    },
-    !skipUpdate
-  );
+const remove = async (item,skipUpdate) => {
+  props.items.splice(props.items.indexOf(item),1);
+  if(skipUpdate) return;
+
+  await ArcControlService.writeARC(ArcControlService.props.arc_root,['ISA_Investigation','ISA_Study']);
+  await ArcControlService.readARC();
 };
 
-const showDialog = async person_o => {
+const showDialog = async item_o => {
   $q.dialog({
     component: PersonDialog,
-    componentProps: person_o ? {config: person_o} : {}
-  }).onOk( async person_n => {
-    if(person_o)
-      await remove(person_o,true);
-    await add(person_n);
+    componentProps: item_o ? {config: item_o} : {}
+  }).onOk( async item_n => {
+    if(item_o)
+      remove(item_o,true);
+    add(item_n);
   });
 }
 
@@ -81,9 +55,9 @@ const showDialog = async person_o => {
     <List
       :items='props.items'
       name= 'Person'
-      :label='item => `${item.firstName} ${item.lastName}`'
-      :caption='item => item.comments && item.comments.length>0 && item.comments[0].hasOwnProperty("value") ? "ORCID: "+item.comments[0].value : "Missing ORCID"'
-      :avatar= 'item => item.lastName[0].toUpperCase()'
+      :label='item => `${item.FirstName} ${item.LastName}`'
+      :caption='item => item.Comments ? `x` : `Missing ORCID`'
+      :avatar= 'item => item.LastName[0].toUpperCase()'
       icon_add= 'person_add_alt_1'
       icon_remove= 'person_remove'
 

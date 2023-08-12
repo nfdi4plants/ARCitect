@@ -25,8 +25,9 @@
     "@quasar/extras": "1.15.3",
     "chokidar": "3.5.1",
     "express": "latest",
+    "@nfdi4plants/exceljs": "latest",
     "fs-extra": "latest",
-    "quasar": "2.8.0",
+    "quasar": "2.12.4",
     "query-string": "latest",
     "vue": "3.2.31",
     "vue3-markdown-it": "1.0.10"

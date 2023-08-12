@@ -1,97 +1,98 @@
 <script lang="ts" setup>
 
-import { onMounted, ref, reactive } from 'vue';
+import { onMounted, ref, reactive, watch } from 'vue';
 
 import ViewItem from '../components/ViewItem.vue';
 import FormInput from '../components/FormInput.vue';
-import ArcCommanderService from '../ArcCommanderService.ts';
-import Assay from '../interfaces/Assay.ts';
+import Property from '../Property.ts';
+
+import AppProperties from '../AppProperties.ts';
+import ArcControlService from '../ArcControlService.ts';
+
+import {OntologyAnnotation} from '../../../../dist/ARCC/ISA/ISA/JsonTypes/OntologyAnnotation.js';
 
 export interface Props {
   group: String
 };
 const props = defineProps<Props>();
+
 const iProps = reactive({
-  error: ''
+  form: [[]],
+  assay: null
 });
 
-const assay = new Assay();
-const form = [
-  [
-    assay.model.assayIdentifier,
-    assay.model.studies
-  ],
-  [assay.model.measurementtype],
-  [assay.model.technologytype],
-  [assay.model.technologyplatform]
-];
+const make_optionsFn = (name,termAccession)=>{
+  return async val => {
+    if(val.length<1)
+      return [];
 
-const init = async config=>{
-  assay.init(config);
+    const res = await window.ipc.invoke('InternetService.callSwateAPI', {
+      method: 'getTermSuggestionsByParentTerm',
+      payload: [{
+        'n': 5,
+        'query': val,
+        'parent_term': {
+          'Name': name,
+          'TermAccession': termAccession
+        }
+      }]
+    });
+
+    if(!Array.isArray(res) || res.length<1)
+      return [];
+
+    return res.map(i=>OntologyAnnotation.fromString(i.Name,i.FK_Ontology,i.Accession));
+  };
 };
-defineExpose({init});
+
+const init = async ()=>{
+
+  iProps.assay = ArcControlService.props.arc.ISA.TryFindAssay(AppProperties.active_assay);
+  if(!iProps.assay)
+    return;
+
+  iProps.form = [
+    [
+      Property( iProps.assay, 'Identifier', {readonly:true} ),
+    ],
+    [
+      Property( iProps.assay, 'MeasurementType', {
+        label:'Measurement Type',
+        type: 'ontology',
+        hint: 'A term to qualify the endpoint, or what is being measured, e.g., gene expression profiling or protein identification.',
+        optionsFn: make_optionsFn('Research Technique','NCIT:C20368')
+      }),
+    ],
+    [
+      Property( iProps.assay, 'TechnologyType', {
+        label:'Technology Type',
+        type: 'ontology',
+        hint: 'Term to identify the technology used to perform the measurement, e.g., DNA microarray, mass spectrometry.',
+        optionsFn: make_optionsFn('Research Technique','NCIT:C20368')
+      }),
+    ],
+    [
+      Property( iProps.assay, 'TechnologyPlatform', {
+        label:'Technology Platform',
+        type: 'ontology',
+        hint: 'Manufacturer and platform name, e.g., Bruker AVANCE.',
+        optionsFn: make_optionsFn('instrument model','MS:1000031')
+      }),
+    ],
+  ];
+};
+onMounted( init );
+watch( ()=>AppProperties.active_assay, init );
 
 const onReset = async ()=>{
-  await ArcCommanderService.getArcProperties();
+  await ArcControlService.readARC();
+  init();
 };
 
 const onSubmit = async ()=>{
-  const assayIdentifier = Assay.getIdentifier(assay);
-  const old_assay = Assay.getAssay(assayIdentifier);
-  const old_studies = Assay.getStudies(old_assay).sort();
-  const new_studies = assay.model.studies.value.sort();
-
-  if(new_studies.length<1){
-    iProps.error = 'An assay must belong to at least one study';
-    return;
-  } else {
-    iProps.error = '';
-  }
-
-  const updateStudies = old_studies.length !== new_studies.length || !old_studies.every((val, index) => val === new_studies[index]);
-  if(updateStudies){
-    const commands = [];
-    for(let s of new_studies){
-      if(!old_studies.includes(s))
-        commands.push({
-            args: ['a','register','--studyidentifier',s,'--assayidentifier',assayIdentifier],
-            title: 'Registering Assay',
-            silent: false
-        });
-    }
-    for(let s of old_studies){
-      if(!new_studies.includes(s))
-        commands.push({
-            args: ['a','unregister','--studyidentifier',s,'--assayidentifier',assayIdentifier],
-            title: 'Unregistering Assay',
-            silent: false
-        });
-    }
-
-    await ArcCommanderService.run(
-      commands,
-      true
-    );
-  }
-
-  {
-    const args = ['a','update','--studyidentifier',new_studies[0],'--assayidentifier',assayIdentifier];
-    args.push('--measurementtype')
-    args.push( assay.model.measurementtype.value)
-    args.push('--technologytype')
-    args.push( assay.model.technologytype.value)
-    args.push('--technologyplatform')
-    args.push( assay.model.technologyplatform.value)
-
-    await ArcCommanderService.run(
-      {
-          args: args,
-          title: 'Updating Assay',
-          silent: false
-      },
-      true
-    );
-  }
+  await ArcControlService.writeARC(ArcControlService.props.arc_root,['ISA_Assay']);
+  await ArcControlService.readARC();
+  init();
 };
 
 </script>
@@ -110,7 +111,7 @@ const onSubmit = async ()=>{
         @reset="onReset"
       >
         <q-card-section>
-          <div class='row' v-for="(row,i) in form">
+          <div class='row' v-for="(row,i) in iProps.form">
             <div class='col' v-for="(property,j) in row">
               <FormInput :property='property'></FormInput>
             </div>
@@ -126,10 +127,9 @@ const onSubmit = async ()=>{
           </div>
         </q-card-section>
 
-
         <q-card-actions align='right' style="padding:2.1em;">
-          <q-btn label="Update" type="submit" icon='check_circle' color="secondary" :disabled='ArcCommanderService.props.busy'/>
-          <q-btn label="Reset" type="reset" icon='change_circle' color="secondary" class="q-ml-sm" :disabled='ArcCommanderService.props.busy'/>
+          <q-btn label="Update" type="submit" icon='check_circle' color="secondary"/>
+          <q-btn label="Reset" type="reset" icon='change_circle' color="secondary" class="q-ml-sm"/>
         </q-card-actions>
       </q-form>
     </q-card>

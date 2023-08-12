@@ -58,14 +58,14 @@ const importArc = async url =>{
     url_with_credentials = url_with_credentials.replace('https://', `https://oauth2:${appProperties.user.token.access_token}@`);
 
   const dialogProps = reactive({
-      title: 'Downloading ARC',
-      ok_title: 'Open',
-      cancel_title: 'Close',
-      error: '',
-      items: [
-        ['Downloading ARC',0]
-      ]
-    })
+    title: 'Downloading ARC',
+    ok_title: 'Open',
+    cancel_title: 'Close',
+    error: '',
+    items: [
+      ['Downloading ARC',0]
+    ]
+  });
 
   $q.dialog({
     component: ProgressDialog,

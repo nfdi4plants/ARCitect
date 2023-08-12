@@ -3,9 +3,10 @@ import './security-restrictions';
 import {restoreOrCreateWindow} from '/@/mainWindow';
 import {LocalFileSystemService} from '/@/LocalFileSystemService';
 import {DataHubService} from '/@/DataHubService';
-import {ArcCommanderService} from '/@/ArcCommanderService';
+// import {ArcCommanderService} from '/@/ArcCommanderService';
 import {InternetService} from '/@/InternetService';
 import {GitService} from '/@/GitService';
+import {ArcControlService} from '/@/ArcControlService';
 
 /**
  * Prevent multiple instances
@@ -44,12 +45,11 @@ app.on('activate', restoreOrCreateWindow);
 app.whenReady()
   .then(DataHubService.init)
   .then(LocalFileSystemService.init)
-  .then(ArcCommanderService.init)
   .then(InternetService.init)
   .then(GitService.init)
+  .then(ArcControlService.init)
   .then(restoreOrCreateWindow)
   .catch((e) => console.error('Failed create window:', e));
-
 
 /**
  * Install Vue.js or some other devtools in development mode only

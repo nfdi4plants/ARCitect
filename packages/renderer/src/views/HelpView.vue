@@ -1,39 +1,26 @@
 <script lang="ts" setup>
 
-import {reactive,watch,onMounted} from 'vue';
-import Markdown from 'vue3-markdown-it';
 import appProperties from '../AppProperties.ts';
 
-import assay_help from '../docs/assay.ts';
-import study_help from '../docs/study.ts';
-import home_help from '../docs/home.ts';
-import investigation_help from '../docs/investigation.ts';
-import datahub_help from '../docs/datahub.ts';
-import git_help from '../docs/git.ts';
-
-const props = reactive({
-  help: '# Help'
-});
-
-const init = async () => {
-  switch(appProperties.state){
-    case appProperties.STATES.HOME: return props.help = home_help;
-    case appProperties.STATES.EDIT_INVESTIGATION: return props.help = investigation_help;
-    case appProperties.STATES.EDIT_STUDY: return props.help = study_help;
-    case appProperties.STATES.EDIT_ASSAY: return props.help = assay_help;
-    case appProperties.STATES.OPEN_DATAHUB: return props.help = datahub_help;
-    case appProperties.STATES.GIT: return props.help = git_help;
-    default: return props.help = '# ';
-  }
-};
-
-watch( ()=>appProperties.state, init );
-onMounted(init);
+import GitHelp from '../docs/git.vue';
+import AssayHelp from '../docs/assay.vue';
+import StudyHelp from '../docs/study.vue';
+import DataHubHelp from '../docs/datahub.vue';
+import HomeHelp from '../docs/home.vue';
+import InvestigationHelp from '../docs/investigation.vue';
 
 </script>
 
 <template>
-  <Markdown class='markdown q-pa-lg' :source="props.help" />
+  <div style='margin:-2.5em 2em 0 1em'>
+    <!--<GitHelp v-if='appProperties.state===appProperties.STATES.GIT'></GitHelp>-->
+    <!--<InvestigationHelp v-else-if='appProperties.state===appProperties.STATES.EDIT_INVESTIGATION'></InvestigationHelp>-->
+    <!--<DataHubHelp v-else-if='appProperties.state===appProperties.STATES.OPEN_DATAHUB'></DataHubHelp>-->
+    <!--<AssayHelp v-else-if='appProperties.state===appProperties.STATES.EDIT_ASSAY'></AssayHelp>-->
+    <!--<StudyHelp v-else-if='appProperties.state===appProperties.STATES.EDIT_STUDY'></StudyHelp>-->
+    <!--<HomeHelp v-else></HomeHelp>-->
+    <HomeHelp></HomeHelp>
+  </div>
 </template>
 
 <style>
