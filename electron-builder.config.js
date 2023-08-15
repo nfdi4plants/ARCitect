@@ -21,7 +21,6 @@ const config = {
     "target": ["dmg"],
   },
   linux: {
-    "extraResources": 'bins/linux',
     "target": ["AppImage"]
   }
 };
