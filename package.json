@@ -14,6 +14,7 @@
     "build:renderer": "cd ./packages/renderer && vite build",
     "compile": "cross-env MODE=production npm run build && electron-builder build --config electron-builder.config.js",
     "compilew": "cross-env MODE=production npm run build && electron-builder build --config electron-builder.config.js --win",
+    "compilem": "cross-env MODE=production npm run build && electron-builder build --config electron-builder.config.js --mac",
     "debug": "node scripts/debug.js",
     "lint": "eslint . --ext js,ts,vue",
     "typecheck:main": "tsc --noEmit -p packages/main/tsconfig.json",
