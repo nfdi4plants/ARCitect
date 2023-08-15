@@ -3,35 +3,27 @@ export default `
 
 If you want to create, edit, or extend an ARC, this is the tool to use.
 
-![NewsARC](../assets/Home-Help.png)
+![sidebar](../assets/ARCitect-help.drawio.svg)
 
+Navigate *via* the sidebar to
 
-The ARCitect offers the following ways to open an ARC:   
+- **Login** to the DataHUB (1)
+- Create a **New ARC** on your local computer (2)
+- **Open** an existing ARC on your computer (3)
+- **Download** an ARC from the DataHUB (4)
+- **Reset** your ARC, if you are unsure about your changes (5)
+- Save the current **version** of your ARC and synchronize it to the DataHUB (6)
+- **Toggle** the help menu. 
 
-**New ARC** (1)  
-Create a brand new ARC on your local computer.
-**Open ARC** (2)   
-Open an ARC on your computer.   
-**Download ARC** (3)   
-Browse and import an ARC from the DataHUB.
+Once opened, it is possible to navigate through your ARC much like a file browser.
 
-Once opened, it is possible to navigate through your ARC much like a file browser and perform the following functions:   
-   
-**Add Items** (4)   
-Create new items.   
-**Adjust Information** (5)   
-Add context to your research.     
-**Add Content** (6)   
-Upload existing datasets or write down protocols.
-
-After completing the adjustments, the following options are available:
-
-**Login** (7)   
-Log into your DataPLANT account and you will be able to view your private ARCs, commit changes and upload them.     
-**Reset ARC** (8)   
-If you are unsure about your changes, reset the ARC.   
-**Synchronize ARC** (9)   
-Commit your changes indicating them and synchronize your ARC, allowing your colleagues or yourself to follow the process.
+Here you can 
+- find the name of your ARC (a)
+- find the ARC's assays (b)
+- find the ARC's studies (c)
+- **add a dataset** (d) or **protocol** (e) to an existing assay
+- **add** a new assay (f)
+- **add a protocol** (g) to an existing study
+- **add** a new study (h).
 
 `
-
