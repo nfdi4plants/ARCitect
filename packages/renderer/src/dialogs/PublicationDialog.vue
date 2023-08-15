@@ -4,7 +4,7 @@ import { reactive, onMounted } from 'vue';
 import FormInput from '../components/FormInput.vue';
 import Property from '../Property.ts';
 
-import {Publication} from '../../../../dist/ARCC/ISA/ISA/JsonTypes/Publication.js';
+import {Publication} from '../../../../lib/ARCC/ISA/ISA/JsonTypes/Publication.js';
 
 const props = defineProps<{config?:Object}>();
 const iProps = reactive({
@@ -28,13 +28,8 @@ const init = async ()=>{
   iProps.valid = true;
   iProps.mode = props.config ? 'Edit' : 'Add';
 
-  if(props.config){
-    iProps.publication.PubMedID = props.config.PubMedID;
-    iProps.publication.DOI = props.config.DOI;
-    iProps.publication.Authors = props.config.Authors;
-    iProps.publication.Title = props.config.Title;
-    iProps.publication.Status = props.config.Status;
-  }
+  if(props.config)
+    iProps.publication = props.config.Copy();
 
   iProps.form = [
     [

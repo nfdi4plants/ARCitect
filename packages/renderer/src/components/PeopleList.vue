@@ -19,9 +19,8 @@ const props = withDefaults(defineProps<Props>(), {
 
 const add = async item => {
   props.items.push(item);
-  console.log(ArcControlService.props.arc.ISA);
   await ArcControlService.writeARC(ArcControlService.props.arc_root,['ISA_Investigation','ISA_Study']);
-  // await ArcControlService.readARC();
+  await ArcControlService.readARC();
 };
 
 const remove = async (item,skipUpdate) => {
@@ -56,7 +55,7 @@ const showDialog = async item_o => {
       :items='props.items'
       name= 'Person'
       :label='item => `${item.FirstName} ${item.LastName}`'
-      :caption='item => item.Comments ? `x` : `Missing ORCID`'
+      :caption='item => item.ORCID ? item.ORCID : `Missing ORCID`'
       :avatar= 'item => item.LastName[0].toUpperCase()'
       icon_add= 'person_add_alt_1'
       icon_remove= 'person_remove'

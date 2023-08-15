@@ -12,8 +12,8 @@ import HeaderDialog from '../dialogs/HeaderDialog.vue';
 import { useQuasar } from 'quasar'
 const $q = useQuasar();
 
-import {CompositeCell} from '/home/jones/external/projects/arc-commander-ui/arcade2/dist/ARCC/ISA/ISA/ArcTypes/CompositeCell.js';
-import {CompositeHeader} from '/home/jones/external/projects/arc-commander-ui/arcade2/dist/ARCC/ISA/ISA/ArcTypes/CompositeHeader.js';
+import {CompositeCell} from '../../../../lib/ARCC/ISA/ISA/ArcTypes/CompositeCell.js';
+import {CompositeHeader} from '../../../../lib/ARCC/ISA/ISA/ArcTypes/CompositeHeader.js';
 
 export interface Props {
   group: String
@@ -355,9 +355,9 @@ const isValidHeader = header=>{
           <template v-slot:body-cell="props">
             <q-td :props="props"
               @focusin="selectionStart(props.value);selectionEnd(props.value)"
+              :class='"cell "+(isSelected(props.value) ? "cell_selected " : isValid(props.value) ? "cell_valid" : "cell_invalid")'
             >
                 <div v-if='props.value.isTerm || props.value.isUnitized'
-                  :class='"cell_input " + (isSelected(props.value) ? "cell_selected " : !isValid(props.value) ? "cell_invalid" : "")'
                   @click="editCell(props.value);"
                 >
                   <table class='cell_table'>
@@ -374,7 +374,6 @@ const isValidHeader = header=>{
                   </table>
                 </div>
                 <div v-else
-                  :class='"cell_input " + (isSelected(props.value) ? "cell_selected " : "")'
                   @input="e=>editFreeForm(e.target.innerText,props.value)"
                   :contenteditable='props.value.isFreeText'
                 >
@@ -398,11 +397,18 @@ const isValidHeader = header=>{
 
   .swate td {
     margin: 0 !important;
-    padding: 0 !important;
   }
 
   .swate_th {
     background-color: #ebebeb !important;
+  }
+
+  .cell {
+    padding:0.2em 0.8em !important;
+  }
+
+  .cell div {
+    outline:0;
   }
 
   .cell_selected {

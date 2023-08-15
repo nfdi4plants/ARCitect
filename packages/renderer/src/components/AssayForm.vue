@@ -9,7 +9,7 @@ import Property from '../Property.ts';
 import AppProperties from '../AppProperties.ts';
 import ArcControlService from '../ArcControlService.ts';
 
-import {OntologyAnnotation} from '../../../../dist/ARCC/ISA/ISA/JsonTypes/OntologyAnnotation.js';
+import {OntologyAnnotation} from '../../../../lib/ARCC/ISA/ISA/JsonTypes/OntologyAnnotation.js';
 
 export interface Props {
   group: String

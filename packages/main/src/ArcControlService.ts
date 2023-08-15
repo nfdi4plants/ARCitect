@@ -3,10 +3,8 @@ import {
   BrowserWindow
 } from 'electron';
 
-import { ARC } from "../../../dist/ARCC/ARCtrl.js";
-// import ExcelJS from '@nfdi4plants/exceljs';
-import { Xlsx } from '../../../dist/fsspreadsheet/Xlsx.js';
-// import { toJsWorkbook, toFsWorkbook } from "../../../dist/fsspreadsheet/Workbook.js";
+import { ARC } from "../../../lib/ARCC/ARCtrl.js";
+import { Xlsx } from '../../../lib/fsspreadsheet/Xlsx.js';
 import FS from 'fs';
 
 const PATH = require('path');

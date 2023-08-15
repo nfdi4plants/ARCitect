@@ -137,7 +137,6 @@ onUnmounted(async () => {
       <div style="display:block;text-align:center;" v-if="props.list.length<1">
           <q-circular-progress
             indeterminate
-            rounded
             size="20em"
             color="primary"
             class="q-ma-md"

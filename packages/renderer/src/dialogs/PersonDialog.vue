@@ -4,7 +4,7 @@ import { reactive, onMounted } from 'vue';
 import FormInput from '../components/FormInput.vue';
 import Property from '../Property.ts';
 
-import {Person} from '../../../../dist/ARCC/ISA/ISA/JsonTypes/Person.js';
+import {Person} from '../../../../lib/ARCC/ISA/ISA/JsonTypes/Person.js';
 
 const props = defineProps<{config?:Object}>();
 const iProps = reactive({
@@ -28,20 +28,13 @@ const init = async ()=>{
   iProps.valid = true;
   iProps.mode = props.config ? 'Edit' : 'Add';
 
-  if(props.config){
-    iProps.person.ID = props.config.ID;
-    iProps.person.LastName = props.config.LastName;
-    iProps.person.FirstName = props.config.FirstName;
-    iProps.person.MidInitials = props.config.MidInitials;
-    iProps.person.EMail = props.config.EMail;
-    iProps.person.Phone = props.config.Phone;
-    iProps.person.Fax = props.config.Fax;
-    iProps.person.Address = props.config.Address;
-    iProps.person.Affiliation = props.config.Affiliation;
-    iProps.person.Roles = props.config.Roles;
-  }
+  if(props.config)
+    iProps.person = props.config.Copy();
 
   iProps.form = [
+    [
+      Property( iProps.person, 'ORCID' ),
+    ],
     [
       Property( iProps.person, 'FirstName'),
       Property( iProps.person, 'LastName' ),

@@ -2,7 +2,7 @@
 
 import { date } from 'quasar'
 
-import {OntologyAnnotation} from '../../../../dist/ARCC/ISA/ISA/JsonTypes/OntologyAnnotation.js';
+import {OntologyAnnotation} from '../../../../lib/ARCC/ISA/ISA/JsonTypes/OntologyAnnotation.js';
 
 export interface Props {
   property: Object
