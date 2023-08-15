@@ -88,7 +88,7 @@ const showHomeView = ()=>{
 }
 
 onMounted(async () => {
-  openLocalArc('/home/jones/external/projects/TEMP/ArcPrototype');
+  // openLocalArc('/home/jones/external/projects/TEMP/ArcPrototype');
   // await ArcCommanderService.init();
   // AppProperties.state=AppProperties.STATES.HOME;
   // AppProperties.path_sep = await window.ipc.invoke('LocalFileSystemService.getPathSeparator');
