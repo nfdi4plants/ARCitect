@@ -55,7 +55,7 @@ const showDialog = async item_o => {
       :items='props.items'
       name= 'Person'
       :label='item => `${item.FirstName} ${item.LastName}`'
-      :caption='item => item.ORCID ? item.ORCID : `Missing ORCID`'
+      :caption='item => "ORCID: " + (item.ORCID ? item.ORCID : `Missing`)'
       :avatar= 'item => item.LastName[0].toUpperCase()'
       icon_add= 'person_add_alt_1'
       icon_remove= 'person_remove'

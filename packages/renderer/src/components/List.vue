@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 
-import ArcCommanderService from '../ArcCommanderService.ts';
+import ArcControlService from '../ArcControlService.ts';
 
 export interface Props {
   items: Object[],
@@ -37,10 +37,10 @@ const emit = defineEmits(['edit','add','remove']);
           <q-item-section side>
             <div class='row'>
               <div class='col' style="padding:0 0.3em 0 0">
-                <q-btn label="" icon='edit' color="secondary" :disabled='ArcCommanderService.props.busy' v-on:click='()=>emit("edit",item)'/>
+                <q-btn label="" icon='edit' color="secondary" :disabled='ArcControlService.props.busy' v-on:click='()=>emit("edit",item)'/>
               </div>
               <div class='col'>
-                <q-btn label="" :icon='props.icon_remove' color="secondary" :disabled='ArcCommanderService.props.busy' v-on:click='()=>emit("remove",item)'/>
+                <q-btn label="" :icon='props.icon_remove' color="secondary" :disabled='ArcControlService.props.busy' v-on:click='()=>emit("remove",item)'/>
               </div>
             </div>
           </q-item-section>
@@ -49,7 +49,7 @@ const emit = defineEmits(['edit','add','remove']);
     </q-card-section>
 
     <q-card-actions align='right' style="padding:2.2em;">
-      <q-btn :label="`Add ${props.name}`" :icon='props.icon_add' color="secondary" class="q-ml-sm" :disabled='ArcCommanderService.props.busy' v-on:click='()=>emit("add")'/>
+      <q-btn :label="`Add ${props.name}`" :icon='props.icon_add' color="secondary" class="q-ml-sm" :disabled='ArcControlService.props.busy' v-on:click='()=>emit("add")'/>
     </q-card-actions>
   </q-card>
 </template>

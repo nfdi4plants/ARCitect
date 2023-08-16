@@ -57,23 +57,18 @@ watch(()=>AppProperties.state, async (newValue, oldValue) => {
 let uniqueLabelCounter = 0;
 
 const addStudy = async ()=>{
-  // $q.dialog({
-  //   component: StringDialog,
-  //   componentProps: {
-  //     title: 'Add Study',
-  //     property: 'Identifier',
-  //     icon: 'add_box'
-  //   }
-  // }).onOk( async data => {
-  //   const r = await ArcCommanderService.run({
-  //       args: ['study','add','--identifier',data],
-  //       title: `Adding Study`,
-  //       silent: false
-  //     },
-  //     true
-  //   );
-  //   AppProperties.active_study = data;
-  // });
+  $q.dialog({
+    component: StringDialog,
+    componentProps: {
+      title: 'Add Study',
+      property: 'Identifier',
+      icon: 'add_box'
+    }
+  }).onOk( async data => {
+    console.log(data);
+
+    // AppProperties.active_study = data;
+  });
 };
 const addAssay = async ()=>{
   // $q.dialog({

@@ -10,7 +10,7 @@ export interface Props {
 const props = defineProps<Props>();
 
 const checkDate = val => {
-  return val==='' || val===undefined  ? true : date.isValid(val) || 'Invalid date.';
+  return val==='' || val===undefined  ? true : date.isValid(date.extractDate(val,'DD.MM.YYYY')) || 'Invalid date.';
 };
 const hideDateBoxes = box => {
   box.hide();

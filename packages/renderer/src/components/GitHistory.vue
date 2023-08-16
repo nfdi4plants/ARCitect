@@ -3,7 +3,7 @@
 import { reactive } from 'vue';
 
 import ViewItem from '../components/ViewItem.vue';
-import ArcCommanderService from '../ArcCommanderService.ts';
+import ArcControlService from '../ArcControlService.ts';
 
 const iProps = reactive({
   git_log: []
@@ -13,7 +13,7 @@ const getHistory = async ()=>{
   // get log
   const response = await window.ipc.invoke('GitService.run', {
     args: [`log`,`--pretty=format:{"ref":"%H", "authorName":"%aN", "authorEmail":"%aE", "ts": "%cI", "title":"%s"},`],
-    cwd: ArcCommanderService.props.arc_root
+    cwd: ArcControlService.props.arc_root
   });
   const format = x => ('00' + x).slice(-2);
   const log = JSON.parse('['+response[1].slice(0,-1)+']');
@@ -39,7 +39,7 @@ const getHistory = async ()=>{
         <q-timeline-entry
           v-for="(item,i) in iProps.git_log"
           :title="item.title"
-          :subtitle="item.ts + '&nbsp;-&nbsp;' + item.authorName + '('+item.authorEmail+')'"
+          :subtitle="item.ts + '&nbsp;-&nbsp;' + item.authorName + ' ('+item.authorEmail+')'"
           side="left"
         >
         </q-timeline-entry>

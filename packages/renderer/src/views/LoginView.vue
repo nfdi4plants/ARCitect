@@ -10,7 +10,6 @@ const showLoginView = ()=>{
 
 window.ipc.on('DataHubService.authentificationData', async user_data=>{
   appProperties.user = user_data;
-  appProperties.state=appProperties.STATES.HOME;
   // const r = await ArcCommanderService.run([
   //     {
   //       args: ['config','setgituser','-l','-n',user_data.username,'-e',user_data.email],

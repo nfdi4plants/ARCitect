@@ -1,12 +1,12 @@
 <script lang="ts" setup>
 import {onMounted,onUnmounted,reactive,ref,nextTick} from 'vue';
 
-import appProperties from '../AppProperties.ts';
+import AppProperties from '../AppProperties.ts';
 import ViewItem from '../components/ViewItem.vue';
 
 import ProgressDialog from '../dialogs/ProgressDialog.vue';
 
-import ArcCommanderService from '../ArcCommanderService.ts';
+import ArcControlService from '../ArcControlService.ts';
 
 import { useQuasar } from 'quasar'
 const $q = useQuasar();
@@ -19,15 +19,6 @@ const props = reactive({
   msgs: [],
   localUrl: ''
 });
-
-const openLocalArc = async ()=>{
-  const path = props.localUrl || null;
-  if(!path)
-    return;
-  appProperties.state=appProperties.STATES.HOME;
-  ArcCommanderService.props.arc_root = path;
-  await ArcCommanderService.getArcProperties();
-};
 
 const inspectArc = url =>{
   window.ipc.invoke('InternetService.openExternalURL', url);
@@ -54,8 +45,8 @@ const importArc = async url =>{
     return;
 
   let url_with_credentials = url;
-  if(appProperties.user)
-    url_with_credentials = url_with_credentials.replace('https://', `https://oauth2:${appProperties.user.token.access_token}@`);
+  if(AppProperties.user)
+    url_with_credentials = url_with_credentials.replace('https://', `https://oauth2:${AppProperties.user.token.access_token}@`);
 
   const dialogProps = reactive({
     title: 'Downloading ARC',
@@ -70,8 +61,10 @@ const importArc = async url =>{
   $q.dialog({
     component: ProgressDialog,
     componentProps: dialogProps
-  }).onOk( () => {
-    openLocalArc();
+  }).onOk( async () => {
+    if(!props.localUrl) return;
+    await ArcControlService.readARC(props.localUrl);
+    AppProperties.state=AppProperties.STATES.HOME;
   });
 
   const response = await window.ipc.invoke('GitService.run', {
@@ -97,13 +90,13 @@ const importArc = async url =>{
 };
 
 onMounted(async () => {
-  appProperties.title = 'Import ARC from DataHUB';
+  AppProperties.title = 'Import ARC from DataHUB';
   window.ipc.on('ArcCommanderService.MSG', processMsg);
-  const list = await window.ipc.invoke('DataHubService.getArcs', appProperties.user && appProperties.user.token ? appProperties.user.token.access_token : null);
+  const list = await window.ipc.invoke('DataHubService.getArcs', AppProperties.user && AppProperties.user.token ? AppProperties.user.token.access_token : null);
 
-  if(appProperties.user){
+  if(AppProperties.user){
     for(let i of list)
-      i.isOwner = i.hasOwnProperty('owner') && i.owner.hasOwnProperty('username') && i.owner.username===appProperties.user.username;
+      i.isOwner = i.hasOwnProperty('owner') && i.owner.hasOwnProperty('username') && i.owner.username===AppProperties.user.username;
 
     props.list = list.sort( (a,b)=>{
       if(a.isOwner && !b.isOwner)

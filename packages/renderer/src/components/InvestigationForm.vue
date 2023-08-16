@@ -8,7 +8,8 @@ import Property from '../Property.ts';
 import ArcControlService from '../ArcControlService.ts';
 
 export interface Props {
-  group: String
+  group: String,
+  investigation: Object
 };
 const props = defineProps<Props>();
 
@@ -17,33 +18,30 @@ const iProps = reactive({
 });
 
 const init = async ()=>{
-  const arc = ArcControlService.props.arc;
-
   iProps.form = [
     [
-      Property( arc.ISA, 'Identifier', {readonly:true} ),
-      Property( arc.ISA, 'Title' ),
+      Property( props.investigation, 'Identifier', {readonly:true} ),
+      Property( props.investigation, 'Title' ),
     ],
     [
-      Property( arc.ISA, 'Description', {hint:'A textual description of the investigation'} ),
+      Property( props.investigation, 'Description', {hint:'A textual description of the investigation'} ),
     ],
     [
-      Property(arc.ISA, 'SubmissionDate',{hint:'The date the investigation was was released publicly'}),
-      Property(arc.ISA, 'PublicReleaseDate',{hint:'The date the investigation was was released publicly'}),
+      Property( props.investigation, 'SubmissionDate',{hint:'The date the investigation was was released publicly'}),
+      Property( props.investigation, 'PublicReleaseDate',{hint:'The date the investigation was was released publicly'}),
     ]
   ];
 };
 onMounted( init );
+watch( ()=>props.investigation, init );
 
 const onReset = async ()=>{
   await ArcControlService.readARC();
-  init();
 };
 
 const onSubmit = async ()=>{
   await ArcControlService.writeARC(ArcControlService.props.arc_root,['ISA_Investigation']);
   await ArcControlService.readARC();
-  init();
 };
 
 </script>

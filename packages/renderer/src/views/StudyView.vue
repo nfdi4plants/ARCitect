@@ -15,12 +15,15 @@ const iProps = reactive({
 });
 
 const init = async ()=>{
+  if(!ArcControlService.props.arc) return;
+
   iProps.study = ArcControlService.props.arc.ISA.GetStudy(AppProperties.active_study);
   iProps.people = iProps.study.Contacts;
   iProps.publications = iProps.study.Publications;
 };
 
 onMounted( init );
+watch( ()=>ArcControlService.props.arc, init );
 watch( ()=>AppProperties.active_study, init );
 
 </script>

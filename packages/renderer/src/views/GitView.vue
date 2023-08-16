@@ -11,8 +11,8 @@ import GitHistory from '../components/GitHistory.vue';
 
   <q-list bordered class="rounded-borders">
     <GitCommitForm></GitCommitForm>
-    <!--<q-separator />-->
-    <!--<GitHistory></GitHistory>-->
+    <q-separator />
+    <GitHistory></GitHistory>
   </q-list>
 
 </template>

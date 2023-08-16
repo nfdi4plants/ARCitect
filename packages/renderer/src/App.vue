@@ -48,15 +48,8 @@ const showError = ()=>{
 const openLocalArc = async path=>{
   if(!path) path = await window.ipc.invoke('LocalFileSystemService.selectDir', ['Select local ARC','Select local ARC']);
   if(!path) return;
-
   await ArcControlService.readARC(path);
-  // const isArc = await window.ipc.invoke('LocalFileSystemService.isARC', path);
-  // if(!isARC)
-  //   return;
-  // AppProperties.state=AppProperties.STATES.HOME;
-  // AppProperties.arc_root = path;
-  // await window.ipc.invoke('ArcControlService.OpenARC',path)
-  // await ArcCommanderService.getArcProperties();
+  AppProperties.state=AppProperties.STATES.HOME;
 };
 
 const newLocalArc = async ()=>{
@@ -64,23 +57,8 @@ const newLocalArc = async ()=>{
   if(!path)
     return;
 
-  const systemPath = path.split('/').join(AppProperties.path_sep);
-
-  let response = await window.ipc.invoke('ArcCommanderService.run', {
-    args: [`-p`,systemPath,'init']
-  });
-  if(!response[0])
-    return showError();
-
-  const id = path.split('/').pop();
-
-  response = await window.ipc.invoke('ArcCommanderService.run', {
-    args: [`-p`,systemPath,'i','create','-i',id,'--title',id]
-  });
-  if(!response[0])
-    return showError();
-
-  openLocalArc(path);
+  AppProperties.state=AppProperties.STATES.HOME;
+  await ArcControlService.new_arc(path);
 };
 
 const showHomeView = ()=>{
@@ -88,7 +66,7 @@ const showHomeView = ()=>{
 }
 
 onMounted(async () => {
-  // openLocalArc('/home/jones/external/projects/TEMP/ArcPrototype');
+  openLocalArc('/home/jones/external/projects/TEMP/ArcPrototype');
   // await ArcCommanderService.init();
   // AppProperties.state=AppProperties.STATES.HOME;
   // AppProperties.path_sep = await window.ipc.invoke('LocalFileSystemService.getPathSeparator');
@@ -195,9 +173,43 @@ const test = async ()=>{
       </q-page-container>
     </q-layout>
 
+    <div class='ModalLoading' v-if='ArcControlService.props.busy'>
+      <div>
+        <q-circular-progress
+          indeterminate
+          size="20em"
+          color="primary"
+          class="q-ma-md"
+          :thickness="0.6"
+        />
+      </div>
+    </div>
+
 </template>
 
 <style>
+
+.ModalLoading {
+  position: absolute;
+  left:0;
+  right:0;
+  top:0;
+  bottom:0;
+  z-index:9999;
+  background-color: #00000044;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ModalLoading > div {
+  margin: 0;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
 
 .no-selection {
   -webkit-touch-callout: none; /* iOS Safari */

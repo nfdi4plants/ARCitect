@@ -4,28 +4,33 @@ import { onMounted, ref, reactive, watch } from 'vue';
 
 import ViewItem from '../components/ViewItem.vue';
 import FormInput from '../components/FormInput.vue';
-import ArcCommanderService from '../ArcCommanderService.ts';
+import ArcControlService from '../ArcControlService.ts';
 
-import Property from '../interfaces/Property.ts';
+import Property from '../Property.ts';
 
-import appProperties from '../AppProperties.ts';
+import AppProperties from '../AppProperties.ts';
 
 const iProps = reactive({
   git_status: [],
   error: '',
   succ: '',
+  commit: {
+    name: '',
+    email: '',
+    remote: '',
+    msg: ''
+  },
+  form: []
 });
 
-class CommitProperties extends PropertyTree {
-  // constructor(){
-  //   super([
-  //     new Property('name',{label:'Full Name'}),
-  //     new Property('email',{label:'eMail'}),
-  //     new Property('remote',{label:'Remote'}),
-  //     new Property('msg',{label:'Commit Message',hint:'A short description of the made changes',type:'textarea'}),
-  //   ])
-  // }
-};
+iProps.form = [
+  [
+    Property( iProps.commit, 'name', {label:'Full Name'}),
+    Property( iProps.commit, 'email', {label:'eMail'} )
+  ],
+  [Property( iProps.commit, 'remote')],
+  [Property( iProps.commit, 'msg', {label:'Commit Message',hint:'A short description of the made changes',type:'textarea'})],
+];
 
 const raiseError = err => {
   iProps.busy = false;
@@ -33,20 +38,10 @@ const raiseError = err => {
   return false;
 };
 
-const commitProperties = new CommitProperties();
-const form = [
-  [
-    commitProperties.model.name,
-    commitProperties.model.email
-  ],
-  [commitProperties.model.remote],
-  [commitProperties.model.msg],
-];
-
 const getStatus = async()=>{
   const response = await window.ipc.invoke('GitService.run', {
     args: [`status`,`-z`],
-    cwd: ArcCommanderService.props.arc_root
+    cwd: ArcControlService.props.arc_root
   });
   iProps.git_status = response[1].split('\u0000').map(x => [x.slice(0,2),x.slice(3)]).slice(0,-1);
 };
@@ -57,11 +52,11 @@ const setGitUser = async(name,email)=>{
   // set git user and email
   response = await window.ipc.invoke('GitService.run', {
     args: [`config`,`user.name`,name],
-    cwd: ArcCommanderService.props.arc_root
+    cwd: ArcControlService.props.arc_root
   });
   response = await window.ipc.invoke('GitService.run', {
     args: [`config`,`user.email`,email],
-    cwd: ArcCommanderService.props.arc_root
+    cwd: ArcControlService.props.arc_root
   });
 };
 
@@ -78,13 +73,13 @@ const trackChanges = async()=>{
   if(git_rm.length>1)
     await window.ipc.invoke('GitService.run', {
       args: git_rm,
-      cwd: ArcCommanderService.props.arc_root
+      cwd: ArcControlService.props.arc_root
     });
 
   if(git_add.length>1)
     await window.ipc.invoke('GitService.run', {
       args: git_add,
-      cwd: ArcCommanderService.props.arc_root
+      cwd: ArcControlService.props.arc_root
     });
 };
 
@@ -92,9 +87,9 @@ const commit = async()=>{
   iProps.busy = true;
   iProps.error = '';
   iProps.succ = '';
-  const name = commitProperties.model.name.value;
-  const email = commitProperties.model.email.value;
-  const msg = commitProperties.model.msg.value;
+  const name = iProps.commit.name;
+  const email = iProps.commit.email;
+  const msg = iProps.commit.msg;
   if(!name || !email || !msg)
     return raiseError('Name, eMail, and commit message required');
 
@@ -103,7 +98,7 @@ const commit = async()=>{
 
   await window.ipc.invoke('GitService.run', {
     args: ['commit','-m',msg],
-    cwd: ArcCommanderService.props.arc_root
+    cwd: ArcControlService.props.arc_root
   });
 
   await init();
@@ -118,7 +113,7 @@ const push = async()=>{
   iProps.succ = '';
   if(iProps.git_status.length>0)
     return raiseError('Commit changes before push.');
-  if(!appProperties.user)
+  if(!AppProperties.user)
     return raiseError('Sign in to push to <b>nfdi4plants.org</b>.');
 
   let response = null;
@@ -126,7 +121,7 @@ const push = async()=>{
   // get current branch
   response = await window.ipc.invoke('GitService.run', {
     args: [`branch`],
-    cwd: ArcCommanderService.props.arc_root
+    cwd: ArcControlService.props.arc_root
   });
   const branches = response[1].split('\n').slice(0,-1);
   const cBranch = branches.filter(x=>x[0]=='*').pop().slice(2);
@@ -134,7 +129,7 @@ const push = async()=>{
     return raiseError('Unable to find current branch');
 
   // fetch remote
-  const remote = commitProperties.model.remote.value;
+  const remote = iProps.commit.remote;
   const remotes = await getRemotes();
   let remoteExistsLocally = false;
   for(const r of remotes)
@@ -146,34 +141,36 @@ const push = async()=>{
   if(!remoteExistsLocally)
     response = await window.ipc.invoke('GitService.run', {
       args: [`remote`,`add`,'origin',remote],
-      cwd: ArcCommanderService.props.arc_root
+      cwd: ArcControlService.props.arc_root
     });
 
   // patch remote with token
-  const patched_remote = `https://oauth2:${appProperties.user.token.access_token}@git.nfdi4plants.org` + remote.split('git.nfdi4plants.org')[1];
+  const patched_remote = `https://oauth2:${AppProperties.user.token.access_token}@git.nfdi4plants.org` + remote.split('git.nfdi4plants.org')[1];
 
   // add patched remote
   response = await window.ipc.invoke('GitService.run', {
     args: [`remote`,`add`,'arcitect_remote',patched_remote],
-    cwd: ArcCommanderService.props.arc_root
+    cwd: ArcControlService.props.arc_root
   });
 
   // push
   response = await window.ipc.invoke('GitService.run', {
     args: [`push`,`arcitect_remote`,cBranch],
-    cwd: ArcCommanderService.props.arc_root
+    cwd: ArcControlService.props.arc_root
   });
   if(response[1].includes('up-to-date'))
     iProps.succ = 'Everything Up-To-Date';
   else if(response[1].includes('Updates were rejected because the remote contains work'))
     iProps.error = 'ARC on server contains updates. Please download updates first.';
+  else if(response[1].includes('error:'))
+    iProps.error = response[1];
   else
     iProps.succ = 'Upload Successful';
 
   // remove patched remote
   response = await window.ipc.invoke('GitService.run', {
     args: [`remote`,`remove`,'arcitect_remote'],
-    cwd: ArcCommanderService.props.arc_root
+    cwd: ArcControlService.props.arc_root
   });
 
   iProps.busy = false;
@@ -185,7 +182,7 @@ const pull = async()=>{
   iProps.succ = '';
   if(iProps.git_status.length>0)
     return raiseError('Commit changes before pull.');
-  if(!appProperties.user)
+  if(!AppProperties.user)
     return raiseError('Sign in to pull from <b>nfdi4plants.org</b>.');
 
   let response = null;
@@ -193,7 +190,7 @@ const pull = async()=>{
   // get current branch
   response = await window.ipc.invoke('GitService.run', {
     args: [`branch`],
-    cwd: ArcCommanderService.props.arc_root
+    cwd: ArcControlService.props.arc_root
   });
   const branches = response[1].split('\n').slice(0,-1);
   const cBranch = branches.filter(x=>x[0]=='*').pop().slice(2);
@@ -201,7 +198,7 @@ const pull = async()=>{
     return raiseError('Unable to find current branch.');
 
   // fetch remote
-  const remote = commitProperties.model.remote.value;
+  const remote = iProps.commit.remote;
   const remotes = await getRemotes();
   let remoteExistsLocally = false;
   for(const r of remotes)
@@ -213,22 +210,22 @@ const pull = async()=>{
   if(!remoteExistsLocally)
     response = await window.ipc.invoke('GitService.run', {
       args: [`remote`,`add`,'origin',remote],
-      cwd: ArcCommanderService.props.arc_root
+      cwd: ArcControlService.props.arc_root
     });
 
   // patch remote with token
-  const patched_remote = `https://oauth2:${appProperties.user.token.access_token}@git.nfdi4plants.org` + remote.split('git.nfdi4plants.org')[1];
+  const patched_remote = `https://oauth2:${AppProperties.user.token.access_token}@git.nfdi4plants.org` + remote.split('git.nfdi4plants.org')[1];
 
   // add patched remote
   response = await window.ipc.invoke('GitService.run', {
     args: [`remote`,`add`,'arcitect_remote',patched_remote],
-    cwd: ArcCommanderService.props.arc_root
+    cwd: ArcControlService.props.arc_root
   });
 
   // pull
   response = await window.ipc.invoke('GitService.run', {
     args: [`pull`,`arcitect_remote`,cBranch],
-    cwd: ArcCommanderService.props.arc_root
+    cwd: ArcControlService.props.arc_root
   });
   if(response[1].includes('Already up to date.'))
     iProps.succ = 'Everything Up-To-Date';
@@ -238,7 +235,7 @@ const pull = async()=>{
   // remove patched remote
   response = await window.ipc.invoke('GitService.run', {
     args: [`remote`,`remove`,'arcitect_remote'],
-    cwd: ArcCommanderService.props.arc_root
+    cwd: ArcControlService.props.arc_root
   });
 
   iProps.busy = false;
@@ -247,7 +244,7 @@ const pull = async()=>{
 const getGitUser = async()=>{
   const response = await window.ipc.invoke('GitService.run', {
     args: [`config`,`--list`],
-    cwd: ArcCommanderService.props.arc_root
+    cwd: ArcControlService.props.arc_root
   });
   let name='';
   let email='';
@@ -266,7 +263,7 @@ const getGitUser = async()=>{
 const getRemotes = async()=>{
   const response = await window.ipc.invoke('GitService.run', {
     args: [`remote`,`-v`],
-    cwd: ArcCommanderService.props.arc_root
+    cwd: ArcControlService.props.arc_root
   });
   return response[1].split('\n');
 };
@@ -277,7 +274,10 @@ const getRemote = async()=>{
     if(r.includes('(push)') && r.includes('git.nfdi4plants.org'))
       return r.replace(' (push)','').split('\t')[1];
 
-  return `https://git.nfdi4plants.org/${appProperties.user.username}/${ArcCommanderService.props.arc_root.split('/').pop()}.git`;
+  if(AppProperties.user)
+    return `https://git.nfdi4plants.org/${AppProperties.user.username}/${ArcControlService.props.arc_root.split('/').pop()}.git`;
+
+  return '';
 };
 
 const init = async()=>{
@@ -288,22 +288,25 @@ const init = async()=>{
   const remote = await getRemote();
 
   let user = null;
-  if(appProperties.user)
-    user = appProperties.user;
+  if(AppProperties.user)
+    user = AppProperties.user;
   else
     user = await getGitUser();
 
-  commitProperties.init({
-    'name': user.name,
-    'email': user.email,
-    'remote': remote,
-    'msg': '',
-  });
+  iProps.commit.name = user.name;
+  iProps.commit.email = user.email;
+  iProps.commit.remote = remote;
+  iProps.commit.msg = '';
+
+  for(const row of iProps.form)
+    for(const property of row)
+      property.updateOriginalValue();
 
   iProps.busy = false;
 };
 
 onMounted(init);
+watch(()=>AppProperties.user, init);
 
 </script>
 
@@ -318,7 +321,7 @@ onMounted(init);
   >
     <q-card flat>
       <q-card-section style="padding-bottom:0;margin-bottom:-1.2em;">
-        <div class='row' v-for="(row,i) in form">
+        <div class='row' v-for="(row,i) in iProps.form">
           <div class='col' v-for="(property,j) in row">
             <FormInput :property='property'></FormInput>
           </div>
@@ -360,6 +363,12 @@ onMounted(init);
           </template>
           <div v-html='iProps.error'></div>
         </q-banner>
+        <q-banner rounded inline-actions class="bg-red-10 text-white" dense v-if='!AppProperties.user'>
+          <template v-slot:avatar>
+            <q-icon name="warning"/>
+          </template>
+          <div>Sign in to push to <b>nfdi4plants.org</b>.</div>
+        </q-banner>
         <q-banner rounded inline-actions class="bg-secondary text-white" dense v-if='iProps.succ'>
           <template v-slot:avatar>
             <q-icon name="check_circle"/>
@@ -369,11 +378,11 @@ onMounted(init);
       </div>
 
       <q-card-actions align='right' style="padding:0 2.1em 1em 2.1em;">
-        <q-btn label="Refresh" style="margin-bottom:0.5em;" @click="getStatus" icon='change_circle' color="secondary" :disabled='ArcCommanderService.props.busy || iProps.busy'/>
-        <q-btn label="Commit" style="margin-bottom:0.5em;" @click="commit" icon='check_circle' color="secondary" :disabled='ArcCommanderService.props.busy || iProps.busy || iProps.git_status.length<1'/>
-        <q-btn label="Upload" style="margin-bottom:0.5em;" @click="push" icon='cloud_upload' color="secondary" :disabled='ArcCommanderService.props.busy || iProps.busy'/>
-        <q-btn label="Download" style="margin-bottom:0.5em;" @click="pull" icon='cloud_download' color="secondary" :disabled='ArcCommanderService.props.busy || iProps.busy'/>
-        <!--<q-btn label="Sync" @click="" icon='cloud_sync' color="secondary" :disabled='ArcCommanderService.props.busy'/>-->
+        <q-btn label="Refresh" style="margin-bottom:0.5em;" @click="getStatus" icon='change_circle' color="secondary" :disabled='ArcControlService.props.busy || iProps.busy'/>
+        <q-btn label="Commit" style="margin-bottom:0.5em;" @click="commit" icon='check_circle' color="secondary" :disabled='ArcControlService.props.busy || iProps.busy || iProps.git_status.length<1'/>
+        <q-btn label="Upload" style="margin-bottom:0.5em;" @click="push" icon='cloud_upload' color="secondary" :disabled='ArcControlService.props.busy || iProps.busy || !AppProperties.user'/>
+        <q-btn label="Download" style="margin-bottom:0.5em;" @click="pull" icon='cloud_download' color="secondary" :disabled='ArcControlService.props.busy || iProps.busy || !AppProperties.user'/>
+        <!--<q-btn label="Sync" @click="" icon='cloud_sync' color="secondary" :disabled='ArcControlService.props.busy'/>-->
       </q-card-actions>
 
     </q-card>

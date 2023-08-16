@@ -47,6 +47,10 @@ const Property = (model,property,config)=>{
     };
   }
 
+  p.updateOriginalValue = () => {
+    p.org_value = p.model[p.property];
+  };
+
   return p;
 };
 

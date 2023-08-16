@@ -12,13 +12,13 @@ import ArcControlService from '../ArcControlService.ts';
 import {OntologyAnnotation} from '../../../../lib/ARCC/ISA/ISA/JsonTypes/OntologyAnnotation.js';
 
 export interface Props {
-  group: String
+  group: String,
+  assay: Object
 };
 const props = defineProps<Props>();
 
 const iProps = reactive({
-  form: [[]],
-  assay: null
+  form: [[]]
 });
 
 const make_optionsFn = (name,termAccession)=>{
@@ -46,17 +46,15 @@ const make_optionsFn = (name,termAccession)=>{
 };
 
 const init = async ()=>{
-
-  iProps.assay = ArcControlService.props.arc.ISA.TryFindAssay(AppProperties.active_assay);
-  if(!iProps.assay)
+  if(!props.assay)
     return;
 
   iProps.form = [
     [
-      Property( iProps.assay, 'Identifier', {readonly:true} ),
+      Property( props.assay, 'Identifier', {readonly:true} ),
     ],
     [
-      Property( iProps.assay, 'MeasurementType', {
+      Property( props.assay, 'MeasurementType', {
         label:'Measurement Type',
         type: 'ontology',
         hint: 'A term to qualify the endpoint, or what is being measured, e.g., gene expression profiling or protein identification.',
@@ -64,7 +62,7 @@ const init = async ()=>{
       }),
     ],
     [
-      Property( iProps.assay, 'TechnologyType', {
+      Property( props.assay, 'TechnologyType', {
         label:'Technology Type',
         type: 'ontology',
         hint: 'Term to identify the technology used to perform the measurement, e.g., DNA microarray, mass spectrometry.',
@@ -72,7 +70,7 @@ const init = async ()=>{
       }),
     ],
     [
-      Property( iProps.assay, 'TechnologyPlatform', {
+      Property( props.assay, 'TechnologyPlatform', {
         label:'Technology Platform',
         type: 'ontology',
         hint: 'Manufacturer and platform name, e.g., Bruker AVANCE.',
@@ -82,7 +80,7 @@ const init = async ()=>{
   ];
 };
 onMounted( init );
-watch( ()=>AppProperties.active_assay, init );
+watch( ()=>props.assay, init );
 
 const onReset = async ()=>{
   await ArcControlService.readARC();
