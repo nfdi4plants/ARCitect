@@ -38,8 +38,11 @@ const Property = (model,property,config)=>{
     loading: config.loading || false,
     options: Array.isArray(config.options) ? config.options : [],
     limit_to_options: config.limit_to_options || false,
-    filter: null
+    filter: null,
+    dirty: null,
   });
+  p.dirty = ()=>p.org_value!=p.model[p.property] && !(!p.org_value && !p.model[p.property]);
+
   if(config.optionsFn){
     p.filter = async (val, update, abort) => {
       const options = await config.optionsFn(val);

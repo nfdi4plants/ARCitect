@@ -40,13 +40,11 @@ watch( ()=>props.study, init );
 
 const onReset = async ()=>{
   await ArcControlService.readARC();
-  init();
 };
 
 const onSubmit = async ()=>{
-  await ArcControlService.writeARC(ArcControlService.props.arc_root,['ISA_Study']);
+  await ArcControlService.writeARC(ArcControlService.props.arc_root,['ISA_Investigation','ISA_Study']);
   await ArcControlService.readARC();
-  init();
 };
 
 </script>

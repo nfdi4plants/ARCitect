@@ -18,7 +18,9 @@ export interface Props {
 const props = defineProps<Props>();
 
 const iProps = reactive({
-  form: [[]]
+  form: [[]],
+  studies_assay: [],
+  studies_all: []
 });
 
 const make_optionsFn = (name,termAccession)=>{
@@ -45,13 +47,27 @@ const make_optionsFn = (name,termAccession)=>{
   };
 };
 
+const study_contains_assay = (s,assay_identifier) => {
+  try {
+    s.GetAssay(assay_identifier);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 const init = async ()=>{
-  if(!props.assay)
-    return;
+  if(!props.assay || !ArcControlService.props.arc) return;
+  const assay_identifier = props.assay.Identifier;
+  if(!assay_identifier) return;
+
+  iProps.studies_all = ArcControlService.props.arc.ISA.Studies.map(s=>s.Identifier);
+  iProps.studies_assay = ArcControlService.props.arc.ISA.Studies.filter( s=>study_contains_assay(s,assay_identifier)).map(s=>s.Identifier);
 
   iProps.form = [
     [
       Property( props.assay, 'Identifier', {readonly:true} ),
+      Property( iProps, 'studies_assay', {type:'select', multi:true, options: iProps.studies_all, readonly:true})
     ],
     [
       Property( props.assay, 'MeasurementType', {
@@ -84,13 +100,30 @@ watch( ()=>props.assay, init );
 
 const onReset = async ()=>{
   await ArcControlService.readARC();
-  init();
 };
 
 const onSubmit = async ()=>{
-  await ArcControlService.writeARC(ArcControlService.props.arc_root,['ISA_Assay']);
+  if(iProps.studies_assay.length<1)
+    return iProps.error = 'Assay must be assigned to at least one study.';
+
+  const assay_identifier = props.assay.Identifier;
+
+  for(const s of ArcControlService.props.arc.ISA.Studies){
+    if(study_contains_assay(s,assay_identifier)){
+      if(!iProps.studies_assay.includes(s.Identifier)){
+        console.log('unregister',s.Identifier);
+        s.RemoveAssayAt( s.GetAssayIndex(assay_identifier) );
+      }
+    } else {
+      if(iProps.studies_assay.includes(s.Identifier)){
+        console.log('register',s.Identifier);
+        s.Assays.push(props.assay);
+      }
+    }
+  }
+
+  await ArcControlService.writeARC(ArcControlService.props.arc_root,['ISA_Investigation','ISA_Study','ISA_Assay']);
   await ArcControlService.readARC();
-  init();
 };
 
 </script>

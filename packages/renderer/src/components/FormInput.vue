@@ -24,7 +24,7 @@ const hideDateBoxes = box => {
       v-if='props.property.type==="ontology"'
       v-model="props.property.model[props.property.property]"
       :style="`margin:0 0.5em ${props.property.hint?2:-0.5}em 0.5em;${props.property.disabled?'opacity:0.6':''}`"
-      :bg-color="props.property.model[props.property.property]!=props.property.org_value ? 'teal-1':'grey-3'"
+      :bg-color="props.property.dirty() ? 'teal-1':'grey-3'"
       :hint="props.property.hint"
       filled
       use-input
@@ -81,7 +81,7 @@ const hideDateBoxes = box => {
       v-else-if='props.property.type!=="select"'
 
       :style="`margin:0 0.5em ${props.property.hint?2:-0.5}em 0.5em;`"
-      :bg-color="props.property.model[props.property.property]!=props.property.org_value ? 'teal-1':'grey-3'"
+      :bg-color="props.property.dirty() ? 'teal-1':'grey-3'"
       filled
       v-model="props.property.model[props.property.property]"
       :label="props.property.label"
@@ -106,7 +106,7 @@ const hideDateBoxes = box => {
     <q-select
       v-else
       :style="`margin:0 0.5em ${props.property.hint?1:-0.5}em 0.5em;`"
-      :bg-color="props.property.model[props.property.property]!=props.property.org_value ? 'teal-1':'grey-3'"
+      :bg-color="props.property.dirty() ? 'teal-1':'grey-3'"
       filled
       v-model="props.property.model[props.property.property]"
       :use-input="props.property.useInput"
@@ -119,6 +119,7 @@ const hideDateBoxes = box => {
       @input-value="props.property.setModel"
       :label="props.property.label"
       :loading="props.property.loading"
+      :readonly="props.property.readonly"
       :multiple="props.property.multi"
       :disable="props.property.disabled"
     >

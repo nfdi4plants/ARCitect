@@ -3,18 +3,15 @@ import { useDialogPluginComponent } from 'quasar';
 import { reactive, onMounted, watch } from 'vue';
 
 import FormInput from '../components/FormInput.vue';
-import Assay from '../interfaces/Assay.ts';
-const item = new Assay();
-item.model.assayIdentifier.readonly = false;
-const newStudyString = 'Create New Study';
-
-const form = [
-  [item.model.assayIdentifier],
-  [item.model.studies],
-];
+import Property from '../Property.ts';
+import ArcControlService from '../ArcControlService.ts';
 
 const iProps = reactive({
-  valid: true
+  valid: true,
+  assay_identifier: '',
+  study_identifier: '',
+  studies: [],
+  form: []
 });
 
 defineEmits([
@@ -24,26 +21,26 @@ defineEmits([
 const { dialogRef, onDialogHide, onDialogOK, onDialogCancel } = useDialogPluginComponent();
 
 const onSubmit = async () => {
-  iProps.valid = item.model.assayIdentifier.value && item.model.studies.value;
+  iProps.valid = iProps.assay_identifier && iProps.study_identifier;
   if(!iProps.valid)
     return;
 
-  onDialogOK(item);
+  onDialogOK([iProps.assay_identifier,iProps.study_identifier]);
 };
 
-onMounted(async ()=>{
-  item.init({
-    assayIdentifier: '',
-    studies: [newStudyString]
-  });
-});
+const init = async ()=>{
+  iProps.studies = ArcControlService.props.arc.ISA.Studies.map(s => s.Identifier).sort();
+  iProps.studies.push('Create New Study')
+  iProps.assay_identifier = '';
+  iProps.study_identifier = 'Create New Study';
 
-watch( ()=>item.model.studies.value, ()=>{
-  if(item.model.studies.value.length<1)
-    item.model.studies.value = [newStudyString];
-  else if(item.model.studies.value.length>1 && item.model.studies.value.includes(newStudyString))
-    item.model.studies.value = item.model.studies.value.filter(i=>i!=newStudyString);
-});
+  iProps.form = [
+    [Property( iProps, 'assay_identifier', {label:'Assay Identifier'})],
+    [Property( iProps, 'study_identifier', {label:'Study Identifier',type:'select', options:iProps.studies})]
+  ];
+};
+
+onMounted(init);
 
 </script>
 
@@ -58,7 +55,7 @@ watch( ()=>item.model.studies.value, ()=>{
         </q-card-section>
 
         <q-card-section>
-          <div class='row' v-for="(row,i) in form">
+          <div class='row' v-for="(row,i) in iProps.form">
             <div class='col' v-for="(property,j) in row">
               <FormInput :property='property'></FormInput>
             </div>

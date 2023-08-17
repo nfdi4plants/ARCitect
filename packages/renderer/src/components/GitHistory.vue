@@ -34,7 +34,7 @@ const getHistory = async ()=>{
     group="git"
     @before-show='getHistory'
   >
-    <q-card flat style="padding: 0 5em;">
+    <q-card flat style="padding: 1em 5em;">
       <q-timeline color="secondary">
         <q-timeline-entry
           v-for="(item,i) in iProps.git_log"

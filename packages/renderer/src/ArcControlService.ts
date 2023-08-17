@@ -43,6 +43,7 @@ const ArcControlService = {
 
     ArcControlService.props.busy = true;
 
+    arc.UpdateFileSystem();
     let contracts = arc.GetWriteContracts();
     if(filter)
       contracts = contracts.filter( x=>filter.includes(x.DTOType) );

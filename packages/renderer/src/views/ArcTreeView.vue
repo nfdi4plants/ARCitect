@@ -8,6 +8,9 @@ import NewAssayDialog from '../dialogs/NewAssayDialog.vue';
 import { useQuasar } from 'quasar'
 const $q = useQuasar();
 
+import {ArcStudy} from '../../../../lib/ARCC/ISA/ISA/ArcTypes/ArcStudy.js';
+import {ArcAssay} from '../../../../lib/ARCC/ISA/ISA/ArcTypes/ArcAssay.js';
+
 const emit = defineEmits(['openArc']);
 
 const props = reactive({
@@ -38,11 +41,16 @@ watch(()=>ArcControlService.props.arc_root, async (newValue, oldValue) => {
   arcTree._value.setExpanded(props.root);
 });
 
-// watch(()=>AppProperties.active_study, async (newValue, oldValue) => {
-//   await nextTick();
-//   selected.value = `${ArcCommanderService.props.arc_root}/studies/${newValue}`;
-//   onSelectionChanged(selected.value);
-// });
+watch(()=>AppProperties.active_study, async (newValue, oldValue) => {
+  await nextTick();
+  selected.value = `${ArcControlService.props.arc_root}/studies/${newValue}`;
+  onSelectionChanged(selected.value);
+});
+watch(()=>AppProperties.active_assay, async (newValue, oldValue) => {
+  await nextTick();
+  selected.value = `${ArcControlService.props.arc_root}/assays/${newValue}`;
+  onSelectionChanged(selected.value);
+});
 
 watch(()=>AppProperties.state, async (newValue, oldValue) => {
   if([
@@ -65,37 +73,28 @@ const addStudy = async ()=>{
       icon: 'add_box'
     }
   }).onOk( async data => {
-    console.log(data);
-
-    // AppProperties.active_study = data;
+    const study = new ArcStudy(data,data);
+    ArcControlService.props.arc.ISA.AddStudy(study);
+    await ArcControlService.writeARC(ArcControlService.props.arc_root);
+    await ArcControlService.readARC();
+    AppProperties.active_study = data;
   });
 };
 const addAssay = async ()=>{
-  // $q.dialog({
-  //   component: NewAssayDialog
-  // }).onOk( async data => {
-  //   const cmds = [];
-  //   if(data.model.studies.value.length===1 && data.model.studies.value[0]==='Create New Study'){
-  //     cmds.push({
-  //       args: ['assay','add','--assayidentifier',data.model.assayIdentifier.value],
-  //       title: `Adding Assay`,
-  //       silent: true
-  //     });
-  //   } else {
-  //     cmds.push({
-  //       args: ['assay','init','--assayidentifier',data.model.assayIdentifier.value],
-  //       title: `Adding Assay`,
-  //       silent: false
-  //     });
-  //     for(const s of data.model.studies.value)
-  //       cmds.push({
-  //         args: ['assay','register','--assayidentifier',data.model.assayIdentifier.value,'--studyidentifier',s],
-  //         title: `Registering Assay`,
-  //         silent: false
-  //       });
-  //   }
-  //   const r = await ArcCommanderService.run(cmds,true);
-  // });
+  $q.dialog({
+    component: NewAssayDialog
+  }).onOk( async data => {
+    const assay = new ArcAssay(data[0]);
+    const createNewStudy = data[1]==='Create New Study';
+    if(createNewStudy)
+      ArcControlService.props.arc.ISA.AddStudy(
+        new ArcStudy(data[0],data[0])
+      );
+    ArcControlService.props.arc.ISA.AddAssay(createNewStudy ? data[0] : data[1], assay);
+    await ArcControlService.writeARC(ArcControlService.props.arc_root);
+    await ArcControlService.readARC();
+    AppProperties.active_assay = data[0];
+  });
 };
 
 const addProtocol = async n=>{
@@ -130,7 +129,7 @@ const readDir_ = async path => {
   };
 
   const isMarkdown = l => {
-    return ['md','txt'].some( i=>new RegExp(`\\.${i}$`,'g').test(l.toLowerCase()))
+    return ['md','txt','py','xml','cwl','json'].some( i=>new RegExp(`\\.${i}$`,'g').test(l.toLowerCase()))
   }
 
   const isEditable = (n,p)=>{
