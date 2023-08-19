@@ -49,7 +49,7 @@ const ArcControlService = {
       contracts = contracts.filter( x=>filter.includes(x.DTOType) );
 
     for(const contract of contracts){
-      if(contract.DTO && contract.DTO.constructor && contract.DTO.constructor.name === 'FsWorkbook'){
+      if(['ISA_Investigation','ISA_Study','ISA_Assay'].includes(contract.DTOType)){
         const buffer = await Xlsx.toBytes(contract.DTO);
         await window.ipc.invoke('LocalFileSystemService.writeFile', [arc_root+'/'+contract.Path,buffer,{}]);
       } else if(contract.DTOType==='PlainText'){

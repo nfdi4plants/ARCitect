@@ -6,7 +6,6 @@ import {DataHubService} from '/@/DataHubService';
 // import {ArcCommanderService} from '/@/ArcCommanderService';
 import {InternetService} from '/@/InternetService';
 import {GitService} from '/@/GitService';
-import {ArcControlService} from '/@/ArcControlService';
 import os from 'os';
 
 /**
@@ -53,7 +52,6 @@ app.whenReady()
   .then(LocalFileSystemService.init)
   .then(InternetService.init)
   .then(GitService.init)
-  .then(ArcControlService.init)
   .then(restoreOrCreateWindow)
   .catch((e) => console.error('Failed create window:', e));
 

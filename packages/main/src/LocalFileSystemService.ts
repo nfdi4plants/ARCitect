@@ -26,12 +26,8 @@ export const LocalFileSystemService = {
 
   getAllXLSX: async (e,root) => {
     root = path_to_system(root);
-    let xlsx_files = []
-
-    console.log('root: ',root);
+    let xlsx_files = [];
     LocalFileSystemService.getAllXLSX_(xlsx_files,root);
-    for(let path of xlsx_files )
-      console.log(path);
     return xlsx_files.map( p=>path_to_arcitect(p.replace(root+PATH.sep,'')) );
   },
 
@@ -152,7 +148,6 @@ export const LocalFileSystemService = {
 
 
   writeFile: async (e,[path,data,options])=>{
-    console.log(path);
     options = options || {encoding:'UTF-8'};
     path = path_to_system(path);
     FS.mkdirSync(PATH.dirname(path),{recursive:true});
