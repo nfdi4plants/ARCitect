@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 
-import { onMounted, ref, reactive, watch } from 'vue';
+import { onMounted, onUnmounted, ref, reactive, watch } from 'vue';
 
 import ViewItem from '../components/ViewItem.vue';
 
@@ -32,23 +32,41 @@ const iProps = reactive({
   edit_rIdx0: -1,
   edit_rIdx1: -1,
   edit_cIdx0: -1,
-  edit_cIdx1: -1
+  edit_cIdx1: -1,
+  test: []
 });
+
+const handle_keyboard = e => {
+  if(e.key==='Escape')
+    return clearSelection2();
+  else if (e.key==='Delete'){
+    return deleteSelection();
+  }
+};
 
 const init = async ()=>{
   iProps.assay = ArcControlService.props.arc.ISA.TryFindAssay(AppProperties.active_assay);
   if(!iProps.assay)
     return;
 
+  window.addEventListener('keydown', handle_keyboard);
+
   iProps.sheets = iProps.assay.Tables.map(t=>t.Name);
   iProps.active_sheet = iProps.assay.Tables.length ? iProps.assay.Tables[0].Name : null;
   updateTable();
 };
+const clear = async ()=>{
+  window.removeEventListener('keydown', handle_keyboard);
+};
 onMounted( init );
+onUnmounted( clear );
 watch( ()=>AppProperties.active_assay, init );
 
 const updateTable = async old_active_sheet =>{
   console.log(iProps.assay);
+
+  clearSelection();
+  clearSelection2();
 
   if(iProps.active_sheet===null){
     iProps.columns = [];
@@ -67,10 +85,8 @@ const updateTable = async old_active_sheet =>{
     }).onOk( async data => {
       const table = iProps.assay.InitTable(data,iProps.assay.Tables.length);
       for(const title of ['Input','Output'])
-        table.AddColumn(
-          new CompositeHeader(13,[title]),
-          [CompositeCell.createFreeText('')]
-        );
+        table.AddColumn(new CompositeHeader(13,[title]));
+      table.AddRow();
       iProps.sheets = iProps.assay.Tables.map(t=>t.Name);
       iProps.active_sheet = iProps.assay.Tables.length ? iProps.assay.Tables[0].Name : null;
     });
@@ -141,14 +157,54 @@ const editFreeForm = (v,c)=>{
   table.UpdateCellAt(c.cIdx,c.rIdx,newCell);
 };
 
+const clearSelection = ()=>{
+  if (window.getSelection)
+    window.getSelection().removeAllRanges();
+  else if (document.selection)
+    document.selection.empty();
+};
+const clearSelection2 = ()=>{
+  iProps.edit_rIdx0 = -1;
+  iProps.edit_cIdx0 = -1;
+  iProps.edit_rIdx1 = -1;
+  iProps.edit_cIdx1 = -1;
+};
+
+const deleteSelection = ()=>{
+  // delete rows
+  const table = iProps.assay.GetTable(iProps.active_sheet);
+  if(iProps.edit_cIdx0===0 && iProps.edit_cIdx1===table.ColumnCount-1){
+    for(let r=iProps.edit_rIdx1; r>=iProps.edit_rIdx0; r--)
+      table.RemoveRow(r);
+    if(table.RowCount<1)
+      table.AddRow();
+    updateTable();
+  } else {
+    for(let r=iProps.edit_rIdx0; r<=iProps.edit_rIdx1; r++)
+      for(let c=iProps.edit_cIdx0; c<=iProps.edit_cIdx1; c++){
+        const cell = table.TryGetCellAt(c,r);
+        table.UpdateCellAt(c,r,
+        cell.isTerm ? CompositeCell.emptyTerm : cell.isUnitized ? CompositeCell.emptyUnitized : CompositeCell.emptyFreeText );
+      }
+    updateTable();
+  }
+  clearSelection();
+  clearSelection2();
+};
+
 const selectionStart = cell=>{
   iProps.edit_rIdx0 = cell.rIdx;
   iProps.edit_cIdx0 = cell.cIdx;
   iProps.edit_rIdx1 = cell.rIdx;
   iProps.edit_cIdx1 = cell.cIdx;
-}
+  clearSelection();
+};
 
 const selectionEnd = cell=>{
+  if(iProps.edit_rIdx0<0 || iProps.edit_cIdx0<0){
+    iProps.edit_rIdx0 = cell.rIdx;
+    iProps.edit_cIdx0 = cell.cIdx;
+  }
 
   const r0 = Math.min(iProps.edit_rIdx0, cell.rIdx);
   const r1 = Math.max(iProps.edit_rIdx0, cell.rIdx);
@@ -159,7 +215,23 @@ const selectionEnd = cell=>{
   iProps.edit_cIdx0 = c0;
   iProps.edit_rIdx1 = r1;
   iProps.edit_cIdx1 = c1;
+  clearSelection();
 };
+
+const selectRow = (idx,shiftKey) => {
+  const table = iProps.assay.GetTable(iProps.active_sheet);
+  if(!shiftKey)
+    selectionStart({rIdx:idx,cIdx:0});
+  selectionEnd({rIdx:idx,cIdx:table.ColumnCount-1});
+  clearSelection();
+}
+const selectColumn = idx => {
+
+  const table = iProps.assay.GetTable(iProps.active_sheet);
+  selectionStart({rIdx:0,cIdx:idx});
+  selectionEnd({rIdx:table.RowCount-1,cIdx:idx});
+  clearSelection();
+}
 
 const editCell = cell => {
   if(cell.isFreeText) return;
@@ -258,13 +330,20 @@ const isValidHeader = header=>{
   return !header.IsTermColumn || header.fields[0].TermAccessionNumber;
 };
 
-const deleteRow = async idx => {
+const addColumn = idx => {
   const table = iProps.assay.GetTable(iProps.active_sheet);
-  table.RemoveRow(idx);
+  table.AddColumn(new CompositeHeader(13,['New Column']),null,idx+1);
+  updateTable();
+};
+
+const addRow = idx => {
+  const table = iProps.assay.GetTable(iProps.active_sheet);
+  table.AddRow(null,idx+1);
   updateTable();
 };
 
 const processClick = (e,props)=>{
+  console.log(e,props)
   if(e.shiftKey){
     selectionEnd(props.value);
   } else {
@@ -304,7 +383,8 @@ const processClick = (e,props)=>{
         </q-tabs>
 
         <br>
-        ({{iProps.edit_rIdx0}},{{iProps.edit_cIdx0}}): ({{iProps.edit_rIdx1}},{{iProps.edit_cIdx1}})
+        <!--({{iProps.edit_rIdx0}},{{iProps.edit_cIdx0}}): ({{iProps.edit_rIdx1}},{{iProps.edit_cIdx1}})-->
+
 
         <q-table
           title=""
@@ -324,19 +404,10 @@ const processClick = (e,props)=>{
               :props="props"
             >
               <div style="position:relative;">
-                <table class='cell_table' @dblclick='editHeader(props.col.header)'>
-                  <tr>
-                    <td>{{props.col.label}}</td>
-                    <td style="text-align:right;" v-if='!props.col.header.IsSingleColumn && !isValidHeader(props.col.header)'>
-                      <q-icon name="help" color='grey-6' size='1.3em'>
-                        <q-tooltip class='text-body2'>
-                          {{ isValidHeader(props.col.header) ? 'Verified Ontology Term: ' + props.col.header.fields[0].TermAccessionNumber : 'Unverified Ontology Term'}}
-                        </q-tooltip>
-                      </q-icon>
-                    </td>
-                  </tr>
-                </table>
-                <q-icon v-if='props.col.idx<props.col.table.ColumnCount-1' size='2em' name='add_circle' class='add_column_icon' color='secondary'></q-icon>
+                <div style="padding:0 0.5em;" @click='selectColumn(props.col.idx)' @dblclick='editHeader(props.col.header)'>
+                  {{props.col.label}}
+                </div>
+                <q-icon v-if='props.col.idx<props.col.table.ColumnCount-1' size='2em' name='add_circle' class='add_column_icon' color='secondary' @click='addColumn(props.col.idx)'></q-icon>
               </div>
             </q-th>
           </template>
@@ -350,6 +421,9 @@ const processClick = (e,props)=>{
                   @dblclick="editCell(props.value);"
                 >
                   {{props.value.toString()}}
+                  <q-tooltip class='text-body2' v-if='!isValid(props.value)'>
+                    {{ isValid(props.value) ? 'Verified Ontology Term: ' + props.value.fields.slice(-1)[0].TermAccessionNumber : 'Unverified Ontology Term'}}
+                  </q-tooltip>
                   <!--<table class='cell_table'>-->
                   <!--  <tr>-->
                   <!--    <td></td>-->
@@ -373,8 +447,9 @@ const processClick = (e,props)=>{
           </template>
 
           <template v-slot:body-selection="scope">
-            <div class='cell_axis'></div>
-            <!--<q-icon size='2em' name='indeterminate_check_box' color='secondary' style="cursor:pointer;margin-left:-8px;" @click='deleteRow(scope.key)'></q-icon>-->
+            <div class='cell_axis' @click='addRow(scope.key)'>
+              <q-icon size='1.5em' name='add_circle' class='add_row_icon' color='secondary'></q-icon>
+            </div>
           </template>
 
           <!--<template v-slot:bottom-row>-->
@@ -413,7 +488,6 @@ const processClick = (e,props)=>{
     outline:0;
     height: 100%;
     display: flex;
-    justify-content: center;
     align-items: center;
     padding: 0.2em 0.5em;
   }
@@ -421,7 +495,6 @@ const processClick = (e,props)=>{
   .cell_axis {
     height: 100%;
     display: flex;
-    justify-content: center;
     align-items: center;
   }
 
@@ -441,9 +514,17 @@ const processClick = (e,props)=>{
     opacity: 0.0000001;
     position:absolute !important;
     right:-0.85em;
-    top:0.15em;
+    top:-0.1em;
   }
   .add_column_icon:hover {
+    opacity: 1;
+  }
+
+  .add_row_icon {
+    opacity: 0.0000001;
+  }
+
+  td div:hover .add_row_icon {
     opacity: 1;
   }
 
