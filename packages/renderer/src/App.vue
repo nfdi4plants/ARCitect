@@ -66,7 +66,9 @@ const showHomeView = ()=>{
 }
 
 onMounted(async () => {
-  // openLocalArc('/home/jones/external/projects/TEMP/ArcPrototype');
+  layoutProperties.showHelp = false;
+  layoutProperties.toolbarMinimized = true;
+  openLocalArc('/home/jones/external/projects/TEMP/ArcPrototype');
   // await ArcCommanderService.init();
   // AppProperties.state=AppProperties.STATES.HOME;
   // AppProperties.path_sep = await window.ipc.invoke('LocalFileSystemService.getPathSeparator');
@@ -211,7 +213,7 @@ const test = async ()=>{
   transform: translate(-50%, -50%);
 }
 
-.no-selection {
+.no-selectionn {
   -webkit-touch-callout: none; /* iOS Safari */
   -webkit-user-select: none; /* Safari */
   -khtml-user-select: none; /* Konqueror HTML */

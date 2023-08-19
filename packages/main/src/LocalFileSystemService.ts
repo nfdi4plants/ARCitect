@@ -27,7 +27,11 @@ export const LocalFileSystemService = {
   getAllXLSX: async (e,root) => {
     root = path_to_system(root);
     let xlsx_files = []
+
+    console.log('root: ',root);
     LocalFileSystemService.getAllXLSX_(xlsx_files,root);
+    for(let path of xlsx_files )
+      console.log(path);
     return xlsx_files.map( p=>path_to_arcitect(p.replace(root+PATH.sep,'')) );
   },
 

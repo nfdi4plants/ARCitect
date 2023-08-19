@@ -67,7 +67,7 @@ const init = async ()=>{
   iProps.form = [
     [
       Property( props.assay, 'Identifier', {readonly:true} ),
-      Property( iProps, 'studies_assay', {type:'select', multi:true, options: iProps.studies_all, readonly:true})
+      Property( iProps, 'studies_assay', {type:'select', multi:true, options: iProps.studies_all})
     ],
     [
       Property( props.assay, 'MeasurementType', {
@@ -117,7 +117,7 @@ const onSubmit = async ()=>{
     } else {
       if(iProps.studies_assay.includes(s.Identifier)){
         console.log('register',s.Identifier);
-        s.Assays.push(props.assay);
+        s.AddAssay(props.assay);
       }
     }
   }

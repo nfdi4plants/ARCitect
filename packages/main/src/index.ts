@@ -7,6 +7,7 @@ import {DataHubService} from '/@/DataHubService';
 import {InternetService} from '/@/InternetService';
 import {GitService} from '/@/GitService';
 import {ArcControlService} from '/@/ArcControlService';
+import os from 'os';
 
 /**
  * Prevent multiple instances
@@ -18,6 +19,11 @@ if (!isSingleInstance) {
 }
 app.on('second-instance', restoreOrCreateWindow);
 
+/**
+ * Windows Fix
+ */
+if(os.platform()==='win32')
+  app.commandLine.appendSwitch('no-sandbox');
 
 /**
  * Disable Hardware Acceleration for more power-save

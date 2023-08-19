@@ -25,7 +25,7 @@ watch( ()=>AppProperties.active_assay, init );
 <template>
   <q-list>
     <AssayForm :assay='iProps.assay' group="igroup" defaultOpened></AssayForm>
-    <!--<q-separator />-->
-    <!--<SwateForm group="igroup" defaultOpened></SwateForm>-->
+    <q-separator />
+    <SwateForm group="igroup" defaultOpened></SwateForm>
   </q-list>
 </template>

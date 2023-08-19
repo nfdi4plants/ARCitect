@@ -71,18 +71,8 @@ const iProps = reactive({
 
 const init = async ()=>{
 
-
-
-  // iProps.types = iProps.types.map( t => {return {label:t,value:t}} );
-  // iProps.term_column_types = iProps.term_column_types.map( t => {return {label:t,value:t}} );
-
-  // console.log(props.header);
-  // iProps.type = iProps.types[ props.header.IsSingleColumn ? 0 : props.header.IsTerm ? 1 : 2 ].value;
   iProps.term_column_types = props.header.cases();
-  const term_column_types_map = {};
-  for(let i in iProps.term_column_types)
-    term_column_types_map[iProps.term_column_types[i]] = i;
-  iProps.term_column = iProps.term_column_types[ term_column_types_map[getType(props.header)] ];
+  iProps.term_column = iProps.term_column_types[ props.header.tag ];
 
   const name = props.header.ToTerm();
   iProps.name = OntologyAnnotation.fromString(name.NameText,name.TermSourceREF,name.TermAccessionNumber);
