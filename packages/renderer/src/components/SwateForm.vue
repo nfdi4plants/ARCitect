@@ -18,7 +18,8 @@ import {CompositeHeader} from '../../../../lib/ARCC/ISA/ISA/ArcTypes/CompositeHe
 import {ArcTable} from '../../../../lib/ARCC/ISA/ISA/ArcTypes/ArcTable.js';
 
 export interface Props {
-  group: String
+  group: String,
+  owner: Object
 };
 const props = defineProps<Props>();
 
@@ -45,26 +46,29 @@ const handle_keyboard = e => {
 };
 
 const init = async ()=>{
-  iProps.assay = ArcControlService.props.arc.ISA.TryFindAssay(AppProperties.active_assay);
-  if(!iProps.assay)
+  iProps.sheets = [];
+  iProps.active_sheet = null;
+
+  if(!props.owner)
     return;
 
   window.addEventListener('keydown', handle_keyboard);
 
-  iProps.sheets = iProps.assay.Tables.map(t=>t.Name);
-  iProps.active_sheet = iProps.assay.Tables.length ? iProps.assay.Tables[0].Name : null;
+  if(!props.owner.Tables) return;
+
+  iProps.sheets = props.owner.Tables.map(t=>t.Name);
+  iProps.active_sheet = props.owner.Tables.length ? props.owner.Tables[0].Name : null;
+
   updateTable();
 };
 const clear = async ()=>{
   window.removeEventListener('keydown', handle_keyboard);
 };
 onMounted( init );
+watch( ()=>props.owner, init );
 onUnmounted( clear );
-watch( ()=>AppProperties.active_assay, init );
 
 const updateTable = async old_active_sheet =>{
-  console.log(iProps.assay);
-
   clearSelection();
   clearSelection2();
 
@@ -83,25 +87,25 @@ const updateTable = async old_active_sheet =>{
         icon: 'add_box'
       }
     }).onOk( async data => {
-      const table = iProps.assay.InitTable(data,iProps.assay.Tables.length);
+      const table = props.owner.InitTable(data,props.owner.Tables.length);
       for(const title of ['Input','Output'])
         table.AddColumn(new CompositeHeader(13,[title]));
       table.AddRow();
-      iProps.sheets = iProps.assay.Tables.map(t=>t.Name);
-      iProps.active_sheet = iProps.assay.Tables.length ? iProps.assay.Tables[0].Name : null;
+      iProps.sheets = props.owner.Tables.map(t=>t.Name);
+      iProps.active_sheet = props.owner.Tables.length ? props.owner.Tables[0].Name : null;
     });
     return;
   }
 
   if(iProps.active_sheet === '@RemoveTable@'){
-    iProps.assay.RemoveTable(old_active_sheet);
-    iProps.sheets = iProps.assay.Tables.map(t=>t.Name);
-    iProps.active_sheet = iProps.assay.Tables.length ? iProps.assay.Tables[0].Name : null;
+    props.owner.RemoveTable(old_active_sheet);
+    iProps.sheets = props.owner.Tables.map(t=>t.Name);
+    iProps.active_sheet = props.owner.Tables.length ? props.owner.Tables[0].Name : null;
     return;
   }
 
-  const table = iProps.assay.GetTable(iProps.active_sheet);
-  console.log('updateTable', table)
+  const table = props.owner.GetTable(iProps.active_sheet);
+  // console.log('updateTable', table)
 
   const columns_ = [];
   let cIdx = 0;
@@ -153,7 +157,7 @@ watch(cell_input, ()=>{
 
 const editFreeForm = (v,c)=>{
   const newCell = CompositeCell.createFreeText(v);
-  const table = iProps.assay.GetTable(iProps.active_sheet);
+  const table = props.owner.GetTable(iProps.active_sheet);
   table.UpdateCellAt(c.cIdx,c.rIdx,newCell);
 };
 
@@ -172,7 +176,7 @@ const clearSelection2 = ()=>{
 
 const deleteSelection = ()=>{
   // delete rows
-  const table = iProps.assay.GetTable(iProps.active_sheet);
+  const table = props.owner.GetTable(iProps.active_sheet);
   if(iProps.edit_cIdx0===0 && iProps.edit_cIdx1===table.ColumnCount-1){
     for(let r=iProps.edit_rIdx1; r>=iProps.edit_rIdx0; r--)
       table.RemoveRow(r);
@@ -197,7 +201,7 @@ const selectionStart = cell=>{
   iProps.edit_cIdx0 = cell.cIdx;
   iProps.edit_rIdx1 = cell.rIdx;
   iProps.edit_cIdx1 = cell.cIdx;
-  clearSelection();
+  // clearSelection();
 };
 
 const selectionEnd = cell=>{
@@ -215,11 +219,12 @@ const selectionEnd = cell=>{
   iProps.edit_cIdx0 = c0;
   iProps.edit_rIdx1 = r1;
   iProps.edit_cIdx1 = c1;
-  clearSelection();
+  if(iProps.edit_rIdx0!==iProps.edit_rIdx1 || iProps.edit_cIdx0!==iProps.edit_cIdx1)
+    clearSelection();
 };
 
 const selectRow = (idx,shiftKey) => {
-  const table = iProps.assay.GetTable(iProps.active_sheet);
+  const table = props.owner.GetTable(iProps.active_sheet);
   if(!shiftKey)
     selectionStart({rIdx:idx,cIdx:0});
   selectionEnd({rIdx:idx,cIdx:table.ColumnCount-1});
@@ -227,7 +232,7 @@ const selectRow = (idx,shiftKey) => {
 }
 const selectColumn = idx => {
 
-  const table = iProps.assay.GetTable(iProps.active_sheet);
+  const table = props.owner.GetTable(iProps.active_sheet);
   selectionStart({rIdx:0,cIdx:idx});
   selectionEnd({rIdx:table.RowCount-1,cIdx:idx});
   clearSelection();
@@ -236,7 +241,7 @@ const selectColumn = idx => {
 const editCell = cell => {
   if(cell.isFreeText) return;
 
-  const table = iProps.assay.GetTable(iProps.active_sheet);
+  const table = props.owner.GetTable(iProps.active_sheet);
 
   $q.dialog({
     component: TermDialog,
@@ -248,7 +253,7 @@ const editCell = cell => {
 };
 
 const editHeader = header => {
-  const table = iProps.assay.GetTable(iProps.active_sheet);
+  const table = props.owner.GetTable(iProps.active_sheet);
   const column = table.GetColumn(header.cIdx);
 
   $q.dialog({
@@ -258,8 +263,8 @@ const editHeader = header => {
     if(operation.delete){
       table.RemoveColumn(header.cIdx);
     } else {
-      for(const cell of column.Cells)
-        console.log(cell);
+      // for(const cell of column.Cells)
+      //   console.log(cell);
 
       // header
       const new_header = new CompositeHeader(
@@ -331,29 +336,25 @@ const isValidHeader = header=>{
 };
 
 const addColumn = idx => {
-  const table = iProps.assay.GetTable(iProps.active_sheet);
+  const table = props.owner.GetTable(iProps.active_sheet);
   table.AddColumn(new CompositeHeader(13,['New Column']),null,idx+1);
   updateTable();
 };
 
 const addRow = idx => {
-  const table = iProps.assay.GetTable(iProps.active_sheet);
+  const table = props.owner.GetTable(iProps.active_sheet);
   table.AddRow(null,idx+1);
   updateTable();
 };
 
 const processClick = (e,props)=>{
-  console.log(e,props)
+  // console.log(e,props)
   if(e.shiftKey){
     selectionEnd(props.value);
   } else {
     selectionStart(props.value);
   }
 };
-
-// @mousedown='selectionStart(props.value)'
-//               @mouseover='selectionIntermediate(props.value)'
-//               @mouseup='selectionEnd(props.value)'
 
 </script>
 
@@ -424,18 +425,6 @@ const processClick = (e,props)=>{
                   <q-tooltip class='text-body2' v-if='!isValid(props.value)'>
                     {{ isValid(props.value) ? 'Verified Ontology Term: ' + props.value.fields.slice(-1)[0].TermAccessionNumber : 'Unverified Ontology Term'}}
                   </q-tooltip>
-                  <!--<table class='cell_table'>-->
-                  <!--  <tr>-->
-                  <!--    <td></td>-->
-                  <!--    <td style="text-align:right;" v-if='!isValid(props.value)'>-->
-                  <!--      <q-icon :name="isValid(props.value) ? 'check_circle' : 'help'" :color='"grey-6"' size='1.3em'>-->
-                  <!--        <q-tooltip class='text-body2'>-->
-                  <!--          {{ isValid(props.value) ? 'Verified Ontology Term: ' + props.value.fields.slice(-1)[0].TermAccessionNumber : 'Unverified Ontology Term'}}-->
-                  <!--        </q-tooltip>-->
-                  <!--      </q-icon>-->
-                  <!--    </td>-->
-                  <!--  </tr>-->
-                  <!--</table>-->
                 </div>
                 <div v-else
                   @input="e=>editFreeForm(e.target.innerText,props.value)"

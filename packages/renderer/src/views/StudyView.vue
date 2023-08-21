@@ -4,6 +4,7 @@ import { reactive, onMounted, watch, ref } from 'vue';
 import StudyForm from '../components/StudyForm.vue';
 import PeopleList from '../components/PeopleList.vue';
 import PublicationsList from '../components/PublicationsList.vue';
+import SwateForm from '../components/SwateForm.vue';
 
 import AppProperties from '../AppProperties.ts';
 import ArcControlService from '../ArcControlService.ts';
@@ -35,5 +36,7 @@ watch( ()=>AppProperties.active_study, init );
     <PeopleList :items='iProps.people' group='sgroup'></PeopleList>
     <q-separator />
     <PublicationsList :items='iProps.publications' group='sgroup'></PublicationsList>
+    <q-separator />
+    <SwateForm :owner='iProps.study' group='sgroup'></SwateForm>
   </q-list>
 </template>
