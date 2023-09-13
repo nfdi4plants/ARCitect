@@ -104,6 +104,9 @@ export const LocalFileSystemService = {
   registerChangeListener: async (e,path)=>{
     path = path_to_system(path)
 
+    if(changeListeners[path])
+      await LocalFileSystemService.unregisterChangeListener(null,path);
+
     changeListeners[path] = chokidar.watch(path,{ignoreInitial:true});
 
     const updatePath = path => {
@@ -158,22 +161,44 @@ export const LocalFileSystemService = {
     return PATH.sep;
   },
 
+  getFileSizes: async (e,file_paths)=>{
+    const sizes = [];
+    for(let file_path of file_paths){
+      file_path = path_to_system(file_path);
+      let size = 0;
+      try {
+        size = FS.statSync(file_path).size / (1024*1024);
+      } catch {}
+      sizes.push( size );
+    }
+    return sizes;
+  },
+
+  exists: async (e,path)=>{
+    try {
+      FS.statSync(path_to_system(path))
+      return true;
+    } catch {return false;}
+  },
+
   init: async () => {
     process.on('unhandledRejection', (reason, p) => {
       console.error(`Unhandled Rejection at: ${util.inspect(p)} reason: ${reason}`);
     });
 
-    ipcMain.handle('LocalFileSystemService.readDir', LocalFileSystemService.readDir)
-    ipcMain.handle('LocalFileSystemService.readFile', LocalFileSystemService.readFile)
-    ipcMain.handle('LocalFileSystemService.writeFile', LocalFileSystemService.writeFile)
-    ipcMain.handle('LocalFileSystemService.selectDir', LocalFileSystemService.selectDir)
-    ipcMain.handle('LocalFileSystemService.selectAny', LocalFileSystemService.selectAny)
-    ipcMain.handle('LocalFileSystemService.saveFile', LocalFileSystemService.saveFile)
-    ipcMain.handle('LocalFileSystemService.copy', LocalFileSystemService.copy)
-    ipcMain.handle('LocalFileSystemService.createEmptyFile', LocalFileSystemService.createEmptyFile)
-    ipcMain.handle('LocalFileSystemService.registerChangeListener', LocalFileSystemService.registerChangeListener)
-    ipcMain.handle('LocalFileSystemService.unregisterChangeListener', LocalFileSystemService.unregisterChangeListener)
-    ipcMain.handle('LocalFileSystemService.getPathSeparator', LocalFileSystemService.getPathSeparator)
-    ipcMain.handle('LocalFileSystemService.getAllXLSX', LocalFileSystemService.getAllXLSX)
+    ipcMain.handle('LocalFileSystemService.readDir', LocalFileSystemService.readDir);
+    ipcMain.handle('LocalFileSystemService.readFile', LocalFileSystemService.readFile);
+    ipcMain.handle('LocalFileSystemService.writeFile', LocalFileSystemService.writeFile);
+    ipcMain.handle('LocalFileSystemService.selectDir', LocalFileSystemService.selectDir);
+    ipcMain.handle('LocalFileSystemService.selectAny', LocalFileSystemService.selectAny);
+    ipcMain.handle('LocalFileSystemService.saveFile', LocalFileSystemService.saveFile);
+    ipcMain.handle('LocalFileSystemService.copy', LocalFileSystemService.copy);
+    ipcMain.handle('LocalFileSystemService.createEmptyFile', LocalFileSystemService.createEmptyFile);
+    ipcMain.handle('LocalFileSystemService.registerChangeListener', LocalFileSystemService.registerChangeListener);
+    ipcMain.handle('LocalFileSystemService.unregisterChangeListener', LocalFileSystemService.unregisterChangeListener);
+    ipcMain.handle('LocalFileSystemService.getPathSeparator', LocalFileSystemService.getPathSeparator);
+    ipcMain.handle('LocalFileSystemService.getAllXLSX', LocalFileSystemService.getAllXLSX);
+    ipcMain.handle('LocalFileSystemService.getFileSizes', LocalFileSystemService.getFileSizes);
+    ipcMain.handle('LocalFileSystemService.exists', LocalFileSystemService.exists);
   }
 }

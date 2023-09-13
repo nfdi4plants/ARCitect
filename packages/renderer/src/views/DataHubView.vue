@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import {onMounted,onUnmounted,reactive,ref,nextTick} from 'vue';
+import {onMounted,onUnmounted,reactive,ref,nextTick,watch} from 'vue';
 
 import AppProperties from '../AppProperties.ts';
 import ViewItem from '../components/ViewItem.vue';
@@ -17,7 +17,9 @@ const props = reactive({
   showDialog: false,
   state: 0,
   msgs: [],
-  localUrl: ''
+  localUrl: '',
+  search_text: '',
+  download_lfs: false,
 });
 
 const inspectArc = url =>{
@@ -69,7 +71,8 @@ const importArc = async url =>{
 
   const response = await window.ipc.invoke('GitService.run', {
     args: [`clone`,url_with_credentials],
-    cwd: destination
+    cwd: destination,
+    env: {GIT_LFS_SKIP_SMUDGE: (props.download_lfs?0:1)}
   });
   if(response[1].includes('fatal:')){
     dialogProps.items[0][1] = 2;
@@ -89,8 +92,9 @@ const importArc = async url =>{
   dialogProps.items[0][1] = 1;
 };
 
-onMounted(async () => {
-  AppProperties.title = 'Import ARC from DataHUB';
+const init = async () => {
+  props.list = [];
+
   window.ipc.on('ArcCommanderService.MSG', processMsg);
   const list = await window.ipc.invoke('DataHubService.getArcs', AppProperties.user && AppProperties.user.token ? AppProperties.user.token.access_token : null);
 
@@ -109,8 +113,10 @@ onMounted(async () => {
   } else {
     props.list = list.sort( (a,b)=>a.name.localeCompare(b.name) );
   }
+};
 
-});
+onMounted(init);
+watch(()=>AppProperties.user, init);
 onUnmounted(async () => {
   window.ipc.off('ArcCommanderService.MSG', processMsg);
 });
@@ -125,8 +131,31 @@ onUnmounted(async () => {
       caption="Download ARCs from the nfdi4plants DataHUB"
       group="datahub"
       defaultOpened
+      :fullWidth="false"
     >
-      <q-separator />
+      <br>
+      <div class="q-gutter-md row">
+        <q-input class='col-7' v-model="props.search_text" label="ARC Identifier" dense outlined :disable='props.list.length<1'>
+          <template v-slot:append>
+            <q-icon v-if="props.search_text!==''" name="close" @click="props.search_text=''" class="cursor-pointer" />
+            <q-icon name="search" />
+          </template>
+          <template v-slot:hint>
+            Field hint
+          </template>
+        </q-input>
+
+        <q-checkbox class='col' v-model="props.download_lfs" label="LFS" dense color='secondary' style="min-width:50px;">
+          <q-tooltip class='text-body2'>
+            Download Large Files
+          </q-tooltip>
+        </q-checkbox>
+
+        <q-btn class='col' label="Refresh" icon='refresh' color="secondary" @click='init()' no-wrap style="min-width:142px;"/>
+      </div>
+      <br>
+      <q-separator/>
+
       <div style="display:block;text-align:center;" v-if="props.list.length<1">
           <q-circular-progress
             indeterminate
@@ -140,7 +169,7 @@ onUnmounted(async () => {
 
       <q-list style="padding:1em;" separator v-else>
         <q-item
-          v-for="(item,i) in props.list"
+          v-for="(item,i) in props.list.filter(x=> x.name.toLowerCase().includes(props.search_text.toLowerCase()) || x.namespace.name.toLowerCase().includes(props.search_text.toLowerCase()))"
           :style="i%2===1?'background-color:#fafafa;' : ''"
         >
           <q-item-section avatar>
@@ -162,6 +191,8 @@ onUnmounted(async () => {
           </q-item-section>
         </q-item>
       </q-list>
+
+
     </ViewItem>
   </q-list>
 </template>

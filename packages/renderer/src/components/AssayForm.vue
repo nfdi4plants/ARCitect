@@ -49,7 +49,7 @@ const make_optionsFn = (name,termAccession)=>{
 
 const study_contains_assay = (s,assay_identifier) => {
   try {
-    s.GetAssay(assay_identifier);
+    s.GetRegisteredAssay(assay_identifier);
     return true;
   } catch {
     return false;
@@ -111,13 +111,11 @@ const onSubmit = async ()=>{
   for(const s of ArcControlService.props.arc.ISA.Studies){
     if(study_contains_assay(s,assay_identifier)){
       if(!iProps.studies_assay.includes(s.Identifier)){
-        console.log('unregister',s.Identifier);
-        s.RemoveAssayAt( s.GetAssayIndex(assay_identifier) );
+        ArcControlService.props.arc.ISA.DeregisterAssay( s.Identifier, assay_identifier );
       }
     } else {
       if(iProps.studies_assay.includes(s.Identifier)){
-        console.log('register',s.Identifier);
-        s.AddAssay(props.assay);
+        ArcControlService.props.arc.ISA.RegisterAssay( s.Identifier, assay_identifier );
       }
     }
   }

@@ -13,7 +13,7 @@ const iProps = reactive({
 
 const init = async ()=>{
   if(!ArcControlService.props.arc) return;
-  iProps.assay = ArcControlService.props.arc.ISA.TryFindAssay(AppProperties.active_assay);
+  iProps.assay = ArcControlService.props.arc.ISA.GetAssay(AppProperties.active_assay);
 };
 
 onMounted( init );
@@ -26,6 +26,6 @@ watch( ()=>AppProperties.active_assay, init );
   <q-list>
     <AssayForm :assay='iProps.assay' group="agroup" defaultOpened></AssayForm>
     <q-separator />
-    <SwateForm :owner='iProps.assay' group="agroup" defaultOpened></SwateForm>
+    <SwateForm :owner='iProps.assay' group="agroup"></SwateForm>
   </q-list>
 </template>

@@ -5,13 +5,15 @@ import FormInput from '../components/FormInput.vue';
 import Property from '../Property.ts';
 
 import {Publication} from '../../../../lib/ARCC/ISA/ISA/JsonTypes/Publication.js';
+import {OntologyAnnotation} from '../../../../lib/ARCC/ISA/ISA/JsonTypes/OntologyAnnotation.js';
 
 const props = defineProps<{config?:Object}>();
 const iProps = reactive({
   form: [[]],
   valid: true,
   mode: 'Add',
-  publication: new Publication()
+  publication: null,
+  publication_status: []
 });
 
 const { dialogRef, onDialogHide, onDialogOK, onDialogCancel } = useDialogPluginComponent();
@@ -24,12 +26,27 @@ const onSubmit = async () => {
   onDialogOK(iProps.publication);
 };
 
+const getStatusTerms = async ()=>{
+  const res = await window.ipc.invoke('InternetService.callSwateAPI', {
+    method: 'getAllTermsByParentTerm',
+    payload: [{
+      "Name": "publication status",
+      "TermAccession": "EFO:0001742"
+    }]
+  });
+  return res.map(i=>OntologyAnnotation.fromString(i.Name,i.FK_Ontology,i.Accession));
+};
+
 const init = async ()=>{
   iProps.valid = true;
   iProps.mode = props.config ? 'Edit' : 'Add';
 
   if(props.config)
     iProps.publication = props.config.Copy();
+  else
+    iProps.publication = new Publication();
+
+  iProps.publication_status = await getStatusTerms();
 
   iProps.form = [
     [
@@ -38,7 +55,12 @@ const init = async ()=>{
     ],
     [ Property( iProps.publication, 'Title' ) ],
     [ Property(iProps.publication, 'Authors' ) ],
-    [ Property(iProps.publication, 'Status', {type:'select',options:['Published', 'Submitted', 'In Preparation']} ) ],
+    [ Property( iProps.publication, 'Status', {
+        label:'Status',
+        type: 'ontology',
+        optionsFn: ()=>iProps.publication_status
+      })
+    ]
   ];
 };
 onMounted( init );

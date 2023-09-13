@@ -9,7 +9,7 @@ import ArcControlService from '../ArcControlService.ts';
 const iProps = reactive({
   valid: true,
   assay_identifier: '',
-  study_identifier: '',
+  study_identifier: [],
   studies: [],
   form: []
 });
@@ -18,29 +18,38 @@ defineEmits([
   ...useDialogPluginComponent.emits
 ]);
 
+const createStudyString = 'Create New Study';
+
 const { dialogRef, onDialogHide, onDialogOK, onDialogCancel } = useDialogPluginComponent();
 
 const onSubmit = async () => {
-  iProps.valid = iProps.assay_identifier && iProps.study_identifier;
+  iProps.valid = iProps.assay_identifier && iProps.study_identifier.length;
   if(!iProps.valid)
     return;
 
-  onDialogOK([iProps.assay_identifier,iProps.study_identifier]);
+  onDialogOK([iProps.assay_identifier,iProps.study_identifier.includes(createStudyString) ? [] : iProps.study_identifier]);
 };
 
 const init = async ()=>{
   iProps.studies = ArcControlService.props.arc.ISA.Studies.map(s => s.Identifier).sort();
-  iProps.studies.push('Create New Study')
   iProps.assay_identifier = '';
-  iProps.study_identifier = 'Create New Study';
+  iProps.study_identifier = [createStudyString];
 
   iProps.form = [
     [Property( iProps, 'assay_identifier', {label:'Assay Identifier'})],
-    [Property( iProps, 'study_identifier', {label:'Study Identifier',type:'select', options:iProps.studies})]
+    [Property( iProps, 'study_identifier', {label:'Study Identifier',type:'select',multi:true, options:iProps.studies})]
   ];
 };
 
 onMounted(init);
+
+watch( ()=>iProps.study_identifier, ()=>{
+  if(iProps.study_identifier.length>1 && iProps.study_identifier.includes(createStudyString)){
+    iProps.study_identifier.splice(iProps.study_identifier.indexOf(createStudyString),1);
+  } else if(iProps.study_identifier.length<1){
+    iProps.study_identifier = [createStudyString];
+  }
+});
 
 </script>
 
@@ -66,7 +75,7 @@ onMounted(init);
               <template v-slot:avatar>
                 <q-icon name="warning"/>
               </template>
-              <b>Identifier and Study are Required.</b>
+              <b>Identifier and Study Association are Required.</b>
             </q-banner>
           </div>
         </q-card-section>

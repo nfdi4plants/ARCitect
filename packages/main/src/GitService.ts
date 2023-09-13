@@ -13,27 +13,25 @@ export const GitService = {
     return new Promise( (resolve, reject) => {
       const args = typeof options === 'string' ? [options] : options.args;
       const o = typeof options === 'string' ? {} : options;
-      o.env = process.env;
+      o.env = Object.assign({}, o.env || {}, process.env);
       o.cwd = (o.cwd || '').split('/').join(PATH.sep);
 
-      let window = BrowserWindow.getAllWindows().find(w => !w.isDestroyed());
+      // let window = BrowserWindow.getAllWindows().find(w => !w.isDestroyed());
 
       const p = spawn('git', args, o);
       let error = false;
       let output = '';
-      p.stdout.on('data', data => {
+      const handleOutput = data => {
+        if(!data) return;
         const dataAsString = data.toString();
+        // console.log(dataAsString);
         output += dataAsString;
         if(dataAsString.toLowerCase().includes('error'))
           error = true;
         // window.webContents.send('GitService.MSG', dataAsString);
-      });
-
-      p.stderr.on('data', data => {
-        error = true;
-        output += data.toString();
-        // window.webContents.send('GitService.MSG', dataAsString);
-      });
+      };
+      p.stdout.on('data', handleOutput);
+      p.stderr.on('data', handleOutput);
 
       p.on('error', err => {
         console.error(err.toString());

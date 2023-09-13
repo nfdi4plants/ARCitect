@@ -8,8 +8,7 @@ import NewAssayDialog from '../dialogs/NewAssayDialog.vue';
 import { useQuasar } from 'quasar'
 const $q = useQuasar();
 
-import {ArcStudy} from '../../../../lib/ARCC/ISA/ISA/ArcTypes/ArcStudy.js';
-import {ArcAssay} from '../../../../lib/ARCC/ISA/ISA/ArcTypes/ArcAssay.js';
+import {ArcStudy, ArcAssay} from '../../../../lib/ARCC/ISA/ISA/ArcTypes/ArcTypes.js';
 
 const emit = defineEmits(['openArc']);
 
@@ -35,7 +34,8 @@ watch(()=>ArcControlService.props.arc_root, async (newValue, oldValue) => {
     label: props.root.split('/').pop(),
     lazy: true,
     icon: 'edit_square',
-    selectable: true
+    selectable: true,
+    isDirectory: true
   }];
   await nextTick();
   arcTree._value.setExpanded(props.root);
@@ -64,6 +64,16 @@ watch(()=>AppProperties.state, async (newValue, oldValue) => {
 
 let uniqueLabelCounter = 0;
 
+const addStudy_ = async (identifier,skip_io)=>{
+  const study = new ArcStudy(identifier,identifier);
+  ArcControlService.props.arc.ISA.AddStudy(study);
+  ArcControlService.props.arc.ISA.RegisterStudy(identifier);
+  if(!skip_io){
+    await ArcControlService.writeARC(ArcControlService.props.arc_root);
+    await ArcControlService.readARC();
+    AppProperties.active_study = identifier;
+  }
+};
 const addStudy = async ()=>{
   $q.dialog({
     component: StringDialog,
@@ -72,25 +82,24 @@ const addStudy = async ()=>{
       property: 'Identifier',
       icon: 'add_box'
     }
-  }).onOk( async data => {
-    const study = new ArcStudy(data,data);
-    ArcControlService.props.arc.ISA.AddStudy(study);
-    await ArcControlService.writeARC(ArcControlService.props.arc_root);
-    await ArcControlService.readARC();
-    AppProperties.active_study = data;
-  });
+  }).onOk( async data => await addStudy_(data));
 };
+
 const addAssay = async ()=>{
   $q.dialog({
     component: NewAssayDialog
   }).onOk( async data => {
+    if(data[1].length<1){
+      await addStudy_(data[0],true);
+      data[1].push(data[0]);
+    }
+
     const assay = new ArcAssay(data[0]);
-    const createNewStudy = data[1]==='Create New Study';
-    if(createNewStudy)
-      ArcControlService.props.arc.ISA.AddStudy(
-        new ArcStudy(data[0],data[0])
-      );
-    ArcControlService.props.arc.ISA.AddAssay(createNewStudy ? data[0] : data[1], assay);
+    ArcControlService.props.arc.ISA.AddAssay(assay);
+
+    for(let study of data[1])
+      ArcControlService.props.arc.ISA.RegisterAssay(study,data[0]);
+
     await ArcControlService.writeARC(ArcControlService.props.arc_root);
     await ArcControlService.readARC();
     AppProperties.active_assay = data[0];
@@ -230,6 +239,7 @@ const onSelectionChanged = id=>{
 }
 
 const updatePath = async path => {
+  console.log(path);
   const n = arcTree._value.getNodeByKey(path);
   if(!n)
     return;
@@ -239,7 +249,17 @@ const updatePath = async path => {
     arcTree._value.setExpanded(path,true);
 };
 
-window.ipc.on('LocalFileSystemService.updatePath', updatePath);
+const formatSize = size => {
+  // const log = Math.min(Math.floor(Math.log10(size));
+  let log = Math.floor(Math.log(size) / Math.log(1024));
+  log = Math.max(0,Math.min(4,log));
+  const suffix = ['B','KB','MB','GB','TB'][log];
+
+  return (size / Math.pow(1024,log)).toFixed(2) + ' ' + suffix;
+};
+
+onMounted( ()=>{window.ipc.on('LocalFileSystemService.updatePath', updatePath);} );
+onUnmounted( ()=>{window.ipc.off('LocalFileSystemService.updatePath', updatePath);} );
 
 </script>
 
@@ -259,9 +279,11 @@ window.ipc.on('LocalFileSystemService.updatePath', updatePath);
       selected-color='white'
       no-selection-unset
     >
-      <!--<template v-slot:header-root="prop">-->
-      <!--  <div class='text-weight-bold'>{{ prop.node.label }}</div>-->
-      <!--</template>-->
+      <template v-slot:default-header="prop">
+        <q-icon v-if='prop.node.icon' :name='prop.node.icon' style="padding:0 0.2em 0 0;"></q-icon>
+        <div style="flex:100">{{ prop.node.label }}</div>
+        <div v-if='!prop.node.isDirectory && !["add_box","block"].includes(prop.node.icon)' style="flex:1;white-space: nowrap;">{{ formatSize(prop.node.size) }}</div>
+      </template>
     </q-tree>
 
     <div style="text-align:center;" v-if='props.nodes.length<1'>

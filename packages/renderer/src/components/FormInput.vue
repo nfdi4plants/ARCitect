@@ -92,6 +92,7 @@ const hideDateBoxes = box => {
       :readonly="props.property.readonly"
       :loading="props.property.loading"
       :disable="props.property.disabled"
+      :dense="props.property.dense"
       hide-buttom-space
     >
       <template v-slot:append>
@@ -122,6 +123,7 @@ const hideDateBoxes = box => {
       :readonly="props.property.readonly"
       :multiple="props.property.multi"
       :disable="props.property.disabled"
+      :placeholder="props.property.placeholder"
     >
     </q-select>
     <!--<q-badge color="secondary" class="q-mb-md">-->

@@ -34,20 +34,25 @@ import ArcControlService from './ArcControlService.ts';
 // // $q.dark.toggle()
 
 
-const layoutProperties = reactive({
+const iProps = reactive({
   showToolbar: true,
   toolbarMinimized: false,
   showHelp: true,
   splitterModel: 300,
+  error: false,
+  error_text: '',
 });
-
-const showError = ()=>{
-  return 0;
-}
 
 const openLocalArc = async path=>{
   if(!path) path = await window.ipc.invoke('LocalFileSystemService.selectDir', ['Select local ARC','Select local ARC']);
   if(!path) return;
+  const isARC = await window.ipc.invoke('LocalFileSystemService.exists', path+'/isa.investigation.xlsx');
+  if(!isARC){
+    iProps.error_text = 'Invalid ARC format: '+path;
+    iProps.error = true;
+    return;
+  }
+
   await ArcControlService.readARC(path);
   AppProperties.state=AppProperties.STATES.HOME;
 };
@@ -66,8 +71,8 @@ const showHomeView = ()=>{
 }
 
 onMounted(async () => {
-  // layoutProperties.showHelp = false;
-  // layoutProperties.toolbarMinimized = true;
+  // iProps.showHelp = false;
+  // iProps.toolbarMinimized = true;
   // openLocalArc('/home/jones/external/projects/TEMP/ArcPrototype');
   // await ArcCommanderService.init();
   // AppProperties.state=AppProperties.STATES.HOME;
@@ -86,10 +91,10 @@ const test = async ()=>{
 <template>
     <q-layout view="hHh LpR fFf" class="no-selection">
       <q-drawer
-        v-model='layoutProperties.showToolbar'
+        v-model='iProps.showToolbar'
         show-if-above
 
-        :mini="layoutProperties.toolbarMinimized"
+        :mini="iProps.toolbarMinimized"
 
         :width="190"
         :breakpoint="500"
@@ -123,14 +128,14 @@ const test = async ()=>{
 
             <q-separator />
 
-            <ToolbarButton text='Toggle Help' icon='help' @clicked='layoutProperties.toolbarMinimized=!layoutProperties.toolbarMinimized;layoutProperties.showHelp=!layoutProperties.showHelp;'></ToolbarButton>
+            <ToolbarButton text='Toggle Help' icon='help' @clicked='iProps.toolbarMinimized=!iProps.toolbarMinimized;iProps.showHelp=!iProps.showHelp;'></ToolbarButton>
           </q-list>
         </q-scroll-area>
       </q-drawer>
 
       <q-drawer
         show-if-above
-        v-model="layoutProperties.showHelp"
+        v-model="iProps.showHelp"
         side="right"
         bordered
         :breakpoint='0'
@@ -145,7 +150,7 @@ const test = async ()=>{
       <q-page-container>
         <q-page padding>
           <q-splitter
-            v-model="layoutProperties.splitterModel"
+            v-model="iProps.splitterModel"
             class='full'
             unit='px'
             :limits='[300,Infinity]'
@@ -157,6 +162,21 @@ const test = async ()=>{
             </template>
 
             <template v-slot:after>
+              <q-dialog v-model="iProps.error">
+                <q-card>
+                  <q-card-section>
+                    <div class="text-h6">Error</div>
+                  </q-card-section>
+
+                  <q-card-section class="q-pt-none">
+                    {{iProps.error_text}}
+                  </q-card-section>
+
+                  <q-card-actions align="right">
+                    <q-btn label="OK" color="teal" v-close-popup />
+                  </q-card-actions>
+                </q-card>
+              </q-dialog>
               <!--<q-scroll-area class='fit' style="height: 100%;">-->
                 <!--<HomeView v-if ='AppProperties.state===AppProperties.STATES.HOME'></HomeView>-->
                 <DataHubView v-if='AppProperties.state===AppProperties.STATES.OPEN_DATAHUB'></DataHubView>

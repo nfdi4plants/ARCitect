@@ -1,6 +1,6 @@
 {
   "name": "ARCitect",
-  "version": "v0.0.5",
+  "version": "v0.0.7",
   "private": true,
   "engines": {
     "node": ">=v16.13",
@@ -26,7 +26,6 @@
     "@quasar/extras": "1.15.3",
     "chokidar": "3.5.1",
     "express": "latest",
-    "@nfdi4plants/exceljs": "latest",
     "fs-extra": "latest",
     "quasar": "2.12.4",
     "query-string": "latest",

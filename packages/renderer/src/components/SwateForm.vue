@@ -98,6 +98,7 @@ const updateTable = async old_active_sheet =>{
   }
 
   if(iProps.active_sheet === '@RemoveTable@'){
+    if(!old_active_sheet) return;
     props.owner.RemoveTable(old_active_sheet);
     iProps.sheets = props.owner.Tables.map(t=>t.Name);
     iProps.active_sheet = props.owner.Tables.length ? props.owner.Tables[0].Name : null;
