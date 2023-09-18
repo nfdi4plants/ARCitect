@@ -5,23 +5,9 @@ It adds an intuitive, user-friendly GUI to the [ARC Commander](https://github.co
 
 :construction: Note, that the **ARCitect** is currently being developed and not ready for standard users, yet. :construction: 
 
-***Preview:***
-
-<img src="./packages/renderer/assets/ARCitext-preview.png" width=400px>
-
 ## Beta Testing
 
-### Prerequisites
-
-Please install the latest version of [Node.js](https://nodejs.org/en/download). 
-
-### Installation
-
-1. Download or clone this repository.
-2. Run `npm install` in root directory
-3. Run `npm run debug`
-4. The ARCitect application starts and is updated as soon as a modification has been saved.
-
+To install the ARCitect for testing, please follow the [ARCitect Manual](https://nfdi4plants.org/nfdi4plants.knowledgebase/docs/ARCitect-Manual/index.html) in our knowledge base.
 
 ## Contribution
 
