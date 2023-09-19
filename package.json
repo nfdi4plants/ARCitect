@@ -24,6 +24,7 @@
   },
   "dependencies": {
     "@quasar/extras": "1.15.3",
+    "@nfdi4plants/exceljs": "latest",
     "chokidar": "3.5.1",
     "express": "latest",
     "fs-extra": "latest",

@@ -3,7 +3,6 @@ import './security-restrictions';
 import {restoreOrCreateWindow} from '/@/mainWindow';
 import {LocalFileSystemService} from '/@/LocalFileSystemService';
 import {DataHubService} from '/@/DataHubService';
-// import {ArcCommanderService} from '/@/ArcCommanderService';
 import {InternetService} from '/@/InternetService';
 import {GitService} from '/@/GitService';
 import os from 'os';
