@@ -1,6 +1,6 @@
 {
   "name": "ARCitect",
-  "version": "v0.0.7",
+  "version": "v0.0.8",
   "private": true,
   "engines": {
     "node": ">=v16.13",
@@ -15,6 +15,7 @@
     "compile": "cross-env MODE=production npm run build && electron-builder build --config electron-builder.config.js",
     "compilew": "cross-env MODE=production npm run build && electron-builder build --config electron-builder.config.js --win",
     "compilem": "cross-env MODE=production npm run build && electron-builder build --config electron-builder.config.js --mac",
+    "publish": "cross-env MODE=production npm run build && electron-builder build --config electron-builder.config.js --publish always",
     "debug": "node scripts/debug.js",
     "lint": "eslint . --ext js,ts,vue",
     "typecheck:main": "tsc --noEmit -p packages/main/tsconfig.json",
@@ -24,6 +25,7 @@
   },
   "dependencies": {
     "@quasar/extras": "1.15.3",
+    "@nfdi4plants/exceljs": "latest",
     "chokidar": "3.5.1",
     "express": "latest",
     "fs-extra": "latest",
