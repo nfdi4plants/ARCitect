@@ -2,6 +2,10 @@ import { BrowserWindow,Menu,shell } from 'electron';
 import path from 'path';
 import { join } from 'path';
 import { URL } from 'url';
+const contextMenu = require('electron-context-menu');
+contextMenu({
+  showSaveImageAs: true
+});
 
 async function createWindow() {
   const mainWindow = new BrowserWindow({

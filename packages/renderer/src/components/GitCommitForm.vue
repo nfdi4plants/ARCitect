@@ -48,7 +48,7 @@ const raiseError = err => {
 
 const getStatus = async()=>{
   const response = await window.ipc.invoke('GitService.run', {
-    args: [`status`,`-z`],
+    args: [`status`,`-z`,`-u`],
     cwd: ArcControlService.props.arc_root
   });
   const status = response[1].split('\u0000').map(x => [x.slice(0,2),x.slice(3)]).slice(0,-1);
