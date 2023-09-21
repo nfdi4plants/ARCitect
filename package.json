@@ -16,7 +16,7 @@
     "compilew": "cross-env MODE=production npm run build && electron-builder build --config electron-builder.config.js --win",
     "compilem": "cross-env MODE=production npm run build && electron-builder build --config electron-builder.config.js --mac",
     "publish": "cross-env MODE=production npm run build && electron-builder build --config electron-builder.config.js --publish always",
-    "debug": "node scripts/debug.js",
+    "start": "node scripts/debug.js",
     "lint": "eslint . --ext js,ts,vue",
     "typecheck:main": "tsc --noEmit -p packages/main/tsconfig.json",
     "typecheck:preload": "tsc --noEmit -p packages/preload/tsconfig.json",
