@@ -1,13 +1,22 @@
 # ARCitect
 
-The **ARCitect** is a tool to create, manage and share your ARCs.  
-It adds an intuitive, user-friendly GUI to the [ARC Commander](https://github.com/nfdi4plants/arcCommander). 
+The **ARCitect** is an **electron-app** to create, manage and share your **ARCs**.
 
 :construction: Note, that the **ARCitect** is currently being developed and not ready for standard users, yet. :construction: 
 
-## Beta Testing
+## Installation
 
-To install the ARCitect for testing, please follow the [ARCitect Manual](https://nfdi4plants.org/nfdi4plants.knowledgebase/docs/ARCitect-Manual/index.html) in our knowledge base.
+It is only necesary to download and run one of the provided standalone **Releases** for **Windows** (suffix: win.zip), **MacOS** (suffix: dmg), and **Linux** (suffix: AppImage). The releases do not require you to install any dependencies (except `git` for the MacOS and Linux releases).
+
+## Building from Source 
+
+To build ARCitect from source, you first need to clone this repository, then install its dependencies via npm, and finally start ARCitect via npm, i.e.,
+```
+git clone https://github.com/nfdi4plants/ARCitect
+cd ARCitect
+npm install
+npm start
+```
 
 ## Contribution
 
