@@ -1,6 +1,6 @@
 {
   "name": "ARCitect",
-  "version": "v0.0.9",
+  "version": "v0.0.10",
   "private": true,
   "engines": {
     "node": ">=v16.13",
@@ -26,6 +26,7 @@
   "dependencies": {
     "@quasar/extras": "1.15.3",
     "@nfdi4plants/exceljs": "latest",
+    "electron-context-menu": "3.6.1",
     "chokidar": "3.5.1",
     "express": "latest",
     "fs-extra": "latest",
