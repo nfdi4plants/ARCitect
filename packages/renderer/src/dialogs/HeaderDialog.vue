@@ -4,25 +4,15 @@ import { reactive, onMounted, watch } from 'vue';
 
 import FormInput from '../components/FormInput.vue';
 import Property from '../Property.ts';
-import {OntologyAnnotation} from '../../../../lib/ARCC/ISA/ISA/JsonTypes/OntologyAnnotation.js';
-import {CompositeCell} from '../../../../lib/ARCC/ISA/ISA/ArcTypes/CompositeCell.js';
-import {CompositeHeader} from '../../../../lib/ARCC/ISA/ISA/ArcTypes/CompositeHeader.js';
+import {OntologyAnnotation} from '@nfdi4plants/arctrl/ISA/ISA/JsonTypes/OntologyAnnotation.js';
+import {CompositeCell} from '@nfdi4plants/arctrl/ISA/ISA/ArcTypes/CompositeCell.js';
+import {CompositeHeader,IOType} from '@nfdi4plants/arctrl/ISA/ISA/ArcTypes/CompositeHeader.js';
 
 export interface Props {
   header: Object,
-  column: Object
+  insertHeader: Boolean
 };
 const props = defineProps<Props>();
-
-const getType = header=>{
-  if(header.IsIOType) return 'IOType';
-  if(header.isFactor) return 'Factor';
-  if(header.isComponent) return 'Component';
-  if(header.isCharacteristic) return 'Characteristic';
-  if(header.isParameter) return 'Parameter';
-  if(header.isProtocolREF) return 'ProtocolREF';
-  return 'Unspecified';
-};
 
 const make_optionsFn = tryParentTerm=>{
   return async val => {
@@ -60,55 +50,38 @@ const make_optionsFn = tryParentTerm=>{
 };
 
 const iProps = reactive({
-  form: [[]],
-  term_column_types: [],
-  term_column: null,
-  name: null,
-  unit: null,
-  unit_prop: null,
-  has_unit: false
+  column_types: CompositeHeader.Cases.map(x=>x[1]).slice(0,-1),
+  column_type: null,
+  column_type_p: null,
+
+  io_types: IOType.Cases.map(x=>x[1]).slice(0,-1),
+  io_type: IOType.Cases.map(x=>x[1])[0],
+  io_type_p: null,
+
+  term: null,
+  term_p: null,
 });
 
+iProps.column_type_p = Property(iProps, 'column_type', {label:'Type',useInput:true, type:'select',optionsFn:()=>iProps.column_types});
+iProps.io_type_p = Property(iProps, 'io_type', {label:'IO Type',useInput:true, type:'select',optionsFn:()=>iProps.io_types});
+iProps.term_p = Property(iProps, 'term', {label:'Term',type:'ontology',optionsFn: make_optionsFn(false)});
+
 const init = async ()=>{
-
-  iProps.term_column_types = props.header.cases();
-  iProps.term_column = iProps.term_column_types[ props.header.tag ];
-
-  const name = props.header.ToTerm();
-  iProps.name = OntologyAnnotation.fromString(name.NameText,name.TermSourceREF,name.TermAccessionNumber);
-
-  let unit_cell = props.column.Cells.length && props.column.Cells[0].isUnitized ? props.column.Cells[0] : null;
-  iProps.has_unit = unit_cell!==null;
-
-  iProps.unit = OntologyAnnotation.fromString(
-    unit_cell ? unit_cell.fields[1].NameText : '',
-    unit_cell ? unit_cell.fields[1].TermSourceREF : '',
-    unit_cell ? unit_cell.fields[1].TermAccessionNumber : ''
+  const headerAsTerm = props.header.ToTerm();
+  iProps.column_type_p.setValue(
+    props.header.tag===13 ? headerAsTerm.NameText : iProps.column_types[ props.header.tag ]
   );
-  iProps.unit_prop = Property(iProps, 'unit', {
-    label: 'Unit',
-    type: 'ontology',
-    optionsFn: make_optionsFn(false),
-    disabled: !iProps.has_unit
-  });
-
-  iProps.form = [
-    [
-      Property(iProps, 'term_column', {label:'Column Type', type:'select',options:iProps.term_column_types}),
-      Property(iProps, 'name', {
-        label: 'Column Name',
-        type: 'ontology',
-        optionsFn: make_optionsFn(false)
-      })
-    ],
-    [
-      Property(iProps, 'has_unit', {label:'Has Unit', type:'checkbox'}),
-      iProps.unit_prop,
-    ],
-  ];
+  iProps.term_p.setValue(
+    headerAsTerm
+  );
+  if([11,12].includes(props.header.tag)){
+    iProps.io_type_p.setValue(props.header.fields[0].name === 'FreeText' ? props.header.fields[0] : props.header.fields[0].name);
+  } else {
+    iProps.io_type_p.setValue('Source');
+  }
 };
 
-watch( ()=>iProps.has_unit, async()=>{iProps.unit_prop.disabled=!iProps.has_unit;} );
+// watch( ()=>iProps.has_unit, async()=>{iProps.unit_prop.disabled=!iProps.has_unit;} );
 
 onMounted( init );
 
@@ -135,15 +108,21 @@ const onSubmit = async () => {
         </q-card-section>
 
         <q-card-section>
-          <div class='row' v-for="(row,i) in iProps.form">
-            <div class='col' v-for="(property,j) in row">
-              <FormInput :property='property'></FormInput>
+          <div class='row'>
+            <div class='col'>
+              <FormInput :property='iProps.column_type_p'></FormInput>
+            </div>
+            <div class='col' v-show='[0,1,2,3].includes(iProps.column_types.indexOf(iProps.column_type))'>
+              <FormInput :property='iProps.term_p'></FormInput>
+            </div>
+            <div class='col' v-show='[11,12].includes(iProps.column_types.indexOf(iProps.column_type))'>
+              <FormInput :property='iProps.io_type_p'></FormInput>
             </div>
           </div>
         </q-card-section>
 
         <q-card-actions align="right" style="margin:0 1.5em 1.5em;">
-          <q-btn color="red-8" icon='delete' label="Delete" @click="onDialogOK({delete:true})" class='text-weight-bold'/>
+          <q-btn color="red-8" icon='delete' label="Delete" @click="onDialogOK({delete:true})" class='text-weight-bold' v-if='!props.insertHeader'/>
           <q-btn color="secondary" icon='edit' label="Update" type='submit' class='text-weight-bold' />
           <q-btn color="secondary" icon='cancel' label="Cancel" @click="onDialogCancel" class='text-weight-bold'/>
         </q-card-actions>

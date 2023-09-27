@@ -1,4 +1,4 @@
-import {app} from 'electron';
+import {app,ipcMain} from 'electron';
 import './security-restrictions';
 import {restoreOrCreateWindow} from '/@/mainWindow';
 import {LocalFileSystemService} from '/@/LocalFileSystemService';
@@ -42,11 +42,15 @@ app.on('window-all-closed', () => {
  */
 app.on('activate', restoreOrCreateWindow);
 
+const initCore = async () => {
+  ipcMain.handle('CORE.getVersion', ()=>process.env['npm_package_version']);
+}
 
 /**
  * Create app window when background process will be ready
  */
 app.whenReady()
+  .then(initCore)
   .then(DataHubService.init)
   .then(LocalFileSystemService.init)
   .then(InternetService.init)

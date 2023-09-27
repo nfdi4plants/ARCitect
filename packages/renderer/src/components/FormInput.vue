@@ -2,7 +2,7 @@
 
 import { date } from 'quasar'
 
-import {OntologyAnnotation} from '../../../../lib/ARCC/ISA/ISA/JsonTypes/OntologyAnnotation.js';
+import {OntologyAnnotation} from '@nfdi4plants/arctrl/ISA/ISA/JsonTypes/OntologyAnnotation.js';
 
 export interface Props {
   property: Object
@@ -14,6 +14,11 @@ const checkDate = val => {
 };
 const hideDateBoxes = box => {
   box.hide();
+}
+
+const isValidTerm = ()=>{
+  const tan = props.property.model[props.property.property].TermAccessionNumber;
+  return tan!=='user-specific' && tan;
 }
 
 </script>
@@ -38,10 +43,11 @@ const hideDateBoxes = box => {
       @input-value="v=>{if(props.property.model[props.property.property].NameText!==v){props.property.model[props.property.property] = OntologyAnnotation.fromString(v)}}"
       @filter="props.property.filter"
       :disable="props.property.disabled"
+      options-dense
     >
       <template v-slot:append>
         <div v-if='props.property.model[props.property.property]'>
-          <div v-if='props.property.model[props.property.property].TermAccessionNumber'>
+          <div v-if='isValidTerm()'>
             <span class='text-body2' style="padding-right:0.5em;">
               {{props.property.model[props.property.property].TermAccessionShort}}
             </span>
@@ -61,6 +67,53 @@ const hideDateBoxes = box => {
       </template>
     </q-select>
 
+    <q-select
+      v-else-if='props.property.type==="ontology-dense"'
+      borderless
+      hide-bottom-space
+      square
+      v-model="props.property.model[props.property.property]"
+      :bg-color="isValidTerm() ? 'white':'red-1'"
+      filled
+      use-input
+      hide-selected
+      fill-input
+      input-debounce="500"
+      dense
+      :options="props.property.options"
+      :option-id="'TermAccessionNumber'"
+      :option-label="a=> a ? a.NameText : ''"
+      @input-value="v=>{if(props.property.model[props.property.property].NameText!==v){props.property.model[props.property.property] = OntologyAnnotation.fromString(v)}}"
+      @filter="props.property.filter"
+      :disable="props.property.disabled"
+      options-dense
+      >
+      <template v-slot:append>
+        <div v-if='props.property.model[props.property.property]'>
+
+          <q-icon v-if='isValidTerm()' name='check_circle' size='0.8em' color='secondary'>
+            <q-tooltip class='text-body2'>
+              {{`Verified Ontology Term (${props.property.model[props.property.property].TermAccessionShort})`}}
+            </q-tooltip>
+          </q-icon>
+          <q-icon v-else name='help' size='0.8em' color='grey-6'>
+            <q-tooltip class='text-body2'>
+              Unverified Ontology Term
+            </q-tooltip>
+          </q-icon>
+        </div>
+      </template>
+    </q-select>
+
+    <q-input
+      v-else-if='props.property.type==="text-dense"'
+      v-model="props.property.model[props.property.property]"
+      dense
+      borderless
+      input-style="padding:0 1em;text-align: right;"
+    >
+    </q-input>
+
     <div v-else-if='props.property.type==="toggle_select"' style="text-align:center;margin:0.5em 0;">
       {{props.property.label}}:&nbsp;
       <q-btn-toggle
@@ -75,7 +128,11 @@ const hideDateBoxes = box => {
       v-model="props.property.model[props.property.property]"
       :label="props.property.label"
       color='secondary'
-    />
+    >
+      <q-tooltip v-if='props.property.tooltip' class='text-body2'>
+              {{props.property.tooltip}}
+      </q-tooltip>
+    </q-checkbox>
 
     <q-input
       v-else-if='props.property.type!=="select"'
@@ -116,14 +173,16 @@ const hideDateBoxes = box => {
       fill-input
       input-debounce="0"
       :options="props.property.options"
-      @filter="props.property.filterFn"
-      @input-value="props.property.setModel"
+      @filter="props.property.filter"
+      @input-value="v => props.property.model[props.property.property]=v"
       :label="props.property.label"
       :loading="props.property.loading"
       :readonly="props.property.readonly"
       :multiple="props.property.multi"
       :disable="props.property.disabled"
+      :dense="props.property.dense"
       :placeholder="props.property.placeholder"
+      options-dense
     >
     </q-select>
     <!--<q-badge color="secondary" class="q-mb-md">-->

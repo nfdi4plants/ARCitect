@@ -2,7 +2,8 @@ import { reactive } from 'vue'
 
 import AppProperties from './AppProperties.ts';
 
-import { ARC } from "../../../lib/ARCC/ARCtrl.js";
+import { ARC } from "@nfdi4plants/arctrl/ARCtrl.js";
+import { ArcInvestigation } from "@nfdi4plants/arctrl/ISA/ISA/ArcTypes/ArcTypes.js";
 import { Xlsx } from '../../../lib/fsspreadsheet/Xlsx.js';
 
 const ArcControlService = {
@@ -21,6 +22,7 @@ const ArcControlService = {
 
     for(const contract of contracts){
       const buffer = await window.ipc.invoke('LocalFileSystemService.readFile', [arc_root+'/'+contract.Path,{}]);
+      console.log(contract.Path);
       contract.DTO = await Xlsx.fromBytes(buffer);
     }
 
@@ -67,13 +69,10 @@ const ArcControlService = {
   },
 
   new_arc: async path=>{
-    // TODO Optimize
-    const arc = ARC.fromFilePaths([]);
+    const arc = new ARC(
+      ArcInvestigation.init(path.split('/').pop())
+    );
     await ArcControlService.writeARC(path,null,arc);
-    await ArcControlService.readARC(path);
-
-    ArcControlService.props.arc.ISA.Identifier = path.split('/').pop();
-    await ArcControlService.writeARC();
     await ArcControlService.readARC(path);
 
     await window.ipc.invoke('GitService.run', {

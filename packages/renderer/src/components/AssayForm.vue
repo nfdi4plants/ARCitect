@@ -9,7 +9,7 @@ import Property from '../Property.ts';
 import AppProperties from '../AppProperties.ts';
 import ArcControlService from '../ArcControlService.ts';
 
-import {OntologyAnnotation} from '../../../../lib/ARCC/ISA/ISA/JsonTypes/OntologyAnnotation.js';
+import {OntologyAnnotation} from '@nfdi4plants/arctrl/ISA/ISA/JsonTypes/OntologyAnnotation.js';
 
 export interface Props {
   group: String,
@@ -25,25 +25,35 @@ const iProps = reactive({
 
 const make_optionsFn = (name,termAccession)=>{
   return async val => {
-    if(val.length<1)
-      return [];
-
-    const res = await window.ipc.invoke('InternetService.callSwateAPI', {
-      method: 'getTermSuggestionsByParentTerm',
-      payload: [{
-        'n': 5,
-        'query': val,
-        'parent_term': {
+    let res;
+    if(val.length<1){
+      res = await window.ipc.invoke('InternetService.callSwateAPI', {
+        method: 'getAllTermsByParentTerm',
+        payload: [{
           'Name': name,
           'TermAccession': termAccession
-        }
-      }]
-    });
+        }]
+      });
+    } else {
+      res = await window.ipc.invoke('InternetService.callSwateAPI', {
+        method: 'getTermSuggestionsByParentTerm',
+        payload: [{
+          'n': 5,
+          'query': val,
+          'parent_term': {
+            'Name': name,
+            'TermAccession': termAccession
+          }
+        }]
+      });
+    }
 
     if(!Array.isArray(res) || res.length<1)
       return [];
 
-    return res.map(i=>OntologyAnnotation.fromString(i.Name,i.FK_Ontology,i.Accession));
+    res = res.map(i=>OntologyAnnotation.fromString(i.Name,i.FK_Ontology,i.Accession));
+    res.sort((a,b)=>a.NameText.localeCompare(b.NameText));
+    return res;
   };
 };
 

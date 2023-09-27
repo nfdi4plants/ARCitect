@@ -4,8 +4,8 @@ import { reactive, onMounted } from 'vue';
 
 import FormInput from '../components/FormInput.vue';
 import Property from '../Property.ts';
-import {OntologyAnnotation} from '../../../../lib/ARCC/ISA/ISA/JsonTypes/OntologyAnnotation.js';
-import {CompositeCell} from '../../../../lib/ARCC/ISA/ISA/ArcTypes/CompositeCell.js';
+import {OntologyAnnotation} from '@nfdi4plants/arctrl/ISA/ISA/JsonTypes/OntologyAnnotation.js';
+import {CompositeCell} from '@nfdi4plants/arctrl/ISA/ISA/ArcTypes/CompositeCell.js';
 
 export interface Props {
   cell: Object,

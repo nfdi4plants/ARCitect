@@ -4,8 +4,8 @@ import { reactive, onMounted } from 'vue';
 import FormInput from '../components/FormInput.vue';
 import Property from '../Property.ts';
 
-import {Publication} from '../../../../lib/ARCC/ISA/ISA/JsonTypes/Publication.js';
-import {OntologyAnnotation} from '../../../../lib/ARCC/ISA/ISA/JsonTypes/OntologyAnnotation.js';
+import {Publication} from '@nfdi4plants/arctrl/ISA/ISA/JsonTypes/Publication.js';
+import {OntologyAnnotation} from '@nfdi4plants/arctrl/ISA/ISA/JsonTypes/OntologyAnnotation.js';
 
 const props = defineProps<{config?:Object}>();
 const iProps = reactive({

@@ -8,7 +8,7 @@ import NewAssayDialog from '../dialogs/NewAssayDialog.vue';
 import { useQuasar } from 'quasar'
 const $q = useQuasar();
 
-import {ArcStudy, ArcAssay} from '../../../../lib/ARCC/ISA/ISA/ArcTypes/ArcTypes.js';
+import {ArcStudy, ArcAssay} from '@nfdi4plants/arctrl/ISA/ISA/ArcTypes/ArcTypes.js';
 
 const emit = defineEmits(['openArc']);
 

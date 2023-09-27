@@ -4,7 +4,7 @@ import { reactive, onMounted } from 'vue';
 import FormInput from '../components/FormInput.vue';
 import Property from '../Property.ts';
 
-import {Person} from '../../../../lib/ARCC/ISA/ISA/JsonTypes/Person.js';
+import {Person} from '@nfdi4plants/arctrl/ISA/ISA/JsonTypes/Person.js';
 
 const props = defineProps<{config?:Object}>();
 const iProps = reactive({

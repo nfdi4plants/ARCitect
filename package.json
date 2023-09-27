@@ -24,10 +24,12 @@
     "typecheck": "npm run typecheck:main && npm run typecheck:preload && npm run typecheck:renderer"
   },
   "dependencies": {
+    "@nfdi4plants/arctrl": "^1.0.0-alpha7",
+    "@nfdi4plants/exceljs": "0.2.0",
     "@quasar/extras": "1.15.3",
-    "@nfdi4plants/exceljs": "latest",
-    "electron-context-menu": "3.6.1",
+    "isomorphic-fetch": "latest",
     "chokidar": "3.5.1",
+    "electron-context-menu": "3.6.1",
     "express": "latest",
     "fs-extra": "latest",
     "quasar": "2.12.4",

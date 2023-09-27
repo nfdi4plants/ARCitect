@@ -41,6 +41,7 @@ const iProps = reactive({
   splitterModel: 300,
   error: false,
   error_text: '',
+  version: '',
 });
 
 const openLocalArc = async path=>{
@@ -71,6 +72,7 @@ const showHomeView = ()=>{
 }
 
 onMounted(async () => {
+  iProps.version = await window.ipc.invoke('CORE.getVersion');
   // iProps.showHelp = false;
   // iProps.toolbarMinimized = true;
   // openLocalArc('/home/jones/external/projects/TEMP/ArcPrototype');
@@ -100,37 +102,42 @@ const test = async ()=>{
         :breakpoint="500"
         bordered
         class="bg-grey-3"
+        content-class="column justify-between no-wrap bg-grey-1"
       >
-        <q-scroll-area class="fit" :horizontal-thumb-style="{ opacity: 0 }">
-          <q-list>
-            <q-item v-ripple clickable class='bg-primary text-white' @click="showHomeView" style="padding-top:1em;padding-bottom:1em;">
-              <q-item-section avatar>
-                <q-icon size="2.5rem" style="margin: 0 -0.20em;" :name="'img:'+logoURL" @click='showHomeView'></q-icon>
-              </q-item-section>
-              <q-item-section style="margin:0.6em 0 0 -1.2em">
-                <q-item-label><b style="font-size:2em">ARC</b><span style="font-size:1.2em">itect</span></q-item-label>
-              </q-item-section>
-            </q-item>
+        <q-list class='column' style="height:100%">
+          <q-item v-ripple clickable class='bg-primary text-white' @click="showHomeView" style="padding-top:1em;padding-bottom:1em;">
+            <q-item-section avatar>
+              <q-icon size="2.5rem" style="margin: 0 -0.20em;" :name="'img:'+logoURL" @click='showHomeView'></q-icon>
+            </q-item-section>
+            <q-item-section style="margin:0.6em 0 0 -1.2em">
+              <q-item-label><b style="font-size:2em">ARC</b><span style="font-size:1.2em">itect</span></q-item-label>
+            </q-item-section>
+          </q-item>
 
-            <LoginView />
+          <LoginView />
 
-            <q-separator />
+          <q-separator />
 
-            <ToolbarButton text='New ARC' icon='note_add' @clicked='newLocalArc()'></ToolbarButton>
-            <ToolbarButton text='Open ARC' icon='file_open' @clicked='openLocalArc()'></ToolbarButton>
-            <ToolbarButton text='Download ARC' icon='cloud_download' @clicked='AppProperties.state=AppProperties.STATES.OPEN_DATAHUB'></ToolbarButton>
+          <ToolbarButton text='New ARC' icon='note_add' @clicked='newLocalArc()'></ToolbarButton>
+          <ToolbarButton text='Open ARC' icon='file_open' @clicked='openLocalArc()'></ToolbarButton>
+          <ToolbarButton text='Download ARC' icon='cloud_download' @clicked='AppProperties.state=AppProperties.STATES.OPEN_DATAHUB'></ToolbarButton>
 
-            <q-separator />
+          <q-separator />
 
-            <!--<ToolbarButton text='Upload ARC' icon='cloud_upload' requiresARC='true' @clicked='test()'></ToolbarButton>-->
-            <ToolbarButton text='Reset ARC' icon='autorenew' requiresARC='true' @clicked='ArcControlService.readARC()'></ToolbarButton>
-            <ToolbarButton text='Versions' icon='update' requiresARC='true' @clicked='AppProperties.state=AppProperties.STATES.GIT'></ToolbarButton>
+          <!--<ToolbarButton text='Upload ARC' icon='cloud_upload' requiresARC='true' @clicked='test()'></ToolbarButton>-->
+          <ToolbarButton text='Reset ARC' icon='autorenew' requiresARC='true' @clicked='ArcControlService.readARC()'></ToolbarButton>
+          <ToolbarButton text='Versions' icon='update' requiresARC='true' @clicked='AppProperties.state=AppProperties.STATES.GIT'></ToolbarButton>
 
-            <q-separator />
+          <q-separator />
 
-            <ToolbarButton text='Toggle Help' icon='help' @clicked='iProps.toolbarMinimized=!iProps.toolbarMinimized;iProps.showHelp=!iProps.showHelp;'></ToolbarButton>
-          </q-list>
-        </q-scroll-area>
+          <ToolbarButton text='Toggle Help' icon='help' @clicked='iProps.toolbarMinimized=!iProps.toolbarMinimized;iProps.showHelp=!iProps.showHelp;'></ToolbarButton>
+
+          <q-item class="col-grow"></q-item>
+          <q-separator />
+          <q-item class='justify-center bg-grey-4' style="margin:0;padding:0.2em;" dense>
+              {{iProps.version}}
+          </q-item>
+        </q-list>
       </q-drawer>
 
       <q-drawer

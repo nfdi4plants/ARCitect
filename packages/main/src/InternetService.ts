@@ -50,6 +50,18 @@ export const InternetService = {
     );
   },
 
+  getTemplates: ()=>{
+    return new Promise(
+      (resolve, reject) => {
+        fetch('https://github.com/nfdi4plants/Swate-templates/releases/download/latest/templates.json')
+          .then(res => res.json())
+          .then(json => {
+            resolve(json)
+          })
+      }
+    );
+  },
+
   openExternalURL: async (e,url)=>{
     shell.openExternal(url);
     return;
@@ -57,6 +69,7 @@ export const InternetService = {
 
   init: async () => {
     ipcMain.handle('InternetService.openExternalURL', InternetService.openExternalURL );
+    ipcMain.handle('InternetService.getTemplates', InternetService.getTemplates );
     ipcMain.handle('InternetService.callSwateAPI', InternetService.callSwateAPI );
   }
 

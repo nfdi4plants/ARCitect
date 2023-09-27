@@ -1,5 +1,7 @@
 import { reactive, watch, ref } from 'vue';
 
+import {OntologyAnnotation} from '@nfdi4plants/arctrl/ISA/ISA/JsonTypes/OntologyAnnotation.js';
+
 const autoLabel = property => {
   let words = property
     .split(/(?=[A-Z])/)
@@ -21,16 +23,20 @@ const autoType = property => {
 };
 
 const Property = (model,property,config)=>{
-  config = config || {};
   // console.log(property, model[property]);
+  config = config || {};
+  if(config.type==='ontology' && !model[property])
+    model[property] = OntologyAnnotation.fromString('');
 
   const p = reactive({
     model: model,
     property: property,
     org_value: model[property],
     hint: config.hint || '',
+    tooltip: config.tooltip || '',
     type: config.type || autoType(property),
     dense: config.dense || false,
+    options_dense: config.options_dense || false,
     multi: config.multi || false,
     label: config.label || autoLabel(property),
     placeholder: config.placeholder || '',
@@ -40,7 +46,6 @@ const Property = (model,property,config)=>{
     loading: config.loading || false,
     options: Array.isArray(config.options) ? config.options : [],
     limit_to_options: config.limit_to_options || false,
-    filter: null,
     dirty: null,
   });
   p.dirty = ()=>p.org_value!=p.model[p.property] && !(!p.org_value && !p.model[p.property]);
@@ -54,6 +59,11 @@ const Property = (model,property,config)=>{
 
   p.updateOriginalValue = () => {
     p.org_value = p.model[p.property];
+  };
+
+  p.setValue = v => {
+    p.model[p.property] = v;
+    p.org_value = v;
   };
 
   return p;
