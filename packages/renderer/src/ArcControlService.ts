@@ -2,7 +2,7 @@ import { reactive } from 'vue'
 
 import AppProperties from './AppProperties.ts';
 
-import { ARC } from "@nfdi4plants/arctrl/ARCtrl.js";
+import { ARC } from "@nfdi4plants/arctrl/ARC.js";
 import { ArcInvestigation } from "@nfdi4plants/arctrl/ISA/ISA/ArcTypes/ArcTypes.js";
 import { Xlsx } from '../../../lib/fsspreadsheet/Xlsx.js';
 

@@ -13,7 +13,7 @@ import StringDialog from '../dialogs/StringDialog.vue';
 import { useQuasar } from 'quasar'
 const $q = useQuasar();
 
-import {Templates_decodeFromString} from "@nfdi4plants/arctrl/Templates/Template.Json.js";
+import {Templates_fromJsonString} from "@nfdi4plants/arctrl/Templates/Template.Json.js";
 
 export interface Props {
   group: String,
@@ -43,7 +43,10 @@ const init = async ()=>{
 
   if(!iProps.templates){
     const templates_json = await window.ipc.invoke('InternetService.getTemplates');
-    iProps.templates = Templates_decodeFromString(JSON.stringify(templates_json));
+    iProps.templates = await Templates_fromJsonString(JSON.stringify(templates_json));
+    console.log(iProps.templates);
+    // for(let x of iProps.templates)
+    //   console.log(x);
   }
 };
 
