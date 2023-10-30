@@ -22,6 +22,11 @@ npm start
 
 The following quick guide is intended to help content contributors find a starting point.
 
+### Release 
+
+1. Increase `package.json` semver.
+2. Any commit with release tag `git tag v<Placeholder>`, where `<Placeholder>` must be equal to `package.json` version.
+
 ### Issues
 
 Feel free to [raise an issue](https://github.com/nfdi4plants/ARCitect/issues/new/choose) to let us know what feature is missing or if anything is buggy.
