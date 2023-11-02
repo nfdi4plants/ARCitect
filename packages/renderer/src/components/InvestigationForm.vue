@@ -27,8 +27,8 @@ const init = async ()=>{
       Property( props.investigation, 'Description', {hint:'A textual description of the investigation'} ),
     ],
     [
-      Property( props.investigation, 'SubmissionDate',{hint:'The date the investigation was was released publicly'}),
-      Property( props.investigation, 'PublicReleaseDate',{hint:'The date the investigation was was released publicly'}),
+      Property( props.investigation, 'SubmissionDate',{hint:'The date the investigation was released publicly'}),
+      Property( props.investigation, 'PublicReleaseDate',{hint:'The date the investigation was released publicly'}),
     ]
   ];
 };

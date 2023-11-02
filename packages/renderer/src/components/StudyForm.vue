@@ -30,8 +30,8 @@ const init = async ()=>{
       Property( props.study, 'Description', {hint:'A textual description of the study'} ),
     ],
     [
-      Property( props.study, 'SubmissionDate',{hint:'The date the study was was released publicly'} ),
-      Property( props.study, 'PublicReleaseDate',{hint:'The date the study was was released publicly'} ),
+      Property( props.study, 'SubmissionDate',{hint:'The date the study was released publicly'} ),
+      Property( props.study, 'PublicReleaseDate',{hint:'The date the study was released publicly'} ),
     ]
   ];
 };
