@@ -8,6 +8,8 @@ The **ARCitect** is an **electron-app** to create, manage and share your **ARCs*
 
 It is only necesary to download and run one of the provided standalone **Releases** for **Windows** (suffix: win.zip), **MacOS** (suffix: dmg), and **Linux** (suffix: AppImage). The releases do not require you to install any dependencies (except `git` for the MacOS and Linux releases).
 
+:bulb: Check out the [DataPLANT knowledge base](https://nfdi4plants.org/nfdi4plants.knowledgebase/docs/ARCitect-Manual/index.html) for details.
+
 ## Building from Source 
 
 To build ARCitect from source, you first need to clone this repository, then install its dependencies via npm, and finally start ARCitect via npm, i.e.,
