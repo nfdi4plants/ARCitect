@@ -27,6 +27,7 @@
     "@nfdi4plants/arctrl": "^1.0.0-alpha7",
     "@nfdi4plants/exceljs": "0.2.0",
     "@quasar/extras": "1.15.3",
+    "@imengyu/vue3-context-menu": "latest",
     "isomorphic-fetch": "latest",
     "chokidar": "3.5.1",
     "electron-context-menu": "3.6.1",

@@ -239,7 +239,6 @@ const onSelectionChanged = id=>{
 }
 
 const updatePath = async path => {
-  console.log(path);
   const n = arcTree._value.getNodeByKey(path);
   if(!n)
     return;

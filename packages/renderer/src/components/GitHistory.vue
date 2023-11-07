@@ -15,6 +15,9 @@ const getHistory = async ()=>{
     args: [`log`,`--pretty=format:{"ref":"%H", "authorName":"%aN", "authorEmail":"%aE", "ts": "%cI", "title":"%s"},`],
     cwd: ArcControlService.props.arc_root
   });
+  if(response[1].startsWith('fatal'))
+    return iProps.git_log = [];
+
   const format = x => ('00' + x).slice(-2);
   const log = JSON.parse('['+response[1].slice(0,-1)+']');
   for(let l of log){
@@ -44,6 +47,9 @@ const getHistory = async ()=>{
         >
         </q-timeline-entry>
       </q-timeline>
+
+      <div v-if='!iProps.git_log.length' class='text-h6' style="text-align:center;color:#aaa;">No Commits</div>
+
     </q-card>
   </ViewItem>
 </template>

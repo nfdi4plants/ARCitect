@@ -11,6 +11,7 @@ import Property from '../Property.ts';
 import AppProperties from '../AppProperties.ts';
 
 import ProgressDialog from '../dialogs/ProgressDialog.vue';
+import GitDialog from '../dialogs/GitDialog.vue';
 import { useQuasar } from 'quasar'
 const $q = useQuasar();
 
@@ -153,34 +154,38 @@ const commit = async()=>{
   dialogProps.items[4][1] = 1;
 };
 
-const getCurrentBranch = async item => {
+const getBranches = async () => {
   const response = await window.ipc.invoke('GitService.run', {
     args: [`branch`],
     cwd: ArcControlService.props.arc_root
   });
-  const branches = response[1].split('\n').slice(0,-1);
-  const cBranch = branches.filter(x=>x[0]=='*').pop().slice(2);
-  if(!cBranch){
-    dialogProps.error = 'Unable to find current branch.';
-    item[1] = 2;
-    return null;
+  const branches_raw = response[1].split('\n').slice(0,-1);
+  const branches = {
+    list: [],
+    current: null
+  };
+  for(let branch of branches_raw){
+    const branch_name = branch.slice(2);
+    branches.list.push(branch_name);
+    if(branch[0]==='*')
+      branches.current = branch_name;
   }
-  item[1] = 1;
-  return cBranch;
+
+  return branches;
 };
 
-const patchRemote = async item => {
+const patchRemote = async () => {
+  let response = null;
+
   const remote = iProps.commit.remote;
   const remotes = await getRemotes();
+
   let remoteExistsLocally = false;
-  for(const r of remotes)
-    if(r.includes(remote)){
+  for(const r in remotes)
+    if(remotes[r].includes(remote)){
       remoteExistsLocally = true;
       break;
     }
-
-  let response = null;
-
   if(!remoteExistsLocally)
     response = await window.ipc.invoke('GitService.run', {
       args: [`remote`,`add`,'origin',remote],
@@ -191,15 +196,15 @@ const patchRemote = async item => {
   const patched_remote = `https://oauth2:${AppProperties.user.token.access_token}@git.nfdi4plants.org` + remote.split('git.nfdi4plants.org')[1];
 
   // add patched remote
-  response = await window.ipc.invoke('GitService.run', {
-    args: [`remote`,`remove`,'arcitect_remote'],
-    cwd: ArcControlService.props.arc_root
-  });
+  if(Object.keys(remotes).includes('arcitect_remote'))
+    response = await window.ipc.invoke('GitService.run', {
+      args: [`remote`,`remove`,'arcitect_remote'],
+      cwd: ArcControlService.props.arc_root
+    });
   response = await window.ipc.invoke('GitService.run', {
     args: [`remote`,`add`,'arcitect_remote',patched_remote],
     cwd: ArcControlService.props.arc_root
   });
-  item[1] = 1;
   return patched_remote;
 };
 
@@ -214,17 +219,11 @@ const push = async()=>{
     title: 'Uploading ARC',
     ok_title: 'Ok',
     cancel_title: null,
-    error: '',
-    succ: '',
-    items: [
-      ['Retrieving Current Branch',0],
-      ['Retrieving Remote',0],
-      ['Uploading Data (this can take a while)',0],
-    ]
+    state: 0,
   });
 
   $q.dialog({
-    component: ProgressDialog,
+    component: GitDialog,
     componentProps: dialogProps
   }).onOk( async () => {
     await init();
@@ -233,33 +232,26 @@ const push = async()=>{
   let response = null;
 
   // get current branch
-  const cBranch = await getCurrentBranch(dialogProps.items[0]);
-  if(!cBranch) return;
+  const branches = await getBranches();
+  if(!branches.current) return dialogProps.state=2;
 
   // patch remote
-  const patched_remote = await patchRemote(dialogProps.items[1]);
-  if(!patched_remote) return;
+  const patched_remote = await patchRemote();
+  if(!patched_remote) return dialogProps.state=2;
 
   // push
   response = await window.ipc.invoke('GitService.run', {
-    args: [`push`,`--verbose`,`--atomic`,`--progress`,`arcitect_remote`,cBranch],
+    args: [`push`,`--verbose`,`--atomic`,`--progress`,`arcitect_remote`,branches.current],
     cwd: ArcControlService.props.arc_root
   });
-  if(response[1].includes('up-to-date'))
-    dialogProps.succ = 'Everything Up-To-Date';
-  else if(response[1].includes('Updates were rejected because the remote contains work'))
-    dialogProps.error = 'ARC on server contains updates. Please download updates first.';
-  else if(response[1].includes('error:'))
-    dialogProps.error = response[1];
-  else
-    dialogProps.succ = 'Upload Successful';
 
   // remove patched remote
   response = await window.ipc.invoke('GitService.run', {
     args: [`remote`,`remove`,'arcitect_remote'],
     cwd: ArcControlService.props.arc_root
   });
-  dialogProps.items[2][1] = dialogProps.error ? 2 : 1;
+
+  dialogProps.state=1;
 };
 
 const isTrackedWithLFS = item=>{
@@ -278,21 +270,11 @@ const pull = async()=>{
     title: 'Downloading ARC',
     ok_title: 'Ok',
     cancel_title: null,
-    error: '',
-    succ: '',
-    items: [
-      ['Retrieving Current Branch',0],
-      ['Retrieving Remote',0],
-      ['Downloading Data',0],
-      ['Downloading LFS Files',0],
-    ]
+    state: 0,
   });
 
-  if(!iProps.lfs_pull)
-    dialogProps.items.pop();
-
   $q.dialog({
-    component: ProgressDialog,
+    component: GitDialog,
     componentProps: dialogProps
   }).onOk( async () => {
     await init();
@@ -301,37 +283,31 @@ const pull = async()=>{
   let response = null;
 
   // get current branch
-  const cBranch = await getCurrentBranch(dialogProps.items[0]);
-  if(!cBranch) return;
+  const branches = await getBranches();
+  if(!branches.current) return dialogProps.state=2;
 
   // patch remote
-  const patched_remote = await patchRemote(dialogProps.items[1]);
-  if(!patched_remote) return;
+  const patched_remote = await patchRemote();
+  if(!patched_remote) return dialogProps.state=2;
 
   // pull
   response = await window.ipc.invoke('GitService.run', {
-    args: [`pull`,`arcitect_remote`,cBranch],
+    args: [`pull`,`arcitect_remote`,branches.current,'--progress'],
     cwd: ArcControlService.props.arc_root
   });
   if(iProps.lfs_pull){
-    dialogProps.items[2][1] = 1;
     response = await window.ipc.invoke('GitService.run', {
-      args: [`lfs`,`pull`,`arcitect_remote`,cBranch],
+      args: [`lfs`,`pull`,`arcitect_remote`,branches.current],
       cwd: ArcControlService.props.arc_root
     });
   }
-
-  if(response[1].includes('Already up to date.'))
-    dialogProps.succ = 'Everything Up-To-Date';
-  else
-    dialogProps.succ = 'Download Successful';
 
   // remove patched remote
   response = await window.ipc.invoke('GitService.run', {
     args: [`remote`,`remove`,'arcitect_remote'],
     cwd: ArcControlService.props.arc_root
   });
-  dialogProps.items[dialogProps.items.length-1][1] = 1;
+  dialogProps.state=1;
 };
 
 const getGitUser = async()=>{
@@ -358,17 +334,22 @@ const getRemotes = async()=>{
     args: [`remote`,`-v`],
     cwd: ArcControlService.props.arc_root
   });
-  return response[1].split('\n');
+  const remotes = {};
+  for(let row of response[1].split('\n').slice(0,-1)){
+    const row_ = row.split('\t');
+    remotes[row_[0]] = row_[1];
+  }
+  return remotes;
 };
 
 const getRemote = async()=>{
   const remotes = await getRemotes();
-  for(let r of remotes)
-    if(r.includes('(push)') && r.includes('git.nfdi4plants.org'))
-      return r.replace(' (push)','').split('\t')[1];
+  for(let r in remotes)
+    if(remotes[r][1].includes('(push)') && remotes[r][1].includes('git.nfdi4plants.org'))
+      return remotes[r][1].replace(' (push)','');
 
   if(AppProperties.user)
-    return `https://git.nfdi4plants.org/${AppProperties.user.username}/${ArcControlService.props.arc_root.split('/').pop()}.git`;
+    return `https://git.nfdi4plants.org/${AppProperties.user.username}/${ArcControlService.props.arc_root.split('/').pop().split(' ').join('_')}.git`;
 
   return '';
 };

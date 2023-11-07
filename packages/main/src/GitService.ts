@@ -16,19 +16,39 @@ export const GitService = {
       o.env = Object.assign({}, o.env || {}, process.env);
       o.cwd = (o.cwd || '').split('/').join(PATH.sep);
 
-      // let window = BrowserWindow.getAllWindows().find(w => !w.isDestroyed());
+      let window = BrowserWindow.getAllWindows().find(w => !w.isDestroyed());
+      window.webContents.send('GitService.MSG', 'git '+args.join(' '));
 
+      // o.env['GIT_TRACE'] = 1;
+      // o.env['GIT_TRACE_PACKET'] = 1;
+      // o.env['GIT_TRACE_PERFORMANCE'] = 1;
+      // o.env['GIT_TRACE_SETUP'] = 1;
+      // o.env['GIT_CURL_VERBOSE'] = 1;
+      // o.env['GIT_TRANSFER_TRACE'] = 1;
+      // o.stdio = 'inherit';
+
+
+      // console.log(args, o)
       const p = spawn('git', args, o);
+
       let error = false;
       let output = '';
+      let iii=0;
       const handleOutput = data => {
         if(!data) return;
-        const dataAsString = data.toString();
-        // console.log(dataAsString);
+        let dataAsString = data.toString();
+        dataAsString = dataAsString.replace(/\n|\r/g, '\n');
+
         output += dataAsString;
         if(dataAsString.toLowerCase().includes('error'))
           error = true;
-        // window.webContents.send('GitService.MSG', dataAsString);
+
+        for(let row of dataAsString.split('\n')){
+          if(row==='') continue;
+          window.webContents.send('GitService.MSG', row);
+          // iii++;
+          // console.log(">"+iii+">"+row+"<"+iii+"<");
+        }
       };
       p.stdout.on('data', handleOutput);
       p.stderr.on('data', handleOutput);

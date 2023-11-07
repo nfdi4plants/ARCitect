@@ -14,6 +14,7 @@ import { useQuasar } from 'quasar'
 const $q = useQuasar();
 
 import {Templates_fromJsonString} from "@nfdi4plants/arctrl/Templates/Template.Json.js";
+import {CompositeHeader} from '@nfdi4plants/arctrl/ISA/ISA/ArcTypes/CompositeHeader.js';
 
 export interface Props {
   group: String,
@@ -23,7 +24,7 @@ const props = defineProps<Props>();
 
 const iProps = reactive({
   sheets: [],
-  active_sheet: '',
+  active_sheet: null,
   templates: null,
   search_by_parent_term: false
 });
@@ -121,7 +122,7 @@ const onSubmit = async ()=>{
         @submit="onSubmit"
         @reset="onReset"
       >
-        <SwateTable :table="(Object.keys(props.owner).length && !iProps.active_sheet.startsWith('@')) ? props.owner.GetTable(iProps.active_sheet) : {}" :search_by_parent_term='iProps.search_by_parent_term'></SwateTable>
+        <SwateTable v-if='iProps.active_sheet' :table="(Object.keys(props.owner).length && !iProps.active_sheet.startsWith('@')) ? props.owner.GetTable(iProps.active_sheet) : {}" :search_by_parent_term='iProps.search_by_parent_term'></SwateTable>
         <q-card-actions align='right' style="padding:2.1em;">
           <FormInput :property="Property( iProps, 'search_by_parent_term', {type:'checkbox',label:'Parent Search',dense:true,tooltip:'Limit search to child terms of the column term.'})"/>
           <q-btn label="Apply Template" icon='table_chart' color="secondary" style="margin-left:1em;"/>

@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 
-import { onMounted, onUnmounted, ref, reactive, watch } from 'vue';
+import { reactive, h, watch } from 'vue';
 
 import {OntologyAnnotation} from '@nfdi4plants/arctrl/ISA/ISA/JsonTypes/OntologyAnnotation.js';
 import {CompositeHeader,IOType} from '@nfdi4plants/arctrl/ISA/ISA/ArcTypes/CompositeHeader.js';
@@ -17,10 +17,10 @@ export interface Props {
 };
 const props = defineProps<Props>();
 
-const cell_input = ref(null);
-
-const iProps = reactive({
-  table: null
+const iProbs = reactive({
+  rows: [],
+  cols: [],
+  rowWatcher: ()=>{}
 });
 
 const getColumns = table=>{
@@ -82,6 +82,112 @@ const editHeader = async (idx,insertHeader) => {
   });
 };
 
+import ContextMenu from '@imengyu/vue3-context-menu'
+
+const onHeaderContextMenu = (e,cell) => {
+  e.preventDefault();
+
+  ContextMenu.showContextMenu({
+    x: e.x,
+    y: e.y,
+    theme: 'flat',
+    items: [
+      {
+        label: "Add Row",
+        icon: h(
+          'i',
+          {
+            class: 'q-icon on-left notranslate material-icons',
+            role:'img',
+            style:{fontSize: '1.5em',color:'#333'}
+          },
+          ['vertical_align_bottom']
+        ),
+        onClick: ()=>props.table.AddRowsEmpty(1,cell.rowIndex+1),
+        divided: true,
+      },
+      {
+        label: "Add Header Before",
+        icon: h(
+          'i',
+          {
+            class: 'q-icon on-left notranslate material-icons',
+            role:'img',
+            style:{fontSize: '1.5em',color:'#333',transform:'rotate(180deg)'}
+          },
+          ['keyboard_tab']
+        ),
+        onClick: () =>editHeader(cell.col.idx,true)
+      },
+      {
+        label: "Add Header After",
+        icon: h(
+          'i',
+          {
+            class: 'q-icon on-left notranslate material-icons',
+            role:'img',
+            style:{fontSize: '1.5em',color:'#333'}
+          },
+          ['keyboard_tab']
+        ),
+        onClick: () =>editHeader(cell.col.idx+1,true)
+      },
+    ]
+  });
+};
+
+const onCellContextMenu = (e,cell) => {
+  e.preventDefault();
+
+  ContextMenu.showContextMenu({
+    x: e.x,
+    y: e.y,
+    theme: 'flat',
+    items: [
+      {
+        label: "Add Row Above",
+        icon: h(
+          'i',
+          {
+            class: 'q-icon on-left notranslate material-icons',
+            role:'img',
+            style:{fontSize: '1.5em',color:'#333'}
+          },
+          ['vertical_align_top']
+        ),
+        onClick: ()=>props.table.AddRowsEmpty(1,cell.rowIndex)
+      },
+      {
+        label: "Add Row Below",
+        icon: h(
+          'i',
+          {
+            class: 'q-icon on-left notranslate material-icons',
+            role:'img',
+            style:{fontSize: '1.5em',color:'#333'}
+          },
+          ['vertical_align_bottom']
+        ),
+        onClick: ()=>props.table.AddRowsEmpty(1,cell.rowIndex+1),
+        divided: true,
+      },
+      {
+        label: "Delete Row",
+        icon: h(
+          'i',
+          {
+            class: 'q-icon on-left notranslate material-icons',
+            role:'img',
+            style:{fontSize: '1.5em',color:'#333'}
+          },
+          ['delete']
+        ),
+        onClick: () =>props.table.RemoveRow(cell.rowIndex)
+      },
+    ]
+  });
+};
+
 </script>
 
 <template>
@@ -100,18 +206,22 @@ const editHeader = async (idx,insertHeader) => {
       <q-th
         class='swate_th'
         :props="cell_props"
+        @contextmenu='e=>onHeaderContextMenu(e,cell_props)'
       >
         <div style="position:relative;">
           <div style="padding:0 0.5em;" @dblclick='editHeader(cell_props.col.idx)'>
             {{cell_props.col.label}}
           </div>
-          <q-icon v-if='cell_props.col.idx<cell_props.col.table.ColumnCount-1' size='2em' name='add_circle' class='add_column_icon' color='secondary' @click='editHeader(cell_props.col.idx+1,true)'></q-icon>
+          <!--<q-icon v-if='cell_props.col.idx<cell_props.col.table.ColumnCount-1' size='2em' name='add_circle' class='add_column_icon' color='secondary' @click='editHeader(cell_props.col.idx+1,true)'></q-icon>-->
         </div>
       </q-th>
     </template>
 
     <template v-slot:body-cell="cell_props">
-      <q-td :props="cell_props">
+      <q-td
+        :props="cell_props"
+        @contextmenu='e=>onCellContextMenu(e,cell_props)'
+      >
         <SwateCell
           :table='props.table || {}'
           :cell='cell_props.value'

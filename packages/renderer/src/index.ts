@@ -10,5 +10,9 @@ app.use(Quasar, {
   plugins: {Dialog,Loading}, // import Quasar plugins and add here
 });
 
+import '@imengyu/vue3-context-menu/lib/vue3-context-menu.css'
+import ContextMenu from '@imengyu/vue3-context-menu'
+app.use(ContextMenu);
+
 app.mount('#app');
 

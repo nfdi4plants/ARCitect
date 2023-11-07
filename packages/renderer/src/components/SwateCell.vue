@@ -13,6 +13,7 @@ import {
 } from '@nfdi4plants/arctrl/ISA/ISA/ArcTypes/CompositeCell.js';
 
 import FormInput from '../components/FormInput.vue';
+import SwateContextMenu from '../components/SwateContextMenu.vue';
 import Property from '../Property.ts';
 
 export interface Props {
@@ -35,6 +36,14 @@ const iProps = reactive({
   unit_text_p: null,
   unit: OntologyAnnotation.fromString(''),
   unit_p: null,
+
+  ctx_show: false,
+  ctx_options: {
+    zIndex: 3,
+    minWidth: 230,
+    x: 500,
+    y: 200
+  },
 });
 
 const make_optionsFn = () => {
@@ -137,22 +146,24 @@ watch(()=>iProps.free_text, updateFreeTextCell);
 </script>
 
 <template>
-  <FormInput
-    v-if='props.cell.isTerm'
-    :property='iProps.term_p'
-  />
-  <div v-else-if='props.cell.isUnitized' class='row'>
+  <div>
     <FormInput
-      :property='iProps.unit_text_p'
-      class='col'
+      v-if='props.cell.isTerm'
+      :property='iProps.term_p'
     />
+    <div v-else-if='props.cell.isUnitized' class='row'>
+      <FormInput
+        :property='iProps.unit_text_p'
+        class='col'
+      />
+      <FormInput
+        :property='iProps.unit_p'
+        class='col'
+      />
+    </div>
     <FormInput
-      :property='iProps.unit_p'
-      class='col'
+      v-else-if='props.cell.isFreeText'
+      :property='iProps.free_text_p'
     />
   </div>
-  <FormInput
-    v-else-if='props.cell.isFreeText'
-    :property='iProps.free_text_p'
-  />
 </template>

@@ -4,7 +4,8 @@ import {onMounted,onUnmounted,reactive,ref,nextTick,watch} from 'vue';
 import AppProperties from '../AppProperties.ts';
 import ViewItem from '../components/ViewItem.vue';
 
-import ProgressDialog from '../dialogs/ProgressDialog.vue';
+// import ProgressDialog from '../dialogs/ProgressDialog.vue';
+import GitDialog from '../dialogs/GitDialog.vue';
 
 import ArcControlService from '../ArcControlService.ts';
 
@@ -54,14 +55,11 @@ const importArc = async url =>{
     title: 'Downloading ARC',
     ok_title: 'Open',
     cancel_title: 'Close',
-    error: '',
-    items: [
-      ['Downloading ARC',0]
-    ]
+    state: 0
   });
 
   $q.dialog({
-    component: ProgressDialog,
+    component: GitDialog,
     componentProps: dialogProps
   }).onOk( async () => {
     if(!props.localUrl) return;
@@ -70,13 +68,12 @@ const importArc = async url =>{
   });
 
   const response = await window.ipc.invoke('GitService.run', {
-    args: [`clone`,url_with_credentials],
+    args: [`clone`,url_with_credentials,'--progress'],
     cwd: destination,
     env: {GIT_LFS_SKIP_SMUDGE: (props.download_lfs?0:1)}
   });
   if(response[1].includes('fatal:')){
-    dialogProps.items[0][1] = 2;
-    dialogProps.error = response[1];
+    dialogProps.state = 2;
     return;
   }
 
@@ -89,7 +86,7 @@ const importArc = async url =>{
     args: [`remote`,`add`,`origin`,url],
     cwd: props.localUrl
   });
-  dialogProps.items[0][1] = 1;
+  dialogProps.state = 1;
 };
 
 const init = async () => {
