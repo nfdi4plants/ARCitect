@@ -1,6 +1,6 @@
 {
   "name": "ARCitect",
-  "version": "v0.0.10",
+  "version": "v0.0.11",
   "private": true,
   "engines": {
     "node": ">=v16.13",
@@ -28,6 +28,7 @@
     "@nfdi4plants/exceljs": "0.2.0",
     "@quasar/extras": "1.15.3",
     "@imengyu/vue3-context-menu": "latest",
+    "@fslab/fsspreadsheet": "latest",
     "isomorphic-fetch": "latest",
     "chokidar": "3.5.1",
     "electron-context-menu": "3.6.1",

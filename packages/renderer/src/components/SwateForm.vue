@@ -75,7 +75,7 @@ const updateTable = async old_active_sheet =>{
   }
 
   if(iProps.active_sheet === '@RemoveTable@'){
-    if(!old_active_sheet) return;
+    if(!old_active_sheet) return iProps.active_sheet=null;
     props.owner.RemoveTable(old_active_sheet);
     iProps.sheets = props.owner.Tables.map(t=>t.Name);
     iProps.active_sheet = props.owner.Tables.length ? props.owner.Tables[0].Name : null;
@@ -114,7 +114,7 @@ const onSubmit = async ()=>{
         outside-arrows
         mobile-arrows
       >
-        <q-tab name="@RemoveTable@" label='' icon='remove_circle' ripple/>
+        <q-tab v-if='iProps.sheets.length>0' name="@RemoveTable@" label='' icon='remove_circle' ripple/>
         <q-tab v-for='s of iProps.sheets' :name="s" :label='s' ripple/>
         <q-tab name="@AddTable@" label='' icon='add_circle' ripple/>
       </q-tabs>
@@ -124,8 +124,8 @@ const onSubmit = async ()=>{
       >
         <SwateTable v-if='iProps.active_sheet' :table="(Object.keys(props.owner).length && !iProps.active_sheet.startsWith('@')) ? props.owner.GetTable(iProps.active_sheet) : {}" :search_by_parent_term='iProps.search_by_parent_term'></SwateTable>
         <q-card-actions align='right' style="padding:2.1em;">
-          <FormInput :property="Property( iProps, 'search_by_parent_term', {type:'checkbox',label:'Parent Search',dense:true,tooltip:'Limit search to child terms of the column term.'})"/>
-          <q-btn label="Apply Template" icon='table_chart' color="secondary" style="margin-left:1em;"/>
+          <FormInput :property="Property( iProps, 'search_by_parent_term', {type:'checkbox',label:'Parent Search',dense:true,tooltip:'Limit search to child terms of the column term.'})" style="margin-right:1em;"/>
+          <!--<q-btn label="Apply Template" icon='table_chart' color="secondary" />-->
           <q-btn label="Update" type="submit" icon='check_circle' color="secondary"/>
           <q-btn label="Reset" type="reset" icon='change_circle' color="secondary" class="q-ml-sm"/>
         </q-card-actions>

@@ -20,7 +20,8 @@ const props = defineProps<Props>();
 const iProbs = reactive({
   rows: [],
   cols: [],
-  rowWatcher: ()=>{}
+  rowWatcher: ()=>{},
+  refresh_hack: 0
 });
 
 const getColumns = table=>{
@@ -47,7 +48,6 @@ const getRows = table=>{
 };
 
 const editHeader = async (idx,insertHeader) => {
-
   const header = insertHeader ? new CompositeHeader(3,[OntologyAnnotation.fromString('')]) : props.table.Headers[idx];
 
   $q.dialog({
@@ -84,6 +84,10 @@ const editHeader = async (idx,insertHeader) => {
 
 import ContextMenu from '@imengyu/vue3-context-menu'
 
+const refresh_hack = ()=>{
+  iProbs.refresh_hack = !iProbs.refresh_hack;
+};
+
 const onHeaderContextMenu = (e,cell) => {
   e.preventDefault();
 
@@ -103,7 +107,11 @@ const onHeaderContextMenu = (e,cell) => {
           },
           ['vertical_align_bottom']
         ),
-        onClick: ()=>props.table.AddRowsEmpty(1,cell.rowIndex+1),
+        onClick: ()=>{
+          props.table.AddRowsEmpty(1,0)
+          refresh_hack();
+        }
+          ,
         divided: true,
       },
       {
@@ -155,7 +163,7 @@ const onCellContextMenu = (e,cell) => {
           },
           ['vertical_align_top']
         ),
-        onClick: ()=>props.table.AddRowsEmpty(1,cell.rowIndex)
+        onClick: ()=>{props.table.AddRowsEmpty(1,cell.rowIndex);refresh_hack()}
       },
       {
         label: "Add Row Below",
@@ -168,7 +176,7 @@ const onCellContextMenu = (e,cell) => {
           },
           ['vertical_align_bottom']
         ),
-        onClick: ()=>props.table.AddRowsEmpty(1,cell.rowIndex+1),
+        onClick: ()=>{props.table.AddRowsEmpty(1,cell.rowIndex+1);refresh_hack()},
         divided: true,
       },
       {
@@ -182,7 +190,7 @@ const onCellContextMenu = (e,cell) => {
           },
           ['delete']
         ),
-        onClick: () =>props.table.RemoveRow(cell.rowIndex)
+        onClick: () =>{props.table.RemoveRow(cell.rowIndex);refresh_hack();}
       },
     ]
   });
@@ -192,7 +200,7 @@ const onCellContextMenu = (e,cell) => {
 
 <template>
   <q-table
-    title=""
+    :virtual-scroll-slice-size="iProbs.refresh_hack"
     class='q-ma-sm swate'
     :columns="getColumns(props.table)"
     :rows="getRows(props.table)"
