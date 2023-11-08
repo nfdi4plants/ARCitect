@@ -14,6 +14,8 @@ export const GitService = {
       const args = typeof options === 'string' ? [options] : options.args;
       const o = typeof options === 'string' ? {} : options;
       o.env = Object.assign({}, o.env || {}, process.env);
+
+      // console.log(process.env['PATH']);
       o.cwd = (o.cwd || '').split('/').join(PATH.sep);
 
       let window = BrowserWindow.getAllWindows().find(w => !w.isDestroyed());
@@ -27,39 +29,38 @@ export const GitService = {
       // o.env['GIT_TRANSFER_TRACE'] = 1;
       // o.stdio = 'inherit';
 
+      try {
+        const p = spawn('git', args, o);
 
-      // console.log(args, o)
-      const p = spawn('git', args, o);
+        let error = false;
+        let output = '';
+        const handleOutput = data => {
+          if(!data) return;
+          let dataAsString = data.toString();
+          dataAsString = dataAsString.replace(/\n|\r/g, '\n');
 
-      let error = false;
-      let output = '';
-      let iii=0;
-      const handleOutput = data => {
-        if(!data) return;
-        let dataAsString = data.toString();
-        dataAsString = dataAsString.replace(/\n|\r/g, '\n');
+          output += dataAsString;
+          if(dataAsString.toLowerCase().includes('error'))
+            error = true;
 
-        output += dataAsString;
-        if(dataAsString.toLowerCase().includes('error'))
-          error = true;
+          for(let row of dataAsString.split('\n')){
+            if(row==='') continue;
+            window.webContents.send('GitService.MSG', row);
+          }
+        };
+        p.stdout.on('data', handleOutput);
+        p.stderr.on('data', handleOutput);
 
-        for(let row of dataAsString.split('\n')){
-          if(row==='') continue;
-          window.webContents.send('GitService.MSG', row);
-          // iii++;
-          // console.log(">"+iii+">"+row+"<"+iii+"<");
-        }
-      };
-      p.stdout.on('data', handleOutput);
-      p.stderr.on('data', handleOutput);
+        p.on('error', err => {
+          console.error(err.toString());
+        });
 
-      p.on('error', err => {
-        console.error(err.toString());
-      });
-
-      p.on('exit', code => {
-        resolve([code===0 && !error,output]);
-      });
+        p.on('exit', code => {
+          resolve([code===0 && !error,output]);
+        });
+      } catch (e){
+        resolve([false,e]);
+      }
     });
   },
 

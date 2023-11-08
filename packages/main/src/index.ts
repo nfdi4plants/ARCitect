@@ -46,6 +46,13 @@ const initCore = async () => {
   ipcMain.handle('CORE.getVersion', ()=>process.env['npm_package_version']);
 }
 
+// fix portable path
+if(process.platform === 'win32'){
+  const PATH = require('path');
+  const process_path_separator =  ? ';' : ':';
+  process.env['PATH'] += process.env['PATH'] + process_path_separator + PATH.join([process.env['PORTABLE_EXECUTABLE_DIR'],'resources','bins']);
+}
+
 /**
  * Create app window when background process will be ready
  */

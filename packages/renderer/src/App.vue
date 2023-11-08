@@ -49,7 +49,7 @@ const openLocalArc = async path=>{
   if(!path) return;
   const isARC = await window.ipc.invoke('LocalFileSystemService.exists', path+'/isa.investigation.xlsx');
   if(!isARC){
-    iProps.error_text = 'Invalid ARC format: '+path;
+    iProps.error_text = 'Invalid ARC format:<br>'+path;
     iProps.error = true;
     return;
   }
@@ -73,6 +73,11 @@ const showHomeView = ()=>{
 
 onMounted(async () => {
   iProps.version = await window.ipc.invoke('CORE.getVersion');
+  const git_running = await window.ipc.invoke('GitService.run','--version');
+  if(git_running[0]){
+    iProps.error_text = 'Unable to detect GIT.<br>Please verify that GIT is installed.';
+    iProps.error = true;
+  }
   // iProps.showHelp = false;
   // iProps.toolbarMinimized = true;
   // openLocalArc('/home/jones/external/projects/TEMP/ArcPrototype');
@@ -175,8 +180,13 @@ const test = async ()=>{
                     <div class="text-h6">Error</div>
                   </q-card-section>
 
-                  <q-card-section class="q-pt-none">
-                    {{iProps.error_text}}
+                  <q-card-section class="q-pt-none text-body1">
+                    <table>
+                      <tr>
+                        <td style="padding-right:1em"><q-icon name='warning' size='2em' color='grey-7' /></td>
+                        <td v-html='iProps.error_text'></td>
+                      </tr>
+                    </table>
                   </q-card-section>
 
                   <q-card-actions align="right">
