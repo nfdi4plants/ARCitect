@@ -72,6 +72,7 @@ const showHomeView = ()=>{
 }
 
 onMounted(async () => {
+  window.ipc.on('CORE.MSG', console.log);
   iProps.version = await window.ipc.invoke('CORE.getVersion');
   const git_running = await window.ipc.invoke('GitService.run','--version');
   if(git_running[0]){
