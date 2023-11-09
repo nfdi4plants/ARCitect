@@ -51,10 +51,12 @@ export const GitService = {
         p.stdout.on('data', handleOutput);
         p.stderr.on('data', handleOutput);
 
+        // This hits when the child process cannot be spawned
         p.on('error', err => {
-          console.error(err.toString());
+            console.error("[Git spawn error]", err.toString());
+            resolve([false, err.toString()]);
         });
-
+        // This hits whenever process can be spawned, can still fail or resolve.
         p.on('exit', code => {
           resolve([code===0 && !error,output]);
         });
