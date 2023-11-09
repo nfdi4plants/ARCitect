@@ -123,9 +123,9 @@ const addProtocol = async n=>{
 
 const addDataset = async n=>{
   const path = n.id.split('/').slice(0,-1).join('/');
-  const files = await window.ipc.invoke('LocalFileSystemService.selectAny');
-  for(const fpath of files){
-    await window.ipc.invoke('LocalFileSystemService.copy', [fpath,path]);
+  const paths = await window.ipc.invoke('LocalFileSystemService.selectAny');
+  for(const path_ of paths){
+    await window.ipc.invoke('LocalFileSystemService.copy', [path_,path]);
   }
 };
 

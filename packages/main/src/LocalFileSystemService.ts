@@ -64,7 +64,7 @@ export const LocalFileSystemService = {
   selectAny: async ()=>{
     const window = BrowserWindow.getAllWindows().find(w => !w.isDestroyed())
     const result = await dialog.showOpenDialog(window, {
-      properties: ['openFile','multiSelections']
+      properties: ['openFile','openDirectory','multiSelections']
     });
     return result ? result.filePaths.map(path_to_arcitect) : null;
   },

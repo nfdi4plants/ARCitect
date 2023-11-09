@@ -428,10 +428,10 @@ watch(()=>AppProperties.user, init);
 
           <q-item v-for='(state,i) in iProps.git_status'>
             <q-item-section avatar style="min-width:2em;">
-              <q-icon color='secondary' :name="state[0].includes('M') ? 'edit_square' : state[0].includes('D') ? 'indeterminate_check_box' : 'add_box'"></q-icon>
+              <q-icon :color="state[0].includes('D') ? 'red-10' : 'secondary'" :name="state[0].includes('M') ? 'edit_square' : state[0].includes('D') ? 'indeterminate_check_box' : 'add_box'"></q-icon>
             </q-item-section>
             <q-item-section>
-              <q-item-label>{{state[1]}} {{!state[0].includes("D") ? `(${state[2].toFixed(2)} MB)` : ''}}</q-item-label>
+              <q-item-label>{{state[1]}} <span :style="state[2]>=iProps.lfs_limit ? 'font-weight:bold':''">{{!state[0].includes("D") ? `(${state[2].toFixed(2)} MB)` : ''}}</span></q-item-label>
             </q-item-section>
           </q-item>
         </q-list>
