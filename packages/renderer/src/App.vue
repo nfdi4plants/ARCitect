@@ -75,7 +75,7 @@ onMounted(async () => {
   window.ipc.on('CORE.MSG', console.log);
   iProps.version = await window.ipc.invoke('CORE.getVersion');
   const git_running = await window.ipc.invoke('GitService.run','--version');
-  if(git_running[0]){
+  if(!git_running[0]){
     iProps.error_text = 'Unable to detect GIT.<br>Please verify that GIT is installed.';
     iProps.error = true;
   }
