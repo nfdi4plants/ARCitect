@@ -7,8 +7,8 @@ import util from 'util';
 
 const changeListeners = {};
 
-const path_to_arcitect = path => path.split(PATH.sep).join('/')
-const path_to_system = path => path.split('/').join(PATH.sep)
+const path_to_arcitect = (path: string) => path.split(PATH.sep).join('/')
+const path_to_system = (path: string) => path.split('/').join(PATH.sep)
 
 export const LocalFileSystemService = {
 

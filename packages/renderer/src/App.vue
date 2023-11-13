@@ -18,12 +18,12 @@ import DataHubView from './views/DataHubView.vue';
 import logoURL from '../assets/dpLogo2_w.png'
 
 import { setCssVar } from 'quasar';
-setCssVar('primary', '#2d3e50');
 
 import { onMounted, ref, reactive } from 'vue';
 
 import AppProperties from './AppProperties.ts';
 import ArcControlService from './ArcControlService.ts';
+setCssVar('primary', '#2d3e50');
 // import arcProperties from './ArcProperties.ts';
 // import ArcCommanderService from './ArcCommanderService.ts';
 

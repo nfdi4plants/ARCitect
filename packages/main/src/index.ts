@@ -69,11 +69,11 @@ app.whenReady()
  */
 if (import.meta.env.DEV) {
   app.whenReady()
-    .then(() => import('electron-devtools-installer'))
-    .then(({default: installExtension, VUEJS3_DEVTOOLS}) => installExtension(VUEJS3_DEVTOOLS, {
-      loadExtensionOptions: {
-        allowFileAccess: true,
-      },
-    }))
+    // .then(() => import('electron-devtools-installer'))
+    // .then(({default: installExtension, VUEJS3_DEVTOOLS}) => installExtension(VUEJS3_DEVTOOLS, {
+    //   loadExtensionOptions: {
+    //     allowFileAccess: true,
+    //   },
+    // }))
     .catch(e => console.error('Failed install extension:', e));
 }

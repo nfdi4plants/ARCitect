@@ -11,7 +11,6 @@ async function createWindow() {
   const mainWindow = new BrowserWindow({
     show: false, // Use 'ready-to-show' event to show window
     webPreferences: {
-      nativeWindowOpen: true,
       webviewTag: true, // The webview tag is not recommended. Consider alternatives like iframe or Electron's BrowserView. https://www.electronjs.org/docs/latest/api/webview-tag#warning
       preload: join(__dirname, '../../preload/dist/index.cjs'),
     },
