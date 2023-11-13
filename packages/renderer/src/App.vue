@@ -37,7 +37,7 @@ setCssVar('primary', '#2d3e50');
 const iProps = reactive({
   showToolbar: true,
   toolbarMinimized: false,
-  showHelp: true,
+  showHelp: false,
   splitterModel: 300,
   error: false,
   error_text: '',
@@ -79,7 +79,8 @@ onMounted(async () => {
     iProps.error_text = 'Unable to detect GIT.<br>Please verify that GIT is installed.';
     iProps.error = true;
   }
-  // iProps.showHelp = false;
+  // This is absolutly insane? Without this line the default in iProps is ignored? How?
+  iProps.showHelp = false;
   // iProps.toolbarMinimized = true;
   // openLocalArc('/home/jones/external/projects/TEMP/ArcPrototype');
   // await ArcCommanderService.init();
@@ -136,12 +137,13 @@ const test = async ()=>{
 
           <q-separator />
 
-          <ToolbarButton text='Toggle Help' icon='help' @clicked='iProps.toolbarMinimized=!iProps.toolbarMinimized;iProps.showHelp=!iProps.showHelp;'></ToolbarButton>
-
+          
           <q-item class="col-grow"></q-item>
+          <ToolbarButton text='Toggle Help' icon='help' @clicked='iProps.showHelp=!iProps.showHelp;'></ToolbarButton>
+          <ToolbarButton :text="iProps.toolbarMinimized ? '' : 'Minimize Sidebar'" :icon="iProps.toolbarMinimized ? 'chevron_right' : 'chevron_left'" @clicked='iProps.toolbarMinimized=!iProps.toolbarMinimized;'></ToolbarButton>
           <q-separator />
-          <q-item class='justify-center bg-grey-4' style="margin:0;padding:0.2em;" dense>
-              {{iProps.version}}
+          <q-item class='justify-center bg-grey-4' style="margin:0;padding:0.2rem;" dense>
+            {{iProps.version}}
           </q-item>
         </q-list>
       </q-drawer>
