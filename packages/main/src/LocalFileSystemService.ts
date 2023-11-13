@@ -149,12 +149,13 @@ export const LocalFileSystemService = {
     return fpath;
   },
 
-
   writeFile: async (e,[path,data,options])=>{
     options = options || {encoding:'UTF-8'};
     path = path_to_system(path);
     FS.mkdirSync(PATH.dirname(path),{recursive:true});
-    return FS.writeFileSync(path,data,options);
+    if(data==='' && FS.existsSync(path)) return;
+
+    FS.writeFileSync(path,data,options);
   },
 
   getPathSeparator: async e=>{
@@ -181,11 +182,19 @@ export const LocalFileSystemService = {
     } catch {return false;}
   },
 
+  remove: async (e,path)=>{
+    try {
+      FS.rmSync(path_to_system(path), {recursive:true,force:true});
+      return true;
+    } catch {return false;}
+  },
+
   init: async () => {
     process.on('unhandledRejection', (reason, p) => {
       console.error(`Unhandled Rejection at: ${util.inspect(p)} reason: ${reason}`);
     });
 
+    ipcMain.handle('LocalFileSystemService.remove', LocalFileSystemService.remove);
     ipcMain.handle('LocalFileSystemService.readDir', LocalFileSystemService.readDir);
     ipcMain.handle('LocalFileSystemService.readFile', LocalFileSystemService.readFile);
     ipcMain.handle('LocalFileSystemService.writeFile', LocalFileSystemService.writeFile);

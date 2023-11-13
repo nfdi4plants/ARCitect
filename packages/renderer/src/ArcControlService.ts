@@ -21,7 +21,6 @@ const ArcControlService = {
 
     for(const contract of contracts){
       const buffer = await window.ipc.invoke('LocalFileSystemService.readFile', [arc_root+'/'+contract.Path,{}]);
-      console.log(contract.Path);
       contract.DTO = await Xlsx.fromBytes(buffer);
     }
 

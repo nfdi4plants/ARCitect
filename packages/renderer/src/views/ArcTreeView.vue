@@ -1,5 +1,6 @@
 <script lang="ts" setup>
-import { reactive, ref, nextTick, watch, onMounted, onUnmounted } from 'vue';
+import { reactive, ref, nextTick, watch, onMounted, onUnmounted, h } from 'vue';
+import ContextMenu from '@imengyu/vue3-context-menu'
 import AppProperties from '../AppProperties.ts';
 import ArcControlService from '../ArcControlService.ts';
 import StringDialog from '../dialogs/StringDialog.vue';
@@ -9,6 +10,7 @@ import { useQuasar } from 'quasar'
 const $q = useQuasar();
 
 import {ArcStudy, ArcAssay} from '@nfdi4plants/arctrl/ISA/ISA/ArcTypes/ArcTypes.js';
+
 
 const emit = defineEmits(['openArc']);
 
@@ -134,7 +136,7 @@ const readDir_ = async path => {
 
   const parent = path.split('/').pop().toLowerCase();
   const needsAddElement = l=>{
-    return ['studies','assays','protocols','dataset'].includes( l.toLowerCase() );
+    return ['studies','assays','protocols','dataset','runs','workflows'].includes( l.toLowerCase() );
   };
 
   const isMarkdown = l => {
@@ -149,7 +151,9 @@ const readDir_ = async path => {
     'studies': ['Study', addStudy],
     'assays': ['Assay', addAssay],
     'protocols': ['Protocol', addProtocol],
-    'dataset': ['Dataset', addDataset]
+    'dataset': ['Dataset', addDataset],
+    'runs': ['Dataset', addDataset],
+    'workflows': ['Dataset', addDataset]
   };
 
   for(const n of nodes){
@@ -257,6 +261,65 @@ const formatSize = size => {
   return (size / Math.pow(1024,log)).toFixed(2) + ' ' + suffix;
 };
 
+const deleteAssay = async assay_identifier => {
+  await ArcControlService.props.arc.ISA.RemoveAssay(assay_identifier);
+  await ArcControlService.props.arc.UpdateFileSystem();
+  // console.log(ArcControlService.props.arc);
+  await ArcControlService.writeARC(ArcControlService.props.arc_root);
+  await ArcControlService.readARC();
+  const path = `${ArcControlService.props.arc_root}/assays/${assay_identifier}`;
+  await window.ipc.invoke('LocalFileSystemService.remove', path);
+};
+
+const onCellContextMenu = (e,node) => {
+  // console.log(node);
+  // if(node.type==='node_edit_Assay'){
+  //   e.preventDefault();
+  //   ContextMenu.showContextMenu({
+  //     x: e.x,
+  //     y: e.y,
+  //     theme: 'flat',
+  //     items: [
+  //       {
+  //         label: "Delete Assay",
+  //         icon: h(
+  //           'i',
+  //           {
+  //             class: 'q-icon on-left notranslate material-icons',
+  //             role:'img',
+  //             style:{fontSize: '1.5em',color:'#333'}
+  //           },
+  //           ['delete']
+  //         ),
+  //         onClick: () =>{deleteAssay(node.label)}
+  //       },
+  //     ]
+  //   });
+  // } else if (node.type==='node_edit_Study'){
+  //   e.preventDefault();
+  //   ContextMenu.showContextMenu({
+  //     x: e.x,
+  //     y: e.y,
+  //     theme: 'flat',
+  //     items: [
+  //       {
+  //         label: "Delete Study",
+  //         icon: h(
+  //           'i',
+  //           {
+  //             class: 'q-icon on-left notranslate material-icons',
+  //             role:'img',
+  //             style:{fontSize: '1.5em',color:'#333'}
+  //           },
+  //           ['delete']
+  //         ),
+  //         onClick: () =>{props.table.RemoveRow(cell.rowIndex);refresh_hack();}
+  //       },
+  //     ]
+  //   });
+  // }
+};
+
 onMounted( ()=>{window.ipc.on('LocalFileSystemService.updatePath', updatePath);} );
 onUnmounted( ()=>{window.ipc.off('LocalFileSystemService.updatePath', updatePath);} );
 
@@ -280,8 +343,8 @@ onUnmounted( ()=>{window.ipc.off('LocalFileSystemService.updatePath', updatePath
     >
       <template v-slot:default-header="prop">
         <q-icon v-if='prop.node.icon' :name='prop.node.icon' style="padding:0 0.2em 0 0;"></q-icon>
-        <div style="flex:100">{{ prop.node.label }}</div>
-        <div v-if='!prop.node.isDirectory && !["add_box","block"].includes(prop.node.icon)' style="flex:1;white-space: nowrap;">{{ formatSize(prop.node.size) }}</div>
+        <div style="flex:100" @contextmenu="e=>onCellContextMenu(e,prop.node)">{{ prop.node.label }}</div>
+        <div v-if='!prop.node.isDirectory && !["add_box","block"].includes(prop.node.icon)' style="flex:1;white-space: nowrap;margin-left:1em;">{{ formatSize(prop.node.size) }}</div>
       </template>
     </q-tree>
 
