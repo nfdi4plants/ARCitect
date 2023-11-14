@@ -154,8 +154,12 @@ export const LocalFileSystemService = {
     path = path_to_system(path);
     FS.mkdirSync(PATH.dirname(path),{recursive:true});
     if(data==='' && FS.existsSync(path)) return;
-
-    FS.writeFileSync(path,data,options);
+    try {
+        FS.writeFileSync(path,data,options);
+    } catch (err) {
+        let window = BrowserWindow.getAllWindows().find(w => !w.isDestroyed());
+        window.webContents.send('CORE.MSG', err);
+    }
   },
 
   getPathSeparator: async e=>{

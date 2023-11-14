@@ -4,6 +4,7 @@ import AppProperties from './AppProperties.ts';
 
 import { ARC } from "@nfdi4plants/arctrl/ARC.js";
 import { ArcInvestigation } from "@nfdi4plants/arctrl/ISA/ISA/ArcTypes/ArcTypes.js";
+import { gitignoreContract } from "@nfdi4plants/arctrl/Contracts/Contracts.Git.js";
 import { Xlsx } from '@fslab/fsspreadsheet/Xlsx.js';
 const ArcControlService = {
 
@@ -45,6 +46,8 @@ const ArcControlService = {
 
     arc.UpdateFileSystem();
     let contracts = arc.GetWriteContracts();
+    /// Add default .gitignore
+    contracts.push(gitignoreContract)
     if(filter)
       contracts = contracts.filter( x=>filter.includes(x.DTOType) );
 
@@ -56,7 +59,7 @@ const ArcControlService = {
         await window.ipc.invoke('LocalFileSystemService.writeFile', [
           arc_root+'/'+contract.Path,
           contract.DTO || '',
-          null
+          {encoding:'UTF-8', flag: 'wx'}
         ]);
       } else {
         console.log('unable to resolve write contract', contract);
