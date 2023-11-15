@@ -1,23 +1,37 @@
 <script lang="ts" setup>
 import { reactive, ref, nextTick, watch, onMounted, onUnmounted, h } from 'vue';
 import ContextMenu from '@imengyu/vue3-context-menu'
-import AppProperties from '../AppProperties.ts';
-import ArcControlService from '../ArcControlService.ts';
+import AppProperties from '../AppProperties';
+import ArcControlService from '../ArcControlService';
 import StringDialog from '../dialogs/StringDialog.vue';
 import AddProtocolDialog from '../dialogs/AddProtocolDialog.vue';
 import NewAssayDialog from '../dialogs/NewAssayDialog.vue';
 import { useQuasar } from 'quasar'
+import {ArcStudy, ArcAssay} from '@nfdi4plants/arctrl/ISA/ISA/ArcTypes/ArcTypes.js';
 const $q = useQuasar();
 
-import {ArcStudy, ArcAssay} from '@nfdi4plants/arctrl/ISA/ISA/ArcTypes/ArcTypes.js';
+interface ArcTreeViewNode {
+    header: string;
+    type: string;
+    id: string;
+    label: string | undefined;
+    lazy: boolean;
+    icon: string;
+    selectable: boolean;
+    isDirectory: boolean;
+}
 
+let init: {
+  nodes: ArcTreeViewNode [];
+  root: string
+} = {
+  nodes: [],
+  root: ''
+}
 
 const emit = defineEmits(['openArc']);
 
-const props = reactive({
-  nodes: [],
-  root: ''
-});
+const props = reactive(init);
 const arcTree = ref(null);
 const selected = ref(null);
 

@@ -21,8 +21,8 @@ import { setCssVar } from 'quasar';
 
 import { onMounted, ref, reactive } from 'vue';
 
-import AppProperties from './AppProperties.ts';
-import ArcControlService from './ArcControlService.ts';
+import AppProperties from './AppProperties';
+import ArcControlService from './ArcControlService';
 setCssVar('primary', '#2d3e50');
 // import arcProperties from './ArcProperties.ts';
 // import ArcCommanderService from './ArcCommanderService.ts';
@@ -79,8 +79,6 @@ onMounted(async () => {
     iProps.error_text = 'Unable to detect GIT.<br>Please verify that GIT is installed.';
     iProps.error = true;
   }
-  // This is absolutly insane? Without this line the default in iProps is ignored? How?
-  iProps.showHelp = false;
   // iProps.toolbarMinimized = true;
   // openLocalArc('/home/jones/external/projects/TEMP/ArcPrototype');
   // await ArcCommanderService.init();
@@ -150,7 +148,6 @@ const test = async ()=>{
       </q-drawer>
 
       <q-drawer
-        show-if-above
         v-model="iProps.showHelp"
         side="right"
         bordered
