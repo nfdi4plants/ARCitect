@@ -27,7 +27,8 @@ The following quick guide is intended to help content contributors find a starti
 ### Release 
 
 1. Increase `package.json` semver.
-2. Any commit with release tag `git tag v<Placeholder>`, where `<Placeholder>` must be equal to `package.json` version, will trigger release pipeline in GitHub actions.
+2. Any commit with release tag `git tag <Placeholder>`, where `<Placeholder>` must be equal to `package.json` version, will trigger release pipeline in GitHub actions.
+3. Push tag with `git push --follow-tags`
 
 ### Issues
 
