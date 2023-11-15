@@ -47,14 +47,23 @@ const iProps = reactive({
 const openLocalArc = async (path: string | null | void) =>{
   if(!path) path = await window.ipc.invoke('LocalFileSystemService.selectDir', ['Select local ARC','Select local ARC']);
   if(!path) return;
-  const isARC = await window.ipc.invoke('LocalFileSystemService.exists', path+'/isa.investigation.xlsx');
-  if(!isARC){
+  let isOpen = await ArcControlService.readARC(path);
+  if(!isOpen){
     iProps.error_text = 'Invalid ARC format:<br>'+path;
     iProps.error = true;
     return;
   }
+  AppProperties.state=AppProperties.STATES.HOME;
+};
 
-  await ArcControlService.readARC(path);
+const refreshLocalArc = async () =>{
+  let path = ArcControlService.props.arc_root;
+  let isOpen = await ArcControlService.readARC(path);
+  if(!isOpen){
+    iProps.error_text = 'Unable to find valid ARC at:<br>'+path;
+    iProps.error = true;
+    return;
+  }
   AppProperties.state=AppProperties.STATES.HOME;
 };
 
@@ -130,10 +139,9 @@ const test = async ()=>{
           <q-separator />
 
           <!--<ToolbarButton text='Upload ARC' icon='cloud_upload' requiresARC='true' @clicked='test()'></ToolbarButton>-->
-          <ToolbarButton text='Reset ARC' icon='autorenew' requiresARC @clicked='ArcControlService.readARC()'></ToolbarButton>
+          <ToolbarButton text='Refresh ARC' icon='autorenew' requiresARC @clicked='refreshLocalArc()'></ToolbarButton>
           <ToolbarButton text='Versions' icon='update' requiresARC @clicked='AppProperties.state=AppProperties.STATES.GIT'></ToolbarButton>
           <ToolbarButton text='Explorer' icon='folder_open' requiresARC @clicked='ArcControlService.openArcInExplorer()'></ToolbarButton>
-
           <q-separator />
 
           
@@ -169,9 +177,9 @@ const test = async ()=>{
             :limits='[300,Infinity]'
            >
             <template v-slot:before>
-              <q-scroll-area class='fit' style="height: 100%;">
-                <ArcTreeView @openArc='openLocalArc'></ArcTreeView>
-              </q-scroll-area>
+                <q-scroll-area class='fit' style="flex-grow: 1;">
+                    <ArcTreeView @openArc='openLocalArc'></ArcTreeView>
+                </q-scroll-area>
             </template>
 
             <template v-slot:after>

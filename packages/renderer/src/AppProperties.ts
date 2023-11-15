@@ -26,8 +26,6 @@ const AppProperties = reactive({
 
   user: null,
   path_sep: null,
-
-  arc_root: null
 });
 
 for(let k in AppProperties.STATES){

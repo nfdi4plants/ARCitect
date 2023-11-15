@@ -21,11 +21,28 @@ const ArcControlService = {
 
   props: reactive(init),
 
+  closeARC: async() => {
+    ArcControlService.props.arc_root = null;
+    ArcControlService.props.busy = false;
+    ArcControlService.props.arc = null;
+    AppProperties.active_assay = null;
+    AppProperties.active_study = null;
+    AppProperties.state = 0;
+    return;
+  },
+
   readARC: async (arc_root: string | void | null) =>{
     if(!arc_root)
       arc_root = ArcControlService.props.arc_root;
     if(!arc_root)
       return;
+
+    const isARC = await window.ipc.invoke('LocalFileSystemService.exists', arc_root+'/isa.investigation.xlsx');
+
+    if (!isARC) {
+        ArcControlService.closeARC();
+        return false;
+    }
 
     ArcControlService.props.busy = true;
 
@@ -44,6 +61,7 @@ const ArcControlService = {
     ArcControlService.props.arc_root = arc_root;
     ArcControlService.props.busy = false;
     console.log(arc);
+    return true;
   },
 
   writeARC: async (arc_root,filter,arc)=>{

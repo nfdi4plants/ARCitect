@@ -4,8 +4,9 @@ import FS from 'fs';
 import FSE from 'fs-extra'
 import chokidar from 'chokidar';
 import util from 'util';
+import os from 'os'
 
-const changeListeners = {};
+const changeListeners = new Map<string,chokidar.FSWatcher> ;
 
 const path_to_arcitect = (path: string) => path.split(PATH.sep).join('/')
 const path_to_system = (path: string) => path.split('/').join(PATH.sep)
@@ -104,20 +105,20 @@ export const LocalFileSystemService = {
   registerChangeListener: async (e,path)=>{
     path = path_to_system(path)
 
-    if(changeListeners[path])
+    if(changeListeners.has(path))
       await LocalFileSystemService.unregisterChangeListener(null,path);
-
-    changeListeners[path] = chokidar.watch(path,{ignoreInitial:true});
+    const listener = chokidar.watch(path,{ignoreInitial:true, usePolling: os.platform()==='win32'});
+    changeListeners.set(path, listener);
 
     const updatePath = path => {
       const window = BrowserWindow.getAllWindows().find(w => !w.isDestroyed());
-      window.webContents.send('LocalFileSystemService.updatePath', path_to_arcitect(path));
+      window?.webContents.send('LocalFileSystemService.updatePath', path_to_arcitect(path));
     };
     const updateParentPath = path => {
       updatePath( PATH.dirname(path) );
     };
 
-    changeListeners[path]
+    listener
       // .on('all', (event, path) => {
       //   // console.log(event,path);
       // })
@@ -133,12 +134,12 @@ export const LocalFileSystemService = {
   unregisterChangeListener: async (e,path)=>{
     // console.log('ul',path)
     path = path_to_system(path)
-    const watcher = changeListeners[path];
+    const watcher = changeListeners.get(path);
     if(!watcher)
       return;
 
-    await watcher.unwatch();
-    delete changeListeners[path];
+    await watcher.unwatch(path);
+    changeListeners.delete(path);
     return;
   },
 
@@ -158,7 +159,7 @@ export const LocalFileSystemService = {
         FS.writeFileSync(path,data,options);
     } catch (err) {
         let window = BrowserWindow.getAllWindows().find(w => !w.isDestroyed());
-        window.webContents.send('CORE.MSG', err);
+        window?.webContents.send('CORE.MSG', err);
     }
   },
 

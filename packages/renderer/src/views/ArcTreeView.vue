@@ -341,8 +341,9 @@ onUnmounted( ()=>{window.ipc.off('LocalFileSystemService.updatePath', updatePath
 
 <template>
   <div class='q-pa-md'>
-    <div class='text-h6 text-grey-7' style="font-size:0.9em;border-bottom:0.1em solid #ccc;line-height:1em;padding:0 0 0.7em 0;">{{(props.root.replace(' ', '&nbsp;') || '').split('/').join(' /&nbsp;')}}</div>
+    <div v-if="ArcControlService.props.arc" class='text-h6 text-grey-7' style="font-size:0.9em;border-bottom:0.1em solid #ccc;line-height:1em;padding:0 0 0.7em 0;">{{(props.root.replace(' ', '&nbsp;') || '').split('/').join(' /&nbsp;')}}</div>
     <q-tree
+      v-if="ArcControlService.props.arc"
       ref='arcTree'
       :nodes="props.nodes"
       node-key="id"
@@ -366,7 +367,6 @@ onUnmounted( ()=>{window.ipc.off('LocalFileSystemService.updatePath', updatePath
       <!--<q-icon name="account_tree" size="15em" style='color:#ccc' />-->
       <q-icon name="find_in_page" size="15em" style='color:#ccc' v-on:click='emit("openArc")' />
     </div>
-
   </div>
 </template>
 
