@@ -4,10 +4,10 @@ import ArcControlService from '../ArcControlService.ts';
 import appProperties from '../AppProperties.ts';
 
 export interface Props {
-  icon: String,
-  text: String,
-  requiresARC?: Boolean,
-  requiresUser?: Boolean
+  icon: string,
+  text: string,
+  requiresARC?: boolean,
+  requiresUser?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {

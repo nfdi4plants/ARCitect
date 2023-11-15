@@ -2,6 +2,7 @@ import { BrowserWindow,Menu,shell } from 'electron';
 import path from 'path';
 import { join } from 'path';
 import { URL } from 'url';
+
 const contextMenu = require('electron-context-menu');
 contextMenu({
   showSaveImageAs: true
@@ -55,7 +56,6 @@ async function createWindow() {
 */
 export async function restoreOrCreateWindow() {
   let window = BrowserWindow.getAllWindows().find(w => !w.isDestroyed());
-
   const template = [
     {
       label: 'Window',

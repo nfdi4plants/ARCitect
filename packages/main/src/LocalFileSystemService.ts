@@ -1,4 +1,4 @@
-import { BrowserWindow, ipcMain, dialog } from 'electron';
+import { BrowserWindow, ipcMain, dialog, shell } from 'electron';
 import PATH from 'path';
 import FS from 'fs';
 import FSE from 'fs-extra'
@@ -193,6 +193,16 @@ export const LocalFileSystemService = {
     } catch {return false;}
   },
 
+  openPath: async (e, path:string)=>{
+    path = path_to_system(path)
+    try {
+        shell.openPath(path);
+        return true
+    } catch {
+        return false
+    }
+  },
+
   init: async () => {
     process.on('unhandledRejection', (reason, p) => {
       console.error(`Unhandled Rejection at: ${util.inspect(p)} reason: ${reason}`);
@@ -213,5 +223,6 @@ export const LocalFileSystemService = {
     ipcMain.handle('LocalFileSystemService.getAllXLSX', LocalFileSystemService.getAllXLSX);
     ipcMain.handle('LocalFileSystemService.getFileSizes', LocalFileSystemService.getFileSizes);
     ipcMain.handle('LocalFileSystemService.exists', LocalFileSystemService.exists);
+    ipcMain.handle('LocalFileSystemService.openPath', LocalFileSystemService.openPath);
   }
 }

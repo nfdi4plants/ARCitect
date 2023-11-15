@@ -6,9 +6,22 @@ import { ARC } from "@nfdi4plants/arctrl/ARC.js";
 import { ArcInvestigation } from "@nfdi4plants/arctrl/ISA/ISA/ArcTypes/ArcTypes.js";
 import { gitignoreContract } from "@nfdi4plants/arctrl/Contracts/Contracts.Git.js";
 import { Xlsx } from '@fslab/fsspreadsheet/Xlsx.js';
+
+let init: {
+    arc_root: null | string ,
+    busy: boolean,
+    arc: null | ARC
+} = {
+    arc_root: null ,
+    busy: false,
+    arc: null
+}
+
 const ArcControlService = {
 
-  readARC: async arc_root=>{
+  props: reactive(init),
+
+  readARC: async (arc_root: string | void | null) =>{
     if(!arc_root)
       arc_root = ArcControlService.props.arc_root;
     if(!arc_root)
@@ -69,7 +82,7 @@ const ArcControlService = {
     ArcControlService.props.busy = false;
   },
 
-  new_arc: async path=>{
+  new_arc: async (path: string) =>{
     const arc = new ARC(
       ArcInvestigation.init(path.split('/').pop())
     );
@@ -80,13 +93,15 @@ const ArcControlService = {
       args: ['init'],
       cwd: path
     });
+  },
+
+  openArcInExplorer: async (arc_root: string | null | void) => {
+    if(!arc_root)
+      arc_root = ArcControlService.props.arc_root;
+    if(!arc_root)
+      return;
+    await window.ipc.invoke('LocalFileSystemService.openPath', arc_root);
   }
 };
-
-ArcControlService.props = reactive({
-  arc_root: null,
-  busy: false,
-  arc: null
-});
 
 export default ArcControlService;

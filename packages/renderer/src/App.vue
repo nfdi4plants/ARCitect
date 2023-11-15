@@ -44,7 +44,7 @@ const iProps = reactive({
   version: '',
 });
 
-const openLocalArc = async path=>{
+const openLocalArc = async (path: string | null | void) =>{
   if(!path) path = await window.ipc.invoke('LocalFileSystemService.selectDir', ['Select local ARC','Select local ARC']);
   if(!path) return;
   const isARC = await window.ipc.invoke('LocalFileSystemService.exists', path+'/isa.investigation.xlsx');
@@ -132,8 +132,9 @@ const test = async ()=>{
           <q-separator />
 
           <!--<ToolbarButton text='Upload ARC' icon='cloud_upload' requiresARC='true' @clicked='test()'></ToolbarButton>-->
-          <ToolbarButton text='Reset ARC' icon='autorenew' requiresARC='true' @clicked='ArcControlService.readARC()'></ToolbarButton>
-          <ToolbarButton text='Versions' icon='update' requiresARC='true' @clicked='AppProperties.state=AppProperties.STATES.GIT'></ToolbarButton>
+          <ToolbarButton text='Reset ARC' icon='autorenew' requiresARC @clicked='ArcControlService.readARC()'></ToolbarButton>
+          <ToolbarButton text='Versions' icon='update' requiresARC @clicked='AppProperties.state=AppProperties.STATES.GIT'></ToolbarButton>
+          <ToolbarButton text='Explorer' icon='folder_open' requiresARC @clicked='ArcControlService.openArcInExplorer()'></ToolbarButton>
 
           <q-separator />
 
