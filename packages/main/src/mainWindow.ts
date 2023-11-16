@@ -9,6 +9,7 @@ contextMenu({
 });
 
 async function createWindow() {
+  console.log("HIT; ", join(__dirname, './../../../ressources/icon.png'))
   const mainWindow = new BrowserWindow({
     show: false, // Use 'ready-to-show' event to show window
     webPreferences: {
@@ -17,6 +18,7 @@ async function createWindow() {
     },
     width:1280,
     height:700,
+    icon: join(__dirname, './../../renderer/assets/dpLogo2.png')
   });
 
   /**
