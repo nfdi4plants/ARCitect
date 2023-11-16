@@ -64,7 +64,7 @@ const ArcControlService = {
     return true;
   },
 
-  writeARC: async (arc_root,filter,arc)=>{
+  writeARC: async (arc_root: string | null, filter, arc: ARC | void)=>{
     arc = arc || ArcControlService.props.arc;
     if(!arc)
       return;

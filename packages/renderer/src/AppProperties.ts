@@ -2,6 +2,7 @@ import { reactive } from 'vue'
 
 const AppProperties: {
   STATES: any,
+  state: number,
   active_study: string | null
   active_assay: string | null
 } = reactive({

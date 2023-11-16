@@ -9,6 +9,7 @@ import NewAssayDialog from '../dialogs/NewAssayDialog.vue';
 import { NewAssayInformation } from '../dialogs/NewAssayDialog.vue';
 import { useQuasar } from 'quasar'
 import {ArcStudy, ArcAssay} from '@nfdi4plants/arctrl/ISA/ISA/ArcTypes/ArcTypes.js';
+import NewStudyDialog from '../dialogs/NewStudyDialog.vue';
 
 const $q = useQuasar();
 
@@ -82,24 +83,19 @@ watch(()=>AppProperties.state, async (newValue, oldValue) => {
 
 let uniqueLabelCounter = 0;
 
-const addStudy_ = async (identifier,skip_io)=>{
+const addStudy_ = async (identifier: string, skip_io: boolean | void)=>{
   const study = new ArcStudy(identifier,identifier);
-  ArcControlService.props.arc.ISA.AddStudy(study);
-  ArcControlService.props.arc.ISA.RegisterStudy(identifier);
+  ArcControlService.props.arc.ISA.AddRegisteredStudy(study)
   if(!skip_io){
-    await ArcControlService.writeARC(ArcControlService.props.arc_root);
+    await ArcControlService.writeARC();
     await ArcControlService.readARC();
     AppProperties.active_study = identifier;
   }
 };
+
 const addStudy = async ()=>{
   $q.dialog({
-    component: StringDialog,
-    componentProps: {
-      title: 'Add Study',
-      property: 'Identifier',
-      icon: 'add_box'
-    }
+    component: NewStudyDialog
   }).onOk( async data => await addStudy_(data));
 };
 
@@ -107,10 +103,6 @@ const addAssay = async ()=>{
   $q.dialog({
     component: NewAssayDialog
   }).onOk( async (data: NewAssayInformation) => {
-    // if(data[1].length<1){
-      //   await addStudy_(data[0],true);
-      //   data[1].push(data[0]);
-      // }
     const assay = new ArcAssay(data.assayIdentifier);
     ArcControlService.props.arc.ISA.AddAssay(assay);
 
@@ -373,9 +365,10 @@ onUnmounted( ()=>{window.ipc.off('LocalFileSystemService.updatePath', updatePath
       </template>
     </q-tree>
 
-    <div style="text-align:center;" v-if='props.nodes.length<1'>
+    <div class="column" style="text-align: center; color:#ccc; cursor: pointer;" v-if="props.nodes.length < 1" @click='emit("openArc")'>
       <!--<q-icon name="account_tree" size="15em" style='color:#ccc' />-->
-      <q-icon name="find_in_page" size="15em" style='color:#ccc' v-on:click='emit("openArc")' />
+      <q-icon name="find_in_page" size="15em" style="width: 100%"/>
+      <h6>Open ARC</h6>
     </div>
   </div>
 </template>
