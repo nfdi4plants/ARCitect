@@ -124,7 +124,7 @@ const isValidTerm = ()=>{
     </div>
 
     <q-checkbox
-      v-else-if='props.property.type==="checkbox"'
+      v-else-if='props.property.type === "checkbox"'
       v-model="props.property.model[props.property.property]"
       :label="props.property.label"
       color='secondary'
@@ -135,7 +135,7 @@ const isValidTerm = ()=>{
     </q-checkbox>
 
     <q-input
-      v-else-if='props.property.type!=="select"'
+      v-else-if='props.property.type !== "select"'
 
       :style="`margin:0 0.5em ${props.property.hint?2:-0.5}em 0.5em;`"
       :bg-color="props.property.dirty() ? 'teal-1':'grey-3'"

@@ -1,6 +1,10 @@
 import { reactive } from 'vue'
 
-const AppProperties = reactive({
+const AppProperties: {
+  STATES: any,
+  active_study: string | null
+  active_assay: string | null
+} = reactive({
   STATES: {
     HOME: 0,
 

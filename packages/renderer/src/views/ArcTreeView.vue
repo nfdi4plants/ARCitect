@@ -6,8 +6,10 @@ import ArcControlService from '../ArcControlService';
 import StringDialog from '../dialogs/StringDialog.vue';
 import AddProtocolDialog from '../dialogs/AddProtocolDialog.vue';
 import NewAssayDialog from '../dialogs/NewAssayDialog.vue';
+import { NewAssayInformation } from '../dialogs/NewAssayDialog.vue';
 import { useQuasar } from 'quasar'
 import {ArcStudy, ArcAssay} from '@nfdi4plants/arctrl/ISA/ISA/ArcTypes/ArcTypes.js';
+
 const $q = useQuasar();
 
 interface ArcTreeViewNode {
@@ -104,21 +106,29 @@ const addStudy = async ()=>{
 const addAssay = async ()=>{
   $q.dialog({
     component: NewAssayDialog
-  }).onOk( async data => {
-    if(data[1].length<1){
-      await addStudy_(data[0],true);
-      data[1].push(data[0]);
-    }
-
-    const assay = new ArcAssay(data[0]);
+  }).onOk( async (data: NewAssayInformation) => {
+    // if(data[1].length<1){
+      //   await addStudy_(data[0],true);
+      //   data[1].push(data[0]);
+      // }
+    const assay = new ArcAssay(data.assayIdentifier);
     ArcControlService.props.arc.ISA.AddAssay(assay);
 
-    for(let study of data[1])
-      ArcControlService.props.arc.ISA.RegisterAssay(study,data[0]);
+    if (data.studyIdentifier !== null) {
+      for(let studyIdentifier of data.studyIdentifier)
+        try {
+          ArcControlService.props.arc.ISA.RegisterAssay(studyIdentifier,data.assayIdentifier);
+        } catch {
+          console.log("Unfound study identifier: '", studyIdentifier, "'. Created new Study for identifier.")
+          const study = new ArcStudy(studyIdentifier);
+          ArcControlService.props.arc.ISA.AddRegisteredStudy(study);
+          ArcControlService.props.arc.ISA.RegisterAssay(studyIdentifier,data.assayIdentifier);
+        }
+    };
 
-    await ArcControlService.writeARC(ArcControlService.props.arc_root);
+    await ArcControlService.writeARC(ArcControlService.props.arc_root, undefined, undefined);
     await ArcControlService.readARC();
-    AppProperties.active_assay = data[0];
+    AppProperties.active_assay = data.assayIdentifier;
   });
 };
 
