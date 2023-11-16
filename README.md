@@ -6,9 +6,25 @@ The **ARCitect** is an **electron-app** to create, manage and share your **ARCs*
 
 ## Installation
 
-It is only necesary to download and run one of the provided standalone **Releases** for **Windows** (suffix: win.zip), **MacOS** (suffix: dmg), and **Linux** (suffix: AppImage). The releases do not require you to install any dependencies (except `git` for the MacOS and Linux releases).
+It is only necesary to download and run one of the provided standalone **Releases** for **Windows** (suffix: win.zip), **MacOS** (suffix: dmg), and **Linux** (suffix: AppImage). The releases do not require you to install any dependencies (except `git` for the MacOS and Linux releases). For Linux you might need to make the file executable: 
+#### Make the file executable on Linux
+##### (A) with the user interface
+- right-click the file and select properties
+- go to the "permissions" tab and tick the field "execute"
+- now double-clicking the AppImage should start the ARCitect
 
-:bulb: Check out the [DataPLANT knowledge base](https://nfdi4plants.org/nfdi4plants.knowledgebase/docs/ARCitect-Manual/index.html) for details.
+##### (B) from the command line (you might need specific rights for this)
+- open a terminal
+- move to the directory where you have saved your AppImage (e.g. Downloads)
+```
+cd Downloads
+```
+- make the file executable (use the appropriate name of the file)
+```
+chmod u+x ARCitect-0.0.15.AppImage
+```
+- now double-clicking the AppImage should start the ARCitect
+
 
 ## Building from Source 
 
