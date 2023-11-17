@@ -17,7 +17,7 @@ const onSubmit = async () => {
 };
 
 const importProtocol = async ()=>{
-  const files = await window.ipc.invoke('LocalFileSystemService.selectAny');
+  const files = await window.ipc.invoke('LocalFileSystemService.selectAnyFiles');
   onDialogOK([false,files]);
 };
 
