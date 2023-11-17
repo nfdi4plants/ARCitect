@@ -38,6 +38,18 @@ const props = reactive(init);
 const arcTree = ref(null);
 const selected = ref(null);
 
+const Investigation = "investigation";
+const Studies = "studies";
+const Assays = "assays";
+const Protocols = 'protocols';
+const Dataset = 'dataset';
+const Runs = 'runs';
+const Workflows = 'workflows';
+const Markdown = 'markdown';
+const NodeAdd_PreFix = "node_add_"
+const NodeEdit_PreFix = "node_edit_"
+
+
 watch(()=>ArcControlService.props.arc_root, async (newValue, oldValue) => {
   if(oldValue)
     window.ipc.invoke('LocalFileSystemService.unregisterChangeListener', oldValue);
@@ -48,7 +60,7 @@ watch(()=>ArcControlService.props.arc_root, async (newValue, oldValue) => {
   props.root = newValue;
   props.nodes = [{
     header: 'root',
-    type: 'node_edit_investigation',
+    type: `node_edit_${Investigation}`,
     id: props.root,
     label: props.root.split('/').pop(),
     lazy: true,
@@ -62,12 +74,13 @@ watch(()=>ArcControlService.props.arc_root, async (newValue, oldValue) => {
 
 watch(()=>AppProperties.active_study, async (newValue, oldValue) => {
   await nextTick();
-  selected.value = `${ArcControlService.props.arc_root}/studies/${newValue}`;
+  selected.value = `${ArcControlService.props.arc_root}/${Studies}/${newValue}`;
   onSelectionChanged(selected.value);
 });
+
 watch(()=>AppProperties.active_assay, async (newValue, oldValue) => {
   await nextTick();
-  selected.value = `${ArcControlService.props.arc_root}/assays/${newValue}`;
+  selected.value = `${ArcControlService.props.arc_root}/${Assays}/${newValue}`;
   onSelectionChanged(selected.value);
 });
 
@@ -80,6 +93,14 @@ watch(()=>AppProperties.state, async (newValue, oldValue) => {
     selected.value = null
   }
 });
+
+function formatNodeEditString(contentType: string) {
+  return NodeEdit_PreFix + contentType;
+}
+
+function formatNodeAddString(label: string) {
+  return NodeAdd_PreFix + label.replace(" ","");
+}
 
 let uniqueLabelCounter = 0;
 
@@ -139,7 +160,7 @@ const addProtocol = async n=>{
   });
 };
 
-const addDataset = async n=>{
+const importFiles = async n=>{
   const path = n.id.split('/').slice(0,-1).join('/');
   const paths = await window.ipc.invoke('LocalFileSystemService.selectAnyFiles');
   for(const path_ of paths){
@@ -147,12 +168,21 @@ const addDataset = async n=>{
   }
 };
 
-const readDir_ = async path => {
+const importFolders = async n => {
+  const path = n.id.split('/').slice(0,-1).join('/');
+  const paths = await window.ipc.invoke('LocalFileSystemService.selectAnyFolders');
+  for(const path_ of paths){
+    await window.ipc.invoke('LocalFileSystemService.copy', [path_,path]);
+  }
+};
+
+const readDir_ = async (path: string) => {
   const nodes = await window.ipc.invoke('LocalFileSystemService.readDir', path);
 
   const parent = path.split('/').pop().toLowerCase();
-  const needsAddElement = l=>{
-    return ['studies','assays','protocols','dataset','runs','workflows'].includes( l.toLowerCase() );
+
+  const needsAddElement = (l: string) => {
+    return [Studies,Assays,Protocols, Dataset, Runs, Workflows].includes( l.toLowerCase() );
   };
 
   const isMarkdown = l => {
@@ -160,48 +190,76 @@ const readDir_ = async path => {
   }
 
   const isEditable = (n,p)=>{
-    return n.isDirectory && ['studies','assays'].includes(p);
+    return n.isDirectory && [Studies, Assays].includes(p);
   };
 
-  const elementMap = {
-    'studies': ['Study', addStudy],
-    'assays': ['Assay', addAssay],
-    'protocols': ['Protocol', addProtocol],
-    'dataset': ['Dataset', addDataset],
-    'runs': ['Dataset', addDataset],
-    'workflows': ['Dataset', addDataset]
-  };
 
-  for(const n of nodes){
-    n.label = n.id.split('/').pop();
-    n.lazy = n.isDirectory;
-    if(isEditable(n,parent)){
-      n.type = 'node_edit_'+elementMap[parent][0];
-      n.icon = 'edit_square';
-      n.selectable = true;
-    } else if(isMarkdown(n.label)){
-      n.type = 'node_edit_Markdown';
-      n.icon = 'edit_square';
-      n.selectable = true;
-    } else {
-      n.selectable = false;
-      n.type = 'node';
-    }
-  }
-
-  if(needsAddElement(parent)){
-    nodes.push({
-      type: 'node_add_'+elementMap[parent][0],
-      label: 'Add '+elementMap[parent][0],
+  function createAddNode (label: string, handler: ((n:any) => Promise<void>) ) {
+    const node = {
+      type: formatNodeAddString(label),
+      label: label,
       isDirectory: false,
       lazy: false,
       icon: 'add_box',
       id: path+'/'+'add$'+(uniqueLabelCounter++),
       selectable: true,
       tickable: false,
-      handler: elementMap[parent][1]
-    });
-  }
+      handler: handler
+    }
+    return node; 
+  };
+
+  for(const n of nodes){
+    n.label = n.id.split('/').pop();
+    n.lazy = n.isDirectory;
+    if(isEditable(n,parent)){
+      n.type = formatNodeEditString(parent);
+      n.icon = 'edit_square';
+      n.selectable = true;
+    } else if(isMarkdown(n.label)){
+      n.type = formatNodeEditString(Markdown);
+      n.icon = 'edit_square';
+      n.selectable = true;
+    } else {
+      n.selectable = false;
+      n.type = 'node';
+    }
+  };
+
+  if(needsAddElement(parent)) {
+    switch (parent) {
+      case Studies:
+        let addStudyNode = createAddNode("Add Study", addStudy);
+        nodes.push(addStudyNode);
+        break;
+      case Assays:
+        let addAssayNode = createAddNode("Add Assay", addAssay);
+        nodes.push(addAssayNode);
+        break;
+      case Protocols:
+        let addProcotolNode = createAddNode("Add Protocol", addProtocol)
+        nodes.push(addProcotolNode);
+        break;
+      case Dataset:
+        let importDatasetFilesNode = createAddNode("Import Dataset Files", importFiles)
+        let importDatasetFoldersNode = createAddNode("Import Dataset Folders", importFolders)
+        nodes.push(importDatasetFilesNode);
+        nodes.push(importDatasetFoldersNode);
+        break;
+      case Runs:
+        let importRunsFilesNode = createAddNode("Import Runs Files", importFiles)
+        let importRunsFoldersNode = createAddNode("Import Runs Folders", importFolders)
+        nodes.push(importRunsFilesNode);
+        nodes.push(importRunsFoldersNode);
+        break;
+      case Workflows:
+        let importWorkflowsFilesNode = createAddNode("Import Workflows Files", importFiles)
+        let importWorkflowsFoldersNode = createAddNode("Import Workflows Folders", importFolders)
+        nodes.push(importWorkflowsFilesNode);
+        nodes.push(importWorkflowsFoldersNode);
+        break;
+    }
+  };
 
   if(nodes.length<1){
     nodes.push({
@@ -222,9 +280,9 @@ const readDir_ = async path => {
       return 1;
     }
 
-    if(a.type.startsWith('node_add_') && !b.type.startsWith('node_add_')){
+    if(a.type.startsWith(NodeAdd_PreFix) && !b.type.startsWith(NodeAdd_PreFix)){
       return 1;
-    } else if (!a.type.startsWith('node_add_') && b.type.startsWith('node_add_')){
+    } else if (!a.type.startsWith(NodeAdd_PreFix) && b.type.startsWith(NodeAdd_PreFix)){
       return -1;
     }
     return a.label.localeCompare(b.label);
@@ -232,6 +290,7 @@ const readDir_ = async path => {
 
   return nodes;
 };
+
 const readDir = async ({ node, key, done, fail }) => {
   done( await readDir_(key) );
 };
@@ -241,22 +300,21 @@ const onSelectionChanged = id=>{
   const type = n ? n.type : null;
 
   switch (type) {
-    case 'node_edit_investigation':
+    case formatNodeEditString(Investigation):
       return AppProperties.state=AppProperties.STATES.EDIT_INVESTIGATION;
-    case 'node_edit_Study':
+    case formatNodeEditString(Studies):
       AppProperties.active_study = n.label;
       return AppProperties.state=AppProperties.STATES.EDIT_STUDY;
-    case 'node_edit_Assay':
+    case formatNodeEditString(Assays):
       AppProperties.active_assay = n.label;
       return AppProperties.state=AppProperties.STATES.EDIT_ASSAY;
-    case 'node_edit_Markdown':
+    case formatNodeEditString(Markdown):
       AppProperties.active_markdown = n.id;
       return AppProperties.state=AppProperties.STATES.EDIT_MARKDOWN;
-
     // default:
     //   return AppProperties.state=AppProperties.STATES.HOME;
   }
-}
+};
 
 const updatePath = async path => {
   const n = arcTree._value.getNodeByKey(path);
@@ -277,7 +335,7 @@ const formatSize = size => {
   return (size / Math.pow(1024,log)).toFixed(2) + ' ' + suffix;
 };
 
-const deleteAssay = async assay_identifier => {
+const deleteAssay = async (assay_identifier: string) => {
   await ArcControlService.props.arc.ISA.RemoveAssay(assay_identifier);
   await ArcControlService.props.arc.UpdateFileSystem();
   // console.log(ArcControlService.props.arc);

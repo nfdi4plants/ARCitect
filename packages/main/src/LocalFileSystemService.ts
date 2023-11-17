@@ -71,6 +71,15 @@ export const LocalFileSystemService = {
     return result ? result.filePaths.map(path_to_arcitect) : null;
   },
 
+  selectAnyFolders: async ()=>{
+    const window = BrowserWindow.getAllWindows().find(w => !w.isDestroyed())
+    const result = await dialog.showOpenDialog(window, {
+      // Do not add 'openDirectory' option below. This will replace 'openFile' in windows and linux.
+      properties: ['openDirectory','multiSelections']
+    });
+    return result ? result.filePaths.map(path_to_arcitect) : null;
+  },
+
   saveFile: async ()=>{
     const window = BrowserWindow.getAllWindows().find(w => !w.isDestroyed())
     const result = await dialog.showSaveDialog(window);
@@ -216,6 +225,7 @@ export const LocalFileSystemService = {
     ipcMain.handle('LocalFileSystemService.writeFile', LocalFileSystemService.writeFile);
     ipcMain.handle('LocalFileSystemService.selectDir', LocalFileSystemService.selectDir);
     ipcMain.handle('LocalFileSystemService.selectAnyFiles', LocalFileSystemService.selectAnyFiles);
+    ipcMain.handle('LocalFileSystemService.selectAnyFolders', LocalFileSystemService.selectAnyFolders);
     ipcMain.handle('LocalFileSystemService.saveFile', LocalFileSystemService.saveFile);
     ipcMain.handle('LocalFileSystemService.copy', LocalFileSystemService.copy);
     ipcMain.handle('LocalFileSystemService.createEmptyFile', LocalFileSystemService.createEmptyFile);
