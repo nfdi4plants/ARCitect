@@ -6,6 +6,16 @@ import { ARC } from "@nfdi4plants/arctrl/ARC.js";
 import { ArcInvestigation } from "@nfdi4plants/arctrl/ISA/ISA/ArcTypes/ArcTypes.js";
 import { gitignoreContract } from "@nfdi4plants/arctrl/Contracts/Contracts.Git.js";
 import { Xlsx } from '@fslab/fsspreadsheet/Xlsx.js';
+import {Assays} from './views/ArcTreeView.vue';
+import {FileSystemTree} from '@nfdi4plants/arctrl/FileSystem/FileSystemTree.js'
+
+export const Investigation = "investigation";
+export const Studies = "studies";
+export const Assays = "assays";
+export const Protocols = 'protocols';
+export const Dataset = 'dataset';
+export const Runs = 'runs';
+export const Workflows = 'workflows';
 
 let init: {
     arc_root: null | string ,
@@ -98,6 +108,48 @@ const ArcControlService = {
     }
 
     ArcControlService.props.busy = false;
+  },
+
+  deleteAssay: async (assay_identifier: string) => {
+    const relativePath = `${Assays}/${assay_identifier}`;
+    const path = `${ArcControlService.props.arc_root}/${relativePath}`;
+    const filePaths : string [] = ArcControlService.props.arc.FileSystem.Tree.ToFilePaths();
+    const filteredPaths : string [] = filePaths.filter(path => !path.startsWith(relativePath));
+    const newFsTree = FileSystemTree.fromFilePaths(filteredPaths);
+    // possibly remove assay from edit view
+    if (AppProperties.active_assay === assay_identifier) {
+      AppProperties.active_assay = null;
+      AppProperties.state = AppProperties.STATES.HOME;
+    };
+    await ArcControlService.props.arc.ISA.RemoveAssay(assay_identifier);
+    ArcControlService.props.arc._fs.Tree = newFsTree;
+    await window.ipc.invoke('LocalFileSystemService.remove', path);
+    await ArcControlService.writeARC();
+    await ArcControlService.readARC();
+  },
+
+  deleteStudy: async (study_identifier: string) => {
+
+    const relativePath = `${Studies}/${study_identifier}`;
+    const path = `${ArcControlService.props.arc_root}/${relativePath}`;
+    const filePaths : string [] = ArcControlService.props.arc.FileSystem.Tree.ToFilePaths();
+    const filteredPaths : string [] = filePaths.filter(path => !path.startsWith(relativePath));
+    const newFsTree = FileSystemTree.fromFilePaths(filteredPaths);
+    // possibly remove study from edit view
+    if (AppProperties.active_study === study_identifier) {
+      AppProperties.active_study = null;
+      AppProperties.state = AppProperties.STATES.HOME;
+    };
+    // remove study
+    await ArcControlService.props.arc.ISA.RemoveStudy(study_identifier);
+    // remove study from registered study identifiers
+    ArcControlService.props.arc.ISA.RegisteredStudyIdentifiers = ArcControlService.props.arc.ISA.RegisteredStudyIdentifiers.filter((i: string) => i !== study_identifier)
+    // remove study folder from file system
+    ArcControlService.props.arc._fs.Tree = newFsTree;
+    // remove study folder from disc
+    await window.ipc.invoke('LocalFileSystemService.remove', path);
+    await ArcControlService.writeARC();
+    await ArcControlService.readARC();
   },
 
   new_arc: async (path: string) =>{

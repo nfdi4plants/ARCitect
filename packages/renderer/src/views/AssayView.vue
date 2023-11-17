@@ -12,7 +12,7 @@ const iProps = reactive({
 });
 
 const init = async ()=>{
-  if(!ArcControlService.props.arc) return;
+  if(!ArcControlService.props.arc || !AppProperties.active_assay) return;
   iProps.assay = ArcControlService.props.arc.ISA.GetAssay(AppProperties.active_assay);
 };
 

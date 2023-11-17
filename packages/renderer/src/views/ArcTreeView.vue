@@ -3,6 +3,7 @@ import { reactive, ref, nextTick, watch, onMounted, onUnmounted, h } from 'vue';
 import ContextMenu from '@imengyu/vue3-context-menu'
 import AppProperties from '../AppProperties';
 import ArcControlService from '../ArcControlService';
+import {Investigation, Assays, Studies, Workflows, Runs, Dataset, Protocols} from '../ArcControlService';
 import StringDialog from '../dialogs/StringDialog.vue';
 import AddProtocolDialog from '../dialogs/AddProtocolDialog.vue';
 import NewAssayDialog from '../dialogs/NewAssayDialog.vue';
@@ -10,6 +11,10 @@ import { NewAssayInformation } from '../dialogs/NewAssayDialog.vue';
 import { useQuasar } from 'quasar'
 import {ArcStudy, ArcAssay} from '@nfdi4plants/arctrl/ISA/ISA/ArcTypes/ArcTypes.js';
 import NewStudyDialog from '../dialogs/NewStudyDialog.vue';
+
+const Markdown = 'markdown';
+const NodeAdd_PreFix = "node_add_"
+const NodeEdit_PreFix = "node_edit_"
 
 const $q = useQuasar();
 
@@ -37,17 +42,6 @@ const emit = defineEmits(['openArc']);
 const props = reactive(init);
 const arcTree = ref(null);
 const selected = ref(null);
-
-const Investigation = "investigation";
-const Studies = "studies";
-const Assays = "assays";
-const Protocols = 'protocols';
-const Dataset = 'dataset';
-const Runs = 'runs';
-const Workflows = 'workflows';
-const Markdown = 'markdown';
-const NodeAdd_PreFix = "node_add_"
-const NodeEdit_PreFix = "node_edit_"
 
 
 watch(()=>ArcControlService.props.arc_root, async (newValue, oldValue) => {
@@ -295,7 +289,8 @@ const readDir = async ({ node, key, done, fail }) => {
   done( await readDir_(key) );
 };
 
-const onSelectionChanged = id=>{
+const onSelectionChanged = id =>{
+  if (!arcTree.value) return;
   const n = arcTree._value.getNodeByKey(id);
   const type = n ? n.type : null;
 
@@ -335,63 +330,53 @@ const formatSize = size => {
   return (size / Math.pow(1024,log)).toFixed(2) + ' ' + suffix;
 };
 
-const deleteAssay = async (assay_identifier: string) => {
-  await ArcControlService.props.arc.ISA.RemoveAssay(assay_identifier);
-  await ArcControlService.props.arc.UpdateFileSystem();
-  // console.log(ArcControlService.props.arc);
-  await ArcControlService.writeARC(ArcControlService.props.arc_root);
-  await ArcControlService.readARC();
-  const path = `${ArcControlService.props.arc_root}/assays/${assay_identifier}`;
-  await window.ipc.invoke('LocalFileSystemService.remove', path);
-};
-
 const onCellContextMenu = (e,node) => {
   // console.log(node);
-  // if(node.type==='node_edit_Assay'){
-  //   e.preventDefault();
-  //   ContextMenu.showContextMenu({
-  //     x: e.x,
-  //     y: e.y,
-  //     theme: 'flat',
-  //     items: [
-  //       {
-  //         label: "Delete Assay",
-  //         icon: h(
-  //           'i',
-  //           {
-  //             class: 'q-icon on-left notranslate material-icons',
-  //             role:'img',
-  //             style:{fontSize: '1.5em',color:'#333'}
-  //           },
-  //           ['delete']
-  //         ),
-  //         onClick: () =>{deleteAssay(node.label)}
-  //       },
-  //     ]
-  //   });
-  // } else if (node.type==='node_edit_Study'){
-  //   e.preventDefault();
-  //   ContextMenu.showContextMenu({
-  //     x: e.x,
-  //     y: e.y,
-  //     theme: 'flat',
-  //     items: [
-  //       {
-  //         label: "Delete Study",
-  //         icon: h(
-  //           'i',
-  //           {
-  //             class: 'q-icon on-left notranslate material-icons',
-  //             role:'img',
-  //             style:{fontSize: '1.5em',color:'#333'}
-  //           },
-  //           ['delete']
-  //         ),
-  //         onClick: () =>{props.table.RemoveRow(cell.rowIndex);refresh_hack();}
-  //       },
-  //     ]
-  //   });
-  // }
+  if(node.type===formatNodeEditString(Assays)){
+    e.preventDefault();
+    ContextMenu.showContextMenu({
+      x: e.x,
+      y: e.y,
+      theme: 'flat',
+      items: [
+        {
+          label: "Delete Assay",
+          icon: h(
+            'i',
+            {
+              class: 'q-icon on-left notranslate material-icons',
+              role:'img',
+              style:{fontSize: '1.5em',color:'#333'}
+            },
+            ['delete']
+          ),
+          onClick: () =>{ArcControlService.deleteAssay(node.label)}
+        },
+      ]
+    });
+  } else if (node.type===formatNodeEditString(Studies)){
+    e.preventDefault();
+    ContextMenu.showContextMenu({
+      x: e.x,
+      y: e.y,
+      theme: 'flat',
+      items: [
+        {
+          label: "Delete Study",
+          icon: h(
+            'i',
+            {
+              class: 'q-icon on-left notranslate material-icons',
+              role:'img',
+              style:{fontSize: '1.5em',color:'#333'}
+            },
+            ['delete']
+          ),
+          onClick: () =>{ArcControlService.deleteStudy(node.label)}
+        },
+      ]
+    });
+  }
 };
 
 onMounted( ()=>{window.ipc.on('LocalFileSystemService.updatePath', updatePath);} );

@@ -16,7 +16,7 @@ const iProps = reactive({
 });
 
 const init = async ()=>{
-  if(!ArcControlService.props.arc) return;
+  if(!ArcControlService.props.arc || !AppProperties.active_study) return;
 
   iProps.study = ArcControlService.props.arc.ISA.GetStudy(AppProperties.active_study);
   iProps.people = iProps.study.Contacts;
