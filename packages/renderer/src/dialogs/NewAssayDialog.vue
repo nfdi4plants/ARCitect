@@ -7,6 +7,7 @@ import Property from '../Property.ts';
 import ArcControlService from '../ArcControlService.ts';
 import {ArcStudy} from "@nfdi4plants/arctrl"
 import {checkValidCharacters} from '@nfdi4plants/arctrl/ISA/ISA/Identifier.js'
+import * as internal from 'stream';
 
 export type NewAssayInformation = {
   assayIdentifier: string
@@ -55,11 +56,10 @@ const onSubmit = async () => {
 
 const init = async ()=>{
   let arcStudies = ArcControlService.props.arc.ISA.Studies.map((s: ArcStudy) => s.Identifier).sort();
-  iProps.studies = arcStudies
-  iProps.existingStudies = arcStudies
+  iProps.studies = [...arcStudies];
+  iProps.existingStudies = [...arcStudies];
   iProps.assay_identifier = '';
   iProps.study_identifier = [];
-
   iProps.form = [
     [Property( iProps, 'assay_identifier', {label:'Assay Identifier'})],
   ];
@@ -112,16 +112,12 @@ function createNewStudyIdentifier (val, done) {
   }
 }
 
-// this does not work currently:
-// https://github.com/quasarframework/quasar/discussions/16602
-function clearStudyIdentifier (val: any) {
-  console.log("HIT")
-  let index = iProps.study_identifier.indexOf(val)
-  iProps.study_identifier.splice(index)
-  if (!iProps.existingStudies.includes(val)) {
-    console.log("cleared non existing study")
-    let index = iProps.studies.indexOf(val)
-    iProps.studies.splice(index)
+function clearStudyIdentifier (val: {index: number, value: string}) {
+  let contains = !iProps.existingStudies.includes(val.value)
+  if (contains) {
+    let index = iProps.studies.indexOf(val.value);
+    // console.log("cleared non existing study at index: ", index);
+    iProps.studies.splice(index, 1)
   }
   return;
 }
@@ -159,7 +155,7 @@ function clearStudyIdentifier (val: any) {
             hint="You can add new studies from here."
             @new-value="createNewStudyIdentifier"
             @filter="filterStudyIdentifiers"
-            @clear="clearStudyIdentifier"
+            @remove="clearStudyIdentifier"
           />
           <div style="min-height:3.5em;margin:1em 1em -1em 1em;">
             <q-banner rounded inline-actions class="bg-red-10 text-white" v-if='!iProps.valid' dense>
