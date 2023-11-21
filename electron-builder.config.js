@@ -12,13 +12,11 @@ const config = {
     'packages/**/dist/**',
   ],
   win: {
-    "extraResources": ['bins/win'],
-    // "target": ["portable"],
-    // "target": ["dir"],
-    "target": ["zip"],
+    "extraResources": ['bins/git-binaries-win'],
+    "target": ["zip"]
   },
   mac: {
-    "target": ["dmg"],
+    "target": ["dmg"]
   },
   linux: {
     "target": ["AppImage"]
