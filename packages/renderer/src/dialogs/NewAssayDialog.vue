@@ -140,23 +140,27 @@ function clearStudyIdentifier (val: {index: number, value: string}) {
               <FormInput :property='property'></FormInput>
             </div>
           </div>
-          <q-select
-            filled
-            label="Study Identifiers"
-            v-model="iProps.study_identifier"
-            :style="`margin:0 0.5em -0.5em 0.5em;`"
-            bg-color="grey-3"
-            use-input
-            use-chips
-            multiple
-            input-debounce="0"
-            new-value-mode="add-unique"
-            :options="filterOptions"
-            hint="You can add new studies from here."
-            @new-value="createNewStudyIdentifier"
-            @filter="filterStudyIdentifiers"
-            @remove="clearStudyIdentifier"
-          />
+          <div class='row'>
+            <div class='col' >
+              <q-select
+                filled
+                label="Study Identifiers"
+                v-model="iProps.study_identifier"
+                style="margin:0 0.5em -0.5em 0.5em"
+                bg-color="grey-3"
+                use-input
+                use-chips
+                multiple
+                input-debounce="0"
+                new-value-mode="add-unique"
+                :options="filterOptions"
+                hint="You can add new studies from here."
+                @new-value="createNewStudyIdentifier"
+                @filter="filterStudyIdentifiers"
+                @remove="clearStudyIdentifier"
+              />
+            </div>
+          </div>
           <div style="min-height:3.5em;margin:1em 1em -1em 1em;">
             <q-banner rounded inline-actions class="bg-red-10 text-white" v-if='!iProps.valid' dense>
               <template v-slot:avatar>
@@ -178,3 +182,9 @@ function clearStudyIdentifier (val: {index: number, value: string}) {
     </q-dialog>
   </q-form>
 </template>
+
+<style>
+.q-item.q-router-link--active, .q-item--active {
+  color: var(--q-secondary) !important
+}
+</style>

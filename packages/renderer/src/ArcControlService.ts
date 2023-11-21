@@ -6,8 +6,10 @@ import { ARC } from "@nfdi4plants/arctrl/ARC.js";
 import { ArcInvestigation } from "@nfdi4plants/arctrl/ISA/ISA/ArcTypes/ArcTypes.js";
 import { gitignoreContract } from "@nfdi4plants/arctrl/Contracts/Contracts.Git.js";
 import { Xlsx } from '@fslab/fsspreadsheet/Xlsx.js';
-import {Assays} from './views/ArcTreeView.vue';
 import {FileSystemTree} from '@nfdi4plants/arctrl/FileSystem/FileSystemTree.js'
+import {ARCAux_getArcInvestigationFromContracts} from '@nfdi4plants/arctrl/ARC.js'
+import {ARCtrl_ISA_ArcInvestigation__ArcInvestigation_tryFromReadContract_Static_7570923F} from '@nfdi4plants/arctrl/Contracts/Contracts.ArcTypes.js'
+import { FsWorkbook } from "@nfdi4plants/arctrl/fable_modules/FsSpreadsheet.5.0.1/FsWorkbook.fs.js";
 
 export const Investigation = "investigation";
 export const Studies = "studies";
@@ -25,6 +27,50 @@ let init: {
     arc_root: null ,
     busy: false,
     arc: null
+}
+
+function debugLog(c) {
+  let matchResult, fsworkbook;
+  console.log("INNER HIT");
+  console.log(c);
+  if (c.Operation === "READ") {
+      console.log(1);
+      if (c.DTOType != null) {
+          console.log(2);
+          if (c.DTOType === "ISA_Investigation") {
+              console.log(3);
+              if (c.DTO != null) {
+                  console.log(4);
+                  if (c.DTO instanceof FsWorkbook) {
+                      console.log(5);
+                      matchResult = 0;
+                      fsworkbook = c.DTO;
+                  }
+                  else {
+                      matchResult = 1;
+                  }
+              }
+              else {
+                  matchResult = 1;
+              }
+          }
+          else {
+              matchResult = 1;
+          }
+      }
+      else {
+          matchResult = 1;
+      }
+  }
+  else {
+      matchResult = 1;
+  }
+  switch (matchResult) {
+      case 0:
+          return fromFsWorkbook(fsworkbook);
+      default:
+          return void 0;
+  }
 }
 
 const ArcControlService = {
@@ -48,7 +94,7 @@ const ArcControlService = {
       return;
 
     const isARC = await window.ipc.invoke('LocalFileSystemService.exists', arc_root+'/isa.investigation.xlsx');
-
+    console.log("isARC", isARC)
     if (!isARC) {
         ArcControlService.closeARC();
         return false;
@@ -59,14 +105,19 @@ const ArcControlService = {
     const xlsx_files = await window.ipc.invoke('LocalFileSystemService.getAllXLSX', arc_root);
     const arc = ARC.fromFilePaths(xlsx_files);
     const contracts = arc.GetReadContracts();
+    console.log("CONTRACTS:", contracts)
 
     for(const contract of contracts){
       const buffer = await window.ipc.invoke('LocalFileSystemService.readFile', [arc_root+'/'+contract.Path,{}]);
       contract.DTO = await Xlsx.fromBytes(buffer);
     }
-
-    await arc.SetISAFromContracts(contracts);
-
+    console.log("HIT");
+    console.log("CONTRACT 0:", contracts[0])
+    let ai = debugLog(contracts[0]);
+    console.log(ai)
+    console.log("BETWEEN")
+    arc.SetISAFromContracts(contracts);
+    console.log("HIT 2")
     ArcControlService.props.arc = arc;
     ArcControlService.props.arc_root = arc_root;
     ArcControlService.props.busy = false;

@@ -26,7 +26,7 @@
   "dependencies": {
     "@fslab/fsspreadsheet": "latest",
     "@imengyu/vue3-context-menu": "latest",
-    "@nfdi4plants/arctrl": "^1.0.0-beta.5",
+    "@nfdi4plants/arctrl": "1.0.0-beta.7",
     "@nfdi4plants/exceljs": "0.2.0",
     "@quasar/extras": "1.15.3",
     "chokidar": "3.5.1",
