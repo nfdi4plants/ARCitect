@@ -7,9 +7,7 @@ import { ArcInvestigation } from "@nfdi4plants/arctrl/ISA/ISA/ArcTypes/ArcTypes.
 import { gitignoreContract } from "@nfdi4plants/arctrl/Contracts/Contracts.Git.js";
 import { Xlsx } from '@fslab/fsspreadsheet/Xlsx.js';
 import {FileSystemTree} from '@nfdi4plants/arctrl/FileSystem/FileSystemTree.js'
-import {ARCAux_getArcInvestigationFromContracts} from '@nfdi4plants/arctrl/ARC.js'
-import {ARCtrl_ISA_ArcInvestigation__ArcInvestigation_tryFromReadContract_Static_7570923F} from '@nfdi4plants/arctrl/Contracts/Contracts.ArcTypes.js'
-import { FsWorkbook } from "@nfdi4plants/arctrl/fable_modules/FsSpreadsheet.5.0.1/FsWorkbook.fs.js";
+import {Contract} from '@nfdi4plants/arctrl/Contract/Contract.js'
 
 export const Investigation = "investigation";
 export const Studies = "studies";
@@ -29,48 +27,8 @@ let init: {
     arc: null
 }
 
-function debugLog(c) {
-  let matchResult, fsworkbook;
-  console.log("INNER HIT");
-  console.log(c);
-  if (c.Operation === "READ") {
-      console.log(1);
-      if (c.DTOType != null) {
-          console.log(2);
-          if (c.DTOType === "ISA_Investigation") {
-              console.log(3);
-              if (c.DTO != null) {
-                  console.log(4);
-                  if (c.DTO instanceof FsWorkbook) {
-                      console.log(5);
-                      matchResult = 0;
-                      fsworkbook = c.DTO;
-                  }
-                  else {
-                      matchResult = 1;
-                  }
-              }
-              else {
-                  matchResult = 1;
-              }
-          }
-          else {
-              matchResult = 1;
-          }
-      }
-      else {
-          matchResult = 1;
-      }
-  }
-  else {
-      matchResult = 1;
-  }
-  switch (matchResult) {
-      case 0:
-          return fromFsWorkbook(fsworkbook);
-      default:
-          return void 0;
-  }
+function relativePath_to_absolute(relativePath: string) {
+  return ArcControlService.props.arc_root + '/' + relativePath
 }
 
 const ArcControlService = {
@@ -94,7 +52,7 @@ const ArcControlService = {
       return;
 
     const isARC = await window.ipc.invoke('LocalFileSystemService.exists', arc_root+'/isa.investigation.xlsx');
-    console.log("isARC", isARC)
+
     if (!isARC) {
         ArcControlService.closeARC();
         return false;
@@ -105,24 +63,40 @@ const ArcControlService = {
     const xlsx_files = await window.ipc.invoke('LocalFileSystemService.getAllXLSX', arc_root);
     const arc = ARC.fromFilePaths(xlsx_files);
     const contracts = arc.GetReadContracts();
-    console.log("CONTRACTS:", contracts)
-
     for(const contract of contracts){
       const buffer = await window.ipc.invoke('LocalFileSystemService.readFile', [arc_root+'/'+contract.Path,{}]);
       contract.DTO = await Xlsx.fromBytes(buffer);
     }
-    console.log("HIT");
-    console.log("CONTRACT 0:", contracts[0])
-    let ai = debugLog(contracts[0]);
-    console.log(ai)
-    console.log("BETWEEN")
     arc.SetISAFromContracts(contracts);
-    console.log("HIT 2")
     ArcControlService.props.arc = arc;
     ArcControlService.props.arc_root = arc_root;
     ArcControlService.props.busy = false;
     console.log(arc);
     return true;
+  },
+
+  handleARCContracts: async (contracts: Contract []) => {
+    let arc = ArcControlService.props.arc;
+    let arc_root = ArcControlService.props.arc_root;
+    if(!arc || !arc_root)
+      return;
+
+    ArcControlService.props.busy = true;
+    arc.UpdateFileSystem();
+    for (const contract of contracts) {
+      switch (contract.Operation) {
+        case 'DELETE':
+          await window.ipc.invoke('LocalFileSystemService.remove', relativePath_to_absolute(contract.Path));
+          break;
+        case 'UPDATE': case 'WRITE':
+          const buffer = await Xlsx.toBytes(contract.DTO);
+          await window.ipc.invoke('LocalFileSystemService.writeFile', [relativePath_to_absolute(contract.Path),buffer,{}]);
+          break;
+        default:
+          console.log(`Warning. 'handleARCContracts' hit unknown expression for contract type: ${contract.Operation} in ${contract}.`)
+          break;
+      }
+    }
   },
 
   writeARC: async (arc_root: string | null, filter, arc: ARC | void)=>{
@@ -162,44 +136,23 @@ const ArcControlService = {
   },
 
   deleteAssay: async (assay_identifier: string) => {
-    const relativePath = `${Assays}/${assay_identifier}`;
-    const path = `${ArcControlService.props.arc_root}/${relativePath}`;
-    const filePaths : string [] = ArcControlService.props.arc.FileSystem.Tree.ToFilePaths();
-    const filteredPaths : string [] = filePaths.filter(path => !path.startsWith(relativePath));
-    const newFsTree = FileSystemTree.fromFilePaths(filteredPaths);
     // possibly remove assay from edit view
     if (AppProperties.active_assay === assay_identifier) {
       AppProperties.active_assay = null;
       AppProperties.state = AppProperties.STATES.HOME;
     };
-    await ArcControlService.props.arc.ISA.RemoveAssay(assay_identifier);
-    ArcControlService.props.arc._fs.Tree = newFsTree;
-    await window.ipc.invoke('LocalFileSystemService.remove', path);
-    await ArcControlService.writeARC();
+    let contracts = ArcControlService.props.arc.RemoveAssay(assay_identifier)
+    await ArcControlService.handleARCContracts(contracts);
     await ArcControlService.readARC();
   },
 
   deleteStudy: async (study_identifier: string) => {
-
-    const relativePath = `${Studies}/${study_identifier}`;
-    const path = `${ArcControlService.props.arc_root}/${relativePath}`;
-    const filePaths : string [] = ArcControlService.props.arc.FileSystem.Tree.ToFilePaths();
-    const filteredPaths : string [] = filePaths.filter(path => !path.startsWith(relativePath));
-    const newFsTree = FileSystemTree.fromFilePaths(filteredPaths);
-    // possibly remove study from edit view
     if (AppProperties.active_study === study_identifier) {
       AppProperties.active_study = null;
       AppProperties.state = AppProperties.STATES.HOME;
     };
-    // remove study
-    await ArcControlService.props.arc.ISA.RemoveStudy(study_identifier);
-    // remove study from registered study identifiers
-    ArcControlService.props.arc.ISA.RegisteredStudyIdentifiers = ArcControlService.props.arc.ISA.RegisteredStudyIdentifiers.filter((i: string) => i !== study_identifier)
-    // remove study folder from file system
-    ArcControlService.props.arc._fs.Tree = newFsTree;
-    // remove study folder from disc
-    await window.ipc.invoke('LocalFileSystemService.remove', path);
-    await ArcControlService.writeARC();
+    let contracts = ArcControlService.props.arc.RemoveStudy(study_identifier)
+    await ArcControlService.handleARCContracts(contracts);
     await ArcControlService.readARC();
   },
 

@@ -24,7 +24,7 @@ export const LocalFileSystemService = {
       }
     }
   },
-
+  
   getAllXLSX: async (e,root) => {
     root = path_to_system(root);
     let xlsx_files = [];

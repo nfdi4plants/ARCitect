@@ -68,13 +68,13 @@ watch(()=>ArcControlService.props.arc_root, async (newValue, oldValue) => {
 
 watch(()=>AppProperties.active_study, async (newValue, oldValue) => {
   await nextTick();
-  selected.value = `${ArcControlService.props.arc_root}/${Studies}/${newValue}`;
+  selected._value = `${ArcControlService.props.arc_root}/${Studies}/${newValue}`;
   onSelectionChanged(selected.value);
 });
 
 watch(()=>AppProperties.active_assay, async (newValue, oldValue) => {
   await nextTick();
-  selected.value = `${ArcControlService.props.arc_root}/${Assays}/${newValue}`;
+  selected._value = `${ArcControlService.props.arc_root}/${Assays}/${newValue}`;
   onSelectionChanged(selected.value);
 });
 
@@ -290,7 +290,7 @@ const readDir = async ({ node, key, done, fail }) => {
 };
 
 const onSelectionChanged = id =>{
-  if (!arcTree.value) return;
+  if (!arcTree._value) return;
   const n = arcTree._value.getNodeByKey(id);
   const type = n ? n.type : null;
 
@@ -312,6 +312,10 @@ const onSelectionChanged = id =>{
 };
 
 const updatePath = async path => {
+  console.log("updatePath", path)
+  console.log("arcTree", arcTree)
+  if (!arcTree.value)
+    return;
   const n = arcTree._value.getNodeByKey(path);
   if(!n)
     return;
@@ -388,7 +392,7 @@ onUnmounted( ()=>{window.ipc.off('LocalFileSystemService.updatePath', updatePath
   <div class='q-pa-md'>
     <div v-if="ArcControlService.props.arc" class='text-h6 text-grey-7' style="font-size:0.9em;border-bottom:0.1em solid #ccc;line-height:1em;padding:0 0 0.7em 0;">{{(props.root.replace(' ', '&nbsp;') || '').split('/').join(' /&nbsp;')}}</div>
     <q-tree
-      v-if="ArcControlService.props.arc"
+    v-if="ArcControlService.props.arc"
       ref='arcTree'
       :nodes="props.nodes"
       node-key="id"
@@ -409,7 +413,7 @@ onUnmounted( ()=>{window.ipc.off('LocalFileSystemService.updatePath', updatePath
     </q-tree>
 
     <div class="column" style="text-align: center; color:#ccc; cursor: pointer;" v-if="props.nodes.length < 1" @click='emit("openArc")'>
-      <!--<q-icon name="account_tree" size="15em" style='color:#ccc' />-->
+      <!-- <q-icon name="account_tree" size="15em" style='color:#ccc' /> -->
       <q-icon name="find_in_page" size="15em" style="width: 100%"/>
       <h6>Open ARC</h6>
     </div>
