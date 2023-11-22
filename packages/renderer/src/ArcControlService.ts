@@ -31,10 +31,11 @@ function relativePath_to_absolute(relativePath: string) {
   return ArcControlService.props.arc_root + '/' + relativePath
 }
 
+
 const ArcControlService = {
-
+  
   props: reactive(init),
-
+  
   closeARC: async() => {
     ArcControlService.props.arc_root = null;
     ArcControlService.props.busy = false;
@@ -44,18 +45,18 @@ const ArcControlService = {
     AppProperties.state = 0;
     return;
   },
-
+  
   readARC: async (arc_root: string | void | null) =>{
-    if(!arc_root)
+      if(!arc_root)
       arc_root = ArcControlService.props.arc_root;
     if(!arc_root)
-      return;
+    return;
 
     const isARC = await window.ipc.invoke('LocalFileSystemService.exists', arc_root+'/isa.investigation.xlsx');
 
     if (!isARC) {
-        ArcControlService.closeARC();
-        return false;
+      ArcControlService.closeARC();
+      return false;
     }
 
     ArcControlService.props.busy = true;

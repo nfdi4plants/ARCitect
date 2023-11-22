@@ -18,9 +18,11 @@ const iProps = reactive({
 const init = async ()=>{
   if(!ArcControlService.props.arc || !AppProperties.active_study) return;
 
-  iProps.study = ArcControlService.props.arc.ISA.GetStudy(AppProperties.active_study);
-  iProps.people = iProps.study.Contacts;
-  iProps.publications = iProps.study.Publications;
+  const study = ArcControlService.props.arc.ISA.TryGetStudy(AppProperties.active_study);
+  if (!study) return;
+  iProps.study = study
+  iProps.people = study.Contacts;
+  iProps.publications = study.Publications;
 };
 
 onMounted( init );
