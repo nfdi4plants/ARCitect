@@ -1,9 +1,6 @@
 <script lang="ts" setup>
 import { useDialogPluginComponent } from 'quasar';
 import { reactive, onMounted, watch, ref } from 'vue';
-
-import FormInput from '../components/FormInput.vue';
-import Property from '../Property.ts';
 import ArcControlService from '../ArcControlService.ts';
 import {ArcStudy} from "@nfdi4plants/arctrl"
 import {checkValidCharacters} from '@nfdi4plants/arctrl/ISA/ISA/Identifier.js'
@@ -16,25 +13,31 @@ export type NewAssayInformation = {
 
 const iProps : {
   valid: boolean,
-  errorMsgs: string [],
+  temp_studyInput: string,
   assay_identifier: string
   study_identifier: string [],
-  studies: string []
+  studies: string [],
+  existingAssays: string [],
   existingStudies: string [],
-  form: any []
 } = reactive({
   valid: true,
-  errorMsgs: [],
+  // Study multiple select with useChips requires "ENTER" to accept new values. This lead to confusion. Here we try to store any input given by the user.
+  // 👀 The logic is: If temp_studyInput !== '' && temp_studyInput passes validation then add temp_studyInput as identifer.
+  temp_studyInput: '',
   assay_identifier: '',
   // This value contains the selected study identifiers, for which the new assay will be registered
   study_identifier: [],
   // This value contains the currently available select options 
   // (this can differ from existingStudies if new options are added)
   studies: [],
+  // This is used to disallow adding same assay again
+  existingAssays: [],
   // This value always contains only the existing study identifiers from ARC model
   existingStudies: [],
-  form: []
 });
+
+// This binds to q-select quasar component
+const studySelect = ref(null)
 
 let filterOptions = ref(iProps.studies)
 
@@ -45,51 +48,48 @@ defineEmits([
 const { dialogRef, onDialogHide, onDialogOK, onDialogCancel } = useDialogPluginComponent();
 
 const onSubmit = async () => {
-  if (iProps.assay_identifier === ``) {
-    iProps.valid = false;
-    iProps.errorMsgs.push('Assay Identifier cannot be empty!')
-  }
-  if (!iProps.valid) return;
   const newAssayInformation : NewAssayInformation = {assayIdentifier: iProps.assay_identifier, studyIdentifier: iProps.study_identifier} 
   onDialogOK(newAssayInformation);
 };
 
 const init = async ()=>{
-  let arcStudies = ArcControlService.props.arc.ISA.Studies.map((s: ArcStudy) => s.Identifier).sort();
+  let arcStudies = ArcControlService.props.arc.ISA.StudyIdentifiers.sort()
+  let arcAssays = ArcControlService.props.arc.ISA.AssayIdentifiers
   iProps.studies = [...arcStudies];
   iProps.existingStudies = [...arcStudies];
+  iProps.existingAssays = arcAssays
   iProps.assay_identifier = '';
   iProps.study_identifier = [];
-  iProps.form = [
-    [Property( iProps, 'assay_identifier', {label:'Assay Identifier'})],
-  ];
 };
 
 onMounted(init);
 
-function resetErrors() {
-  iProps.valid = true;
-  iProps.errorMsgs = [];
+function hasValidCharacters (identifier: string) {
+  try {
+    checkValidCharacters(identifier) 
+    return true;
+  } catch (err) {
+    return false;
+  }
+} 
+
+function hasValidCharactersStudies (identifiers: string []) {
+  if (identifiers.length === 0) return true;
+  try {
+    for (const identifier of identifiers) {
+      checkValidCharacters(identifier) 
+    }
+    return true;
+  } catch (err) {
+    return false;
+  }
+} 
+
+function assayIsNew(newAssayIdentifer:string) {
+  return iProps.existingAssays.includes(newAssayIdentifer) ? false : true
 }
 
-watch( () => [iProps.study_identifier, iProps.assay_identifier], () =>{
-  resetErrors();
-  for (let study of iProps.study_identifier) 
-    try {
-      if (study !== '') checkValidCharacters(study)
-    } catch (error) {
-      iProps.valid = false;
-      iProps.errorMsgs.push(`Invalid Identifier for: "${study}": ${error}`)
-    }
-  try {
-    if (iProps.assay_identifier !== '') checkValidCharacters(iProps.assay_identifier)
-  } catch (error) {
-    iProps.valid = false;
-    iProps.errorMsgs.push(`Invalid Identifier for: "${iProps.assay_identifier}": ${error}`)
-  }
-});
-
-function filterStudyIdentifiers (val, update) {
+function filterStudyIdentifiers (val: string, update) {
   update(() => {
     if (val === '') {
       filterOptions.value = iProps.studies
@@ -122,6 +122,24 @@ function clearStudyIdentifier (val: {index: number, value: string}) {
   return;
 }
 
+function onBlurAddTemp_StudyInput() {
+  let v = iProps.temp_studyInput
+  if (v === '') return;
+  if (!hasValidCharacters(v)) return;
+  iProps.study_identifier.push(iProps.temp_studyInput);
+  // only add to studies if it did not exist beforehand
+  if (!iProps.studies.includes(v)) {
+    iProps.studies.push(iProps.temp_studyInput);
+  }
+}
+
+function onChangeSetTemp_StudyInput(val: string) {
+  iProps.temp_studyInput = val;
+  if (!studySelect.value) return;
+  // quasar q-select method
+  studySelect.value.validate(val);
+}
+
 </script>
 
 <template>
@@ -135,18 +153,28 @@ function clearStudyIdentifier (val: {index: number, value: string}) {
         </q-card-section>
 
         <q-card-section>
-          <div class='row' v-for="(row,i) in iProps.form">
-            <div class='col' v-for="(property,j) in row">
-              <FormInput :property='property'></FormInput>
+          <div class='row' >
+            <div class='col' >
+              <q-input
+                filled
+                style="margin-bottom: 1rem;"
+                v-model="iProps.assay_identifier"
+                label="Add Assay"
+                :rules="[
+                  val => val !== '' || `Assay identifier must not be empty`,
+                  val => hasValidCharacters(val) || `Invalid Identifier for: '${iProps.assay_identifier}': New identifier contains forbidden characters! Allowed characters are: letters, digits, underscore (_), dash (-) and whitespace ( ).`,
+                  val => assayIsNew(val) || `Assay identifier: '${val}' is already set for this ARC.`
+                ]"
+              />
             </div>
           </div>
           <div class='row'>
             <div class='col' >
               <q-select
+                ref="studySelect"
                 filled
                 label="Study Identifiers"
                 v-model="iProps.study_identifier"
-                style="margin:0 0.5em -0.5em 0.5em"
                 bg-color="grey-3"
                 use-input
                 use-chips
@@ -154,10 +182,15 @@ function clearStudyIdentifier (val: {index: number, value: string}) {
                 input-debounce="0"
                 new-value-mode="add-unique"
                 :options="filterOptions"
-                hint="You can add new studies from here."
+                hint="Add or create studies. Verify with <Enter>."
+                :rules="[
+                  val => hasValidCharactersStudies(val) || `New identifier contains forbidden characters! Allowed characters are: letters, digits, underscore (_), dash (-) and whitespace ( ).`,
+                ]"
                 @new-value="createNewStudyIdentifier"
                 @filter="filterStudyIdentifiers"
                 @remove="clearStudyIdentifier"
+                @input-value="onChangeSetTemp_StudyInput"
+                @blur="onBlurAddTemp_StudyInput"
               />
             </div>
           </div>
@@ -166,9 +199,6 @@ function clearStudyIdentifier (val: {index: number, value: string}) {
               <template v-slot:avatar>
                 <q-icon name="warning"/>
               </template>
-              <ul>
-                <li v-for="error in iProps.errorMsgs">{{error}}</li>
-              </ul>
             </q-banner>
           </div>
         </q-card-section>
