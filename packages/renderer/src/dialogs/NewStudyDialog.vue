@@ -34,7 +34,7 @@ const onSubmit = async () => {
 };
 
 const init = async ()=>{
-  let arcStudies = ArcControlService.props.arc.ISA.Studies.map((s: ArcStudy) => s.Identifier).sort();
+  let arcStudies = ArcControlService.props.arc.ISA.StudyIdentifiers.sort()
   iProps.existingStudies = arcStudies
   iProps.study_identifier = '';
 };
@@ -51,6 +51,11 @@ function hasValidCharacters (identifier: string) {
   }
 } 
 
+function studyIsNew(newStudyIdentifer:string) {
+  return iProps.existingStudies.includes(newStudyIdentifer) ? false : true
+}
+
+
 </script>
 
 <template>
@@ -66,11 +71,13 @@ function hasValidCharacters (identifier: string) {
         <q-card-section>
           <q-input
             filled
+            style="margin-bottom: 1rem;"
             v-model="iProps.study_identifier"
             label="Add Study"
             :rules="[
               val => val !== '' || `Study identifier must not be empty`,
               val => hasValidCharacters(val) || `Invalid Identifier for: '${iProps.study_identifier}': New identifier contains forbidden characters! Allowed characters are: letters, digits, underscore (_), dash (-) and whitespace ( ).`,
+              val => studyIsNew(val) || `Study identifier: '${val}' is already set for this ARC.`
             ]"
             lazy-rules
           />
