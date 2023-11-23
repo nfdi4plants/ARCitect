@@ -13,7 +13,7 @@ export interface Props {
 };
 const props = defineProps<Props>();
 
-const iProps = reactive({
+const iProps : {form: any [] []} = reactive({
   form: [[]]
 });
 

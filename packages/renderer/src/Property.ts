@@ -22,7 +22,7 @@ const autoType = property => {
     :'text';
 };
 
-const Property = (model,property,config)=>{
+const Property = (model: any,property: string, config?: any)=>{
   // console.log(property, model[property]);
   config = config || {};
   if(config.type==='ontology' && !model[property])

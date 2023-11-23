@@ -9,7 +9,7 @@ import AddProtocolDialog from '../dialogs/AddProtocolDialog.vue';
 import NewAssayDialog from '../dialogs/NewAssayDialog.vue';
 import { NewAssayInformation } from '../dialogs/NewAssayDialog.vue';
 import { useQuasar } from 'quasar'
-import {ArcStudy, ArcAssay} from '@nfdi4plants/arctrl/ISA/ISA/ArcTypes/ArcTypes.js';
+import {ARC, ArcStudy, ArcAssay} from '@nfdi4plants/arctrl';
 import NewStudyDialog from '../dialogs/NewStudyDialog.vue';
 
 const Markdown = 'markdown';
@@ -187,7 +187,6 @@ const readDir_ = async (path: string) => {
     return n.isDirectory && [Studies, Assays].includes(p);
   };
 
-
   function createAddNode (label: string, handler: ((n:any) => Promise<void>) ) {
     const node = {
       type: formatNodeAddString(label),
@@ -220,10 +219,19 @@ const readDir_ = async (path: string) => {
     }
   };
 
+  // Here check loose assays/studies ~ WIP, Kevin
+  // function checkVacantStudies() {
+  //   const arc : ARC = ArcControlService.props.arc
+  //   console.log("HIT")
+  //   if (!arc) return;
+  //   console.log(arc.ISA.RegisteredStudyIdentifiers)
+  // }
+
   if(needsAddElement(parent)) {
     switch (parent) {
       case Studies:
         let addStudyNode = createAddNode("Add Study", addStudy);
+        // checkVacantStudies()
         nodes.push(addStudyNode);
         break;
       case Assays:
@@ -333,13 +341,13 @@ const updatePath = async path => {
   debounceReadARC();
   if (!arcTree.value)
     return;
-  const n = arcTree._value.getNodeByKey(path);
+  const n = arcTree.value.getNodeByKey(path);
   if(!n)
     return;
-  const isExpanded = arcTree._value.isExpanded(path);
+  const isExpanded = arcTree.value.isExpanded(path);
   delete n.children;
   if(isExpanded)
-    arcTree._value.setExpanded(path,true);
+    arcTree.value.setExpanded(path,true);
 };
 
 const formatSize = size => {
