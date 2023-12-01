@@ -43,13 +43,15 @@ app.on('window-all-closed', () => {
 app.on('activate', restoreOrCreateWindow);
 
 const initCore = async () => {
+  const PATH = require('path');
   if(process.platform === 'win32'){
-      const PATH = require('path');
       const process_path_separator = ';';
-      // path to GitPortable executables.
       process.env['PATH'] += process_path_separator + [process.resourcesPath,'git-binaries','win','cmd'].join(PATH.sep);
+  } else if(process.platform === 'darwin') {
+      const process_path_separator = ':';
+      const architecture = process.arch === 'arm64' ? 'arm64' : 'amd64' ;
+      process.env['PATH'] += process_path_separator + [process.resourcesPath,'git-binaries','mac',architecture].join(PATH.sep);
   }
-//   ipcMain.handle('CORE.getVersion', ()=>process.env['npm_package_version']);
   ipcMain.handle('CORE.getVersion', ()=>app.getVersion());
 }
 
