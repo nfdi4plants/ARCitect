@@ -1,3 +1,6 @@
 [submodule "bins/git-binaries-win"]
 	path = bins/git-binaries-win
 	url = https://github.com/nfdi4plants/git-binaries-win
+[submodule "git-binaries"]
+	path = git-binaries
+	url = https://github.com/nfdi4plants/git-binaries

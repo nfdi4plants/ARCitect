@@ -47,7 +47,7 @@ const initCore = async () => {
       const PATH = require('path');
       const process_path_separator = ';';
       // path to GitPortable executables.
-      process.env['PATH'] += process_path_separator + [process.resourcesPath,'bins','git-binaries-win', 'cmd'].join(PATH.sep);
+      process.env['PATH'] += process_path_separator + [process.resourcesPath,'git-binaries','win','cmd'].join(PATH.sep);
   }
 //   ipcMain.handle('CORE.getVersion', ()=>process.env['npm_package_version']);
   ipcMain.handle('CORE.getVersion', ()=>app.getVersion());
