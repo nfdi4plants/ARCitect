@@ -5,6 +5,7 @@ import FSE from 'fs-extra'
 import chokidar from 'chokidar';
 import util from 'util';
 import os from 'os'
+import image_type from 'image-type';
 
 const changeListeners = new Map<string,chokidar.FSWatcher> ;
 
@@ -24,7 +25,7 @@ export const LocalFileSystemService = {
       }
     }
   },
-  
+
   getAllXLSX: async (e,root) => {
     root = path_to_system(root);
     let xlsx_files = [];
@@ -96,8 +97,14 @@ export const LocalFileSystemService = {
       options = parameters[1];
     }
     path = path_to_system(path)
-    // const file = FS.readFileSync(path,{encoding:encoding});
     return FS.readFileSync(path,options);
+  },
+
+  readImage: async (e,path)=>{
+    const contents = FS.readFileSync(path_to_system(path));
+    const b64 = contents.toString('base64');
+    const type = image_type(contents);
+    return `data:${type.mime};base64,${b64}`;
   },
 
   copy: async (e,[src,dst])=>{
@@ -222,6 +229,7 @@ export const LocalFileSystemService = {
     ipcMain.handle('LocalFileSystemService.remove', LocalFileSystemService.remove);
     ipcMain.handle('LocalFileSystemService.readDir', LocalFileSystemService.readDir);
     ipcMain.handle('LocalFileSystemService.readFile', LocalFileSystemService.readFile);
+    ipcMain.handle('LocalFileSystemService.readImage', LocalFileSystemService.readImage);
     ipcMain.handle('LocalFileSystemService.writeFile', LocalFileSystemService.writeFile);
     ipcMain.handle('LocalFileSystemService.selectDir', LocalFileSystemService.selectDir);
     ipcMain.handle('LocalFileSystemService.selectAnyFiles', LocalFileSystemService.selectAnyFiles);

@@ -12,6 +12,7 @@ import { useQuasar } from 'quasar'
 import {ArcStudy, ArcAssay} from '@nfdi4plants/arctrl/ISA/ISA/ArcTypes/ArcTypes.js';
 import NewStudyDialog from '../dialogs/NewStudyDialog.vue';
 
+const Image = 'image';
 const Markdown = 'markdown';
 const NodeAdd_PreFix = "node_add_"
 const NodeEdit_PreFix = "node_edit_"
@@ -183,6 +184,10 @@ const readDir_ = async (path: string) => {
     return ['md','txt','py','xml','cwl','json'].some( i=>new RegExp(`\\.${i}$`,'g').test(l.toLowerCase()))
   }
 
+  const isImage = l => {
+    return ['png','jpeg','jpg'].some( i=>new RegExp(`\\.${i}$`,'g').test(l.toLowerCase()))
+  }
+
   const isEditable = (n,p)=>{
     return n.isDirectory && [Studies, Assays].includes(p);
   };
@@ -199,7 +204,7 @@ const readDir_ = async (path: string) => {
       tickable: false,
       handler: handler
     }
-    return node; 
+    return node;
   };
 
   for(const n of nodes){
@@ -212,6 +217,10 @@ const readDir_ = async (path: string) => {
     } else if(isMarkdown(n.label)){
       n.type = formatNodeEditString(Markdown);
       n.icon = 'edit_square';
+      n.selectable = true;
+    } else if(isImage(n.label)){
+      n.type = formatNodeEditString(Image);
+      n.icon = 'image';
       n.selectable = true;
     } else {
       n.selectable = false;
@@ -314,6 +323,9 @@ const onSelectionChanged = id =>{
     case formatNodeEditString(Markdown):
       AppProperties.active_markdown = n.id;
       return AppProperties.state=AppProperties.STATES.EDIT_MARKDOWN;
+    case formatNodeEditString(Image):
+      AppProperties.active_image = n.id;
+      return AppProperties.state=AppProperties.STATES.EDIT_IMAGE;
     // default:
     //   return AppProperties.state=AppProperties.STATES.HOME;
   }
@@ -322,7 +334,7 @@ const onSelectionChanged = id =>{
 const asyncDebounce = (mainFunction, delay) => {
   // Declare a variable called 'timer' to store the timer ID
   let timer: NodeJS.Timeout;
-  
+
   // Return an anonymous function that takes in any number of arguments
   return function (...args) {
     // Clear the previous timer to prevent the execution of 'mainFunction'
@@ -432,7 +444,7 @@ onUnmounted( ()=>{window.ipc.off('LocalFileSystemService.updatePath', updatePath
     >
       <template v-slot:default-header="prop">
         <q-icon v-if='prop.node.icon' :name='prop.node.icon' style="padding:0 0.2em 0 0;"></q-icon>
-        <div style="flex:100" @contextmenu="e=>onCellContextMenu(e,prop.node)">{{ prop.node.label }}</div>
+        <div style="flex:100;white-space: nowrap;" @contextmenu="e=>onCellContextMenu(e,prop.node)">{{ prop.node.label }}</div>
         <div v-if='!prop.node.isDirectory && !["add_box","block"].includes(prop.node.icon)' style="flex:1;white-space: nowrap;margin-left:1em;">{{ formatSize(prop.node.size) }}</div>
       </template>
     </q-tree>

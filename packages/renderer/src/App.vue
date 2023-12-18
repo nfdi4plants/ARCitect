@@ -9,6 +9,7 @@ import InvestigationView from './views/InvestigationView.vue';
 import AssayView from './views/AssayView.vue';
 import StudyView from './views/StudyView.vue';
 import MarkdownView from './views/MarkdownView.vue';
+import ImageView from './views/ImageView.vue';
 import HelpView from './views/HelpView.vue';
 import LoginView from './views/LoginView.vue';
 import GitView from './views/GitView.vue';
@@ -144,7 +145,7 @@ const test = async ()=>{
           <ToolbarButton text='Explorer' icon='folder_open' requiresARC @clicked='ArcControlService.openArcInExplorer()'></ToolbarButton>
           <q-separator />
 
-          
+
           <q-item class="col-grow"></q-item>
           <ToolbarButton text='Toggle Help' icon='help' @clicked='iProps.showHelp=!iProps.showHelp;'></ToolbarButton>
           <ToolbarButton :text="iProps.toolbarMinimized ? '' : 'Minimize Sidebar'" :icon="iProps.toolbarMinimized ? 'chevron_right' : 'chevron_left'" @clicked='iProps.toolbarMinimized=!iProps.toolbarMinimized;'></ToolbarButton>
@@ -210,6 +211,7 @@ const test = async ()=>{
                 <AssayView v-else-if='AppProperties.state===AppProperties.STATES.EDIT_ASSAY'></AssayView>
                 <StudyView v-else-if='AppProperties.state===AppProperties.STATES.EDIT_STUDY'></StudyView>
                 <MarkdownView v-else-if='AppProperties.state===AppProperties.STATES.EDIT_MARKDOWN'></MarkdownView>
+                <ImageView v-else-if='AppProperties.state===AppProperties.STATES.EDIT_IMAGE'></ImageView>
                 <GitView v-else-if='AppProperties.state===AppProperties.STATES.GIT'></GitView>
                 <HomeView v-else></HomeView>
                 <!--<div v-else></div>-->

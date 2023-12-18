@@ -27,6 +27,7 @@ const ALLOWED_EXTERNAL_ORIGINS = new Set<`https://${string}`>([
   'https://www.w3schools.com',
   'https://www.google.com',
   'https://git.nfdi4plants.org',
+  'https://gitlab.plantmicrobe.de',
 ]);
 
 

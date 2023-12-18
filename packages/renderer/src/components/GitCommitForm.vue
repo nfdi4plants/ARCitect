@@ -193,7 +193,7 @@ const patchRemote = async () => {
     });
 
   // patch remote with token
-  const patched_remote = `https://oauth2:${AppProperties.user.token.access_token}@git.nfdi4plants.org` + remote.split('git.nfdi4plants.org')[1];
+  const patched_remote = `https://oauth2:${AppProperties.user.tokens['git.nfdi4plants.org'].access_token}@git.nfdi4plants.org` + remote.split('git.nfdi4plants.org')[1];
 
   // add patched remote
   if(Object.keys(remotes).includes('arcitect_remote'))

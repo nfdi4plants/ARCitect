@@ -12,11 +12,11 @@ const config = {
     'packages/**/dist/**',
   ],
   win: {
-    "extraResources": ['bins/git-binaries/win'],
+    "extraResources": ['git-binaries/win'],
     "target": ["zip"]
   },
   mac: {
-    "extraResources": ['bins/git-binaries/mac'],
+    "extraResources": ['git-binaries/mac'],
     "target": ["dmg"]
   },
   linux: {

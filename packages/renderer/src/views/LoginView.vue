@@ -5,25 +5,12 @@ import ArcCommanderService from '../ArcCommanderService.ts';
 import appProperties from '../AppProperties.ts';
 
 const showLoginView = ()=>{
-  window.ipc.invoke('DataHubService.authenticate');
+  window.ipc.invoke('DataHubService.authenticate', 'git.nfdi4plants.org');
 }
 
-window.ipc.on('DataHubService.authentificationData', async user_data=>{
-  appProperties.user = user_data;
-  // const r = await ArcCommanderService.run([
-  //     {
-  //       args: ['config','setgituser','-l','-n',user_data.username,'-e',user_data.email],
-  //       title: `Init Git User`,
-  //       silent: false
-  //     },
-  //     {
-  //       args: ['remote','token','store','-t',user_data.token.access_token],
-  //       title: `Store Git Token`,
-  //       silent: false
-  //     }
-  //   ],
-  //   false
-  // );
+window.ipc.on('DataHubService.authentificationData', async user=>{
+  appProperties.user = user;
+
 });
 
 </script>

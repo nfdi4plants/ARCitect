@@ -33,6 +33,7 @@
     "electron-context-menu": "3.6.1",
     "express": "latest",
     "fs-extra": "latest",
+    "image-type": "^5.2.0",
     "isomorphic-fetch": "latest",
     "quasar": "2.12.4",
     "query-string": "latest",

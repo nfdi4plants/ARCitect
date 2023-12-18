@@ -23,6 +23,9 @@ const AppProperties: {
     LOGIN: 400,
 
     GIT: 500,
+
+    EDIT_MARKDOWN: 600,
+    EDIT_IMAGE: 601,
   },
   STATES_I: {},
   state: 100,

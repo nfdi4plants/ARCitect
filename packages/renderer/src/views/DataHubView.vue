@@ -21,6 +21,14 @@ const props = reactive({
   localUrl: '',
   search_text: '',
   download_lfs: false,
+  host: 'git.nfdi4plants.org',
+  hosts: [
+    'git.nfdi4plants.org',
+    'gitlab.nfdi4plants.de',
+    'gitlab.plantmicrobe.de'
+  ],
+
+  error: '',
 });
 
 const inspectArc = url =>{
@@ -48,8 +56,8 @@ const importArc = async url =>{
     return;
 
   let url_with_credentials = url;
-  if(AppProperties.user)
-    url_with_credentials = url_with_credentials.replace('https://', `https://oauth2:${AppProperties.user.token.access_token}@`);
+  if(AppProperties.user && AppProperties.user.tokens[props.host])
+    url_with_credentials = url_with_credentials.replace('https://', `https://oauth2:${AppProperties.user.tokens[props.host].access_token}@`);
 
   const dialogProps = reactive({
     title: 'Downloading ARC',
@@ -90,10 +98,24 @@ const importArc = async url =>{
 };
 
 const init = async () => {
+
+  props.error = '';
   props.list = [];
 
   window.ipc.on('ArcCommanderService.MSG', processMsg);
-  const list = await window.ipc.invoke('DataHubService.getArcs', AppProperties.user && AppProperties.user.token ? AppProperties.user.token.access_token : null);
+  const list = await window.ipc.invoke(
+    'DataHubService.getArcs',
+    [
+      props.host,
+      AppProperties.user && AppProperties.user.tokens[props.host]
+        ? AppProperties.user.tokens[props.host].access_token
+        : null
+    ]
+  );
+  if(!list){
+    props.error = 'Unable to authenticate current user at host `'+props.host+'`';
+    return;
+  }
 
   if(AppProperties.user){
     for(let i of list)
@@ -114,6 +136,8 @@ const init = async () => {
 
 onMounted(init);
 watch(()=>AppProperties.user, init);
+watch(()=>props.host, init);
+
 onUnmounted(async () => {
   window.ipc.off('ArcCommanderService.MSG', processMsg);
 });
@@ -131,8 +155,8 @@ onUnmounted(async () => {
       :fullWidth="false"
     >
       <br>
-      <div class="q-gutter-md row">
-        <q-input class='col-7' v-model="props.search_text" label="ARC Identifier" dense outlined :disable='props.list.length<1'>
+      <div class="q-gutter-md row q-px-md">
+        <q-input class='col-grow' v-model="props.search_text" label="ARC Identifier" dense outlined :disable='props.list.length<1'>
           <template v-slot:append>
             <q-icon v-if="props.search_text!==''" name="close" @click="props.search_text=''" class="cursor-pointer" />
             <q-icon name="search" />
@@ -142,18 +166,26 @@ onUnmounted(async () => {
           </template>
         </q-input>
 
-        <q-checkbox class='col' v-model="props.download_lfs" label="LFS" dense color='secondary' style="min-width:50px;">
+        <q-checkbox class='' v-model="props.download_lfs" label="LFS" dense color='secondary' style="min-width:50px;">
           <q-tooltip class='text-body2'>
             Download Large Files
           </q-tooltip>
         </q-checkbox>
 
-        <q-btn class='col' label="Refresh" icon='refresh' color="secondary" @click='init()' no-wrap style="min-width:142px;"/>
+        <q-select class='' v-model="props.host" :options="props.hosts" label="Host" dense/>
+        <q-btn class='' label="" icon='refresh' color="secondary" @click='init()' no-wrap/>
       </div>
       <br>
       <q-separator/>
 
-      <div style="display:block;text-align:center;" v-if="props.list.length<1">
+      <q-banner v-if='props.error' dense>
+        <template v-slot:avatar>
+          <q-icon name="warning" color="grey-7" />
+        </template>
+        <div v-html='props.error'></div>
+      </q-banner>
+
+      <div style="display:block;text-align:center;" v-else-if="props.list.length<1">
           <q-circular-progress
             indeterminate
             size="20em"
