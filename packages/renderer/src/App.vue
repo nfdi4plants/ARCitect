@@ -139,12 +139,10 @@ const test = async ()=>{
 
           <q-separator />
 
-          <!--<ToolbarButton text='Upload ARC' icon='cloud_upload' requiresARC='true' @clicked='test()'></ToolbarButton>-->
-          <ToolbarButton text='Refresh ARC' icon='autorenew' requiresARC @clicked='refreshLocalArc()'></ToolbarButton>
-          <ToolbarButton text='Versions' icon='update' requiresARC @clicked='AppProperties.state=AppProperties.STATES.GIT'></ToolbarButton>
+          <ToolbarButton text='Refresh ARC' icon='refresh' requiresARC @clicked='refreshLocalArc()'></ToolbarButton>
+          <ToolbarButton text='Versioning' icon='mediation' requiresARC @clicked='AppProperties.state=AppProperties.STATES.GIT'></ToolbarButton>
           <ToolbarButton text='Explorer' icon='folder_open' requiresARC @clicked='ArcControlService.openArcInExplorer()'></ToolbarButton>
           <q-separator />
-
 
           <q-item class="col-grow"></q-item>
           <ToolbarButton text='Toggle Help' icon='help' @clicked='iProps.showHelp=!iProps.showHelp;'></ToolbarButton>

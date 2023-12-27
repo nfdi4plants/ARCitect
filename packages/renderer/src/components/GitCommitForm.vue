@@ -3,15 +3,14 @@
 import { onMounted, onUnmounted, ref, reactive, watch } from 'vue';
 
 import ViewItem from '../components/ViewItem.vue';
-import FormInput from '../components/FormInput.vue';
+import a_input from '../components/a_input.vue';
+import a_btn from '../components/a_btn.vue';
 import ArcControlService from '../ArcControlService.ts';
-
-import Property from '../Property.ts';
 
 import AppProperties from '../AppProperties.ts';
 
-import ProgressDialog from '../dialogs/ProgressDialog.vue';
 import GitDialog from '../dialogs/GitDialog.vue';
+import ProgressDialog from '../dialogs/ProgressDialog.vue';
 import { useQuasar } from 'quasar'
 const $q = useQuasar();
 
@@ -19,28 +18,15 @@ const iProps = reactive({
   git_status: [],
   error: '',
   lfs_limit: 1,
-  lfs_pull: false,
+
   commit: {
     name: '',
     email: '',
-    remote: '',
     msg: ''
   },
-  form: []
-});
 
-iProps.form = [
-  [
-    Property( iProps.commit, 'name', {label:'Full Name'}),
-    Property( iProps.commit, 'email', {label:'eMail'} )
-  ],
-  [Property( iProps.commit, 'remote')],
-  [Property( iProps.commit, 'msg', {label:'Commit Message',hint:'A short description of the made changes',type:'textarea'})],
-  [
-    Property( iProps, 'lfs_limit', {label:'LFS Size Limit in MB',hint:'File above limit are tracked via LFS',dense:true}),
-    Property( iProps, 'lfs_pull', {type:'checkbox',label:'Download LFS Files'})
-  ],
-];
+  userListener: ()=>{}
+});
 
 const raiseError = err => {
   iProps.error = err;
@@ -154,160 +140,8 @@ const commit = async()=>{
   dialogProps.items[4][1] = 1;
 };
 
-const getBranches = async () => {
-  const response = await window.ipc.invoke('GitService.run', {
-    args: [`branch`],
-    cwd: ArcControlService.props.arc_root
-  });
-  const branches_raw = response[1].split('\n').slice(0,-1);
-  const branches = {
-    list: [],
-    current: null
-  };
-  for(let branch of branches_raw){
-    const branch_name = branch.slice(2);
-    branches.list.push(branch_name);
-    if(branch[0]==='*')
-      branches.current = branch_name;
-  }
-
-  return branches;
-};
-
-const patchRemote = async () => {
-  let response = null;
-
-  const remote = iProps.commit.remote;
-  const remotes = await getRemotes();
-
-  let remoteExistsLocally = false;
-  for(const r in remotes)
-    if(remotes[r].includes(remote)){
-      remoteExistsLocally = true;
-      break;
-    }
-  if(!remoteExistsLocally)
-    response = await window.ipc.invoke('GitService.run', {
-      args: [`remote`,`add`,'origin',remote],
-      cwd: ArcControlService.props.arc_root
-    });
-
-  // patch remote with token
-  const patched_remote = `https://oauth2:${AppProperties.user.tokens['git.nfdi4plants.org'].access_token}@git.nfdi4plants.org` + remote.split('git.nfdi4plants.org')[1];
-
-  // add patched remote
-  if(Object.keys(remotes).includes('arcitect_remote'))
-    response = await window.ipc.invoke('GitService.run', {
-      args: [`remote`,`remove`,'arcitect_remote'],
-      cwd: ArcControlService.props.arc_root
-    });
-  response = await window.ipc.invoke('GitService.run', {
-    args: [`remote`,`add`,'arcitect_remote',patched_remote],
-    cwd: ArcControlService.props.arc_root
-  });
-  return patched_remote;
-};
-
-const push = async()=>{
-  iProps.error = '';
-  if(iProps.git_status.length>0)
-    return raiseError('Commit changes before push.');
-  if(!AppProperties.user)
-    return raiseError('Sign in to push to <b>nfdi4plants.org</b>.');
-
-  const dialogProps = reactive({
-    title: 'Uploading ARC',
-    ok_title: 'Ok',
-    cancel_title: null,
-    state: 0,
-  });
-
-  $q.dialog({
-    component: GitDialog,
-    componentProps: dialogProps
-  }).onOk( async () => {
-    await init();
-  });
-
-  let response = null;
-
-  // get current branch
-  const branches = await getBranches();
-  if(!branches.current) return dialogProps.state=2;
-
-  // patch remote
-  const patched_remote = await patchRemote();
-  if(!patched_remote) return dialogProps.state=2;
-
-  // push
-  response = await window.ipc.invoke('GitService.run', {
-    args: [`push`,`--verbose`,`--atomic`,`--progress`,`arcitect_remote`,branches.current],
-    cwd: ArcControlService.props.arc_root
-  });
-
-  // remove patched remote
-  response = await window.ipc.invoke('GitService.run', {
-    args: [`remote`,`remove`,'arcitect_remote'],
-    cwd: ArcControlService.props.arc_root
-  });
-
-  dialogProps.state=1;
-};
-
 const isTrackedWithLFS = item=>{
   return item[2]>iProps.lfs_limit;
-};
-
-const pull = async()=>{
-  iProps.busy = true;
-  iProps.error = '';
-  if(iProps.git_status.length>0)
-    return raiseError('Commit changes before pull.');
-  if(!AppProperties.user)
-    return raiseError('Sign in to pull from <b>nfdi4plants.org</b>.');
-
-  const dialogProps = reactive({
-    title: 'Downloading ARC',
-    ok_title: 'Ok',
-    cancel_title: null,
-    state: 0,
-  });
-
-  $q.dialog({
-    component: GitDialog,
-    componentProps: dialogProps
-  }).onOk( async () => {
-    await init();
-  });
-
-  let response = null;
-
-  // get current branch
-  const branches = await getBranches();
-  if(!branches.current) return dialogProps.state=2;
-
-  // patch remote
-  const patched_remote = await patchRemote();
-  if(!patched_remote) return dialogProps.state=2;
-
-  // pull
-  response = await window.ipc.invoke('GitService.run', {
-    args: [`pull`,`arcitect_remote`,branches.current,'--progress'],
-    cwd: ArcControlService.props.arc_root
-  });
-  if(iProps.lfs_pull){
-    response = await window.ipc.invoke('GitService.run', {
-      args: [`lfs`,`pull`,`arcitect_remote`,branches.current],
-      cwd: ArcControlService.props.arc_root
-    });
-  }
-
-  // remove patched remote
-  response = await window.ipc.invoke('GitService.run', {
-    args: [`remote`,`remove`,'arcitect_remote'],
-    cwd: ArcControlService.props.arc_root
-  });
-  dialogProps.state=1;
 };
 
 const getGitUser = async()=>{
@@ -329,37 +163,32 @@ const getGitUser = async()=>{
   };
 };
 
-const getRemotes = async()=>{
+const reset = async()=>{
+
+  const dialogProps = reactive({
+    title: 'Resetting ARC',
+    ok_title: 'Ok',
+    cancel_title: null,
+    state: 0,
+  });
+
+  $q.dialog({
+    component: GitDialog,
+    componentProps: dialogProps
+  });
+
   const response = await window.ipc.invoke('GitService.run', {
-    args: [`remote`,`-v`],
+    args: [`reset`,`--hard`],
     cwd: ArcControlService.props.arc_root
   });
-  const remotes = {};
-  for(let row of response[1].split('\n').slice(0,-1)){
-    const row_ = row.split('\t');
-    remotes[row_[0]] = row_[1];
-  }
-  return remotes;
-};
 
-const getRemote = async()=>{
-  const remotes = await getRemotes();
-  for(let r in remotes)
-    if(remotes[r][1].includes('(push)') && remotes[r][1].includes('git.nfdi4plants.org'))
-      return remotes[r][1].replace(' (push)','');
-
-  if(AppProperties.user)
-    return `https://git.nfdi4plants.org/${AppProperties.user.username}/${ArcControlService.props.arc_root.split('/').pop().split(' ').join('_')}.git`;
-
-  return '';
+  dialogProps.state = response[0] ? 1 : 2;
 };
 
 const init = async()=>{
 
-  iProps.busy = true;
   iProps.error = '';
   await getStatus();
-  const remote = await getRemote();
 
   let user = null;
   if(AppProperties.user)
@@ -369,40 +198,52 @@ const init = async()=>{
 
   iProps.commit.name = user.name;
   iProps.commit.email = user.email;
-  iProps.commit.remote = remote;
   iProps.commit.msg = '';
-
-  for(const row of iProps.form)
-    for(const property of row)
-      property.updateOriginalValue();
-
-  iProps.busy = false;
-
-  window.ipc.on('LocalFileSystemService.updatePath', getStatus);
 };
 
-onMounted(init);
-onUnmounted(()=>window.ipc.off('LocalFileSystemService.updatePath', getStatus));
-watch(()=>AppProperties.user, init);
+onMounted(()=>{
+  iProps.userListener = watch(()=>AppProperties.user, init);
+  window.ipc.on('LocalFileSystemService.updatePath', getStatus);
+  init();
+});
+onUnmounted(()=>{
+  iProps.userListener(); // disable old listener
+  window.ipc.off('LocalFileSystemService.updatePath', getStatus);
+});
 
 </script>
 
 <template>
   <ViewItem
-    icon="update"
-    label="Update"
-    caption="Commit changes and upload ARC"
+    icon="verified"
+    label="Commit"
+    caption="Track changes of the ARC"
     group="git"
     defaultOpened
-    @before-show='init'
   >
     <q-card flat>
       <q-card-section style="padding-bottom:0;margin-bottom:-1.2em;">
-        <div class='row' v-for="(row,i) in iProps.form">
-          <div class='col' v-for="(property,j) in row">
-            <FormInput :property='property'></FormInput>
+        <div class='row' >
+          <div class='col'>
+            <a_input v-model='iProps.commit.name' label="Name"/>
+          </div>
+          <div class='col'>
+            <a_input v-model='iProps.commit.email' label="eMail"/>
           </div>
         </div>
+
+        <div class='row' >
+          <div class='col'>
+            <a_input v-model='iProps.commit.msg' label='Commit Message' type="textarea"/>
+          </div>
+        </div>
+
+        <div class='row' >
+          <div class='col'>
+            <a_input type="number" v-model='iProps.lfs_limit' label="LFS Limit in MB"/>
+          </div>
+        </div>
+
       </q-card-section>
 
       <br>
@@ -437,26 +278,10 @@ watch(()=>AppProperties.user, init);
         </q-list>
       </q-card-section>
 
-      <div style="margin:0 2em 0.4em 2em;">
-        <q-banner rounded inline-actions class="bg-red-10 text-white" dense v-if='iProps.error'>
-          <template v-slot:avatar>
-            <q-icon name="warning"/>
-          </template>
-          <div v-html='iProps.error'></div>
-        </q-banner>
-        <q-banner rounded inline-actions class="bg-red-10 text-white" dense v-if='!AppProperties.user'>
-          <template v-slot:avatar>
-            <q-icon name="warning"/>
-          </template>
-          <div>Sign in to push to <b>nfdi4plants.org</b>.</div>
-        </q-banner>
-      </div>
-
       <q-card-actions align='right' style="padding:0 2.1em 1em 2.1em;">
-        <q-btn label="Commit" style="margin-bottom:0.5em;" @click="commit" icon='check_circle' color="secondary" :disabled='ArcControlService.props.busy || iProps.busy || iProps.git_status.length<1'/>
-        <q-btn label="Upload" style="margin-bottom:0.5em;" @click="push" icon='cloud_upload' color="secondary" :disabled='ArcControlService.props.busy || iProps.busy || !AppProperties.user'/>
-        <q-btn label="Download" style="margin-bottom:0.5em;" @click="pull" icon='cloud_download' color="secondary" :disabled='ArcControlService.props.busy || iProps.busy || !AppProperties.user'/>
-        <!--<q-btn label="Sync" @click="" icon='cloud_sync' color="secondary" :disabled='ArcControlService.props.busy'/>-->
+        <a_btn v-if='iProps.error' color="red-10" icon='warning' :label="iProps.error" no-caps style="margin-right:auto"/>
+        <a_btn label="Reset" @click="reset" icon='change_circle'/>
+        <a_btn label="Commit" @click="commit" icon='check_circle' :disabled='iProps.git_status.length<1'/>
       </q-card-actions>
 
     </q-card>

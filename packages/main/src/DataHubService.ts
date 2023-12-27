@@ -11,6 +11,19 @@ const express = require('express');
 let authApp = null;
 const authPort = 7890;
 
+const CREDENTIALS = {
+  'git.nfdi4plants.org': {
+    id: '80f4fbff13c3a27713860b6e71755fb3cba7adf644cf71a7cfcc9c1f67ac3680',
+    secret: null,
+  },
+  'gitlab.nfdi4plants.de': {
+    id: '63068e329ba2bba4a5077c29d19996e4b9440fa47ee00da3f79f53f63558a8a8',
+    secret: 'a5c722995c5b7f6b43e337694f84a7af6ecea61a8486817b1be3d2fa87b4354c',
+  },
+  // 'gitlab.plantmicrobe.de': {
+  // },
+}
+
 export const DataHubService = {
 
   auth_host: null,
@@ -30,13 +43,13 @@ export const DataHubService = {
                 resolve(JSON.parse(output));
               });
             } else {
-              console.error(response);
+              console.error('response',response);
               resolve(null);
             }
           })
           request.end()
         } catch(err){
-          console.error(err);
+          console.error('catch',err);
           resolve(null);
         }
       }
@@ -64,34 +77,60 @@ export const DataHubService = {
   },
 
   authenticate: async (e,host)=>{
+    if(!CREDENTIALS[host]) return false;
+
     DataHubService.auth_host  = host;
     const url_params = {
       response_type: 'code',
       redirect_uri: 'http://localhost:7890',
-      client_id: '80f4fbff13c3a27713860b6e71755fb3cba7adf644cf71a7cfcc9c1f67ac3680',
+      client_id: CREDENTIALS[host].id,
       scope: `openid read_api email profile read_repository write_repository`
     };
-    const auth_url = `https://${DataHubService.auth_host}/oauth/authorize?${querystring.stringify(url_params)}`;
+    const auth_url = `https://${host}/oauth/authorize?${querystring.stringify(url_params)}`;
     shell.openExternal(auth_url);
-  },
 
-  getParams: code=>{
-    return querystring.stringify({
-      client_id: '80f4fbff13c3a27713860b6e71755fb3cba7adf644cf71a7cfcc9c1f67ac3680',
-      grant_type: 'authorization_code',
-      redirect_uri: 'http://localhost:7890',
-      code: code
-    });
+    return true;
   },
 
   getToken: async (e,code,host)=>{
+    if(!CREDENTIALS[host]) return null;
+
+    const url_params = {
+      code: code,
+      client_id: CREDENTIALS[host].id,
+      client_secret: CREDENTIALS[host].secret,
+      grant_type: 'authorization_code',
+      redirect_uri: 'http://localhost:7890'
+    };
+
+    const path = `/oauth/token?${querystring.stringify(url_params)}`;
+
     return await DataHubService.getWebPageAsJson(
         null,
         {
           host: host,
-          path: `/oauth/token?` + DataHubService.getParams(code),
+          path: path,
           port: 443,
           method: 'POST',
+          headers: {
+            'user-agent': 'node.js',
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+  },
+
+  getGroups: async (e,[host,token])=>{
+    return await DataHubService.getWebPageAsJson(
+        null,
+        {
+          host: host,
+          path: `/api/v4/groups/?${querystring.stringify({
+            access_token: token,
+            all_available: true
+          })}`,
+          port: 443,
+          method: 'GET',
           headers: {
             'user-agent': 'node.js',
             'Content-Type': 'application/json'
@@ -120,6 +159,7 @@ export const DataHubService = {
     ipcMain.handle('DataHubService.getArcs', DataHubService.getArcs );
     ipcMain.handle('DataHubService.inspectArc', DataHubService.inspectArc );
     ipcMain.handle('DataHubService.authenticate', DataHubService.authenticate );
+    ipcMain.handle('DataHubService.getGroups', DataHubService.getGroups );
 
     authApp = express()
     authApp.get('/', async (req, res) => {
@@ -130,8 +170,8 @@ export const DataHubService = {
       const code = req.url.split('/?code=')[1];
       const token = await DataHubService.getToken(null,code,DataHubService.auth_host);
       const user = await DataHubService.getUser(null,token.access_token,DataHubService.auth_host);
-      user.tokens = {};
-      user.tokens[DataHubService.auth_host] = token;
+      user.token = token;
+      user.host = DataHubService.auth_host;
 
       res.send('<h1>Login and Authorization Complete. You can now return to ARCitect.</h1><script>window.close()</script>');
       let window = BrowserWindow.getAllWindows().find(w => !w.isDestroyed());

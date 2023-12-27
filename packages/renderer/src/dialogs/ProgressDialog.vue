@@ -2,6 +2,8 @@
 import { useDialogPluginComponent } from 'quasar';
 import { reactive, onMounted } from 'vue';
 
+import a_btn from '../components/a_btn.vue';
+
 export interface Props {
   items: Array,
   title: String,
@@ -53,24 +55,13 @@ const { dialogRef, onDialogHide, onDialogOK, onDialogCancel } = useDialogPluginC
           </q-item>
         </q-list>
 
-        <q-banner rounded inline-actions class="bg-red-10 text-white" dense v-if='props.error'>
-          <template v-slot:avatar>
-            <q-icon name="warning"/>
-          </template>
-          <div v-html='props.error'></div>
-        </q-banner>
-        <q-banner rounded inline-actions class="bg-secondary text-white" dense v-if='props.succ'>
-          <template v-slot:avatar>
-            <q-icon name="check_circle"/>
-          </template>
-          <div v-html='props.succ'></div>
-        </q-banner>
-
       </q-card-section>
 
       <q-card-actions align="right" style="margin:0 1.5em 1.5em;">
-        <q-btn color="secondary" :label="props.ok_title" @click="onDialogOK" type='submit' class='text-weight-bold' :disabled='!props.error && props.items[props.items.length-1][1]!==1'/>
-        <q-btn color="secondary" v-if='props.cancel_title' :label="props.cancel_title" @click="onDialogCancel" class='text-weight-bold' :disabled='props.items[props.items.length-1][1]<1'/>
+        <a_btn v-if='props.error' color="red-10" icon='warning' :label="iProps.error" no-caps style="margin-right:auto"/>
+        <a_btn v-if='props.succ' icon='check_circle' :label="props.succ" no-caps style="margin-right:auto"/>
+        <a_btn :label="props.ok_title" @click="onDialogOK" type='submit' :disabled='!props.error && props.items[props.items.length-1][1]!==1'/>
+        <a_btn v-if='props.cancel_title' :label="props.cancel_title" @click="onDialogCancel" :disabled='props.items[props.items.length-1][1]<1'/>
       </q-card-actions>
     </q-card>
 

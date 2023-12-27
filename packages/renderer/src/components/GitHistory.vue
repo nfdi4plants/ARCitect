@@ -32,7 +32,7 @@ const getHistory = async ()=>{
 <template>
   <ViewItem
     icon="history"
-    label="History"
+    label="Log"
     caption="Inspect ARC history"
     group="git"
     @before-show='getHistory'
