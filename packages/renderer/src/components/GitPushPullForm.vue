@@ -219,7 +219,7 @@ const removeRemote = async remote=>{
 <template>
   <ViewItem
     icon="wifi_protected_setup"
-    label="Push/Pull"
+    label="Push / Pull"
     caption="Synchronize the ARC with a DataHub"
     group="git"
   >
@@ -259,7 +259,7 @@ const removeRemote = async remote=>{
         </div>
         <div class='row'>
           <div class='col'>
-            <a_checkbox v-model='iProps.lfs_pull' label="Use LFS" style="float:right;"/>
+            <a_checkbox v-model='iProps.lfs_pull' label="Use Large File Storage" style="float:right;"/>
           </div>
         </div>
 

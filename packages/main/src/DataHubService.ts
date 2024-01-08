@@ -20,8 +20,10 @@ const CREDENTIALS = {
     id: '63068e329ba2bba4a5077c29d19996e4b9440fa47ee00da3f79f53f63558a8a8',
     secret: 'a5c722995c5b7f6b43e337694f84a7af6ecea61a8486817b1be3d2fa87b4354c',
   },
-  // 'gitlab.plantmicrobe.de': {
-  // },
+  'gitlab.plantmicrobe.de': {
+    id: '36ccd7924db8cf3548ee422b084dfdb28e0353cb99bbe7c0f236ae2b5f6c1bcb',
+    secret: 'bbdd7493a1beb223d6345101d839b8aebfd81f889fd8e851d6674a9994cdab0c',
+  },
 }
 
 export const DataHubService = {

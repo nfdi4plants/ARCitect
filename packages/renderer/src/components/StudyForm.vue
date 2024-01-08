@@ -7,6 +7,10 @@ import Property from '../Property.ts';
 
 import ArcControlService from '../ArcControlService.ts';
 
+import ConfirmationDialog from '../dialogs/ConfirmationDialog.vue';
+import { useQuasar } from 'quasar'
+const $q = useQuasar();
+
 export interface Props {
   group: String,
   study: Object
@@ -47,6 +51,23 @@ const onSubmit = async ()=>{
   await ArcControlService.readARC();
 };
 
+const deleteStudy = async ()=>{
+  $q.dialog({
+    component: ConfirmationDialog,
+    componentProps: {
+      msg: `Are you sure you want to delete study <b>'${props.study.Identifier}'</b>?`,
+      ok_text: 'Delete',
+      ok_icon: 'delete',
+      ok_color: 'red-9',
+      cancel_text: 'Cancel',
+      cancel_icon: 'cancel',
+      cancel_color: 'secondary'
+    }
+  }).onOk( async () => {
+    ArcControlService.deleteStudy(props.study.Identifier);
+  });
+};
+
 </script>
 
 <template>
@@ -70,6 +91,7 @@ const onSubmit = async ()=>{
         </q-card-section>
 
         <q-card-actions align='right' style="padding:2.1em;">
+          <q-btn label="Delete" icon='delete' color="red-9" @click='deleteStudy'/>
           <q-btn label="Update" type="submit" icon='check_circle' color="secondary"/>
           <q-btn label="Reset" type="reset" icon='change_circle' color="secondary" class="q-ml-sm"/>
         </q-card-actions>

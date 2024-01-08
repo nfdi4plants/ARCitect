@@ -38,7 +38,7 @@ const AppProperties: {
   datahub_hosts: [
     'git.nfdi4plants.org',
     'gitlab.nfdi4plants.de',
-    // 'gitlab.plantmicrobe.de'
+    'gitlab.plantmicrobe.de'
   ]
 });
 

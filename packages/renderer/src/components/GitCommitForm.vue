@@ -240,7 +240,7 @@ onUnmounted(()=>{
 
         <div class='row' >
           <div class='col'>
-            <a_input type="number" v-model='iProps.lfs_limit' label="LFS Limit in MB"/>
+            <a_input type="number" v-model='iProps.lfs_limit' label="Large File Storage Limit in MB"/>
           </div>
         </div>
 
