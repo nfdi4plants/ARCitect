@@ -34,6 +34,12 @@ const AppProperties: {
 
   user: null,
   path_sep: null,
+
+  datahub_hosts: [
+    'git.nfdi4plants.org',
+    'gitlab.nfdi4plants.de',
+    // 'gitlab.plantmicrobe.de'
+  ]
 });
 
 for(let k in AppProperties.STATES){

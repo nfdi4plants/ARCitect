@@ -42,13 +42,13 @@ const init = async ()=>{
   iProps.sheets = props.owner.Tables.map(t=>t.Name);
   iProps.active_sheet = props.owner.Tables.length ? props.owner.Tables[0].Name : null;
 
-  if(!iProps.templates){
-    const templates_json = await window.ipc.invoke('InternetService.getTemplates');
-    iProps.templates = await Templates_fromJsonString(JSON.stringify(templates_json));
-    console.log(iProps.templates);
+  // if(!iProps.templates){
+  //   const templates_json = await window.ipc.invoke('InternetService.getTemplates');
+    // iProps.templates = await Templates_fromJsonString(JSON.stringify(templates_json));
+    // console.log(iProps.templates);
     // for(let x of iProps.templates)
     //   console.log(x);
-  }
+  // }
 };
 
 onMounted( init );

@@ -331,35 +331,18 @@ const onSelectionChanged = id =>{
   }
 };
 
-const asyncDebounce = (mainFunction, delay) => {
-  // Declare a variable called 'timer' to store the timer ID
-  let timer: NodeJS.Timeout;
-
-  // Return an anonymous function that takes in any number of arguments
-  return function (...args) {
-    // Clear the previous timer to prevent the execution of 'mainFunction'
-    clearTimeout(timer);
-
-    // Set a new timer that will execute 'mainFunction' after the specified delay
-    timer = setTimeout(async () => {
-      await mainFunction(...args);
-    }, delay);
-  };
-};
-
-const debounceReadARC = asyncDebounce(ArcControlService.readARC, 300);
-
-const updatePath = async path => {
-  debounceReadARC();
+const updatePath = async ([path,type]) => {
   if (!arcTree.value)
     return;
-  const n = arcTree.value.getNodeByKey(path);
+
+  const parentPath = path.split('/').slice(0,-1).join('/');
+  const n = arcTree.value.getNodeByKey(parentPath);
   if(!n)
     return;
-  const isExpanded = arcTree.value.isExpanded(path);
+  const isExpanded = arcTree.value.isExpanded(parentPath);
   delete n.children;
   if(isExpanded)
-    arcTree.value.setExpanded(path,true);
+    arcTree.value.setExpanded(parentPath,true);
 };
 
 const formatSize = size => {

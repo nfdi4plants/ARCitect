@@ -22,13 +22,7 @@ const props = reactive({
   search_text: '',
   download_lfs: false,
   host: 'git.nfdi4plants.org',
-  hosts: [
-    'git.nfdi4plants.org',
-    'gitlab.nfdi4plants.de',
-    'gitlab.plantmicrobe.de'
-  ],
-
-  error: '',
+  error: ''
 });
 
 const inspectArc = url =>{
@@ -56,8 +50,8 @@ const importArc = async url =>{
     return;
 
   let url_with_credentials = url;
-  if(AppProperties.user && AppProperties.user.tokens[props.host])
-    url_with_credentials = url_with_credentials.replace('https://', `https://oauth2:${AppProperties.user.tokens[props.host].access_token}@`);
+  if(AppProperties.user && AppProperties.user.host===props.host)
+    url_with_credentials = url_with_credentials.replace('https://', `https://oauth2:${AppProperties.user.token.access_token}@`);
 
   const dialogProps = reactive({
     title: 'Downloading ARC',
@@ -107,8 +101,8 @@ const init = async () => {
     'DataHubService.getArcs',
     [
       props.host,
-      AppProperties.user && AppProperties.user.tokens[props.host]
-        ? AppProperties.user.tokens[props.host].access_token
+      AppProperties.user && AppProperties.user.host===props.host
+        ? AppProperties.user.token.access_token
         : null
     ]
   );
@@ -172,7 +166,7 @@ onUnmounted(async () => {
           </q-tooltip>
         </q-checkbox>
 
-        <q-select class='' v-model="props.host" :options="props.hosts" label="Host" dense/>
+        <q-select class='' v-model="props.host" :options="AppProperties.datahub_hosts" label="Host" dense/>
         <q-btn class='' label="" icon='refresh' color="secondary" @click='init()' no-wrap/>
       </div>
       <br>

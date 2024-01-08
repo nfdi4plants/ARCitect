@@ -15,13 +15,19 @@ const props = defineProps<Props>();
 <template>
   <q-expansion-item
     expand-separator
-    :icon="props.icon"
-    :label="props.label"
-    :caption="props.caption"
-    header-class="bg-grey-33"
     :group='props.group'
     :default-opened='props.defaultOpened'
   >
+    <template v-slot:header>
+      <q-item-section avatar>
+        <q-icon color="grey-8" :name="props.icon" />
+      </q-item-section>
+
+      <q-item-section no-wrap>
+        <q-item-label>{{props.label}}</q-item-label>
+        <q-item-label caption>{{props.caption}}</q-item-label>
+      </q-item-section>
+    </template>
 
     <div v-if='props.fullWidth' style="display:block;margin:0 auto;">
       <slot></slot>

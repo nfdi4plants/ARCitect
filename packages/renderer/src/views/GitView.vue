@@ -3,6 +3,7 @@
 import { onMounted, ref, reactive, watch } from 'vue';
 
 import GitCommitForm from '../components/GitCommitForm.vue';
+import GitPushPullForm from '../components/GitPushPullForm.vue';
 import GitHistory from '../components/GitHistory.vue';
 
 </script>
@@ -11,6 +12,8 @@ import GitHistory from '../components/GitHistory.vue';
 
   <q-list bordered class="rounded-borders">
     <GitCommitForm></GitCommitForm>
+    <q-separator />
+    <GitPushPullForm></GitPushPullForm>
     <q-separator />
     <GitHistory></GitHistory>
   </q-list>
