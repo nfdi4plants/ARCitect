@@ -41,7 +41,7 @@ export const LocalFileSystemService = {
     for(const l of labels){
       const path_ = PATH.join(path,l);
       const stat = FS.lstatSync(path_);
-      if(l.startsWith('isa.') || l.startsWith('.git') || l.startsWith('.arc'))
+      if(l.startsWith('isa.') || l.startsWith('.git') || l.startsWith('.arc') || l.startsWith('.DS_Store'))
         continue;
 
       stat.id = path_to_arcitect(path_);
