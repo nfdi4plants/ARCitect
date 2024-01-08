@@ -183,6 +183,9 @@ const reset = async()=>{
   });
 
   dialogProps.state = response[0] ? 1 : 2;
+
+  ArcControlService.readARC();
+  init();
 };
 
 const init = async()=>{

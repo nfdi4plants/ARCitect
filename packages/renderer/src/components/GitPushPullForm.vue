@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 
-import { onMounted, reactive } from 'vue';
+import { onMounted, reactive, watch } from 'vue';
 
 import ViewItem from '../components/ViewItem.vue';
 import a_checkbox from '../components/a_checkbox.vue';
@@ -63,15 +63,10 @@ const getBranches = async () => {
   return branches;
 };
 
-const patchRemote = async () => {
-  let response = null;
-
-  const remote = iProps.remote;
-  const remote_url = iProps.remotes[remote];
-
-  return AppProperties.user && remote_url.includes(AppProperties.user.host)
-    ? `https://oauth2:${AppProperties.user.token.access_token}@${AppProperties.user.host}` + remote_url.split(AppProperties.user.host)[1]
-    : remote_url;
+const patchRemote = url => {
+  return AppProperties.user && url.includes(AppProperties.user.host)
+    ? `https://oauth2:${AppProperties.user.token.access_token}@${AppProperties.user.host}` + url.split(AppProperties.user.host)[1]
+    : url;
 };
 
 const push = async()=>{
@@ -106,7 +101,7 @@ const push = async()=>{
   if(!branches.current) return dialogProps.state=2;
 
   // patch remote
-  const patched_remote = await patchRemote();
+  const patched_remote = patchRemote(iProps.remotes[iProps.remote].url);
   if(!patched_remote) return dialogProps.state=2;
 
   // push
@@ -116,6 +111,8 @@ const push = async()=>{
   });
 
   dialogProps.state=1;
+
+  await checkRemotes();
 };
 
 const pull = async()=>{
@@ -147,7 +144,7 @@ const pull = async()=>{
   if(!branches.current) return dialogProps.state=2;
 
   // patch remote
-  const patched_remote = await patchRemote();
+  const patched_remote = patchRemote(iProps.remotes[iProps.remote].url);
   if(!patched_remote) return dialogProps.state=2;
 
   // pull
@@ -163,6 +160,26 @@ const pull = async()=>{
   }
 
   dialogProps.state=1;
+
+  await checkRemotes();
+};
+
+const checkRemotes = async()=>{
+  const branches = await getBranches();
+
+  const hash_response = await window.ipc.invoke('GitService.run', {
+    args: [`rev-parse`,`HEAD`],
+    cwd: ArcControlService.props.arc_root
+  });
+  const latest_local_hash = hash_response[1].trim();
+
+  for(let id in iProps.remotes){
+    const fetch_response = await window.ipc.invoke('GitService.run', {
+      args: [`-c`,`core.askPass=true`,`ls-remote`,patchRemote(iProps.remotes[id].url),`-h`,`refs/heads/${branches.current}`],
+      cwd: ArcControlService.props.arc_root
+    });
+    iProps.remotes[id].dirty = fetch_response[0] && latest_local_hash!==fetch_response[1].split('\t')[0];
+  }
 };
 
 const getRemotes = async()=>{
@@ -171,11 +188,16 @@ const getRemotes = async()=>{
     cwd: ArcControlService.props.arc_root
   });
   iProps.remotes = {};
-  console.log(response);
 
   for(let row of response[1].split('\n').slice(0,-1)){
     const row_ = row.split('\t');
-    iProps.remotes[row_[0]] = row_[1].split(' ')[0];
+    const name = row_[0];
+    const url = row_[1].split(' ')[0];
+
+    iProps.remotes[name] = {
+      url: url,
+      dirty: false
+    };
   }
 
   iProps.remote = Object.keys(iProps.remotes)[0];
@@ -184,18 +206,18 @@ const getRemotes = async()=>{
 const init = async()=>{
   iProps.error = '';
   await getRemotes();
+  await checkRemotes();
 };
 
-onMounted(()=>{
-  init();
-});
+onMounted( init );
+watch(()=>AppProperties.user, init);
 
 const addRemote = e=>{
   $q.dialog({
     component: AddRemoteDialog,
     componentProps: {
       user: AppProperties.user,
-      remotes: Object.keys(iProps.remotes)
+      remotes: Object.keys(iProps.remotes).map(x=>x.url)
     }
   }).onOk( async data => {
     await window.ipc.invoke('GitService.run', {
@@ -231,6 +253,7 @@ const inspectArc = url =>{
     label="Push / Pull"
     caption="Synchronize the ARC with a DataHub"
     group="git"
+    @show='checkRemotes'
   >
     <q-card flat>
       <q-card-section>
@@ -247,14 +270,29 @@ const inspectArc = url =>{
                 <q-item-section no-wrap>
                   <q-item-label>{{id}}</q-item-label>
                   <q-item-label caption style="overflow:hidden;">
-                    {{iProps.remotes[id]}}
+                    {{iProps.remotes[id].url}}
                   </q-item-label>
                 </q-item-section>
 
                 <q-item-section side>
                   <div class="text-grey-8 q-gutter-xs">
-                    <q-btn class="gt-xs" size="12px" flat dense round icon="search" color='gray-7' @click='inspectArc(iProps.remotes[id])' />
-                    <q-btn class="gt-xs" size="12px" flat dense round icon="delete" color='gray-7' @click='removeRemote(id)' />
+                    <q-btn v-if='iProps.remotes[id].dirty' class="gt-xs" size="12px" flat dense round icon="running_with_errors" color='gray-7' @click='inspectArc(iProps.remotes[id].url)'>
+                      <q-tooltip>
+                        ARC is out of Sync!
+                      </q-tooltip>
+                    </q-btn>
+
+                    <q-btn class="gt-xs" size="12px" flat dense round icon="search" color='gray-7' @click='inspectArc(iProps.remotes[id].url)'>
+                      <q-tooltip>
+                        Inspect Remote in the Browser
+                      </q-tooltip>
+                    </q-btn>
+
+                    <q-btn class="gt-xs" size="12px" flat dense round icon="delete" color='gray-7' @click='removeRemote(id)'>
+                      <q-tooltip>
+                        Remove Remote
+                      </q-tooltip>
+                    </q-btn>
                   </div>
                 </q-item-section>
               </q-item>
