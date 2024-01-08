@@ -214,6 +214,15 @@ const removeRemote = async remote=>{
   getRemotes();
 };
 
+const inspectArc = url =>{
+  window.ipc.invoke(
+    'InternetService.openExternalURL',
+    url.startsWith('http://') || url.startsWith('https://')
+      ? url
+      : 'https://' + url
+  );
+};
+
 </script>
 
 <template>
@@ -244,6 +253,7 @@ const removeRemote = async remote=>{
 
                 <q-item-section side>
                   <div class="text-grey-8 q-gutter-xs">
+                    <q-btn class="gt-xs" size="12px" flat dense round icon="search" color='gray-7' @click='inspectArc(iProps.remotes[id])' />
                     <q-btn class="gt-xs" size="12px" flat dense round icon="delete" color='gray-7' @click='removeRemote(id)' />
                   </div>
                 </q-item-section>
