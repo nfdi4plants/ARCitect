@@ -17,6 +17,8 @@ const AppProperties: {
     EDIT_STUDY: 201,
     EDIT_ASSAY: 202,
 
+    EDIT_SWATE: 203,
+
     ADD_STUDY: 301,
     ADD_ASSAY: 302,
 

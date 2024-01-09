@@ -13,6 +13,7 @@ import ImageView from './views/ImageView.vue';
 import HelpView from './views/HelpView.vue';
 import LoginView from './views/LoginView.vue';
 import GitView from './views/GitView.vue';
+import SwateView from './views/SwateView.vue';
 
 import DataHubView from './views/DataHubView.vue';
 
@@ -211,6 +212,7 @@ const test = async ()=>{
                 <MarkdownView v-else-if='AppProperties.state===AppProperties.STATES.EDIT_MARKDOWN'></MarkdownView>
                 <ImageView v-else-if='AppProperties.state===AppProperties.STATES.EDIT_IMAGE'></ImageView>
                 <GitView v-else-if='AppProperties.state===AppProperties.STATES.GIT'></GitView>
+                <SwateView v-else-if='AppProperties.state===AppProperties.STATES.EDIT_SWATE'></SwateView>
                 <HomeView v-else></HomeView>
                 <!--<div v-else></div>-->
               <!--</q-scroll-area>-->
