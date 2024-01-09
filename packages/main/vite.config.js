@@ -29,6 +29,7 @@ const config = {
     },
     rollupOptions: {
       external: [
+        'chokidar',
         'electron',
         'electron-devtools-installer',
         ...builtinModules.flatMap(p => [p, `node:${p}`]),
