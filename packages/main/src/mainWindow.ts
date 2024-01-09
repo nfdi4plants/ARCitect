@@ -14,12 +14,12 @@ async function createWindow() {
     webPreferences: {
       webviewTag: true, // The webview tag is not recommended. Consider alternatives like iframe or Electron's BrowserView. https://www.electronjs.org/docs/latest/api/webview-tag#warning
       preload: join(__dirname, '../../preload/dist/index.cjs'),
+      nodeIntegration: true,
     },
     width:1280,
     height:700,
     icon: join(__dirname, './../../renderer/assets/dpLogo2.png')
   });
-
   /**
   * If you install `show: true` then it can cause issues when trying to close the window.
   * Use `show: false` and listener events `ready-to-show` to fix these issues.

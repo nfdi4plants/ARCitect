@@ -6,6 +6,7 @@ import {DataHubService} from '/@/DataHubService';
 import {InternetService} from '/@/InternetService';
 import {GitService} from '/@/GitService';
 import os from 'os';
+import { SwateService } from './SwateService';
 
 /**
  * Prevent multiple instances
@@ -64,6 +65,7 @@ app.whenReady()
   .then(LocalFileSystemService.init)
   .then(InternetService.init)
   .then(GitService.init)
+  .then(SwateService.init)
   .then(restoreOrCreateWindow)
   .catch((e) => console.error('Failed create window:', e));
 

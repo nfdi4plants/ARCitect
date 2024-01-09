@@ -28,7 +28,7 @@ const ALLOWED_EXTERNAL_ORIGINS = new Set<`https://${string}`>([
   'https://www.google.com',
   'https://git.nfdi4plants.org',
   'https://gitlab.nfdi4plants.de',
-  'https://gitlab.plantmicrobe.de',
+  'https://gitlab.plantmicrobe.de'
 ]);
 
 
@@ -121,12 +121,12 @@ app.on('web-contents-created', (_, contents) => {
       return;
     }
 
-    // Strip away preload scripts if unused or verify their location is legitimate
-    delete webPreferences.preload;
-    // @ts-expect-error `preloadURL` exists - see https://www.electronjs.org/docs/latest/api/web-contents#event-will-attach-webview
-    delete webPreferences.preloadURL;
+    // // Strip away preload scripts if unused or verify their location is legitimate
+    // delete webPreferences.preload;
+    // // @ts-expect-error `preloadURL` exists - see https://www.electronjs.org/docs/latest/api/web-contents#event-will-attach-webview
+    // delete webPreferences.preloadURL;
 
-    // Disable Node.js integration
-    webPreferences.nodeIntegration = false;
+    // // Disable Node.js integration
+    // webPreferences.nodeIntegration = false;
   });
 });

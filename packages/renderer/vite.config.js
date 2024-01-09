@@ -20,7 +20,13 @@ const config = {
     },
   },
   plugins: [
-    vue({}),
+    vue({
+      template: {
+        compilerOptions: {
+          isCustomElement: (tag) => ['WebView'].includes(tag),
+        }
+      }
+    }),
     quasar({})
   ],
   base: '',

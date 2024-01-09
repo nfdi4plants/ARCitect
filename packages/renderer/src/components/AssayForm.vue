@@ -193,7 +193,7 @@ const editTable = ()=>{
 
         <q-card-actions align='right' style="padding:2.1em;">
           <q-btn label="Delete" icon='delete' color="red-9" @click='deleteAssay'/>
-          <!--<q-btn label="Edit Table" icon='edit' @click='editTable' color="secondary"/>-->
+          <q-btn label="Edit Table" icon='edit' @click='editTable' color="secondary"/>
           <q-btn label="Update" type="submit" icon='check_circle' color="secondary"/>
           <q-btn label="Reset" type="reset" icon='change_circle' color="secondary" class="q-ml-sm"/>
         </q-card-actions>
