@@ -2,6 +2,7 @@
   "name": "ARCitect",
   "version": "v0.0.24",
   "private": true,
+  "type": "module",
   "engines": {
     "node": ">=v16.13",
     "npm": ">=8.1"
@@ -37,7 +38,7 @@
     "isomorphic-fetch": "^3.0.0",
     "quasar": "^2.14.2",
     "query-string": "^8.1.0",
-    "vue": "latest",
+    "vue": "^v3.4.7",
     "vue3-markdown-it": "^1.0.10"
   },
   "devDependencies": {
