@@ -1,58 +1,45 @@
 <script lang="ts" setup>
 import { useDialogPluginComponent } from 'quasar';
 import { reactive, onMounted } from 'vue';
-import FormInput from '../components/FormInput.vue';
+import a_input from '../components/a_input.vue';
+import a_btn from '../components/a_btn.vue';
 import Property from '../Property.ts';
+
+import ArcControlService from '../ArcControlService.ts';
 
 import {Person} from '@nfdi4plants/arctrl/ISA/ISA/JsonTypes/Person.js';
 
 const props = defineProps<{config?:Object}>();
 const iProps = reactive({
-  form: [[]],
-  valid: true,
+  error: '',
   mode: 'Add',
-  person: new Person()
+  tab: 'new',
+  person: new Person(),
+  persons: []
 });
 
 const { dialogRef, onDialogHide, onDialogOK, onDialogCancel } = useDialogPluginComponent();
 
 const onSubmit = async () => {
-  iProps.valid = iProps.person.FirstName && iProps.person.LastName;
-  if(!iProps.valid)
-    return;
-
-  onDialogOK(iProps.person);
+  if(iProps.tab==='new'){
+    if(!iProps.person.FirstName || !iProps.person.LastName)
+      return iProps.error='First and last name required';
+    onDialogOK([iProps.person]);
+  } else {
+    onDialogOK(iProps.persons.filter(p=>p.selected));
+  }
 };
 
 const init = async ()=>{
-  iProps.valid = true;
+  iProps.error = '';
   iProps.mode = props.config ? 'Edit' : 'Add';
 
   if(props.config)
     iProps.person = props.config.Copy();
 
-  iProps.form = [
-    [
-      Property( iProps.person, 'ORCID' ),
-    ],
-    [
-      Property( iProps.person, 'FirstName'),
-      Property( iProps.person, 'LastName' ),
-    ],
-    [
-      Property( iProps.person, 'EMail' ),
-    ],
-    [
-      Property(iProps.person, 'Phone' ),
-      Property(iProps.person, 'Fax' ),
-    ],
-    [
-      Property(iProps.person, 'Address' ),
-    ],
-    [
-      Property(iProps.person, 'Affiliation' ),
-    ],
-  ];
+  iProps.persons = await ArcControlService.props.arc.ISA.GetAllPersons();
+  for(let person of iProps.persons)
+    person.selected = false;
 };
 onMounted( init );
 
@@ -63,32 +50,87 @@ onMounted( init );
     @submit="onSubmit"
   >
     <q-dialog ref="dialogRef" @hide="onDialogHide" persistent>
-      <q-card class="q-dialog-plugin" style="min-width:45em;">
+      <q-card class="q-dialog-plugin" style="min-width:45em;height:34em;">
         <q-card-section>
-          <div class="text-h6">{{iProps.mode}} Person</div>
+          <q-tabs
+            v-if='iProps.mode==="Add"'
+            v-model="iProps.tab"
+            dense
+            align="justify"
+            indicator-color="secondary"
+            inline-label
+            class=""
+          >
+            <q-tab name="new" icon="person_add_alt_1" label='Add New Person' />
+            <q-tab name="add" icon="person_search" label='Add Existing Persons'  />
+          </q-tabs>
+          <div v-else class="text-h6">{{iProps.mode}} Person</div>
         </q-card-section>
 
-        <q-card-section>
-
-          <div class='row' v-for="(row,i) in iProps.form">
-            <div class='col' v-for="(property,j) in row">
-              <FormInput :property='property'></FormInput>
+        <q-card-section v-if='iProps.tab==="new"'>
+          <div class='row'>
+            <div class='col'>
+              <a_input v-model='iProps.person.ORCID' label="ORCID"></a_input>
             </div>
           </div>
-
-          <div style="min-height:3.5em;margin:1em 1em -1em 1em;">
-            <q-banner rounded inline-actions class="bg-red-10 text-white" v-if='!iProps.valid' dense>
-              <template v-slot:avatar>
-                <q-icon name="warning"/>
-              </template>
-              <b>Full Name Required.</b>
-            </q-banner>
+          <div class='row'>
+            <div class='col'>
+              <a_input v-model='iProps.person.FirstName' label="First Name"></a_input>
+            </div>
+            <div class='col'>
+              <a_input v-model='iProps.person.LastName' label="Last Name"></a_input>
+            </div>
           </div>
+          <div class='row'>
+            <div class='col'>
+              <a_input v-model='iProps.person.EMail' label="eMail"></a_input>
+            </div>
+          </div>
+          <div class='row'>
+            <div class='col'>
+              <a_input v-model='iProps.person.Phone' label="Phone"></a_input>
+            </div>
+            <div class='col'>
+              <a_input v-model='iProps.person.Fax' label="Fax"></a_input>
+            </div>
+          </div>
+          <div class='row'>
+            <div class='col'>
+              <a_input v-model='iProps.person.Address' label="Address" type='textarea' autogrow></a_input>
+            </div>
+          </div>
+          <div class='row'>
+            <div class='col'>
+              <a_input v-model='iProps.person.Affiliation' label="Affiliation" type='textarea' autogrow></a_input>
+            </div>
+          </div>
+        </q-card-section>
+        <q-card-section v-else>
+          <q-scroll-area style="height:22em">
+          <q-list>
+            <q-item tag="label" v-ripple v-for='person of iProps.persons'>
+              <q-item-section side top>
+                <q-checkbox v-model="person.selected" color='secondary'/>
+              </q-item-section>
+
+              <q-item-section>
+                <q-item-label>{{person.FirstName}} {{person.LastName}}</q-item-label>
+                <q-item-label caption>ORCID: {{person.ORCID || `Missing`}}</q-item-label>
+              </q-item-section>
+            </q-item>
+          </q-list>
+          </q-scroll-area>
         </q-card-section>
 
         <q-card-actions align="right" style="margin:0 1.5em 1.5em;">
-          <q-btn color="teal" :icon='iProps.mode==="Edit" ? "edit" : "person_add_alt_1"' :label="`${iProps.mode==='Edit'?'Update':'Add'} Person`" type='submit' class='text-weight-bold' />
-          <q-btn color="teal" label="Cancel" @click="onDialogCancel" class='text-weight-bold'/>
+          <a_btn v-if='iProps.error' color="red-10" icon='warning' :label="iProps.error" no-caps style="margin-right:auto"/>
+          <a_btn
+            :icon='iProps.mode==="Edit" ? "edit" : "person_add_alt_1"'
+            :label="`${iProps.mode==='Edit'?'Update':'Add'} Person${iProps.tab==='add' && iProps.persons.filter(p=>p.selected).length>1?'s':''}`"
+            type='submit'
+            :disabled='iProps.tab==="add" && iProps.persons.filter(p=>p.selected).length<1'
+          />
+          <a_btn label="Cancel" @click="onDialogCancel"/>
         </q-card-actions>
 
       </q-card>

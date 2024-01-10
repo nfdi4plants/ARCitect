@@ -17,8 +17,9 @@ const props = withDefaults(defineProps<Props>(), {
   group: ''
 });
 
-const add = async item => {
-  props.items.push(item);
+const add = async items => {
+  for(let i of items)
+    props.items.push(i);
   await ArcControlService.writeARC(ArcControlService.props.arc_root,['ISA_Investigation','ISA_Study']);
   await ArcControlService.readARC();
 };
@@ -35,10 +36,10 @@ const showDialog = async item_o => {
   $q.dialog({
     component: PersonDialog,
     componentProps: item_o ? {config: item_o} : {}
-  }).onOk( async item_n => {
+  }).onOk( async items_n => {
     if(item_o)
       remove(item_o,true);
-    add(item_n);
+    add(items_n);
   });
 }
 
