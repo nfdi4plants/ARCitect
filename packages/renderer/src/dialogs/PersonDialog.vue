@@ -108,6 +108,13 @@ onMounted( init );
         <q-card-section v-else>
           <q-scroll-area style="height:22em">
           <q-list>
+
+            <q-item tag="label" v-if='!iProps.persons.length'>
+              <q-item-section>
+                <q-item-label class='text-grey-8' style="margin:0 auto;"><q-avatar text-color="grey-8" icon='person_off' />No existing persons found</q-item-label>
+              </q-item-section>
+            </q-item>
+
             <q-item tag="label" v-ripple v-for='person of iProps.persons'>
               <q-item-section side top>
                 <q-checkbox v-model="person.selected" color='secondary'/>
