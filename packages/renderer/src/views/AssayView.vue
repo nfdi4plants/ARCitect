@@ -2,12 +2,14 @@
 import { reactive, onMounted, watch, ref } from 'vue';
 
 import AssayForm from '../components/AssayForm.vue';
+import PeopleList from '../components/PeopleList.vue';
 
 import ArcControlService from '../ArcControlService.ts';
 import AppProperties from '../AppProperties.ts';
 
 const iProps = reactive({
-  assay: {}
+  assay: {},
+  people: []
 });
 
 const init = async ()=>{
@@ -16,6 +18,7 @@ const init = async ()=>{
   const assay = ArcControlService.props.arc.ISA.TryGetAssay(AppProperties.active_assay);
   if (!assay) return;
   iProps.assay = assay
+  iProps.people = assay.Performers;
 };
 
 onMounted( init );
@@ -27,5 +30,7 @@ watch( ()=>AppProperties.active_assay, init );
 <template>
   <q-list class='fit'>
     <AssayForm :assay='iProps.assay' group="agroup" :defaultOpened='true'></AssayForm>
+    <q-separator />
+    <PeopleList :items='iProps.people' group='agroup'></PeopleList>
   </q-list>
 </template>

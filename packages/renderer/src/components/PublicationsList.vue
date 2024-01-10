@@ -59,6 +59,8 @@ const showDialog = async item_o => {
         :avatar= 'item => item.Title ? item.Title[0].toUpperCase() : item.DOI ? "D" : "P"'
         icon_add= 'bookmark_add'
         icon_remove= 'bookmark_remove'
+        empty_text= 'No Publications Registered'
+        empty_icon= 'import_contacts'
 
         @add='showDialog'
         @edit='showDialog'

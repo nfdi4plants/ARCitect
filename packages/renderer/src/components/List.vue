@@ -10,6 +10,8 @@ export interface Props {
   avatar(i: Object): String,
   icon_add: String,
   icon_remove: String,
+  empty_text: String,
+  empty_icon: String,
 };
 const props = defineProps<Props>();
 
@@ -22,6 +24,13 @@ const emit = defineEmits(['edit','add','remove']);
 
     <q-card-section>
       <q-list separator>
+
+        <q-item v-if='!props.items.length'>
+          <q-item-section>
+            <q-item-label class='text-grey-8' style="margin:0 auto;"><q-avatar text-color="grey-8" :icon='props.empty_icon' />{{props.empty_text}}</q-item-label>
+          </q-item-section>
+        </q-item>
+
         <q-item clickable v-ripple v-for='(item,i) in props.items'>
           <q-item-section avatar v-if='props.avatar(item)'>
             <q-avatar color="primary" text-color="white">
@@ -48,7 +57,7 @@ const emit = defineEmits(['edit','add','remove']);
       </q-list>
     </q-card-section>
 
-    <q-card-actions align='right' style="padding:2.2em;">
+    <q-card-actions align='right' style="padding: 1em 2.2em 2.2em 2.2em;">
       <q-btn :label="`Add ${props.name}`" :icon='props.icon_add' color="secondary" class="q-ml-sm" :disabled='ArcControlService.props.busy' v-on:click='()=>emit("add")'/>
     </q-card-actions>
   </q-card>
