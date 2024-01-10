@@ -59,8 +59,8 @@
 
       <div class="q-checkbox cursor-pointer no-outline row inline no-wrap items-center q-checkbox--dense" tabindex="0" role="checkbox" aria-label="Use Large File Storage" aria-checked="true" filled=""><div class="q-checkbox__inner relative-position non-selectable q-checkbox__inner--falsy" aria-hidden="true"><input class="hidden q-checkbox__native absolute q-ma-none q-pa-none" type="checkbox"><div class="q-checkbox__bg absolute"><svg class="q-checkbox__svg fit absolute-full" viewBox="0 0 24 24"><path class="q-checkbox__truthy" fill="none" d="M1.73,12.91 8.1,19.28 22.79,4.59"></path><path class="q-checkbox__indet" d="M4,14H20V10H4"></path></svg></div></div><span class="no-outline" tabindex="-1"></span><div class="q-checkbox__label q-anchor--skip">Use Large File Storage</div></div>
 
-      <p style="padding-top: 10px;">Check this box to use LFS.</p>
-      
+      <p style="padding-top: 10px;">Check this box to use <a href="https://nfdi4plants.org/nfdi4plants.knowledgebase/docs/guides/arc_WorkingWithLargeDataFiles.html" target="_blank">large file storage (LFS)</a>.</p>
+            
 
       <button class="q-btn q-btn--rectangle bg-secondary text-white"><span
           class="q-btn__content text-center col items-center q-anchor--skip justify-center row"><i
