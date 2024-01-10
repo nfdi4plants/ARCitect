@@ -19,7 +19,7 @@ type MessageHandler = (data: any) => void;
 
 interface SwateAPI {
   handleEvent: (e: MessageEvent) => void;
-  [key: string]: MessageHandler | ((msg: string) => void);
+  [key: string]: MessageHandler;
 }
 
 const send = (msg: Msg, data: any = null): void => {
