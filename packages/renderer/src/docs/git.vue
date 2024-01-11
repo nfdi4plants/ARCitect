@@ -1,6 +1,7 @@
 <!-- TODO: need help on q-item section: html markup or links are not inline but wrapped-->
 <!-- TODO: link commit explanation -->
 <!-- TODO: link LFS explanation -->
+<!-- TODO: externals links are not allowed: "Blocked the opening of an unallowed origin: https://www.nfdi4plants.org" -->
 
 <template>
   <div>
@@ -110,7 +111,7 @@
               </div>
               <div class="col">
                 <q-item-section>Check this box to use <a
-                    href="https://nfdi4plants.org/nfdi4plants.knowledgebase/docs/guides/arc_WorkingWithLargeDataFiles.html"
+                    href="https://www.nfdi4plants.org/nfdi4plants.knowledgebase/docs/guides/arc_WorkingWithLargeDataFiles.html"
                     target="_blank">large file storage (LFS)</a></q-item-section>
               </div>
             </div>

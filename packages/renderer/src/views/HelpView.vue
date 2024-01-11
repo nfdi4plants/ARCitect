@@ -15,7 +15,7 @@ import InvestigationHelp from '../docs/investigation.vue';
   <div style='margin:-2.5em 2em 0 1em'>
     <GitHelp v-if='appProperties.state===appProperties.STATES.GIT'></GitHelp>
     <!--<InvestigationHelp v-else-if='appProperties.state===appProperties.STATES.EDIT_INVESTIGATION'></InvestigationHelp>-->
-    <!--<DataHubHelp v-else-if='appProperties.state===appProperties.STATES.OPEN_DATAHUB'></DataHubHelp>-->
+    <DataHubHelp v-else-if='appProperties.state===appProperties.STATES.OPEN_DATAHUB'></DataHubHelp>
     <!--<AssayHelp v-else-if='appProperties.state===appProperties.STATES.EDIT_ASSAY'></AssayHelp>-->
     <!--<StudyHelp v-else-if='appProperties.state===appProperties.STATES.EDIT_STUDY'></StudyHelp>-->
     <HomeHelp v-else></HomeHelp>
