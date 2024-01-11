@@ -62,6 +62,55 @@
           </q-item-section>
         </q-item>
           
+        <q-separator inset />
+        
+        <div class="q-pt-sm text-justify">
+      <q-list>
+        <q-item>
+          <q-item-section>
+            Three types of changes are displayed together with the file size. 
+          </q-item-section>
+        </q-item>
+        
+        <q-item>
+          <q-item-section>
+
+            <div class="q-item q-item-type row no-wrap" role="listitem">
+        <div class="q-item__section column q-item__section--side justify-center q-item__section--avatar"
+            style="min-width: 2em;"><i class="q-icon text-secondary notranslate material-icons" aria-hidden="true"
+                role="presentation">edit_square</i></div>
+        <div class="q-item__section column q-item__section--main justify-center">
+            <div class="q-item__label">file edited<span style=""></span></div>
+        </div>
+    </div>
+
+    <div class="q-item q-item-type row no-wrap" role="listitem">
+        <div class="q-item__section column q-item__section--side justify-center q-item__section--avatar"
+            style="min-width: 2em;"><i class="q-icon text-secondary notranslate material-icons" aria-hidden="true"
+                role="presentation">add_box</i></div>
+        <div class="q-item__section column q-item__section--main justify-center">
+            <div class="q-item__label">file added <span style=""></span></div>
+        </div>
+    </div>   
+    <div class="q-item q-item-type row no-wrap" role="listitem">
+        <div class="q-item__section column q-item__section--side justify-center q-item__section--avatar"
+            style="min-width: 2em;"><i class="q-icon text-red-10 notranslate material-icons" aria-hidden="true"
+                role="presentation">indeterminate_check_box</i></div>
+        <div class="q-item__section column q-item__section--main justify-center">
+            <div class="q-item__label">file deleted <span style=""></span></div>
+        </div>
+    </div>
+
+          </q-item-section>
+        </q-item>
+</q-list>
+</div>        
+
+
+
+
+
+
         <q-item>
           <q-item-section>
             <div class="row">
