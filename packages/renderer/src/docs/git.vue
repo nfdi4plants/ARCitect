@@ -106,11 +106,6 @@
 </q-list>
 </div>        
 
-
-
-
-
-
         <q-item>
           <q-item-section>
             <div class="row">
