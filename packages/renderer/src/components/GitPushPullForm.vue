@@ -217,7 +217,7 @@ const addRemote = e=>{
     component: AddRemoteDialog,
     componentProps: {
       user: AppProperties.user,
-      remotes: Object.keys(iProps.remotes).map(x=>x.url)
+      remotes: Object.keys(iProps.remotes)
     }
   }).onOk( async data => {
     await window.ipc.invoke('GitService.run', {

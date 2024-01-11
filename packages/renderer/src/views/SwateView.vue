@@ -1,12 +1,15 @@
 <script lang="ts" setup>
-import { BrowserView } from 'electron';
 import { reactive, onMounted, watch, ref } from 'vue';
+import {ArcAssay, ArcStudy} from '@nfdi4plants/arctrl';
+import ArcControlService from '../ArcControlService.ts';
+import AppProperties from '../AppProperties.ts';
 
 let iframe: any | HTMLElement = ref({})
 
 enum Msg {
-  InitResponse,
-  Error
+  Error,
+  AssaySend,
+  StudySend
 }
 
 interface Message {
@@ -29,11 +32,11 @@ const send = (msg: Msg, data: any = null): void => {
     iframe.value.contentWindow?.postMessage(content, '*');
   };
   switch (msg) {
-    case Msg.InitResponse:
-      toSwate("Hello from ARCitect!");
-      break;
-    case Msg.Error:
-      toSwate(data);
+    // case Msg.InitResponse:
+    //   toSwate("Hello from ARCitect!");
+    //   break;
+    default:
+      toSwate(data)
       break;
     // Add more cases as needed
   }
@@ -48,7 +51,19 @@ const SwateAPI : SwateAPI = {
   },
   Init: (msg: string) => {
     console.log(msg)
-    send(Msg.InitResponse)
+    if(!ArcControlService.props.arc || !AppProperties.active_assay) return;
+    const assay = ArcControlService.props.arc.ISA.TryGetAssay(AppProperties.active_assay);
+    if (!assay) return;
+    send(Msg.AssaySend, assay)
+  },
+  AssayReceive: (assay:ArcAssay) => {
+    ArcControlService.props.arc.ISA.SetAssay(assay.Identifier, assay)
+  },
+  StudyReceive: (study:ArcStudy) => {
+    ArcControlService.props.arc.ISA.SetStudy(study.Identifier, study)
+  },
+  Error: (e) => {
+    console.log(e)
   }
 }
 
@@ -57,19 +72,12 @@ onMounted(() => {
   iframe.value.setAttribute("src","http://localhost:8080")
 })
 
-/* 
-* This should be abstracted to a robust system for sending messages always in the same pattern 
-*/
-function initResponse() {
-  iframe.value.contentWindow?.postMessage({swate: true, api: "InitResponse", data: "Hello from ARCitect"}, '*')
-}
-
 </script>
 
 <template>
   <iframe 
     class='fit'
-    style="border: 0; overflow: hidden;"
+    style="border: 0; overflow: hidden; margin-bottom: -1em"
     ref="iframe">
   </iframe>
 </template>
