@@ -17,7 +17,7 @@ import InvestigationHelp from '../docs/investigation.vue';
     <InvestigationHelp v-else-if='appProperties.state===appProperties.STATES.EDIT_INVESTIGATION'></InvestigationHelp>
     <DataHubHelp v-else-if='appProperties.state===appProperties.STATES.OPEN_DATAHUB'></DataHubHelp>
     <!--<AssayHelp v-else-if='appProperties.state===appProperties.STATES.EDIT_ASSAY'></AssayHelp>-->
-    <!--<StudyHelp v-else-if='appProperties.state===appProperties.STATES.EDIT_STUDY'></StudyHelp>-->
+    <StudyHelp v-else-if='appProperties.state===appProperties.STATES.EDIT_STUDY'></StudyHelp>
     <HomeHelp v-else></HomeHelp>
   </div>
 </template>
