@@ -17,7 +17,7 @@ import SwateView from './views/SwateView.vue';
 
 import DataHubView from './views/DataHubView.vue';
 
-import logoURL from '../assets/dpLogo2_w.png'
+import logoURL from '../assets/dpLogo2_w.png';
 
 import { setCssVar } from 'quasar';
 
@@ -26,15 +26,12 @@ import { onMounted, ref, reactive } from 'vue';
 import AppProperties from './AppProperties';
 import ArcControlService from './ArcControlService';
 setCssVar('primary', '#2d3e50');
-// import arcProperties from './ArcProperties.ts';
-// import ArcCommanderService from './ArcCommanderService.ts';
 
 // import { useQuasar } from 'quasar'
 // const $q = useQuasar()
 // console.log($q.dark.isActive) // true, false
 // $q.dark.set(true) // or false or "auto"
 // // $q.dark.toggle()
-
 
 const iProps = reactive({
   showToolbar: true,
@@ -56,6 +53,10 @@ const openLocalArc = async (path: string | null | void) =>{
     return;
   }
   AppProperties.state=AppProperties.STATES.HOME;
+};
+
+const saveLocalArc = async () =>{
+  await ArcControlService.writeARC();
 };
 
 const refreshLocalArc = async () =>{
@@ -140,6 +141,7 @@ const test = async ()=>{
 
           <q-separator />
 
+          <ToolbarButton text='Save ARC' icon='save' requiresARC @clicked='saveLocalArc()'></ToolbarButton>
           <ToolbarButton text='Refresh ARC' icon='refresh' requiresARC @clicked='refreshLocalArc()'></ToolbarButton>
           <ToolbarButton text='Versioning' icon='mediation' requiresARC @clicked='AppProperties.state=AppProperties.STATES.GIT'></ToolbarButton>
           <ToolbarButton text='Explorer' icon='folder_open' requiresARC @clicked='ArcControlService.openArcInExplorer()'></ToolbarButton>

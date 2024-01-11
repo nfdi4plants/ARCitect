@@ -5,7 +5,6 @@ import List from '../components/List.vue';
 import { useQuasar } from 'quasar'
 const $q = useQuasar();
 
-import ArcControlService from '../ArcControlService.ts';
 import PersonDialog from '../dialogs/PersonDialog.vue';
 
 export interface Props {
@@ -20,16 +19,10 @@ const props = withDefaults(defineProps<Props>(), {
 const add = async items => {
   for(let i of items)
     props.items.push(i);
-  await ArcControlService.writeARC(ArcControlService.props.arc_root,['ISA_Investigation','ISA_Study','ISA_Assay']);
-  await ArcControlService.readARC();
 };
 
 const remove = async (item,skipUpdate) => {
   props.items.splice(props.items.indexOf(item),1);
-  if(skipUpdate) return;
-
-  await ArcControlService.writeARC(ArcControlService.props.arc_root,['ISA_Investigation','ISA_Study','ISA_Assay']);
-  await ArcControlService.readARC();
 };
 
 const showDialog = async item_o => {

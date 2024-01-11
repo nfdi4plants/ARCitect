@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { reactive, onMounted, watch, ref } from 'vue';
+import { reactive, watch, onBeforeMount } from 'vue';
 
 import AssayForm from '../components/AssayForm.vue';
 import PeopleList from '../components/PeopleList.vue';
@@ -21,7 +21,7 @@ const init = async ()=>{
   iProps.people = assay.Performers;
 };
 
-onMounted( init );
+onBeforeMount( init );
 watch( ()=>ArcControlService.props.arc, init );
 watch( ()=>AppProperties.active_assay, init );
 

@@ -2,10 +2,7 @@
 import { useDialogPluginComponent } from 'quasar';
 import { reactive, onMounted, watch, ref } from 'vue';
 
-import FormInput from '../components/FormInput.vue';
-import Property from '../Property';
 import ArcControlService from '../ArcControlService';
-import {ArcStudy} from "@nfdi4plants/arctrl"
 import {checkValidCharacters} from '@nfdi4plants/arctrl/ISA/ISA/Identifier.js'
 
 
@@ -29,7 +26,7 @@ const onSubmit = async () => {
   if (iProps.study_identifier === ``) {
     iProps.valid = false;
   }
-  if (!iProps.valid) return; 
+  if (!iProps.valid) return;
   onDialogOK(iProps.study_identifier);
 };
 
@@ -49,7 +46,7 @@ function hasValidCharacters (identifier: string) {
     console.error(err)
     return false;
   }
-} 
+}
 
 function studyIsNew(newStudyIdentifer:string) {
   return iProps.existingStudies.includes(newStudyIdentifer) ? false : true
