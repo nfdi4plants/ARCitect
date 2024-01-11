@@ -34,11 +34,28 @@
         
         <q-item>
           <q-item-section>
-            Add a Commit Message to comment your changes.
+            <label class="q-field row no-wrap items-start q-field--filled q-input q-field--float q-field--dense" style="padding: 0.4em;"><!----><div class="relative-position col self-stretch"><div class="q-field__control relative-position row no-wrap"><div class="col relative-position row no-wrap"><div class="q-field__label absolute">Name</div><!----></div></div><!----></div><!----></label>
+            <label class="q-field row no-wrap items-start q-field--filled q-input q-field--float q-field--dense" style="padding: 0.4em;"><!----><div class="relative-position col self-stretch"><div class="q-field__control relative-position row no-wrap"><div class="col relative-position row no-wrap"><div class="q-field__label absolute">eMail</div><!----></div></div><!----></div><!----></label>
+          </q-item-section>
+          <q-item-section>
+            Once logged in to the DataHUB your Name and eMail address are automatically filled out.
+            <!-- TODO: Link DataHUB-->
+          </q-item-section>
+        </q-item>
+        
+        <q-item>
+          <q-item-section>
+            <label class="q-field row no-wrap items-start q-field--filled q-input q-field--dense" style="padding: 0.4em;"><!----><div class="relative-position col self-stretch"><div class="q-field__control relative-position row no-wrap"><div class="col relative-position row no-wrap"><div class="q-field__label absolute">Commit Message</div><!----></div></div><!----></div><!----></label>
+          </q-item-section>
+          <q-item-section>
+            Add a commit message to document and communicate your changes.
           </q-item-section>
         </q-item>
 
         <q-item>
+          <q-item-section>
+            <label class="q-field row no-wrap items-start q-field--filled q-input q-field--float q-field--dense" style="padding: 0.4em;"><!----><div class="relative-position col self-stretch"><div class="q-field__control relative-position row no-wrap"><div class="col relative-position row no-wrap"><div class="q-field__label absolute">Large File Storage Limit in MB</div><!----></div></div><!----></div><!----></label>
+          </q-item-section>
           <q-item-section>
             <!-- You can adapt the <a href="https://nfdi4plants.org/nfdi4plants.knowledgebase/docs/guides/arc_WorkingWithLargeDataFiles.html" target="_blank">large file storage (LFS)</a> Limit as needed. -->
             You can adapt the large file storage (LFS) Limit as needed.
@@ -105,8 +122,8 @@
                         <path class="q-checkbox__truthy" fill="none" d="M1.73,12.91 8.1,19.28 22.79,4.59"></path>
                         <path class="q-checkbox__indet" d="M4,14H20V10H4"></path>
                       </svg></div>
-                  </div><span class="no-outline" tabindex="-1"></span>
-                  <div class="q-checkbox__label q-anchor--skip">Use Large File <br> Storage</div>
+                  </div><span class="no-outline"></span>
+                  <div class="q-checkbox__label">Use Large File <br> Storage</div>
                 </div>
               </div>
               <div class="col">
@@ -158,8 +175,8 @@
               <div class="col">
                 <button
                   class="q-btn q-btn-item non-selectable no-outline q-btn--flat q-btn--rectangle text-secondary q-btn--actionable q-focusable q-hoverable q-btn--dense"
-                  tabindex="0" type="button"><span class="q-focus-helper" tabindex="-1"></span><span
-                    class="q-btn__content text-center col items-center q-anchor--skip justify-center row"><i
+                  tabindex="0" type="button"><span class="q-focus-helper"></span><span
+                    class="q-btn__content text-center col items-center justify-center row"><i
                       class="q-icon notranslate material-icons" aria-hidden="true"
                       role="img">add_circle</i></span></button>
               </div>
