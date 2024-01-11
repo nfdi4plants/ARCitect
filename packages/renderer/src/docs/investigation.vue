@@ -1,3 +1,5 @@
+<!-- TODO fix add buttons -->
+
 <template>
   <div>
   <h5>Investigation</h5>
@@ -89,7 +91,83 @@
 
 
       </q-list>
+      
+      <br>
+    <q-separator inset />
+
+    <div class="q-item row">
+      <div class="q-item__section column q-item__section--side justify-center">
+        <i class="q-icon text-grey-8 material-icons">groups</i>
       </div>
+      <div class="q-item__section column justify-center q-item__label">People</div>
+    </div>
+
+    <div class="q-pt-sm text-justify">
+      <q-list>
+        <q-item>
+          <q-item-section>
+            In the people section you can add authors and collaborators of your ARC.
+          </q-item-section>
+       </q-item>
+
+        <q-item>
+          <q-item-section>
+            <div class="row">
+              <div class="col">
+                <button class="q-btn q-btn--rectangle bg-secondary text-white">
+                  <div class="col items-center justify-center row"><i class="q-icon on-left material-icons"
+                      role="img">person_add_alt_1</i>add person</div>
+                </button>
+              </div>
+
+                <q-item-section>Click "add person" to add a new person</q-item-section>
+
+            </div>
+          </q-item-section>
+        </q-item>
+
+
+      </q-list>
+      
+      <br>
+    <q-separator inset />
+
+    <div class="q-item row">
+      <div class="q-item__section column q-item__section--side justify-center">
+        <i class="q-icon text-grey-8 material-icons">menu_book</i>
+      </div>
+      <div class="q-item__section column justify-center q-item__label">Publications</div>
+    </div>
+
+    <div class="q-pt-sm text-justify">
+      <q-list>
+        <q-item>
+          <q-item-section>
+            In the people section you can add publications to your ARC.
+          </q-item-section>
+       </q-item>
+
+        <q-item>
+          <q-item-section>
+            <div class="row">
+              <div class="col">
+                <button class="q-btn q-btn--rectangle bg-secondary text-white">
+                  <div class="col items-center justify-center row"><i class="q-icon on-left material-icons"
+                      role="img">bookmark_add</i>add pub</div>
+                </button>
+              </div>
+
+                <q-item-section>Click "add publication" to add a new publication</q-item-section>
+
+            </div>
+          </q-item-section>
+        </q-item>
+
+
+      </q-list>
+      </div>
+</div>
+</div>
 </div>
 
 
