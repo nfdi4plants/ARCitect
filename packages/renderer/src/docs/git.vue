@@ -145,7 +145,7 @@
                 </button>
               </div>
               <div class="col">
-                <q-item-section>Click "PULL" to donload the latest stage of your ARC from the DataHUB.</q-item-section>
+                <q-item-section>Click "PULL" to download the latest stage of your ARC from the DataHUB.</q-item-section>
               </div>
             </div>
           </q-item-section>
