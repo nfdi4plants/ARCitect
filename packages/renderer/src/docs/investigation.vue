@@ -20,15 +20,7 @@
 
     <div class="q-pt-sm text-justify">
       <q-list>
-        <q-item>
-          <q-item-section>
-            The Commit section you to "commit" your changes locally. This saves the changes of your local ARC
-            together with your DataHUB credentials (Name and eMail).
-            <!-- TODO: Link DataHUB-->
-          </q-item-section>
-        </q-item>
-
-               
+              
         <q-item>
           <q-item-section>
             <label class="q-field row no-wrap items-start q-field--filled q-input q-field--float q-field--dense" style="padding: 0.4em;"><!----><div class="relative-position col self-stretch"><div class="q-field__control relative-position row no-wrap"><div class="col relative-position row no-wrap"><div class="q-field__label absolute">Identifier</div><!----></div></div><!----></div><!----></label>            

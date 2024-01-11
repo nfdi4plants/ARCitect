@@ -26,7 +26,7 @@
       <q-list>
         <q-item>
           <q-item-section>
-            The Commit section you to "commit" your changes locally. This saves the changes of your local ARC
+            The Commit section allows you to "commit" your changes locally. This saves the changes of your local ARC
             together with your DataHUB credentials (Name and eMail).
             <!-- TODO: Link DataHUB-->
           </q-item-section>
