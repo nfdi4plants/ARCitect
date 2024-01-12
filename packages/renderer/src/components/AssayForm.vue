@@ -103,7 +103,7 @@ const updateAssignemnt = ()=>{
         <div class='row'>
           <div class='col'>
             <a_term
-              label='Measurment Type'
+              label='Measurement Type'
               v-model='props.assay.MeasurementType'
               term_name='Research Technique'
               term_accession='NCIT:C20368'
@@ -125,7 +125,7 @@ const updateAssignemnt = ()=>{
         <div class='row'>
           <div class='col'>
             <a_term
-              label='Technology Type'
+              label='Technology Platform'
               v-model='props.assay.TechnologyPlatform'
               term_name='instrument model'
               term_accession='MS:1000031'
