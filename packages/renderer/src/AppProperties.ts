@@ -30,7 +30,7 @@ const AppProperties: {
     EDIT_IMAGE: 601,
   },
   STATES_I: {},
-  state: 203,
+  state: 0,
   active_study: null,
   active_assay: null,
 
@@ -41,7 +41,9 @@ const AppProperties: {
     'git.nfdi4plants.org',
     'gitlab.nfdi4plants.de',
     'gitlab.plantmicrobe.de'
-  ]
+  ],
+
+  force_commit_update: 0
 });
 
 for(let k in AppProperties.STATES){

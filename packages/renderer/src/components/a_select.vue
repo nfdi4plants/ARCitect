@@ -9,7 +9,7 @@ const props = withDefaults(defineProps<Props>(), {
 </script>
 
 <template>
-  <q-select v-bind="$attrs" filled options-dense dense style="padding:0.4em;">
+  <q-select v-bind="$attrs" filled options-dense dense style="padding:0.4em;" hide-bottom-space>
     <template v-for="(_, name) in $slots" #[name]="slotProps">
       <slot :name="name" v-bind="slotProps || {}"></slot>
     </template>

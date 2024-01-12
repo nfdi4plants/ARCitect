@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { reactive, onMounted, watch, ref } from 'vue';
+import { reactive, onBeforeMount, watch, ref } from 'vue';
 
 import StudyForm from '../components/StudyForm.vue';
 import PeopleList from '../components/PeopleList.vue';
@@ -24,7 +24,7 @@ const init = async ()=>{
   iProps.publications = study.Publications;
 };
 
-onMounted( init );
+onBeforeMount( init );
 watch( ()=>ArcControlService.props.arc, init );
 watch( ()=>AppProperties.active_study, init );
 

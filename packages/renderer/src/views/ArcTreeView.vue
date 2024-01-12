@@ -401,6 +401,32 @@ const onCellContextMenu = (e,node) => {
       ]
     });
   }
+  // work in progress for adding files to gitignore
+  // else if (
+  //   !node.type.startsWith('empty') && !node.type.startsWith(NodeAdd_PreFix)
+  // ){
+  //   e.preventDefault();
+  //   ContextMenu.showContextMenu({
+  //     x: e.x,
+  //     y: e.y,
+  //     theme: 'flat',
+  //     items: [
+  //       {
+  //         label: "Toggle Git Tracking",
+  //         icon: h(
+  //           'i',
+  //           {
+  //             class: 'q-icon on-left notranslate material-icons',
+  //             role:'img',
+  //             style:{fontSize: '1.5em',color:'#333'}
+  //           },
+  //           ['sync_disabled']
+  //         ),
+  //         onClick: () =>{ArcControlService.updateGitIgnore(node.id)}
+  //       },
+  //     ]
+  //   });
+  // }
 };
 
 onMounted( ()=>{window.ipc.on('LocalFileSystemService.updatePath', updatePath);} );

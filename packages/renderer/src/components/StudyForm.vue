@@ -1,13 +1,12 @@
 <script lang="ts" setup>
-import { reactive, onMounted, watch, ref } from 'vue';
-
 import ViewItem from '../components/ViewItem.vue';
-import FormInput from '../components/FormInput.vue';
-import Property from '../Property.ts';
+import a_input from './a_input.vue';
+import a_date from './a_date.vue';
 
 import ArcControlService from '../ArcControlService.ts';
-
 import ConfirmationDialog from '../dialogs/ConfirmationDialog.vue';
+import SwateControlService from '../SwateControlService.ts';
+import AppProperties from '../AppProperties.ts';
 import { useQuasar } from 'quasar'
 const $q = useQuasar();
 
@@ -16,40 +15,6 @@ export interface Props {
   study: Object
 };
 const props = defineProps<Props>();
-
-const iProps = reactive({
-  form: [[]]
-});
-
-const init = async ()=>{
-  if(!props.study.Identifier)
-    return;
-
-  iProps.form = [
-    [
-      Property( props.study, 'Identifier', {readonly:true} ),
-      Property( props.study, 'Title' ),
-    ],
-    [
-      Property( props.study, 'Description', {hint:'A textual description of the study'} ),
-    ],
-    [
-      Property( props.study, 'SubmissionDate',{hint:'The date the study was released publicly'} ),
-      Property( props.study, 'PublicReleaseDate',{hint:'The date the study was released publicly'} ),
-    ]
-  ];
-};
-onMounted( init );
-watch( ()=>props.study, init );
-
-const onReset = async ()=>{
-  await ArcControlService.readARC();
-};
-
-const onSubmit = async ()=>{
-  await ArcControlService.writeARC(ArcControlService.props.arc_root,['ISA_Investigation','ISA_Study']);
-  await ArcControlService.readARC();
-};
 
 const deleteStudy = async ()=>{
   $q.dialog({
@@ -68,6 +33,10 @@ const deleteStudy = async ()=>{
   });
 };
 
+const editTable = ()=>{
+  SwateControlService.LoadSwateState(AppProperties.STATES.EDIT_STUDY)
+};
+
 </script>
 
 <template>
@@ -78,24 +47,34 @@ const deleteStudy = async ()=>{
     :group="props.group"
   >
     <q-card flat>
-      <q-form
-        @submit="onSubmit"
-        @reset="onReset"
-      >
-        <q-card-section>
-          <div class='row' v-for="(row,i) in iProps.form">
-            <div class='col' v-for="(property,j) in row">
-              <FormInput :property='property'></FormInput>
-            </div>
+      <q-card-section>
+        <div class='row'>
+          <div class='col'>
+            <a_input v-model='props.study.Identifier' label='Identifier' readonly/>
           </div>
-        </q-card-section>
+          <div class='col'>
+            <a_input v-model='props.study.Titel' label='Title'/>
+          </div>
+        </div>
+        <div class='row'>
+          <div class='col'>
+            <a_input v-model='props.study.Description' label='Description' type='textarea' autogrow/>
+          </div>
+        </div>
+        <div class='row'>
+          <div class='col'>
+            <a_date v-model='props.study.SubmissionDate' label='Submission Date'/>
+          </div>
+          <div class='col'>
+            <a_date v-model='props.study.PublicReleaseDate' label='Public Release Date'/>
+          </div>
+        </div>
+      </q-card-section>
 
-        <q-card-actions align='right' style="padding:2.1em;">
-          <q-btn label="Delete" icon='delete' color="red-9" @click='deleteStudy'/>
-          <q-btn label="Update" type="submit" icon='check_circle' color="secondary"/>
-          <q-btn label="Reset" type="reset" icon='change_circle' color="secondary" class="q-ml-sm"/>
-        </q-card-actions>
-      </q-form>
+      <q-card-actions align='right' style="padding:2.1em;">
+        <q-btn label="Delete" icon='delete' color="red-9" @click='deleteStudy'/>
+        <q-btn label="Edit Table" icon='edit' @click='editTable' color="secondary"/>
+      </q-card-actions>
     </q-card>
   </ViewItem>
 </template>

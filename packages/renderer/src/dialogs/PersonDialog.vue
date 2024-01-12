@@ -15,13 +15,15 @@ const iProps = reactive({
   mode: 'Add',
   tab: 'new',
   person: new Person(),
-  persons: []
+  persons: [],
+  loading: false
 });
 
 const { dialogRef, onDialogHide, onDialogOK, onDialogCancel } = useDialogPluginComponent();
 
 const onSubmit = async () => {
   if(iProps.tab==='new'){
+    cleanORCID();
     if(!iProps.person.FirstName || !iProps.person.LastName)
       return iProps.error='First and last name required';
     onDialogOK([iProps.person]);
@@ -42,6 +44,36 @@ const init = async ()=>{
     person.selected = false;
 };
 onMounted( init );
+
+const cleanORCID = ()=>{
+  for(let x of ['https:','http:','/','www.','orcid','.org'])
+    iProps.person.ORCID = iProps.person.ORCID.replaceAll(x,'');
+}
+
+const autoComplete = async ()=>{
+  iProps.error = '';
+
+  cleanORCID();
+
+  if(!iProps.person.ORCID) return;
+
+  iProps.loading = true;
+  const record = await window.ipc.invoke('DataHubService.getPersonByORCID', iProps.person.ORCID);
+  iProps.loading = false;
+  if(!record) return;
+
+  iProps.person.FirstName = record.person.name['given-names'].value;
+  iProps.person.LastName = record.person.name['family-name'].value;
+
+  try{
+    iProps.person.EMail = record['person']['emails']['email'][0].email;
+  } catch(e){}
+  try{
+    const organization = record['activities-summary']['employments']['affiliation-group'][0]['summaries'][0]['employment-summary'].organization;
+    iProps.person.Address = [organization.address.city,organization.address.region,organization.address.country].join(', ');
+    iProps.person.Affiliation = organization.name;
+  } catch(e){}
+}
 
 </script>
 
@@ -137,6 +169,7 @@ onMounted( init );
             type='submit'
             :disabled='iProps.tab==="add" && iProps.persons.filter(p=>p.selected).length<1'
           />
+          <a_btn icon='find_replace' label="Auto Complete" @click="autoComplete" :loading='iProps.loading' :disabled='!iProps.person.ORCID'/>
           <a_btn label="Cancel" @click="onDialogCancel"/>
         </q-card-actions>
 
