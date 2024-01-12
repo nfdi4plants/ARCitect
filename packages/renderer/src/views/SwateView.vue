@@ -1,15 +1,17 @@
 <script lang="ts" setup>
 import { reactive, onMounted, watch, ref } from 'vue';
-import {ArcAssay, ArcStudy} from '@nfdi4plants/arctrl';
 import ArcControlService from '../ArcControlService.ts';
 import AppProperties from '../AppProperties.ts';
+import { ArcAssay, ArcStudy } from '@nfdi4plants/arctrl';
+import { ArcAssay_fromJsonString, ArcAssay_toJsonString } from '@nfdi4plants/arctrl/ISA/ISA.Json/ArcTypes/ArcAssay.js'
+import { ArcStudy_fromJsonString, ArcStudy_toJsonString } from '@nfdi4plants/arctrl/ISA/ISA.Json/ArcTypes/ArcStudy.js'
 
 let iframe: any | HTMLElement = ref({})
 
 enum Msg {
   Error,
-  AssaySend,
-  StudySend
+  AssayToSwate,
+  StudyToSwate
 }
 
 interface Message {
@@ -28,13 +30,28 @@ interface SwateAPI {
 const send = (msg: Msg, data: any = null): void => {
   const toSwate = (data: any): void => {
     const methodName = Msg[msg];
-    const content: Message = {swate: true, api: methodName, data: data }
+    const content: Message = { swate: true, api: methodName, data: data }
     iframe.value.contentWindow?.postMessage(content, '*');
   };
   switch (msg) {
-    // case Msg.InitResponse:
-    //   toSwate("Hello from ARCitect!");
-    //   break;
+    case Msg.AssayToSwate:
+      if (data instanceof ArcAssay) {
+        const jsonString = ArcAssay_toJsonString(data);
+        toSwate({ ArcAssayJsonString: jsonString });
+      } else {
+        console.error('Invalid data type for Msg.AssayToSwate');
+        return;
+      }
+      break;
+    case Msg.StudyToSwate:
+      if (data instanceof ArcStudy) {
+        const jsonString = ArcStudy_toJsonString(data);
+        toSwate({ ArcStudyJsonString: jsonString });
+      } else {
+        console.error('Invalid data type for Msg.AssayToSwate');
+        return;
+      }
+      break;
     default:
       toSwate(data)
       break;
@@ -42,7 +59,7 @@ const send = (msg: Msg, data: any = null): void => {
   }
 };
 
-const SwateAPI : SwateAPI = {
+const SwateAPI: SwateAPI = {
   handleEvent: (e: MessageEvent) => {
     if (e.data.swate) {
       const apiHandler = SwateAPI[e.data.api];
@@ -50,17 +67,19 @@ const SwateAPI : SwateAPI = {
     }
   },
   Init: (msg: string) => {
-    console.log(msg)
-    if(!ArcControlService.props.arc || !AppProperties.active_assay) return;
+    console.log(msg);
+    if (!ArcControlService.props.arc || !AppProperties.active_assay) return;
     const assay = ArcControlService.props.arc.ISA.TryGetAssay(AppProperties.active_assay);
     if (!assay) return;
-    send(Msg.AssaySend, assay)
+    send(Msg.AssayToSwate, assay)
   },
-  AssayReceive: (assay:ArcAssay) => {
-    ArcControlService.props.arc.ISA.SetAssay(assay.Identifier, assay)
+  AssayToARCitect: (assayJsonString: string) => {
+    let assay = ArcAssay_fromJsonString(assayJsonString);
+    ArcControlService.props.arc.ISA.SetAssay(assay.Identifier, assay);
   },
-  StudyReceive: (study:ArcStudy) => {
-    ArcControlService.props.arc.ISA.SetStudy(study.Identifier, study)
+  StudyToARCitect: (studyJsonString: string) => {
+    let study = ArcStudy_fromJsonString(studyJsonString);
+    ArcControlService.props.arc.ISA.SetStudy(study.Identifier, study);
   },
   Error: (e) => {
     console.log(e)
@@ -68,16 +87,13 @@ const SwateAPI : SwateAPI = {
 }
 
 onMounted(() => {
-  window.addEventListener ("message", SwateAPI.handleEvent);
-  iframe.value.setAttribute("src","http://localhost:8080")
+  window.addEventListener("message", SwateAPI.handleEvent);
+  iframe.value.setAttribute("src", "http://localhost:8080/?is_swatehost=1")
 })
 
 </script>
 
 <template>
-  <iframe 
-    class='fit'
-    style="border: 0; overflow: hidden; margin-bottom: -1em"
-    ref="iframe">
+  <iframe class='fit' style="border: 0; overflow: hidden; margin-bottom: -1em" ref="iframe">
   </iframe>
 </template>

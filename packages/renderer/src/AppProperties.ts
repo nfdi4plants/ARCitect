@@ -30,7 +30,7 @@ const AppProperties: {
     EDIT_IMAGE: 601,
   },
   STATES_I: {},
-  state: 203,
+  state: 0,
   active_study: null,
   active_assay: null,
 
