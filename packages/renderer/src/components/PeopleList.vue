@@ -50,7 +50,7 @@ const showDialog = async item_o => {
       name= 'Person'
       :label='item => `${item.FirstName} ${item.LastName}`'
       :caption='item => "ORCID: " + (item.ORCID ? item.ORCID : `Missing`)'
-      :avatar= 'item => item.LastName[0].toUpperCase()'
+      :avatar= 'item => (item.LastName ? item.LastName[0].toUpperCase() : "")'
       icon_add= 'person_add_alt_1'
       icon_remove= 'person_remove'
       empty_text= 'No Persons Registered'

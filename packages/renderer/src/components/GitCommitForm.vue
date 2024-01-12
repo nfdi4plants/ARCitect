@@ -23,9 +23,7 @@ const iProps = reactive({
     name: '',
     email: '',
     msg: ''
-  },
-
-  userListener: ()=>{}
+  }
 });
 
 const raiseError = err => {
@@ -205,12 +203,12 @@ const init = async()=>{
 };
 
 onMounted(()=>{
-  iProps.userListener = watch(()=>AppProperties.user, init);
+  watch(()=>AppProperties.user, init);
+  watch(()=>AppProperties.force_commit_update, init);
   window.ipc.on('LocalFileSystemService.updatePath', getStatus);
   init();
 });
 onUnmounted(()=>{
-  iProps.userListener(); // disable old listener
   window.ipc.off('LocalFileSystemService.updatePath', getStatus);
 });
 

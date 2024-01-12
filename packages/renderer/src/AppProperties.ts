@@ -41,7 +41,9 @@ const AppProperties: {
     'git.nfdi4plants.org',
     'gitlab.nfdi4plants.de',
     'gitlab.plantmicrobe.de'
-  ]
+  ],
+
+  force_commit_update: 0
 });
 
 for(let k in AppProperties.STATES){
