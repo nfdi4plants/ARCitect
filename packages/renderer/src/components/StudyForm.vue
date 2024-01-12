@@ -5,6 +5,8 @@ import a_date from './a_date.vue';
 
 import ArcControlService from '../ArcControlService.ts';
 import ConfirmationDialog from '../dialogs/ConfirmationDialog.vue';
+import SwateControlService from '../SwateControlService.ts';
+import AppProperties from '../AppProperties.ts';
 import { useQuasar } from 'quasar'
 const $q = useQuasar();
 
@@ -29,6 +31,10 @@ const deleteStudy = async ()=>{
   }).onOk( async () => {
     ArcControlService.deleteStudy(props.study.Identifier);
   });
+};
+
+const editTable = ()=>{
+  SwateControlService.LoadSwateState(AppProperties.STATES.EDIT_STUDY)
 };
 
 </script>
@@ -67,6 +73,7 @@ const deleteStudy = async ()=>{
 
       <q-card-actions align='right' style="padding:2.1em;">
         <q-btn label="Delete" icon='delete' color="red-9" @click='deleteStudy'/>
+        <q-btn label="Edit Table" icon='edit' @click='editTable' color="secondary"/>
       </q-card-actions>
     </q-card>
   </ViewItem>

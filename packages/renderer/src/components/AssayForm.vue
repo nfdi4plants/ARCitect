@@ -8,6 +8,7 @@ import a_input from './a_input.vue';
 import a_select from './a_select.vue';
 import a_term from './a_term.vue';
 
+import SwateControlService from '../SwateControlService.ts';
 import AppProperties from '../AppProperties.ts';
 import ArcControlService from '../ArcControlService.ts';
 
@@ -51,7 +52,7 @@ const deleteAssay = async ()=>{
 };
 
 const editTable = ()=>{
-  AppProperties.state=AppProperties.STATES.EDIT_SWATE;
+  SwateControlService.LoadSwateState(AppProperties.STATES.EDIT_ASSAY)
 };
 
 const study_contains_assay = (s,assay_identifier) => {

@@ -1,7 +1,8 @@
 <script lang="ts" setup>
-import { reactive, onMounted, watch, ref } from 'vue';
+import { onMounted, onUnmounted, ref } from 'vue';
 import ArcControlService from '../ArcControlService.ts';
 import AppProperties from '../AppProperties.ts';
+import SwateControlService from '../SwateControlService.ts';
 import { ArcAssay, ArcStudy } from '@nfdi4plants/arctrl';
 import { ArcAssay_fromJsonString, ArcAssay_toJsonString } from '@nfdi4plants/arctrl/ISA/ISA.Json/ArcTypes/ArcAssay.js'
 import { ArcStudy_fromJsonString, ArcStudy_toJsonString } from '@nfdi4plants/arctrl/ISA/ISA.Json/ArcTypes/ArcStudy.js'
@@ -68,18 +69,34 @@ const SwateAPI: SwateAPI = {
   },
   Init: (msg: string) => {
     console.log(msg);
-    if (!ArcControlService.props.arc || !AppProperties.active_assay) return;
-    const assay = ArcControlService.props.arc.ISA.TryGetAssay(AppProperties.active_assay);
-    if (!assay) return;
-    send(Msg.AssayToSwate, assay)
+    switch (SwateControlService.props.SourceState) { 
+      case AppProperties.STATES.EDIT_ASSAY:
+        if (!ArcControlService.props.arc || !AppProperties.active_assay) return;
+        const assay = ArcControlService.props.arc.ISA.TryGetAssay(AppProperties.active_assay);
+        if (!assay) return;
+        send(Msg.AssayToSwate, assay)
+        break;
+      case AppProperties.STATES.EDIT_STUDY:
+      if (!ArcControlService.props.arc || !AppProperties.active_study) return;
+        const study = ArcControlService.props.arc.ISA.TryGetStudy(AppProperties.active_study);
+        if (!study) return;
+        send(Msg.StudyToSwate, study)
+        break;
+    }
   },
   AssayToARCitect: (assayJsonString: string) => {
     let assay = ArcAssay_fromJsonString(assayJsonString);
     ArcControlService.props.arc.ISA.SetAssay(assay.Identifier, assay);
   },
   StudyToARCitect: (studyJsonString: string) => {
-    let study = ArcStudy_fromJsonString(studyJsonString);
+    /// ignore assays, I am actually not sure why this must be create, but it will be empty. Must talk to Lukas Weil about this.
+    /// ~Kevin F. 12.01.2024
+    let [study, assays] = ArcStudy_fromJsonString(studyJsonString);
     ArcControlService.props.arc.ISA.SetStudy(study.Identifier, study);
+  },
+  TriggerSwateClose: () => {
+    AppProperties.state=SwateControlService.props.SourceState
+    SwateControlService.Reset()
   },
   Error: (e) => {
     console.log(e)
@@ -89,7 +106,11 @@ const SwateAPI: SwateAPI = {
 onMounted(() => {
   window.addEventListener("message", SwateAPI.handleEvent);
   iframe.value.setAttribute("src", "http://localhost:8080/?is_swatehost=1")
-})
+});
+
+onUnmounted(() => {
+  window.removeEventListener("message", SwateAPI.handleEvent)
+});
 
 </script>
 
