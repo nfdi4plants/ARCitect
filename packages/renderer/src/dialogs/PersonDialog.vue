@@ -8,6 +8,7 @@ import Property from '../Property.ts';
 import ArcControlService from '../ArcControlService.ts';
 
 import {Person} from '@nfdi4plants/arctrl/ISA/ISA/JsonTypes/Person.js';
+import { ipcMain } from 'electron';
 
 const props = defineProps<{config?:Object}>();
 const iProps = reactive({
@@ -38,6 +39,7 @@ const init = async ()=>{
 
   if(props.config)
     iProps.person = props.config.Copy();
+  cleanORCID();
 
   iProps.persons = await ArcControlService.props.arc.ISA.GetAllPersons();
   for(let person of iProps.persons)
@@ -46,8 +48,9 @@ const init = async ()=>{
 onMounted( init );
 
 const cleanORCID = ()=>{
-  for(let x of ['https:','http:','/','www.','orcid','.org'])
-    iProps.person.ORCID = iProps.person.ORCID.replaceAll(x,'');
+  if(iProps.person.ORCID)
+    for(let x of ['https:','http:','/','www.','orcid','.org'])
+      iProps.person.ORCID = iProps.person.ORCID.replaceAll(x,'');
 }
 
 const autoComplete = async ()=>{
@@ -102,7 +105,7 @@ const autoComplete = async ()=>{
         <q-card-section v-if='iProps.tab==="new"'>
           <div class='row'>
             <div class='col'>
-              <a_input v-model='iProps.person.ORCID' label="ORCID"></a_input>
+              <a_input v-model='iProps.person.ORCID' label="ORCID" mask="####-####-####-####" placeholder='####-####-####-####'></a_input>
             </div>
           </div>
           <div class='row'>
