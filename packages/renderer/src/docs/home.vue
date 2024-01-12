@@ -1,349 +1,957 @@
 
 <template>
-  <div>
-          <h5>Help</h5>
+  <div class="q-pa-sm">
+    <h5>Help</h5>
 
-          <div class="text-h6 text-weight-bold">Sidebar</div>
-            <div class="q-pa-sm text-body2 text-justify">
-                    Navigate the ARCitect via the sidebar on the left.
+    <div class="text-h6 text-weight-bold">Sidebar</div>
+    <div class="q-pa-sm text-body2 text-justify">
+      Navigate the ARCitect via the sidebar on the left.
+    </div>
+
+    <div class="text-justify">
+      <q-list>
+        <q-item>
+          <q-item-section class="col">
+
+            <div class="q-item q-item-type row no-wrap bg-primary text-white">
+              <div class="q-item__section column q-item__section--side justify-center q-item__section--avatar">
+                <span class="q-icon" style="font-size: 2.5rem; margin: 0px -0.2em;">
+                  <img src="/assets/dpLogo2_w.png">
+                </span>
+              </div>
+              <div class="q-item__section column q-item__section--main justify-center"
+                style="margin: 0.6em 0px 0px -1.2em;">
+                <div class="q-item__label"><b style="font-size: 2em;">ARC</b><span style="font-size: 1.2em;">itect</span>
+                </div>
+              </div>
+
             </div>
-          
-          <div class="q-pt-sm text-justify">
-                  <q-list>
-                          <q-item>
-                                  <q-item-section class="col">
 
-                                          <div class="q-item q-item-type row no-wrap bg-primary text-white">
-                                                  <div
-                                                          class="q-item__section column q-item__section--side justify-center q-item__section--avatar">
-                                                          <span class="q-icon"
-                                                                  
-                                                                  style="font-size: 2.5rem; margin: 0px -0.2em;">
-                                                                  <img src="/assets/dpLogo2_w.png">
-                                                          </span>
-                                                  </div>
-                                                  <div class="q-item__section column q-item__section--main justify-center"
-                                                          style="margin: 0.6em 0px 0px -1.2em;">
-                                                          <div class="q-item__label"><b
-                                                                          style="font-size: 2em;">ARC</b><span
-                                                                          style="font-size: 1.2em;">itect</span>
-                                                          </div>
-                                                  </div>
+          </q-item-section>
 
+          <q-separator inset />
+
+          <q-item-section class="col">
+
+            Return to home view
+
+          </q-item-section>
+        </q-item>
+
+        <q-separator inset />
+
+        <q-item>
+          <q-item-section avatar>
+            <q-icon color="grey-7" name="exit_to_app" />
+          </q-item-section>
+          <q-item-section style="margin-left: -1.2em;">Login</q-item-section>
+          <q-item-section>
+            Login to the DataHUB
+          </q-item-section>
+        </q-item>
+
+        <q-item>
+          <q-item-section avatar>
+            <q-icon color="grey-7" name="note_add" />
+          </q-item-section>
+          <q-item-section style="margin-left: -1.2em;">
+            New ARC
+          </q-item-section>
+          <q-item-section>
+            Create a new ARC on your computer
+          </q-item-section>
+        </q-item>
+
+        <q-item>
+          <q-item-section avatar>
+            <q-icon color="grey-7" name="file_open" />
+          </q-item-section>
+          <q-item-section style="margin-left: -1.2em;">
+            Open ARC
+          </q-item-section>
+          <q-item-section>
+            Open an ARC existing from your computer
+          </q-item-section>
+        </q-item>
+
+        <q-item>
+          <q-item-section avatar>
+            <q-icon color="grey-7" name="cloud_download" />
+          </q-item-section>
+          <q-item-section style="margin-left: -1.2em;">
+            Download ARC
+          </q-item-section>
+          <q-item-section>
+            Download an ARC from the DataHUB
+          </q-item-section>
+        </q-item>
+
+        <q-separator inset />
+
+        <q-item>
+          <q-item-section avatar>
+            <q-icon color="grey-7" name="save" />
+          </q-item-section>
+          <q-item-section style="margin-left: -1.2em;">
+            Save ARC
+          </q-item-section>
+          <q-item-section>
+            <!-- TODO -->
+            Save the ARC locally
+          </q-item-section>
+        </q-item>
+
+        <q-item>
+          <q-item-section avatar>
+            <q-icon color="grey-7" name="refresh" />
+          </q-item-section>
+          <q-item-section style="margin-left: -1.2em;">
+            Refresh ARC
+          </q-item-section>
+          <q-item-section>
+            Refresh the open ARC (Reopens the latest state stored on your computer)
+          </q-item-section>
+        </q-item>
+
+        <q-item>
+          <q-item-section avatar>
+            <q-icon color="grey-7" name="mediation" />
+          </q-item-section>
+          <q-item-section style="margin-left: -1.2em;">
+            Versioning
+          </q-item-section>
+          <q-item-section>
+            Track and communicate changes of your ARC
+          </q-item-section>
+        </q-item>
+
+        <q-item>
+          <q-item-section avatar>
+            <q-icon color="grey-7" name="folder_open" />
+          </q-item-section>
+          <q-item-section style="margin-left: -1.2em;">
+            Explorer
+          </q-item-section>
+          <q-item-section>
+            Open the ARC in the explorer on your computer
+          </q-item-section>
+        </q-item>
+
+        <q-separator inset />
+
+        <q-item>
+          <q-item-section avatar>
+            <q-icon color="grey-7" name="help" />
+          </q-item-section>
+          <q-item-section style="margin-left: -1.2em;">
+            Toggle Help
+          </q-item-section>
+          <q-item-section>
+            Show or hide the help menu
+          </q-item-section>
+        </q-item>
+
+        <q-item>
+          <q-item-section avatar>
+            <q-icon color="grey-7" name="chevron_left" />
+          </q-item-section>
+          <q-item-section style="margin-left: -1.2em;">
+            Minimize Sidebar
+          </q-item-section>
+          <q-item-section>
+            Minimize or maximize the sidebar
+          </q-item-section>
+        </q-item>
+
+      </q-list>
+
+    </div>
+
+    <q-separator size=".5em" />
+
+    <div class="text-h6 text-weight-bold">File tree</div>
+    <div class="q-pa-sm text-body2 text-justify">
+      Access and edit the files in your ARC via the file tree.
+    </div>
+
+    <div class="q-pt-sm text-justify">
+      <q-list>
+        <q-item>
+          <q-item-section>
+            <div class="q-tree q-tree--dense" role="tree" style="padding: 1em;">
+              <div class="q-tree__node relative-position q-tree__node--parent">
+                <div class="q-tree__node-header relative-position row no-wrap items-center" tabindex="0" role="treeitem"
+                  aria-expanded="true">
+                  <div class="q-focus-helper" tabindex="-1"></div><i
+                    class="q-icon notranslate material-icons q-tree__arrow q-tree__arrow--rotate">play_arrow</i>
+                  <div class="q-tree__node-header-content col row no-wrap items-center"><i
+                      class="q-icon notranslate material-icons" style="padding: 0px 0.2em 0px 0px;">edit_square</i>
+                    <div style="flex: 100 1 0%; white-space: nowrap;">YourARC</div><!--v-if-->
+                  </div>
+                </div>
+                <div class="q-tree__node-collapsible" style="">
+                  <div class="q-tree__children" role="group">
+                    <div class="q-tree__node relative-position q-tree__node--parent">
+                      <div class="q-tree__node-header relative-position row no-wrap items-center" tabindex="0"
+                        role="treeitem" aria-expanded="false">
+                        <div class="q-focus-helper" tabindex="-1"></div><i
+                          class="q-icon notranslate material-icons q-tree__arrow">play_arrow</i>
+                        <div class="q-tree__node-header-content col row no-wrap items-center"><!--v-if-->
+                          <div style="flex: 100 1 0%; white-space: nowrap;">assays</div><!--v-if-->
+                        </div>
+                      </div>
+                      <div class="q-tree__node-collapsible" style="display: none;">
+                        <div class="q-tree__children" role="group">
+                          <div class="q-tree__node relative-position q-tree__node--parent">
+                            <div class="q-tree__node-header relative-position row no-wrap items-center" tabindex="0"
+                              role="treeitem" aria-expanded="true">
+                              <div class="q-focus-helper" tabindex="-1"></div><i
+                                class="q-icon notranslate material-icons q-tree__arrow q-tree__arrow--rotate">play_arrow</i>
+                              <div class="q-tree__node-header-content col row no-wrap items-center"><i
+                                  class="q-icon notranslate material-icons"
+                                  style="padding: 0px 0.2em 0px 0px;">edit_square</i>
+                                <div style="flex: 100 1 0%; white-space: nowrap;">rnaseq</div><!--v-if-->
+                              </div>
+                            </div>
+                            <div class="q-tree__node-collapsible" style="">
+                              <div class="q-tree__children" role="group">
+                                <div class="q-tree__node relative-position q-tree__node--parent">
+                                  <div class="q-tree__node-header relative-position row no-wrap items-center" tabindex="0"
+                                    role="treeitem" aria-expanded="true">
+                                    <div class="q-focus-helper" tabindex="-1"></div><i
+                                      class="q-icon notranslate material-icons q-tree__arrow q-tree__arrow--rotate">play_arrow</i>
+                                    <div class="q-tree__node-header-content col row no-wrap items-center"><!--v-if-->
+                                      <div style="flex: 100 1 0%; white-space: nowrap;">dataset</div><!--v-if-->
+                                    </div>
+                                  </div>
+                                  <div class="q-tree__node-collapsible" style="">
+                                    <div class="q-tree__children" role="group">
+                                      <div class="q-tree__node relative-position q-tree__node--child">
+                                        <div class="q-tree__node-header relative-position row no-wrap items-center"
+                                          tabindex="0" role="treeitem">
+                                          <div class="q-focus-helper" tabindex="-1"></div>
+                                          <div class="q-tree__node-header-content col row no-wrap items-center"><i
+                                              class="q-icon notranslate material-icons"
+                                              style="padding: 0px 0.2em 0px 0px;">add_box</i>
+                                            <div style="flex: 100 1 0%; white-space: nowrap;">Import Dataset Files</div>
+                                            <!--v-if-->
                                           </div>
-
-                                  </q-item-section>
-
-                                  <q-separator inset />
-
-                                  <q-item-section class="col">
-
-                                          Return to home view
-
-                                  </q-item-section>
-                          </q-item>
-
-                          <q-separator inset />
-
-                          <q-item>
-                                  <q-item-section class="col">
-
-                                    <div class="q-item q-item-type row no-wrap">
-                                            <div class="q-item__section column q-item__section--side justify-center q-item__section--avatar"><i
-                                                            class="q-icon text-grey-7 material-icons">exit_to_app</i></div>
-                                            <div class="q-item__section column q-item__section--main justify-center" style="margin-left: -1.2em;">Login
-                                            </div>
+                                        </div>
+                                      </div>
+                                      <div class="q-tree__node relative-position q-tree__node--child">
+                                        <div class="q-tree__node-header relative-position row no-wrap items-center"
+                                          tabindex="0" role="treeitem">
+                                          <div class="q-focus-helper" tabindex="-1"></div>
+                                          <div class="q-tree__node-header-content col row no-wrap items-center"><i
+                                              class="q-icon notranslate material-icons"
+                                              style="padding: 0px 0.2em 0px 0px;">add_box</i>
+                                            <div style="flex: 100 1 0%; white-space: nowrap;">Import Dataset Folders</div>
+                                            <!--v-if-->
+                                          </div>
+                                        </div>
+                                      </div>
                                     </div>
-
-                                  </q-item-section>                                 
-
-                                  <q-item-section class="col">
-                                    Login to the DataHUB
-                                  </q-item-section>
-                          </q-item>
-                          
-                          <q-item>
-                                  <q-item-section class="col">
-
-                                    <div class="q-item q-item-type row no-wrap">
-                                            <div class="q-item__section column q-item__section--side justify-center q-item__section--avatar"><i
-                                                            class="q-icon text-grey-7 material-icons">note_add</i></div>
-                                            <div class="q-item__section column q-item__section--main justify-center" style="margin-left: -1.2em;">New ARC
-                                            </div>
+                                  </div>
+                                </div>
+                                <div class="q-tree__node relative-position q-tree__node--parent">
+                                  <div class="q-tree__node-header relative-position row no-wrap items-center" tabindex="0"
+                                    role="treeitem">
+                                    <div class="q-focus-helper" tabindex="-1"></div><i
+                                      class="q-icon notranslate material-icons q-tree__arrow">play_arrow</i>
+                                    <div class="q-tree__node-header-content col row no-wrap items-center"><!--v-if-->
+                                      <div style="flex: 100 1 0%; white-space: nowrap;">protocols</div><!--v-if-->
                                     </div>
-
-                                  </q-item-section>
-
-                                  <q-item-section class="col">
-                                    Create a new ARC on your computer
-                                  </q-item-section>
-                          </q-item>
-                  
-                           
-                          <q-item>
-                                  <q-item-section class="col">
-
-                                    <div class="q-item q-item-type row no-wrap">
-                                            <div class="q-item__section column q-item__section--side justify-center q-item__section--avatar"><i
-                                                            class="q-icon text-grey-7 material-icons">file_open</i></div>
-                                            <div class="q-item__section column q-item__section--main justify-center" style="margin-left: -1.2em;">Open ARC
-                                            </div>
+                                  </div>
+                                  <div class="q-tree__node-collapsible" style="display: none;">
+                                    <div class="q-tree__children" role="group"></div>
+                                  </div>
+                                </div>
+                                <div class="q-tree__node relative-position q-tree__node--child">
+                                  <div class="q-tree__node-header relative-position row no-wrap items-center" tabindex="0"
+                                    role="treeitem">
+                                    <div class="q-focus-helper" tabindex="-1"></div>
+                                    <div class="q-tree__node-header-content col row no-wrap items-center"><i
+                                        class="q-icon notranslate material-icons"
+                                        style="padding: 0px 0.2em 0px 0px;">edit_square</i>
+                                      <div style="flex: 100 1 0%; white-space: nowrap;">README.md</div>
+                                      <div style="flex: 1 1 0%; white-space: nowrap; margin-left: 1em;">0.00 B</div>
                                     </div>
-
-                                  </q-item-section>
-
-                                  <q-item-section class="col">
-                                    Open an ARC existing from your computer
-                                  </q-item-section>
-                          </q-item>
-                           
-                          <q-item>
-                                  <q-item-section class="col">
-
-                                    <div class="q-item q-item-type row no-wrap">
-                                            <div class="q-item__section column q-item__section--side justify-center q-item__section--avatar"><i
-                                                            class="q-icon text-grey-7 material-icons">cloud_download</i></div>
-                                            <div class="q-item__section column q-item__section--main justify-center" style="margin-left: -1.2em;">Download ARC
-                                            </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="q-tree__node relative-position q-tree__node--child">
+                            <div class="q-tree__node-header relative-position row no-wrap items-center" tabindex="0"
+                              role="treeitem">
+                              <div class="q-focus-helper" tabindex="-1"></div>
+                              <div class="q-tree__node-header-content col row no-wrap items-center"><i
+                                  class="q-icon notranslate material-icons"
+                                  style="padding: 0px 0.2em 0px 0px;">add_box</i>
+                                <div style="flex: 100 1 0%; white-space: nowrap;">Add Assay</div><!--v-if-->
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="q-tree__node relative-position q-tree__node--parent">
+                      <div class="q-tree__node-header relative-position row no-wrap items-center" tabindex="0"
+                        role="treeitem">
+                        <div class="q-focus-helper" tabindex="-1"></div><i
+                          class="q-icon notranslate material-icons q-tree__arrow">play_arrow</i>
+                        <div class="q-tree__node-header-content col row no-wrap items-center"><!--v-if-->
+                          <div style="flex: 100 1 0%; white-space: nowrap;">runs</div><!--v-if-->
+                        </div>
+                      </div>
+                      <div class="q-tree__node-collapsible" style="display: none;">
+                        <div class="q-tree__children" role="group"></div>
+                      </div>
+                    </div>
+                    <div class="q-tree__node relative-position q-tree__node--parent">
+                      <div class="q-tree__node-header relative-position row no-wrap items-center" tabindex="0"
+                        role="treeitem" aria-expanded="false">
+                        <div class="q-focus-helper" tabindex="-1"></div><i
+                          class="q-icon notranslate material-icons q-tree__arrow">play_arrow</i>
+                        <div class="q-tree__node-header-content col row no-wrap items-center"><!--v-if-->
+                          <div style="flex: 100 1 0%; white-space: nowrap;">studies</div><!--v-if-->
+                        </div>
+                      </div>
+                      <div class="q-tree__node-collapsible" style="display: none;">
+                        <div class="q-tree__children" role="group">
+                          <div class="q-tree__node relative-position q-tree__node--parent">
+                            <div class="q-tree__node-header relative-position row no-wrap items-center" tabindex="0"
+                              role="treeitem" aria-expanded="true">
+                              <div class="q-focus-helper" tabindex="-1"></div><i
+                                class="q-icon notranslate material-icons q-tree__arrow q-tree__arrow--rotate">play_arrow</i>
+                              <div class="q-tree__node-header-content col row no-wrap items-center"><i
+                                  class="q-icon notranslate material-icons"
+                                  style="padding: 0px 0.2em 0px 0px;">edit_square</i>
+                                <div style="flex: 100 1 0%; white-space: nowrap;">plants samples</div><!--v-if-->
+                              </div>
+                            </div>
+                            <div class="q-tree__node-collapsible" style="">
+                              <div class="q-tree__children" role="group">
+                                <div class="q-tree__node relative-position q-tree__node--parent">
+                                  <div class="q-tree__node-header relative-position row no-wrap items-center" tabindex="0"
+                                    role="treeitem" aria-expanded="true">
+                                    <div class="q-focus-helper" tabindex="-1"></div><i
+                                      class="q-icon notranslate material-icons q-tree__arrow q-tree__arrow--rotate">play_arrow</i>
+                                    <div class="q-tree__node-header-content col row no-wrap items-center"><!--v-if-->
+                                      <div style="flex: 100 1 0%; white-space: nowrap;">protocols</div><!--v-if-->
                                     </div>
-
-                                  </q-item-section>
-
-                                  <q-item-section class="col">
-
-                                    Download an ARC from the DataHUB                                    
-
-                                  </q-item-section>
-                          </q-item>
-                  
-                          <q-separator inset />
-                           
-                          <q-item>
-                                  <q-item-section class="col">
-
-                                    <div class="q-item q-item-type row no-wrap">
-                                            <div class="q-item__section column q-item__section--side justify-center q-item__section--avatar"><i
-                                                            class="q-icon text-grey-7 material-icons">refresh</i></div>
-                                            <div class="q-item__section column q-item__section--main justify-center" style="margin-left: -1.2em;">Refresh ARC
-                                            </div>
+                                  </div>
+                                  <div class="q-tree__node-collapsible" style="">
+                                    <div class="q-tree__children" role="group">
+                                      <div class="q-tree__node relative-position q-tree__node--child">
+                                        <div class="q-tree__node-header relative-position row no-wrap items-center"
+                                          tabindex="0" role="treeitem">
+                                          <div class="q-focus-helper" tabindex="-1"></div>
+                                          <div class="q-tree__node-header-content col row no-wrap items-center"><i
+                                              class="q-icon notranslate material-icons"
+                                              style="padding: 0px 0.2em 0px 0px;">add_box</i>
+                                            <div style="flex: 100 1 0%; white-space: nowrap;">Add Protocol</div>
+                                            <!--v-if-->
+                                          </div>
+                                        </div>
+                                      </div>
                                     </div>
-
-                                  </q-item-section>
-
-                                  <q-item-section class="col">
-                                    Refresh the open ARC (Reopens the latest state stored on your computer)
-                                  </q-item-section>
-                          </q-item>           
-                           
-                          <q-item>
-                                  <q-item-section class="col">
-
-                                    <div class="q-item q-item-type row no-wrap">
-                                            <div class="q-item__section column q-item__section--side justify-center q-item__section--avatar"><i
-                                                            class="q-icon text-grey-7 material-icons">mediation</i></div>
-                                            <div class="q-item__section column q-item__section--main justify-center" style="margin-left: -1.2em;">Versioning
-                                            </div>
+                                  </div>
+                                </div>
+                                <div class="q-tree__node relative-position q-tree__node--parent">
+                                  <div class="q-tree__node-header relative-position row no-wrap items-center" tabindex="0"
+                                    role="treeitem" aria-expanded="false">
+                                    <div class="q-focus-helper" tabindex="-1"></div><i
+                                      class="q-icon notranslate material-icons q-tree__arrow">play_arrow</i>
+                                    <div class="q-tree__node-header-content col row no-wrap items-center"><!--v-if-->
+                                      <div style="flex: 100 1 0%; white-space: nowrap;">resources</div><!--v-if-->
                                     </div>
-
-                                  </q-item-section>
-
-                                  <q-item-section class="col">
-                                    Track and communicate changes of your ARC
-                                  </q-item-section>
-                          </q-item>
-                  
-                           
-                          <q-item>
-                                  <q-item-section class="col">
-
-                                    <div class="q-item q-item-type row no-wrap">
-                                            <div class="q-item__section column q-item__section--side justify-center q-item__section--avatar"><i
-                                                            class="q-icon text-grey-7 material-icons">folder_open</i></div>
-                                            <div class="q-item__section column q-item__section--main justify-center" style="margin-left: -1.2em;">Explorer
-                                            </div>
+                                  </div>
+                                  <div class="q-tree__node-collapsible" style="display: none;">
+                                    <div class="q-tree__children" role="group">
+                                      <div class="q-tree__node relative-position q-tree__node--child">
+                                        <div class="q-tree__node-header relative-position row no-wrap items-center"
+                                          tabindex="-1" role="treeitem">
+                                          <div class="q-focus-helper" tabindex="-1"></div>
+                                          <div class="q-tree__node-header-content col row no-wrap items-center"><i
+                                              class="q-icon notranslate material-icons"
+                                              style="padding: 0px 0.2em 0px 0px;">block</i>
+                                            <div style="flex: 100 1 0%; white-space: nowrap;">empty</div><!--v-if-->
+                                          </div>
+                                        </div>
+                                      </div>
                                     </div>
-
-                                  </q-item-section>
-
-                                  <q-item-section class="col">
-
-                                    Open the ARC in the explorer on your computer
-
-                                  </q-item-section>
-                          </q-item>
-
-                          <q-separator inset />
-                          <q-separator inset />
-
-                          <q-item>
-                                  <q-item-section class="col">
-
-                                    <div class="q-item q-item-type row no-wrap">
-                                            <div class="q-item__section column q-item__section--side justify-center q-item__section--avatar"><i
-                                                            class="q-icon text-grey-7 material-icons">help</i></div>
-                                            <div class="q-item__section column q-item__section--main justify-center" style="margin-left: -1.2em;">Toggle Help
-                                            </div>
+                                  </div>
+                                </div>
+                                <div class="q-tree__node relative-position q-tree__node--child">
+                                  <div class="q-tree__node-header relative-position row no-wrap items-center" tabindex="0"
+                                    role="treeitem">
+                                    <div class="q-focus-helper" tabindex="-1"></div>
+                                    <div class="q-tree__node-header-content col row no-wrap items-center"><i
+                                        class="q-icon notranslate material-icons"
+                                        style="padding: 0px 0.2em 0px 0px;">edit_square</i>
+                                      <div style="flex: 100 1 0%; white-space: nowrap;">README.md</div>
+                                      <div style="flex: 1 1 0%; white-space: nowrap; margin-left: 1em;">0.00 B</div>
                                     </div>
-
-                                  </q-item-section>
-
-                                  <q-item-section class="col">
-                                    Use this button to show / hide the help menu
-                                  </q-item-section>
-                          </q-item>
-                          
-                          <q-item>
-                                  <q-item-section class="col">
-
-                                    <div class="q-item q-item-type row no-wrap">
-                                            <div class="q-item__section column q-item__section--side justify-center q-item__section--avatar"><i
-                                                            class="q-icon text-grey-7 material-icons">chevron_left</i></div>
-                                            <div class="q-item__section column q-item__section--main justify-center" style="margin-left: -1.2em;">Minimize Sidebar</div>
-                                    </div>
-
-                                  </q-item-section>
-
-                                  <q-item-section class="col">                                    
-                                    Use this button to minimize / maximize the sidebar
-                                  </q-item-section>
-                          </q-item>
-                  
-                  
-                  </q-list>
-
-          </div>
-
-          <br>
-          
-          <q-separator size=".5em"/>
-       
-          <br>
-
-          <div class="text-h6 text-weight-bold">File tree</div>
-            <div class="q-pa-sm text-body2 text-justify">
-              Access and edit the files in your ARC via the file tree.
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="q-tree__node relative-position q-tree__node--child">
+                            <div class="q-tree__node-header relative-position row no-wrap items-center" tabindex="0"
+                              role="treeitem">
+                              <div class="q-focus-helper" tabindex="-1"></div>
+                              <div class="q-tree__node-header-content col row no-wrap items-center"><i
+                                  class="q-icon notranslate material-icons"
+                                  style="padding: 0px 0.2em 0px 0px;">add_box</i>
+                                <div style="flex: 100 1 0%; white-space: nowrap;">Add Study</div><!--v-if-->
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="q-tree__node relative-position q-tree__node--parent">
+                      <div class="q-tree__node-header relative-position row no-wrap items-center" tabindex="0"
+                        role="treeitem" aria-expanded="false">
+                        <div class="q-focus-helper" tabindex="-1"></div><i
+                          class="q-icon notranslate material-icons q-tree__arrow">play_arrow</i>
+                        <div class="q-tree__node-header-content col row no-wrap items-center"><!--v-if-->
+                          <div style="flex: 100 1 0%; white-space: nowrap;">workflows</div><!--v-if-->
+                        </div>
+                      </div>
+                      <div class="q-tree__node-collapsible" style="display: none;">
+                        <div class="q-tree__children" role="group">
+                          <div class="q-tree__node relative-position q-tree__node--child">
+                            <div class="q-tree__node-header relative-position row no-wrap items-center" tabindex="0"
+                              role="treeitem">
+                              <div class="q-focus-helper" tabindex="-1"></div>
+                              <div class="q-tree__node-header-content col row no-wrap items-center"><i
+                                  class="q-icon notranslate material-icons"
+                                  style="padding: 0px 0.2em 0px 0px;">add_box</i>
+                                <div style="flex: 100 1 0%; white-space: nowrap;">Import Workflows Files</div><!--v-if-->
+                              </div>
+                            </div>
+                          </div>
+                          <div class="q-tree__node relative-position q-tree__node--child">
+                            <div class="q-tree__node-header relative-position row no-wrap items-center" tabindex="0"
+                              role="treeitem">
+                              <div class="q-focus-helper" tabindex="-1"></div>
+                              <div class="q-tree__node-header-content col row no-wrap items-center"><i
+                                  class="q-icon notranslate material-icons"
+                                  style="padding: 0px 0.2em 0px 0px;">add_box</i>
+                                <div style="flex: 100 1 0%; white-space: nowrap;">Import Workflows Folders</div>
+                                <!--v-if-->
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
+          </q-item-section>
+        </q-item>
+        <q-item>
+          <q-item-section>
+            The root of your ARC by default contains the folders: studies - assays - workflows - runs
+          </q-item-section>
+        </q-item>
 
-            <div class="q-pt-sm text-justify">
-                  <q-list>
-                          <q-item>
-                              <q-item-section>                                
-                                <div class="q-tree q-tree--dense" role="tree" style="padding: 1em;"><div class="q-tree__node relative-position q-tree__node--parent"><div class="q-tree__node-header relative-position row no-wrap items-center" tabindex="0" role="treeitem" aria-expanded="true"><div class="q-focus-helper" tabindex="-1"></div><i class="q-icon notranslate material-icons q-tree__arrow q-tree__arrow--rotate">play_arrow</i><!----><div class="q-tree__node-header-content col row no-wrap items-center"><i class="q-icon notranslate material-icons" style="padding: 0px 0.2em 0px 0px;">edit_square</i><div style="flex: 100 1 0%; white-space: nowrap;">YourARC</div><!--v-if--></div></div><div class="q-tree__node-collapsible" style=""><!----><div class="q-tree__children" role="group"><div class="q-tree__node relative-position q-tree__node--parent"><div class="q-tree__node-header relative-position row no-wrap items-center" tabindex="0" role="treeitem" aria-expanded="false"><div class="q-focus-helper" tabindex="-1"></div><i class="q-icon notranslate material-icons q-tree__arrow">play_arrow</i><!----><div class="q-tree__node-header-content col row no-wrap items-center"><!--v-if--><div style="flex: 100 1 0%; white-space: nowrap;">assays</div><!--v-if--></div></div><div class="q-tree__node-collapsible" style="display: none;"><!----><div class="q-tree__children" role="group"><div class="q-tree__node relative-position q-tree__node--parent"><div class="q-tree__node-header relative-position row no-wrap items-center" tabindex="0" role="treeitem" aria-expanded="true"><div class="q-focus-helper" tabindex="-1"></div><i class="q-icon notranslate material-icons q-tree__arrow q-tree__arrow--rotate">play_arrow</i><!----><div class="q-tree__node-header-content col row no-wrap items-center"><i class="q-icon notranslate material-icons" style="padding: 0px 0.2em 0px 0px;">edit_square</i><div style="flex: 100 1 0%; white-space: nowrap;">rnaseq</div><!--v-if--></div></div><div class="q-tree__node-collapsible" style=""><!----><div class="q-tree__children" role="group"><div class="q-tree__node relative-position q-tree__node--parent"><div class="q-tree__node-header relative-position row no-wrap items-center" tabindex="0" role="treeitem" aria-expanded="true"><div class="q-focus-helper" tabindex="-1"></div><i class="q-icon notranslate material-icons q-tree__arrow q-tree__arrow--rotate">play_arrow</i><!----><div class="q-tree__node-header-content col row no-wrap items-center"><!--v-if--><div style="flex: 100 1 0%; white-space: nowrap;">dataset</div><!--v-if--></div></div><div class="q-tree__node-collapsible" style=""><!----><div class="q-tree__children" role="group"><div class="q-tree__node relative-position q-tree__node--child"><div class="q-tree__node-header relative-position row no-wrap items-center" tabindex="0" role="treeitem"><div class="q-focus-helper" tabindex="-1"></div><!----><!----><div class="q-tree__node-header-content col row no-wrap items-center"><i class="q-icon notranslate material-icons" style="padding: 0px 0.2em 0px 0px;">add_box</i><div style="flex: 100 1 0%; white-space: nowrap;">Import Dataset Files</div><!--v-if--></div></div><!----></div><div class="q-tree__node relative-position q-tree__node--child"><div class="q-tree__node-header relative-position row no-wrap items-center" tabindex="0" role="treeitem"><div class="q-focus-helper" tabindex="-1"></div><!----><!----><div class="q-tree__node-header-content col row no-wrap items-center"><i class="q-icon notranslate material-icons" style="padding: 0px 0.2em 0px 0px;">add_box</i><div style="flex: 100 1 0%; white-space: nowrap;">Import Dataset Folders</div><!--v-if--></div></div><!----></div></div></div></div><div class="q-tree__node relative-position q-tree__node--parent"><div class="q-tree__node-header relative-position row no-wrap items-center" tabindex="0" role="treeitem"><div class="q-focus-helper" tabindex="-1"></div><i class="q-icon notranslate material-icons q-tree__arrow">play_arrow</i><!----><div class="q-tree__node-header-content col row no-wrap items-center"><!--v-if--><div style="flex: 100 1 0%; white-space: nowrap;">protocols</div><!--v-if--></div></div><div class="q-tree__node-collapsible" style="display: none;"><!----><div class="q-tree__children" role="group"></div></div></div><div class="q-tree__node relative-position q-tree__node--child"><div class="q-tree__node-header relative-position row no-wrap items-center" tabindex="0" role="treeitem"><div class="q-focus-helper" tabindex="-1"></div><!----><!----><div class="q-tree__node-header-content col row no-wrap items-center"><i class="q-icon notranslate material-icons" style="padding: 0px 0.2em 0px 0px;">edit_square</i><div style="flex: 100 1 0%; white-space: nowrap;">README.md</div><div style="flex: 1 1 0%; white-space: nowrap; margin-left: 1em;">0.00 B</div></div></div><!----></div></div></div></div><div class="q-tree__node relative-position q-tree__node--child"><div class="q-tree__node-header relative-position row no-wrap items-center" tabindex="0" role="treeitem"><div class="q-focus-helper" tabindex="-1"></div><!----><!----><div class="q-tree__node-header-content col row no-wrap items-center"><i class="q-icon notranslate material-icons" style="padding: 0px 0.2em 0px 0px;">add_box</i><div style="flex: 100 1 0%; white-space: nowrap;">Add Assay</div><!--v-if--></div></div><!----></div></div></div></div><div class="q-tree__node relative-position q-tree__node--parent"><div class="q-tree__node-header relative-position row no-wrap items-center" tabindex="0" role="treeitem"><div class="q-focus-helper" tabindex="-1"></div><i class="q-icon notranslate material-icons q-tree__arrow">play_arrow</i><!----><div class="q-tree__node-header-content col row no-wrap items-center"><!--v-if--><div style="flex: 100 1 0%; white-space: nowrap;">runs</div><!--v-if--></div></div><div class="q-tree__node-collapsible" style="display: none;"><!----><div class="q-tree__children" role="group"></div></div></div><div class="q-tree__node relative-position q-tree__node--parent"><div class="q-tree__node-header relative-position row no-wrap items-center" tabindex="0" role="treeitem" aria-expanded="false"><div class="q-focus-helper" tabindex="-1"></div><i class="q-icon notranslate material-icons q-tree__arrow">play_arrow</i><!----><div class="q-tree__node-header-content col row no-wrap items-center"><!--v-if--><div style="flex: 100 1 0%; white-space: nowrap;">studies</div><!--v-if--></div></div><div class="q-tree__node-collapsible" style="display: none;"><!----><div class="q-tree__children" role="group"><div class="q-tree__node relative-position q-tree__node--parent"><div class="q-tree__node-header relative-position row no-wrap items-center" tabindex="0" role="treeitem" aria-expanded="true"><div class="q-focus-helper" tabindex="-1"></div><i class="q-icon notranslate material-icons q-tree__arrow q-tree__arrow--rotate">play_arrow</i><!----><div class="q-tree__node-header-content col row no-wrap items-center"><i class="q-icon notranslate material-icons" style="padding: 0px 0.2em 0px 0px;">edit_square</i><div style="flex: 100 1 0%; white-space: nowrap;">plants samples</div><!--v-if--></div></div><div class="q-tree__node-collapsible" style=""><!----><div class="q-tree__children" role="group"><div class="q-tree__node relative-position q-tree__node--parent"><div class="q-tree__node-header relative-position row no-wrap items-center" tabindex="0" role="treeitem" aria-expanded="true"><div class="q-focus-helper" tabindex="-1"></div><i class="q-icon notranslate material-icons q-tree__arrow q-tree__arrow--rotate">play_arrow</i><!----><div class="q-tree__node-header-content col row no-wrap items-center"><!--v-if--><div style="flex: 100 1 0%; white-space: nowrap;">protocols</div><!--v-if--></div></div><div class="q-tree__node-collapsible" style=""><!----><div class="q-tree__children" role="group"><div class="q-tree__node relative-position q-tree__node--child"><div class="q-tree__node-header relative-position row no-wrap items-center" tabindex="0" role="treeitem"><div class="q-focus-helper" tabindex="-1"></div><!----><!----><div class="q-tree__node-header-content col row no-wrap items-center"><i class="q-icon notranslate material-icons" style="padding: 0px 0.2em 0px 0px;">add_box</i><div style="flex: 100 1 0%; white-space: nowrap;">Add Protocol</div><!--v-if--></div></div><!----></div></div></div></div><div class="q-tree__node relative-position q-tree__node--parent"><div class="q-tree__node-header relative-position row no-wrap items-center" tabindex="0" role="treeitem" aria-expanded="false"><div class="q-focus-helper" tabindex="-1"></div><i class="q-icon notranslate material-icons q-tree__arrow">play_arrow</i><!----><div class="q-tree__node-header-content col row no-wrap items-center"><!--v-if--><div style="flex: 100 1 0%; white-space: nowrap;">resources</div><!--v-if--></div></div><div class="q-tree__node-collapsible" style="display: none;"><!----><div class="q-tree__children" role="group"><div class="q-tree__node relative-position q-tree__node--child"><div class="q-tree__node-header relative-position row no-wrap items-center" tabindex="-1" role="treeitem"><div class="q-focus-helper" tabindex="-1"></div><!----><!----><div class="q-tree__node-header-content col row no-wrap items-center"><i class="q-icon notranslate material-icons" style="padding: 0px 0.2em 0px 0px;">block</i><div style="flex: 100 1 0%; white-space: nowrap;">empty</div><!--v-if--></div></div><!----></div></div></div></div><div class="q-tree__node relative-position q-tree__node--child"><div class="q-tree__node-header relative-position row no-wrap items-center" tabindex="0" role="treeitem"><div class="q-focus-helper" tabindex="-1"></div><!----><!----><div class="q-tree__node-header-content col row no-wrap items-center"><i class="q-icon notranslate material-icons" style="padding: 0px 0.2em 0px 0px;">edit_square</i><div style="flex: 100 1 0%; white-space: nowrap;">README.md</div><div style="flex: 1 1 0%; white-space: nowrap; margin-left: 1em;">0.00 B</div></div></div><!----></div></div></div></div><div class="q-tree__node relative-position q-tree__node--child"><div class="q-tree__node-header relative-position row no-wrap items-center" tabindex="0" role="treeitem"><div class="q-focus-helper" tabindex="-1"></div><!----><!----><div class="q-tree__node-header-content col row no-wrap items-center"><i class="q-icon notranslate material-icons" style="padding: 0px 0.2em 0px 0px;">add_box</i><div style="flex: 100 1 0%; white-space: nowrap;">Add Study</div><!--v-if--></div></div><!----></div></div></div></div><div class="q-tree__node relative-position q-tree__node--parent"><div class="q-tree__node-header relative-position row no-wrap items-center" tabindex="0" role="treeitem" aria-expanded="false"><div class="q-focus-helper" tabindex="-1"></div><i class="q-icon notranslate material-icons q-tree__arrow">play_arrow</i><!----><div class="q-tree__node-header-content col row no-wrap items-center"><!--v-if--><div style="flex: 100 1 0%; white-space: nowrap;">workflows</div><!--v-if--></div></div><div class="q-tree__node-collapsible" style="display: none;"><!----><div class="q-tree__children" role="group"><div class="q-tree__node relative-position q-tree__node--child"><div class="q-tree__node-header relative-position row no-wrap items-center" tabindex="0" role="treeitem"><div class="q-focus-helper" tabindex="-1"></div><!----><!----><div class="q-tree__node-header-content col row no-wrap items-center"><i class="q-icon notranslate material-icons" style="padding: 0px 0.2em 0px 0px;">add_box</i><div style="flex: 100 1 0%; white-space: nowrap;">Import Workflows Files</div><!--v-if--></div></div><!----></div><div class="q-tree__node relative-position q-tree__node--child"><div class="q-tree__node-header relative-position row no-wrap items-center" tabindex="0" role="treeitem"><div class="q-focus-helper" tabindex="-1"></div><!----><!----><div class="q-tree__node-header-content col row no-wrap items-center"><i class="q-icon notranslate material-icons" style="padding: 0px 0.2em 0px 0px;">add_box</i><div style="flex: 100 1 0%; white-space: nowrap;">Import Workflows Folders</div><!--v-if--></div></div><!----></div></div></div></div></div></div></div></div>
-                              </q-item-section>                         
-                          </q-item>
-                          <q-item>
-                              <q-item-section>                                
-                                The root of your ARC by default contains the folders: studies - assays - workflows - runs
-                              </q-item-section>                              
-                          </q-item>
+        <q-separator inset />
 
-                          <q-separator inset/>
-                          <br>
-                          <div class="text-subtitle1 text-weight-bold">Investigation</div>
+        <div class="text-subtitle1 text-weight-bold">Investigation</div>
 
-                          <q-item>
-                              <q-item-section>
-                                <div class="q-tree q-tree--dense" role="tree" style="padding: 1em;"><div class="q-tree__node relative-position q-tree__node--parent"><div class="q-tree__node-header relative-position row no-wrap items-center  q-tree__node--selected" tabindex="0" role="treeitem" aria-expanded="true"><div class="q-focus-helper" tabindex="-1"></div><i class="q-icon notranslate material-icons q-tree__arrow q-tree__arrow--rotate">play_arrow</i><!----><div class="q-tree__node-header-content col row no-wrap items-center text-white"><i class="q-icon notranslate material-icons" style="padding: 0px 0.2em 0px 0px;">edit_square</i><div style="flex: 100 1 0%; white-space: nowrap;">YourARC</div><!--v-if--></div></div><div class="q-tree__node-collapsible" style=""><!----><div class="q-tree__children" role="group"><div class="q-tree__node relative-position q-tree__node--parent"><div class="q-tree__node-header relative-position row no-wrap items-center   " tabindex="0" role="treeitem" aria-expanded="false"><div class="q-focus-helper" tabindex="-1"></div><i class="q-icon notranslate material-icons q-tree__arrow">play_arrow</i><!----><div class="q-tree__node-header-content col row no-wrap items-center"><!--v-if--><div style="flex: 100 1 0%; white-space: nowrap;">assays</div><!--v-if--></div></div><div class="q-tree__node-collapsible" style="display: none;"><!----><div class="q-tree__children" role="group"><div class="q-tree__node relative-position q-tree__node--parent"><div class="q-tree__node-header relative-position row no-wrap items-center   " tabindex="0" role="treeitem" aria-expanded="false"><div class="q-focus-helper" tabindex="-1"></div><i class="q-icon notranslate material-icons q-tree__arrow">play_arrow</i><!----><div class="q-tree__node-header-content col row no-wrap items-center"><i class="q-icon notranslate material-icons" style="padding: 0px 0.2em 0px 0px;">edit_square</i><div style="flex: 100 1 0%; white-space: nowrap;">rnaseq</div><!--v-if--></div></div><div class="q-tree__node-collapsible" style="display: none;"><!----><div class="q-tree__children" role="group"><div class="q-tree__node relative-position q-tree__node--parent"><div class="q-tree__node-header relative-position row no-wrap items-center   " tabindex="0" role="treeitem"><div class="q-focus-helper" tabindex="-1"></div><i class="q-icon notranslate material-icons q-tree__arrow">play_arrow</i><!----><div class="q-tree__node-header-content col row no-wrap items-center"><!--v-if--><div style="flex: 100 1 0%; white-space: nowrap;">dataset</div><!--v-if--></div></div><div class="q-tree__node-collapsible" style="display: none;"><!----><div class="q-tree__children" role="group"></div></div></div><div class="q-tree__node relative-position q-tree__node--parent"><div class="q-tree__node-header relative-position row no-wrap items-center   " tabindex="0" role="treeitem"><div class="q-focus-helper" tabindex="-1"></div><i class="q-icon notranslate material-icons q-tree__arrow">play_arrow</i><!----><div class="q-tree__node-header-content col row no-wrap items-center"><!--v-if--><div style="flex: 100 1 0%; white-space: nowrap;">protocols</div><!--v-if--></div></div><div class="q-tree__node-collapsible" style="display: none;"><!----><div class="q-tree__children" role="group"></div></div></div><div class="q-tree__node relative-position q-tree__node--child"><div class="q-tree__node-header relative-position row no-wrap items-center   " tabindex="0" role="treeitem"><div class="q-focus-helper" tabindex="-1"></div><!----><!----><div class="q-tree__node-header-content col row no-wrap items-center"><i class="q-icon notranslate material-icons" style="padding: 0px 0.2em 0px 0px;">edit_square</i><div style="flex: 100 1 0%; white-space: nowrap;">README.md</div><div style="flex: 1 1 0%; white-space: nowrap; margin-left: 1em;">0.00 B</div></div></div><!----></div></div></div></div><div class="q-tree__node relative-position q-tree__node--child"><div class="q-tree__node-header relative-position row no-wrap items-center   " tabindex="0" role="treeitem"><div class="q-focus-helper" tabindex="-1"></div><!----><!----><div class="q-tree__node-header-content col row no-wrap items-center"><i class="q-icon notranslate material-icons" style="padding: 0px 0.2em 0px 0px;">add_box</i><div style="flex: 100 1 0%; white-space: nowrap;">Add Assay</div><!--v-if--></div></div><!----></div></div></div></div><div class="q-tree__node relative-position q-tree__node--parent"><div class="q-tree__node-header relative-position row no-wrap items-center   " tabindex="0" role="treeitem" aria-expanded="false"><div class="q-focus-helper" tabindex="-1"></div><i class="q-icon notranslate material-icons q-tree__arrow">play_arrow</i><!----><div class="q-tree__node-header-content col row no-wrap items-center"><!--v-if--><div style="flex: 100 1 0%; white-space: nowrap;">runs</div><!--v-if--></div></div><div class="q-tree__node-collapsible" style="display: none;"><!----><div class="q-tree__children" role="group"><div class="q-tree__node relative-position q-tree__node--child"><div class="q-tree__node-header relative-position row no-wrap items-center   " tabindex="0" role="treeitem"><div class="q-focus-helper" tabindex="-1"></div><!----><!----><div class="q-tree__node-header-content col row no-wrap items-center"><i class="q-icon notranslate material-icons" style="padding: 0px 0.2em 0px 0px;">add_box</i><div style="flex: 100 1 0%; white-space: nowrap;">Import Runs Files</div><!--v-if--></div></div><!----></div><div class="q-tree__node relative-position q-tree__node--child"><div class="q-tree__node-header relative-position row no-wrap items-center   " tabindex="0" role="treeitem"><div class="q-focus-helper" tabindex="-1"></div><!----><!----><div class="q-tree__node-header-content col row no-wrap items-center"><i class="q-icon notranslate material-icons" style="padding: 0px 0.2em 0px 0px;">add_box</i><div style="flex: 100 1 0%; white-space: nowrap;">Import Runs Folders</div><!--v-if--></div></div><!----></div></div></div></div><div class="q-tree__node relative-position q-tree__node--parent"><div class="q-tree__node-header relative-position row no-wrap items-center   " tabindex="0" role="treeitem"><div class="q-focus-helper" tabindex="-1"></div><i class="q-icon notranslate material-icons q-tree__arrow">play_arrow</i><!----><div class="q-tree__node-header-content col row no-wrap items-center"><!--v-if--><div style="flex: 100 1 0%; white-space: nowrap;">studies</div><!--v-if--></div></div><div class="q-tree__node-collapsible" style="display: none;"><!----><div class="q-tree__children" role="group"></div></div></div><div class="q-tree__node relative-position q-tree__node--parent"><div class="q-tree__node-header relative-position row no-wrap items-center   " tabindex="0" role="treeitem"><div class="q-focus-helper" tabindex="-1"></div><i class="q-icon notranslate material-icons q-tree__arrow">play_arrow</i><!----><div class="q-tree__node-header-content col row no-wrap items-center"><!--v-if--><div style="flex: 100 1 0%; white-space: nowrap;">workflows</div><!--v-if--></div></div><div class="q-tree__node-collapsible" style="display: none;"><!----><div class="q-tree__children" role="group"></div></div></div></div></div></div></div>
-                              </q-item-section>                         
-                          </q-item>
-                          <q-item>
-                              <q-item-section>                                
-                                Click on your ARC's name to open the "Investigation" menu
-                              </q-item-section>                              
-                          </q-item>
+        <q-item>
+          <q-item-section>
+            <div class="q-tree q-tree--dense" role="tree" style="padding: 1em;">
+              <div class="q-tree__node relative-position q-tree__node--parent">
+                <div class="q-tree__node-header relative-position row no-wrap items-center  q-tree__node--selected"
+                  tabindex="0" role="treeitem" aria-expanded="true">
+                  <div class="q-focus-helper" tabindex="-1"></div><i
+                    class="q-icon notranslate material-icons q-tree__arrow q-tree__arrow--rotate">play_arrow</i>
+                  <div class="q-tree__node-header-content col row no-wrap items-center text-white"><i
+                      class="q-icon notranslate material-icons" style="padding: 0px 0.2em 0px 0px;">edit_square</i>
+                    <div style="flex: 100 1 0%; white-space: nowrap;">YourARC</div><!--v-if-->
+                  </div>
+                </div>
+                <div class="q-tree__node-collapsible" style="">
+                  <div class="q-tree__children" role="group">
+                    <div class="q-tree__node relative-position q-tree__node--parent">
+                      <div class="q-tree__node-header relative-position row no-wrap items-center   " tabindex="0"
+                        role="treeitem" aria-expanded="false">
+                        <div class="q-focus-helper" tabindex="-1"></div><i
+                          class="q-icon notranslate material-icons q-tree__arrow">play_arrow</i>
+                        <div class="q-tree__node-header-content col row no-wrap items-center"><!--v-if-->
+                          <div style="flex: 100 1 0%; white-space: nowrap;">assays</div><!--v-if-->
+                        </div>
+                      </div>
+                      <div class="q-tree__node-collapsible" style="display: none;">
+                        <div class="q-tree__children" role="group">
+                          <div class="q-tree__node relative-position q-tree__node--parent">
+                            <div class="q-tree__node-header relative-position row no-wrap items-center   " tabindex="0"
+                              role="treeitem" aria-expanded="false">
+                              <div class="q-focus-helper" tabindex="-1"></div><i
+                                class="q-icon notranslate material-icons q-tree__arrow">play_arrow</i>
+                              <div class="q-tree__node-header-content col row no-wrap items-center"><i
+                                  class="q-icon notranslate material-icons"
+                                  style="padding: 0px 0.2em 0px 0px;">edit_square</i>
+                                <div style="flex: 100 1 0%; white-space: nowrap;">rnaseq</div><!--v-if-->
+                              </div>
+                            </div>
+                            <div class="q-tree__node-collapsible" style="display: none;">
+                              <div class="q-tree__children" role="group">
+                                <div class="q-tree__node relative-position q-tree__node--parent">
+                                  <div class="q-tree__node-header relative-position row no-wrap items-center   "
+                                    tabindex="0" role="treeitem">
+                                    <div class="q-focus-helper" tabindex="-1"></div><i
+                                      class="q-icon notranslate material-icons q-tree__arrow">play_arrow</i>
+                                    <div class="q-tree__node-header-content col row no-wrap items-center"><!--v-if-->
+                                      <div style="flex: 100 1 0%; white-space: nowrap;">dataset</div><!--v-if-->
+                                    </div>
+                                  </div>
+                                  <div class="q-tree__node-collapsible" style="display: none;">
+                                    <div class="q-tree__children" role="group"></div>
+                                  </div>
+                                </div>
+                                <div class="q-tree__node relative-position q-tree__node--parent">
+                                  <div class="q-tree__node-header relative-position row no-wrap items-center   "
+                                    tabindex="0" role="treeitem">
+                                    <div class="q-focus-helper" tabindex="-1"></div><i
+                                      class="q-icon notranslate material-icons q-tree__arrow">play_arrow</i>
+                                    <div class="q-tree__node-header-content col row no-wrap items-center"><!--v-if-->
+                                      <div style="flex: 100 1 0%; white-space: nowrap;">protocols</div><!--v-if-->
+                                    </div>
+                                  </div>
+                                  <div class="q-tree__node-collapsible" style="display: none;">
+                                    <div class="q-tree__children" role="group"></div>
+                                  </div>
+                                </div>
+                                <div class="q-tree__node relative-position q-tree__node--child">
+                                  <div class="q-tree__node-header relative-position row no-wrap items-center   "
+                                    tabindex="0" role="treeitem">
+                                    <div class="q-focus-helper" tabindex="-1"></div>
+                                    <div class="q-tree__node-header-content col row no-wrap items-center"><i
+                                        class="q-icon notranslate material-icons"
+                                        style="padding: 0px 0.2em 0px 0px;">edit_square</i>
+                                      <div style="flex: 100 1 0%; white-space: nowrap;">README.md</div>
+                                      <div style="flex: 1 1 0%; white-space: nowrap; margin-left: 1em;">0.00 B</div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="q-tree__node relative-position q-tree__node--child">
+                            <div class="q-tree__node-header relative-position row no-wrap items-center   " tabindex="0"
+                              role="treeitem">
+                              <div class="q-focus-helper" tabindex="-1"></div>
+                              <div class="q-tree__node-header-content col row no-wrap items-center"><i
+                                  class="q-icon notranslate material-icons"
+                                  style="padding: 0px 0.2em 0px 0px;">add_box</i>
+                                <div style="flex: 100 1 0%; white-space: nowrap;">Add Assay</div><!--v-if-->
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="q-tree__node relative-position q-tree__node--parent">
+                      <div class="q-tree__node-header relative-position row no-wrap items-center   " tabindex="0"
+                        role="treeitem" aria-expanded="false">
+                        <div class="q-focus-helper" tabindex="-1"></div><i
+                          class="q-icon notranslate material-icons q-tree__arrow">play_arrow</i>
+                        <div class="q-tree__node-header-content col row no-wrap items-center"><!--v-if-->
+                          <div style="flex: 100 1 0%; white-space: nowrap;">runs</div><!--v-if-->
+                        </div>
+                      </div>
+                      <div class="q-tree__node-collapsible" style="display: none;">
+                        <div class="q-tree__children" role="group">
+                          <div class="q-tree__node relative-position q-tree__node--child">
+                            <div class="q-tree__node-header relative-position row no-wrap items-center   " tabindex="0"
+                              role="treeitem">
+                              <div class="q-focus-helper" tabindex="-1"></div>
+                              <div class="q-tree__node-header-content col row no-wrap items-center"><i
+                                  class="q-icon notranslate material-icons"
+                                  style="padding: 0px 0.2em 0px 0px;">add_box</i>
+                                <div style="flex: 100 1 0%; white-space: nowrap;">Import Runs Files</div><!--v-if-->
+                              </div>
+                            </div>
+                          </div>
+                          <div class="q-tree__node relative-position q-tree__node--child">
+                            <div class="q-tree__node-header relative-position row no-wrap items-center   " tabindex="0"
+                              role="treeitem">
+                              <div class="q-focus-helper" tabindex="-1"></div>
+                              <div class="q-tree__node-header-content col row no-wrap items-center"><i
+                                  class="q-icon notranslate material-icons"
+                                  style="padding: 0px 0.2em 0px 0px;">add_box</i>
+                                <div style="flex: 100 1 0%; white-space: nowrap;">Import Runs Folders</div><!--v-if-->
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="q-tree__node relative-position q-tree__node--parent">
+                      <div class="q-tree__node-header relative-position row no-wrap items-center   " tabindex="0"
+                        role="treeitem">
+                        <div class="q-focus-helper" tabindex="-1"></div><i
+                          class="q-icon notranslate material-icons q-tree__arrow">play_arrow</i>
+                        <div class="q-tree__node-header-content col row no-wrap items-center"><!--v-if-->
+                          <div style="flex: 100 1 0%; white-space: nowrap;">studies</div><!--v-if-->
+                        </div>
+                      </div>
+                      <div class="q-tree__node-collapsible" style="display: none;">
+                        <div class="q-tree__children" role="group"></div>
+                      </div>
+                    </div>
+                    <div class="q-tree__node relative-position q-tree__node--parent">
+                      <div class="q-tree__node-header relative-position row no-wrap items-center   " tabindex="0"
+                        role="treeitem">
+                        <div class="q-focus-helper" tabindex="-1"></div><i
+                          class="q-icon notranslate material-icons q-tree__arrow">play_arrow</i>
+                        <div class="q-tree__node-header-content col row no-wrap items-center"><!--v-if-->
+                          <div style="flex: 100 1 0%; white-space: nowrap;">workflows</div><!--v-if-->
+                        </div>
+                      </div>
+                      <div class="q-tree__node-collapsible" style="display: none;">
+                        <div class="q-tree__children" role="group"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </q-item-section>
+        </q-item>
+        <q-item>
+          <q-item-section>
+            Click on your ARC's name to open the "Investigation" menu
+          </q-item-section>
+        </q-item>
 
 
-                          <q-separator inset/>
-                          <br>
-                          <div class="text-subtitle1 text-weight-bold">Studies</div>
+        <q-separator inset />
 
-                          <q-item>
-                              <q-item-section>
-                                <div class="q-tree q-tree--dense"  role="tree" style="padding: 1em;"><div class="q-tree__node-header relative-position row no-wrap items-center   " tabindex="0" role="treeitem" aria-expanded="true"><div class="q-focus-helper" tabindex="-1"></div><i class="q-icon notranslate material-icons q-tree__arrow q-tree__arrow--rotate">play_arrow</i><!----><div class="q-tree__node-header-content col row no-wrap items-center"><!--v-if--><div style="flex: 100 1 0%; white-space: nowrap;">studies</div><!--v-if--></div></div><div class="q-tree__node-collapsible" style=""><!----><div class="q-tree__children" role="group"><div class="q-tree__node relative-position q-tree__node--child"><div class="q-tree__node-header relative-position row no-wrap items-center   " tabindex="0" role="treeitem"><div class="q-focus-helper" tabindex="-1"></div><!----><!----><div class="q-tree__node-header-content col row no-wrap items-center"><i class="q-icon notranslate material-icons" style="padding: 0px 0.2em 0px 0px;">add_box</i><div style="flex: 100 1 0%; white-space: nowrap;">Add Study</div><!--v-if--></div></div><!----></div></div></div></div>                                
-                              </q-item-section>                         
-                          </q-item>
-                          <q-item>
-                              <q-item-section>                                
-                                Unfold studies and click "Add Study" to add a new study to your ARC
-                              </q-item-section>                              
-                          </q-item>
-                                                   
-                          <q-separator inset/>
-                          <q-item>
-                              <q-item-section>
-                                <div class="q-tree q-tree--dense"  role="tree" style="padding: 1em;"><div class="q-tree__node relative-position q-tree__node--parent"><div class="q-tree__node-header relative-position row no-wrap items-center  q-tree__node--selected" tabindex="0" role="treeitem" aria-expanded="true"><div class="q-focus-helper" tabindex="-1"></div><i class="q-icon notranslate material-icons q-tree__arrow q-tree__arrow--rotate">play_arrow</i><!----><div class="q-tree__node-header-content col row no-wrap items-center text-white"><i class="q-icon notranslate material-icons" style="padding: 0px 0.2em 0px 0px;">edit_square</i><div style="flex: 100 1 0%; white-space: nowrap;">YourStudy</div><!--v-if--></div></div><div class="q-tree__node-collapsible" style=""><!----><div class="q-tree__children" role="group"><div class="q-tree__node relative-position q-tree__node--parent"><div class="q-tree__node-header relative-position row no-wrap items-center  " tabindex="0" role="treeitem"><div class="q-focus-helper" tabindex="-1"></div><i class="q-icon notranslate material-icons q-tree__arrow">play_arrow</i><!----><div class="q-tree__node-header-content col row no-wrap items-center"><!--v-if--><div style="flex: 100 1 0%; white-space: nowrap;">protocols</div><!--v-if--></div></div><div class="q-tree__node-collapsible" style="display: none;"><!----><div class="q-tree__children" role="group"></div></div></div><div class="q-tree__node relative-position q-tree__node--parent"><div class="q-tree__node-header relative-position row no-wrap items-center   " tabindex="0" role="treeitem"><div class="q-focus-helper" tabindex="-1"></div><i class="q-icon notranslate material-icons q-tree__arrow">play_arrow</i><!----><div class="q-tree__node-header-content col row no-wrap items-center"><!--v-if--><div style="flex: 100 1 0%; white-space: nowrap;">resources</div><!--v-if--></div></div><div class="q-tree__node-collapsible" style="display: none;"><!----><div class="q-tree__children" role="group"></div></div></div><div class="q-tree__node relative-position q-tree__node--child"><div class="q-tree__node-header relative-position row no-wrap items-center   " tabindex="0" role="treeitem"><div class="q-focus-helper" tabindex="-1"></div><!----><!----><div class="q-tree__node-header-content col row no-wrap items-center"><i class="q-icon notranslate material-icons" style="padding: 0px 0.2em 0px 0px;">edit_square</i><div style="flex: 100 1 0%; white-space: nowrap;">README.md</div><div style="flex: 1 1 0%; white-space: nowrap; margin-left: 1em;">0.00 B</div></div></div><!----></div></div></div></div><div class="q-tree__node relative-position q-tree__node--child"><div class="q-tree__node-header relative-position row no-wrap items-center   " tabindex="0" role="treeitem"><div class="q-focus-helper" tabindex="-1"></div><!----><!----><div class="q-tree__node-header-content col row no-wrap items-center"><i class="q-icon notranslate material-icons" style="padding: 0px 0.2em 0px 0px;">add_box</i><div style="flex: 100 1 0%; white-space: nowrap;">Add Study</div><!--v-if--></div></div><!----></div></div>
-                              </q-item-section>                         
-                          </q-item>
-                          <q-item>
-                              <q-item-section>                                
-                                Click on your study's name to open the "Study" menu
-                              </q-item-section>                              
-                          </q-item>
+        <div class="text-subtitle1 text-weight-bold">Studies</div>
 
-                          <q-separator inset/>
-                          <br>
-                          <div class="text-subtitle1 text-weight-bold">Assays</div>
+        <q-item>
+          <q-item-section>
+            <div class="q-tree q-tree--dense" role="tree" style="padding: 1em;">
+              <div class="q-tree__node-header relative-position row no-wrap items-center   " tabindex="0" role="treeitem"
+                aria-expanded="true">
+                <div class="q-focus-helper" tabindex="-1"></div><i
+                  class="q-icon notranslate material-icons q-tree__arrow q-tree__arrow--rotate">play_arrow</i>
+                <div class="q-tree__node-header-content col row no-wrap items-center"><!--v-if-->
+                  <div style="flex: 100 1 0%; white-space: nowrap;">studies</div><!--v-if-->
+                </div>
+              </div>
+              <div class="q-tree__node-collapsible" style="">
+                <div class="q-tree__children" role="group">
+                  <div class="q-tree__node relative-position q-tree__node--child">
+                    <div class="q-tree__node-header relative-position row no-wrap items-center   " tabindex="0"
+                      role="treeitem">
+                      <div class="q-focus-helper" tabindex="-1"></div>
+                      <div class="q-tree__node-header-content col row no-wrap items-center"><i
+                          class="q-icon notranslate material-icons" style="padding: 0px 0.2em 0px 0px;">add_box</i>
+                        <div style="flex: 100 1 0%; white-space: nowrap;">Add Study</div><!--v-if-->
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </q-item-section>
+        </q-item>
+        <q-item>
+          <q-item-section>
+            Unfold studies and click "Add Study" to add a new study to your ARC
+          </q-item-section>
+        </q-item>
 
-                          <q-item>
-                              <q-item-section>
-                                <div class="q-tree q-tree--dense"  role="tree" style="padding: 1em;"><div class="q-tree__node-header relative-position row no-wrap items-center   " tabindex="0" role="treeitem" aria-expanded="true"><div class="q-focus-helper" tabindex="-1"></div><i class="q-icon notranslate material-icons q-tree__arrow q-tree__arrow--rotate">play_arrow</i><!----><div class="q-tree__node-header-content col row no-wrap items-center"><!--v-if--><div style="flex: 100 1 0%; white-space: nowrap;">assays</div><!--v-if--></div></div><div class="q-tree__node-collapsible" style=""><!----><div class="q-tree__children" role="group"><div class="q-tree__node relative-position q-tree__node--child"><div class="q-tree__node-header relative-position row no-wrap items-center   " tabindex="0" role="treeitem"><div class="q-focus-helper" tabindex="-1"></div><!----><!----><div class="q-tree__node-header-content col row no-wrap items-center"><i class="q-icon notranslate material-icons" style="padding: 0px 0.2em 0px 0px;">add_box</i><div style="flex: 100 1 0%; white-space: nowrap;">Add Assay</div><!--v-if--></div></div><!----></div></div></div></div>                                
-                              </q-item-section>                         
-                          </q-item>
-                          <q-item>
-                              <q-item-section>                                
-                                Unfold assays and click "Add Assay" to add a new assay to your ARC
-                              </q-item-section>                              
-                          </q-item>
+        <q-separator inset />
+        <q-item>
+          <q-item-section>
+            <div class="q-tree q-tree--dense" role="tree" style="padding: 1em;">
+              <div class="q-tree__node relative-position q-tree__node--parent">
+                <div class="q-tree__node-header relative-position row no-wrap items-center  q-tree__node--selected"
+                  tabindex="0" role="treeitem" aria-expanded="true">
+                  <div class="q-focus-helper" tabindex="-1"></div><i
+                    class="q-icon notranslate material-icons q-tree__arrow q-tree__arrow--rotate">play_arrow</i>
+                  <div class="q-tree__node-header-content col row no-wrap items-center text-white"><i
+                      class="q-icon notranslate material-icons" style="padding: 0px 0.2em 0px 0px;">edit_square</i>
+                    <div style="flex: 100 1 0%; white-space: nowrap;">YourStudy</div><!--v-if-->
+                  </div>
+                </div>
+                <div class="q-tree__node-collapsible" style="">
+                  <div class="q-tree__children" role="group">
+                    <div class="q-tree__node relative-position q-tree__node--parent">
+                      <div class="q-tree__node-header relative-position row no-wrap items-center  " tabindex="0"
+                        role="treeitem">
+                        <div class="q-focus-helper" tabindex="-1"></div><i
+                          class="q-icon notranslate material-icons q-tree__arrow">play_arrow</i>
+                        <div class="q-tree__node-header-content col row no-wrap items-center"><!--v-if-->
+                          <div style="flex: 100 1 0%; white-space: nowrap;">protocols</div><!--v-if-->
+                        </div>
+                      </div>
+                      <div class="q-tree__node-collapsible" style="display: none;">
+                        <div class="q-tree__children" role="group"></div>
+                      </div>
+                    </div>
+                    <div class="q-tree__node relative-position q-tree__node--parent">
+                      <div class="q-tree__node-header relative-position row no-wrap items-center   " tabindex="0"
+                        role="treeitem">
+                        <div class="q-focus-helper" tabindex="-1"></div><i
+                          class="q-icon notranslate material-icons q-tree__arrow">play_arrow</i>
+                        <div class="q-tree__node-header-content col row no-wrap items-center"><!--v-if-->
+                          <div style="flex: 100 1 0%; white-space: nowrap;">resources</div><!--v-if-->
+                        </div>
+                      </div>
+                      <div class="q-tree__node-collapsible" style="display: none;">
+                        <div class="q-tree__children" role="group"></div>
+                      </div>
+                    </div>
+                    <div class="q-tree__node relative-position q-tree__node--child">
+                      <div class="q-tree__node-header relative-position row no-wrap items-center   " tabindex="0"
+                        role="treeitem">
+                        <div class="q-focus-helper" tabindex="-1"></div>
+                        <div class="q-tree__node-header-content col row no-wrap items-center"><i
+                            class="q-icon notranslate material-icons" style="padding: 0px 0.2em 0px 0px;">edit_square</i>
+                          <div style="flex: 100 1 0%; white-space: nowrap;">README.md</div>
+                          <div style="flex: 1 1 0%; white-space: nowrap; margin-left: 1em;">0.00 B</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="q-tree__node relative-position q-tree__node--child">
+                <div class="q-tree__node-header relative-position row no-wrap items-center   " tabindex="0"
+                  role="treeitem">
+                  <div class="q-focus-helper" tabindex="-1"></div>
+                  <div class="q-tree__node-header-content col row no-wrap items-center"><i
+                      class="q-icon notranslate material-icons" style="padding: 0px 0.2em 0px 0px;">add_box</i>
+                    <div style="flex: 100 1 0%; white-space: nowrap;">Add Study</div><!--v-if-->
+                  </div>
+                </div>
+              </div>
+            </div>
+          </q-item-section>
+        </q-item>
+        <q-item>
+          <q-item-section>
+            Click on your study's name to open the "Study" menu
+          </q-item-section>
+        </q-item>
 
-                          <q-separator inset/>
-                          <q-item>
-                              <q-item-section>
-                                <div class="q-tree q-tree--dense"  role="tree" style="padding: 1em;"><div class="q-tree__node relative-position q-tree__node--parent"><div class="q-tree__node-header relative-position row no-wrap items-center q-tree__node--selected" tabindex="0" role="treeitem" aria-expanded="true"><div class="q-focus-helper" tabindex="-1"></div><i class="q-icon notranslate material-icons q-tree__arrow q-tree__arrow--rotate">play_arrow</i><!----><div class="q-tree__node-header-content col row no-wrap items-center text-white"><i class="q-icon notranslate material-icons" style="padding: 0px 0.2em 0px 0px;">edit_square</i><div style="flex: 100 1 0%; white-space: nowrap;">YourAssay</div><!--v-if--></div></div><div class="q-tree__node-collapsible" style=""><!----><div class="q-tree__children" role="group"><div class="q-tree__node relative-position q-tree__node--parent"><div class="q-tree__node-header relative-position row no-wrap items-center" tabindex="0" role="treeitem"><div class="q-focus-helper" tabindex="-1"></div><i class="q-icon notranslate material-icons q-tree__arrow">play_arrow</i><!----><div class="q-tree__node-header-content col row no-wrap items-center"><!--v-if--><div style="flex: 100 1 0%; white-space: nowrap;">dataset</div><!--v-if--></div></div><div class="q-tree__node-collapsible" style="display: none;"><!----><div class="q-tree__children" role="group"></div></div></div><div class="q-tree__node relative-position q-tree__node--parent"><div class="q-tree__node-header relative-position row no-wrap items-center " tabindex="0" role="treeitem"><div class="q-focus-helper" tabindex="-1"></div><i class="q-icon notranslate material-icons q-tree__arrow">play_arrow</i><!----><div class="q-tree__node-header-content col row no-wrap items-center"><!--v-if--><div style="flex: 100 1 0%; white-space: nowrap;">protocols</div><!--v-if--></div></div><div class="q-tree__node-collapsible" style="display: none;"><!----><div class="q-tree__children" role="group"></div></div></div><div class="q-tree__node relative-position q-tree__node--child"><div class="q-tree__node-header relative-position row no-wrap items-center " tabindex="0" role="treeitem"><div class="q-focus-helper" tabindex="-1"></div><!----><!----><div class="q-tree__node-header-content col row no-wrap items-center"><i class="q-icon notranslate material-icons" style="padding: 0px 0.2em 0px 0px;">edit_square</i><div style="flex: 100 1 0%; white-space: nowrap;">README.md</div><div style="flex: 1 1 0%; white-space: nowrap; margin-left: 1em;">0.00 B</div></div></div><!----></div></div></div></div><div class="q-tree__node relative-position q-tree__node--child"><div class="q-tree__node-header relative-position row no-wrap items-center " tabindex="0" role="treeitem"><div class="q-focus-helper" tabindex="-1"></div><!----><!----><div class="q-tree__node-header-content col row no-wrap items-center"><i class="q-icon notranslate material-icons" style="padding: 0px 0.2em 0px 0px;">add_box</i><div style="flex: 100 1 0%; white-space: nowrap;">Add Assay</div><!--v-if--></div></div><!----></div></div>
-                              </q-item-section>                         
-                          </q-item>
-                          <q-item>
-                              <q-item-section>                                
-                                Click on your assay's name to open the "Assay" menu
-                              </q-item-section>                              
-                          </q-item>
+        <q-separator inset />
+
+        <div class="text-subtitle1 text-weight-bold">Assays</div>
+
+        <q-item>
+          <q-item-section>
+            <div class="q-tree q-tree--dense" role="tree" style="padding: 1em;">
+              <div class="q-tree__node-header relative-position row no-wrap items-center   " tabindex="0" role="treeitem"
+                aria-expanded="true">
+                <div class="q-focus-helper" tabindex="-1"></div><i
+                  class="q-icon notranslate material-icons q-tree__arrow q-tree__arrow--rotate">play_arrow</i>
+                <div class="q-tree__node-header-content col row no-wrap items-center"><!--v-if-->
+                  <div style="flex: 100 1 0%; white-space: nowrap;">assays</div><!--v-if-->
+                </div>
+              </div>
+              <div class="q-tree__node-collapsible" style="">
+                <div class="q-tree__children" role="group">
+                  <div class="q-tree__node relative-position q-tree__node--child">
+                    <div class="q-tree__node-header relative-position row no-wrap items-center   " tabindex="0"
+                      role="treeitem">
+                      <div class="q-focus-helper" tabindex="-1"></div>
+                      <div class="q-tree__node-header-content col row no-wrap items-center"><i
+                          class="q-icon notranslate material-icons" style="padding: 0px 0.2em 0px 0px;">add_box</i>
+                        <div style="flex: 100 1 0%; white-space: nowrap;">Add Assay</div><!--v-if-->
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </q-item-section>
+        </q-item>
+        <q-item>
+          <q-item-section>
+            Unfold assays and click "Add Assay" to add a new assay to your ARC
+          </q-item-section>
+        </q-item>
+
+        <q-separator inset />
+        <q-item>
+          <q-item-section>
+            <div class="q-tree q-tree--dense" role="tree" style="padding: 1em;">
+              <div class="q-tree__node relative-position q-tree__node--parent">
+                <div class="q-tree__node-header relative-position row no-wrap items-center q-tree__node--selected"
+                  tabindex="0" role="treeitem" aria-expanded="true">
+                  <div class="q-focus-helper" tabindex="-1"></div><i
+                    class="q-icon notranslate material-icons q-tree__arrow q-tree__arrow--rotate">play_arrow</i>
+                  <div class="q-tree__node-header-content col row no-wrap items-center text-white"><i
+                      class="q-icon notranslate material-icons" style="padding: 0px 0.2em 0px 0px;">edit_square</i>
+                    <div style="flex: 100 1 0%; white-space: nowrap;">YourAssay</div><!--v-if-->
+                  </div>
+                </div>
+                <div class="q-tree__node-collapsible" style="">
+                  <div class="q-tree__children" role="group">
+                    <div class="q-tree__node relative-position q-tree__node--parent">
+                      <div class="q-tree__node-header relative-position row no-wrap items-center" tabindex="0"
+                        role="treeitem">
+                        <div class="q-focus-helper" tabindex="-1"></div><i
+                          class="q-icon notranslate material-icons q-tree__arrow">play_arrow</i>
+                        <div class="q-tree__node-header-content col row no-wrap items-center"><!--v-if-->
+                          <div style="flex: 100 1 0%; white-space: nowrap;">dataset</div><!--v-if-->
+                        </div>
+                      </div>
+                      <div class="q-tree__node-collapsible" style="display: none;">
+                        <div class="q-tree__children" role="group"></div>
+                      </div>
+                    </div>
+                    <div class="q-tree__node relative-position q-tree__node--parent">
+                      <div class="q-tree__node-header relative-position row no-wrap items-center " tabindex="0"
+                        role="treeitem">
+                        <div class="q-focus-helper" tabindex="-1"></div><i
+                          class="q-icon notranslate material-icons q-tree__arrow">play_arrow</i>
+                        <div class="q-tree__node-header-content col row no-wrap items-center"><!--v-if-->
+                          <div style="flex: 100 1 0%; white-space: nowrap;">protocols</div><!--v-if-->
+                        </div>
+                      </div>
+                      <div class="q-tree__node-collapsible" style="display: none;">
+                        <div class="q-tree__children" role="group"></div>
+                      </div>
+                    </div>
+                    <div class="q-tree__node relative-position q-tree__node--child">
+                      <div class="q-tree__node-header relative-position row no-wrap items-center " tabindex="0"
+                        role="treeitem">
+                        <div class="q-focus-helper" tabindex="-1"></div>
+                        <div class="q-tree__node-header-content col row no-wrap items-center"><i
+                            class="q-icon notranslate material-icons" style="padding: 0px 0.2em 0px 0px;">edit_square</i>
+                          <div style="flex: 100 1 0%; white-space: nowrap;">README.md</div>
+                          <div style="flex: 1 1 0%; white-space: nowrap; margin-left: 1em;">0.00 B</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="q-tree__node relative-position q-tree__node--child">
+                <div class="q-tree__node-header relative-position row no-wrap items-center " tabindex="0" role="treeitem">
+                  <div class="q-focus-helper" tabindex="-1"></div>
+                  <div class="q-tree__node-header-content col row no-wrap items-center"><i
+                      class="q-icon notranslate material-icons" style="padding: 0px 0.2em 0px 0px;">add_box</i>
+                    <div style="flex: 100 1 0%; white-space: nowrap;">Add Assay</div><!--v-if-->
+                  </div>
+                </div>
+              </div>
+            </div>
+          </q-item-section>
+        </q-item>
+        <q-item>
+          <q-item-section>
+            Click on your assay's name to open the "Assay" menu
+          </q-item-section>
+        </q-item>
 
 
 
-                          
-                          <q-separator inset/>
-                          <br>
-                          <div class="text-subtitle1 text-weight-bold">Study / Assay protocols</div>
-                          <q-item>
-                              <q-item-section>
-                                <div class="q-tree q-tree--dense"  role="tree" style="padding: 1em;"><div class="q-tree__node-header relative-position row no-wrap items-center " tabindex="0" role="treeitem" aria-expanded="true"><div class="q-focus-helper" tabindex="-1"></div><i class="q-icon notranslate material-icons q-tree__arrow q-tree__arrow--rotate">play_arrow</i><!----><div class="q-tree__node-header-content col row no-wrap items-center"><!--v-if--><div style="flex: 100 1 0%; white-space: nowrap;">protocols</div><!--v-if--></div></div><div class="q-tree__node-collapsible" style=""><!----><div class="q-tree__children" role="group"><div class="q-tree__node relative-position q-tree__node--child"><div class="q-tree__node-header relative-position row no-wrap items-center " tabindex="0" role="treeitem"><div class="q-focus-helper" tabindex="-1"></div><!----><!----><div class="q-tree__node-header-content col row no-wrap items-center"><i class="q-icon notranslate material-icons" style="padding: 0px 0.2em 0px 0px;">add_box</i><div style="flex: 100 1 0%; white-space: nowrap;">Add Protocol</div><!--v-if--></div></div><!----></div></div></div></div>
-                              </q-item-section>                         
-                          </q-item>
-                          <q-item>
-                              <q-item-section>                                
-                                Protocols can be added to individual studies or assays, respectively. 
-                              </q-item-section>                              
-                          </q-item>
-                          
-                          
-                          <q-separator inset/>
-                          <br>
-                          <div class="text-subtitle1 text-weight-bold">Assay datasets</div>
-                          <q-item>
-                              <q-item-section>
-                                <div class="q-tree q-tree--dense"  role="tree" style="padding: 1em;"><div class="q-tree__node-header relative-position row no-wrap items-center " tabindex="0" role="treeitem" aria-expanded="true"><div class="q-focus-helper" tabindex="-1"></div><i class="q-icon notranslate material-icons q-tree__arrow q-tree__arrow--rotate">play_arrow</i><!----><div class="q-tree__node-header-content col row no-wrap items-center"><!--v-if--><div style="flex: 100 1 0%; white-space: nowrap;">dataset</div><!--v-if--></div></div><div class="q-tree__node-collapsible" style=""><!----><div class="q-tree__children" role="group"><div class="q-tree__node relative-position q-tree__node--child"><div class="q-tree__node-header relative-position row no-wrap items-center " tabindex="0" role="treeitem"><div class="q-focus-helper" tabindex="-1"></div><!----><!----><div class="q-tree__node-header-content col row no-wrap items-center"><i class="q-icon notranslate material-icons" style="padding: 0px 0.2em 0px 0px;">add_box</i><div style="flex: 100 1 0%; white-space: nowrap;">Import Dataset Files</div><!--v-if--></div></div><!----></div><div class="q-tree__node relative-position q-tree__node--child"><div class="q-tree__node-header relative-position row no-wrap items-center " tabindex="0" role="treeitem"><div class="q-focus-helper" tabindex="-1"></div><!----><!----><div class="q-tree__node-header-content col row no-wrap items-center"><i class="q-icon notranslate material-icons" style="padding: 0px 0.2em 0px 0px;">add_box</i><div style="flex: 100 1 0%; white-space: nowrap;">Import Dataset Folders</div><!--v-if--></div></div><!----></div></div></div></div>
-                              </q-item-section>                         
-                          </q-item>
-                          <q-item>
-                              <q-item-section>                                
-                                Dataset files or folders can imported to individual assays.
-                              </q-item-section>                              
-                          </q-item> 
-                   
-                   
-          </q-list>
-</div>
 
- </div>
+        <q-separator inset />
+
+        <div class="text-subtitle1 text-weight-bold">Study / Assay protocols</div>
+        <q-item>
+          <q-item-section>
+            <div class="q-tree q-tree--dense" role="tree" style="padding: 1em;">
+              <div class="q-tree__node-header relative-position row no-wrap items-center " tabindex="0" role="treeitem"
+                aria-expanded="true">
+                <div class="q-focus-helper" tabindex="-1"></div><i
+                  class="q-icon notranslate material-icons q-tree__arrow q-tree__arrow--rotate">play_arrow</i>
+                <div class="q-tree__node-header-content col row no-wrap items-center"><!--v-if-->
+                  <div style="flex: 100 1 0%; white-space: nowrap;">protocols</div><!--v-if-->
+                </div>
+              </div>
+              <div class="q-tree__node-collapsible" style="">
+                <div class="q-tree__children" role="group">
+                  <div class="q-tree__node relative-position q-tree__node--child">
+                    <div class="q-tree__node-header relative-position row no-wrap items-center " tabindex="0"
+                      role="treeitem">
+                      <div class="q-focus-helper" tabindex="-1"></div>
+                      <div class="q-tree__node-header-content col row no-wrap items-center"><i
+                          class="q-icon notranslate material-icons" style="padding: 0px 0.2em 0px 0px;">add_box</i>
+                        <div style="flex: 100 1 0%; white-space: nowrap;">Add Protocol</div><!--v-if-->
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </q-item-section>
+        </q-item>
+        <q-item>
+          <q-item-section>
+            Protocols can be added to individual studies or assays, respectively.
+          </q-item-section>
+        </q-item>
+
+
+        <q-separator inset />
+
+        <div class="text-subtitle1 text-weight-bold">Assay datasets</div>
+        <q-item>
+          <q-item-section>
+            <div class="q-tree q-tree--dense" role="tree" style="padding: 1em;">
+              <div class="q-tree__node-header relative-position row no-wrap items-center " tabindex="0" role="treeitem"
+                aria-expanded="true">
+                <div class="q-focus-helper" tabindex="-1"></div><i
+                  class="q-icon notranslate material-icons q-tree__arrow q-tree__arrow--rotate">play_arrow</i>
+                <div class="q-tree__node-header-content col row no-wrap items-center"><!--v-if-->
+                  <div style="flex: 100 1 0%; white-space: nowrap;">dataset</div><!--v-if-->
+                </div>
+              </div>
+              <div class="q-tree__node-collapsible" style="">
+                <div class="q-tree__children" role="group">
+                  <div class="q-tree__node relative-position q-tree__node--child">
+                    <div class="q-tree__node-header relative-position row no-wrap items-center " tabindex="0"
+                      role="treeitem">
+                      <div class="q-focus-helper" tabindex="-1"></div>
+                      <div class="q-tree__node-header-content col row no-wrap items-center"><i
+                          class="q-icon notranslate material-icons" style="padding: 0px 0.2em 0px 0px;">add_box</i>
+                        <div style="flex: 100 1 0%; white-space: nowrap;">Import Dataset Files</div><!--v-if-->
+                      </div>
+                    </div>
+                  </div>
+                  <div class="q-tree__node relative-position q-tree__node--child">
+                    <div class="q-tree__node-header relative-position row no-wrap items-center " tabindex="0"
+                      role="treeitem">
+                      <div class="q-focus-helper" tabindex="-1"></div>
+                      <div class="q-tree__node-header-content col row no-wrap items-center"><i
+                          class="q-icon notranslate material-icons" style="padding: 0px 0.2em 0px 0px;">add_box</i>
+                        <div style="flex: 100 1 0%; white-space: nowrap;">Import Dataset Folders</div><!--v-if-->
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </q-item-section>
+        </q-item>
+        <q-item>
+          <q-item-section>
+            Dataset files or folders can imported to individual assays.
+          </q-item-section>
+        </q-item>
+
+
+      </q-list>
+    </div>
+
+  </div>
 </template>
 
 
