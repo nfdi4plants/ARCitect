@@ -1,7 +1,12 @@
 <!-- TODO fix button / column design -->
 
+<script setup> 
+import a_input from '../components/a_input.vue';
+import a_btn from '../components/a_btn.vue';
+</script>
+
 <template>
-  <div class="q-pt-sm">
+  <div class="q-pa-xs">
     <h5>Study</h5>
 
     <div class="text-body2 text-justify">
@@ -20,15 +25,10 @@
       </q-item>
     </q-list>
 
-    <q-list class="q-gutter-xs">
-
+    <q-list class="q-gutter-md">
       <q-item class="row">
         <q-item-section class="col">
-          <q-field filled readonly label="Identifier" stack-label>
-            <template v-slot:control>
-              <div class="self-center no-outline">YourStudy</div>
-            </template>
-          </q-field>
+          <a_input label='Identifier' v-model='{_:"YourIdentifier"}._' readonly/>
         </q-item-section>
         <q-item-section class="col">
           The study identifier is automatically added when adding the study to your ARC and cannot be changed.
@@ -37,11 +37,7 @@
 
       <q-item class="row">
         <q-item-section class="col">
-          <q-field filled label="Title" stack-label>
-            <template v-slot:control>
-              <div class="self-center no-outline">Your study title</div>
-            </template>
-          </q-field>
+          <a_input label='Title' v-model='{_:"Your study title"}._' readonly-hidden/>
         </q-item-section>
         <q-item-section class="col">
           Give your study a short title.
@@ -50,7 +46,7 @@
 
       <q-item class="row">
         <q-item-section class="col">
-          <q-field filled label="Description" />
+          <a_input label='Description' readonly-hidden/>
         </q-item-section>
         <q-item-section class="col">
           Add a description about your study.
@@ -59,36 +55,27 @@
 
       <q-item class="row">
         <div class="col">
-          <q-btn label="Delete" icon='delete' color="red-9" />
+          <a_btn label="delete" icon='delete' color="red-9"/>
         </div>
-        <div class="col">
-          Completely delete a study from the ARC.
-        </div>
+        <q-item-section class="col">
+          Completely delete this study from the ARC.
+        </q-item-section>
       </q-item>
 
       <q-item class="row">
         <div class="col">
-          <q-btn label="Reset" icon='change_circle' color="secondary" class="q-ml-sm" />
+          <a_btn label="edit table" icon='edit' color="secondary" />
         </div>
-        <div class="col">
-          Click "reset" to undo your changes.
-        </div>
-      </q-item>
-
-      <q-item class="row">
-        <div class="col">
-          <q-btn label="Update" icon='check_circle' color="secondary" />
-        </div>
-        <div class="col">
-          Once ready, click "update" to store your changes in the ARC.
-        </div>
+        <q-item-section class="col">
+          Edit experimental metdata.
+        </q-item-section>
       </q-item>
     </q-list>
 
     <q-separator inset />
 
     <q-list>
-      <q-item v-ripple>
+      <q-item>
         <q-item-section avatar>
           <q-icon color="grey-8" name="groups" />
         </q-item-section>
@@ -105,11 +92,11 @@
 
       <q-item class="row">
         <div class="col">
-          <q-btn label="add person" icon='person_add_alt_1' color="secondary" />
+          <a_btn label="add person" icon='person_add_alt_1' color="secondary" />
         </div>
-        <div class="col">
-          Click "add person" to add a person
-        </div>
+        <q-item-section class="col">
+          Click to add a person
+        </q-item-section>
       </q-item>
     </q-list>
 
@@ -132,12 +119,12 @@
       </q-item>
 
       <q-item class="row">
-        <div class="col">
-          <q-btn label="add person" icon='bookmark_add' color="secondary" />
-        </div>
-        <div class="col">
-          Click "add person" to add a person
-        </div>
+        <q-item-section class="col">
+          <a_btn label="add person" icon='bookmark_add' color="secondary" />
+        </q-item-section>
+        <q-item-section class="col">
+          Click to add a publication
+        </q-item-section>
       </q-item>
     </q-list>
 
