@@ -8,8 +8,8 @@ let iframe: any | HTMLElement = ref({})
 
 enum Msg {
   Error,
-  AssaySend,
-  StudySend
+  AssayToSwate,
+  StudyToSwate
 }
 
 interface Message {
@@ -54,12 +54,12 @@ const SwateAPI : SwateAPI = {
     if(!ArcControlService.props.arc || !AppProperties.active_assay) return;
     const assay = ArcControlService.props.arc.ISA.TryGetAssay(AppProperties.active_assay);
     if (!assay) return;
-    send(Msg.AssaySend, assay)
+    send(Msg.AssayToSwate, assay)
   },
-  AssayReceive: (assay:ArcAssay) => {
+  AssayToARCitect: (assay:ArcAssay) => {
     ArcControlService.props.arc.ISA.SetAssay(assay.Identifier, assay)
   },
-  StudyReceive: (study:ArcStudy) => {
+  StudyToARCitect: (study:ArcStudy) => {
     ArcControlService.props.arc.ISA.SetStudy(study.Identifier, study)
   },
   Error: (e) => {
