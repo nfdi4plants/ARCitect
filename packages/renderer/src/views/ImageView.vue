@@ -11,9 +11,7 @@ const iProps = reactive({
 
 const init = async ()=>{
   if(!AppProperties.active_image) return;
-
   iProps.image = await window.ipc.invoke('LocalFileSystemService.readImage', AppProperties.active_image);
-  console.log(iProps.image);
 };
 
 onMounted(init);

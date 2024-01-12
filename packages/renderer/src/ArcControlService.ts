@@ -182,7 +182,40 @@ const ArcControlService = {
     if(!requires_update) return;
 
     await ArcControlService.readARC();
+  },
+
+  updateGitIgnore: async (path:string) => {
+    const entry = path.replace(ArcControlService.props.arc_root,'');
+    const ignore_exists = await window.ipc.invoke('LocalFileSystemService.exists', ArcControlService.props.arc_root+'/.gitignore');
+    if(!ignore_exists)
+      await ArcControlService.writeARC();
+
+    const ignore_string = await window.ipc.invoke('LocalFileSystemService.readFile', ArcControlService.props.arc_root+'/.gitignore');
+    const line_delimiter = ignore_string.indexOf('\r\n')<0 ? '\n' : '\r\n';
+    const ignore_entries = ignore_string.split(line_delimiter);
+
+    const entry_index = ignore_entries.indexOf(entry);
+    if(entry_index<0){
+      ignore_entries.push(entry);
+      await window.ipc.invoke('GitService.run', {
+        args: ['reset', '.'+entry],
+        cwd: ArcControlService.props.arc_root
+      });
+      await window.ipc.invoke('GitService.run', {
+        args: ['rm', '--cached', '.'+entry],
+        cwd: ArcControlService.props.arc_root
+      });
+    } else {
+      ignore_entries.splice(entry_index,1);
+      await window.ipc.invoke('GitService.run', {
+        args: [`add`,'.'+entry],
+        cwd: ArcControlService.props.arc_root
+      });
+    }
+    await window.ipc.invoke('LocalFileSystemService.writeFile', [ArcControlService.props.arc_root+'/.gitignore', ignore_entries.join(line_delimiter)]);
+    AppProperties.force_commit_update++;
   }
+
 };
 
 window.ipc.on('LocalFileSystemService.updatePath', ArcControlService.updateARCfromFS);
