@@ -1,5 +1,159 @@
+<script> 
+import { ref } from 'vue'
+
+import logoURL from '/assets/dpLogo2_w.png';
+
+export default {
+  setup () {
+    
+    return {
+      selectedInv: ref('YourARC'),
+      selectedStudy: ref('YourStudy'),
+      selectedAssay: ref('YourAssay'),
+      ARCtreeInv: [
+        {
+          label: 'YourARC',
+          icon: "edit_square",
+          clickable: false,
+          children: [
+            {label: 'assays', children:[{label: ''}], clickable: false, expandable: false, selectable: false},
+            {label: 'runs', children:[{label: ''}], clickable: false, expandable: false, selectable: false},
+            {label: 'studies', children:[{label: ''}], clickable: false, expandable: false, selectable: false},
+            {label: 'workflows', children:[{label: ''}], clickable: false, expandable: false, selectable: false},
+          ]
+        }
+      ],
+      ARCtreeStudy: [
+        {
+          label: 'YourStudy',
+          icon: "edit_square",
+          clickable: false,
+          children: [
+            {label: 'protocols', children:[{label: ''}], clickable: false, expandable: false, selectable: false},
+            {label: 'resources', children:[{label: ''}], clickable: false, expandable: false, selectable: false},
+            {label: 'README.md', icon: "edit_square", clickable: false, expandable: false, selectable: false},
+          ]
+        }],
+      ARCtreeAssay: [
+        {
+          label: 'YourAssay',
+          icon: "edit_square",
+          clickable: false,
+          children: [
+            {label: 'protocols', children:[{label: ''}], clickable: false, expandable: false, selectable: false},
+            {label: 'resources', children:[{label: ''}], clickable: false, expandable: false, selectable: false},
+            {label: 'README.md', icon: "edit_square", clickable: false, expandable: false, selectable: false},
+          ]
+        }],
+        addStudies: [
+        {
+          label: 'studies',
+          clickable: false,
+          children: [
+            {label: 'Add Study', icon: "add_box", clickable: false, expandable: false, selectable: false}
+          ]
+        }],
+        addProtocols: [
+        {
+          label: 'protocols',
+          clickable: false,
+          children: [
+            {label: 'Add Protocol', icon: "add_box", clickable: false, expandable: false, selectable: false}
+          ]
+        }],
+        addAssays: [
+        {
+          label: 'assays',
+          clickable: false,
+          children: [
+            {label: 'Add Assay', icon: "add_box", clickable: false, expandable: false, selectable: false}
+          ]
+        }],
+        importDatasets: [
+        {
+          label: 'dataset',
+          clickable: false,
+          children: [
+            {label: 'Import Dataset Files', icon: "add_box", clickable: false, expandable: false, selectable: false},
+            {label: 'Import Dataset Folders', icon: "add_box", clickable: false, expandable: false, selectable: false}
+          ]
+        }]
+    }
+  }
+}
+</script>
+
 
 <template>
+
+    <div class="q-pa-md q-gutter-sm" style="padding:1em;">
+    
+      <q-tree
+      :nodes="ARCtreeInv"
+      node-key="label"
+      dense
+      default-expand-all
+      />
+      
+      <q-tree
+      :nodes="ARCtreeInv"
+      node-key="label"
+      dense
+      selected-color='white'
+      v-model:selected="selectedInv"
+      default-expand-all
+      />
+
+      <q-tree
+      :nodes="addStudies"
+      node-key="label"
+      dense
+      default-expand-all
+      />
+    
+      <q-tree
+      :nodes="ARCtreeStudy"
+      node-key="label"
+      dense
+      selected-color='white'
+      v-model:selected="selectedStudy"
+      default-expand-all
+      />
+
+      <q-tree
+      :nodes="addAssays"
+      node-key="label"
+      dense
+      default-expand-all
+      />
+    
+      <q-tree
+      :nodes="ARCtreeAssay"
+      node-key="label"
+      dense
+      selected-color='white'
+      v-model:selected="selectedAssay"
+      default-expand-all
+      />
+
+      <q-tree
+      :nodes="addProtocols"
+      node-key="label"
+      dense
+      default-expand-all
+      />
+
+      <q-tree
+      :nodes="importDatasets"
+      node-key="label"
+      dense
+      default-expand-all
+      />    
+    
+    </div>
+
+
+
   <div class="q-pa-sm">
     <h5>Help</h5>
 
@@ -11,30 +165,20 @@
     <div class="text-justify">
       <q-list>
         <q-item>
-          <q-item-section class="col">
 
-            <div class="q-item q-item-type row no-wrap bg-primary text-white">
-              <div class="q-item__section column q-item__section--side justify-center q-item__section--avatar">
-                <span class="q-icon" style="font-size: 2.5rem; margin: 0px -0.2em;">
-                  <img src="/assets/dpLogo2_w.png">
-                </span>
-              </div>
-              <div class="q-item__section column q-item__section--main justify-center"
-                style="margin: 0.6em 0px 0px -1.2em;">
-                <div class="q-item__label"><b style="font-size: 2em;">ARC</b><span style="font-size: 1.2em;">itect</span>
-                </div>
-              </div>
-
-            </div>
-
-          </q-item-section>
+          <q-item class='bg-primary text-white' style="padding-top:1em;padding-bottom:1em;">
+            <q-item-section avatar>
+              <q-icon size="2.5rem" style="margin: 0 -0.20em;" :name="'img:'+logoURL"></q-icon>
+            </q-item-section>
+            <q-item-section style="margin:0.6em 0 0 -1.2em">
+              <q-item-label><b style="font-size:2em">ARC</b><span style="font-size:1.2em">itect</span></q-item-label>
+            </q-item-section>
+          </q-item>
 
           <q-separator inset />
 
-          <q-item-section class="col">
-
+          <q-item-section>
             Return to home view
-
           </q-item-section>
         </q-item>
 
@@ -168,6 +312,7 @@
     </div>
 
     <q-separator size=".5em" />
+
 
     <div class="text-h6 text-weight-bold">File tree</div>
     <div class="q-pa-sm text-body2 text-justify">
@@ -961,3 +1106,4 @@ q-tree__node--link
 q-focusable
 q-hoverable
 -->
+
