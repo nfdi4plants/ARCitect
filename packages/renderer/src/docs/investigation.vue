@@ -1,169 +1,112 @@
-<!-- TODO fix add buttons -->
+<!-- TODO fix button / column design -->
+
+<script setup>
+import a_input from '../components/a_input.vue';
+import a_btn from '../components/a_btn.vue';
+</script>
 
 <template>
-  <div>
-  <h5>Investigation</h5>
+  <div class="q-pa-xs">
+    <h5>Investigation</h5>
 
     <div class="text-body2 text-justify">
       In the Investigation menu you can adapt the investigation-level metadata of your ARC.
     </div>
-    <br>
 
     <q-separator inset />
 
-    <div class="q-item row">
-      <div class="q-item__section column q-item__section--side justify-center">
-        <i class="q-icon text-grey-8 material-icons">biotech</i>
-      </div>
-      <div class="q-item__section column justify-center q-item__label">Investigation</div>
-    </div>
+    <q-item>
+      <q-item-section avatar>
+        <q-icon color="grey-8" name="biotech" />
+      </q-item-section>
+      <q-item-section>Investigation</q-item-section>
+    </q-item>
 
-    <div class="q-pt-sm text-justify">
-      <q-list>
-              
-        <q-item>
-          <q-item-section>
-            <label class="q-field row no-wrap items-start q-field--filled q-input q-field--float q-field--dense" style="padding: 0.4em;"><!----><div class="relative-position col self-stretch"><div class="q-field__control relative-position row no-wrap"><div class="col relative-position row no-wrap"><div class="q-field__label absolute">Identifier</div><!----></div></div><!----></div><!----></label>            
-          </q-item-section>
-          <q-item-section>
-            Your ARC's identifier is automatically added based on the name of your ARC and cannot be changed.
-          </q-item-section>
-        </q-item>
-        
-        <q-item>
-          <q-item-section>
-            <label class="q-field row no-wrap items-start q-field--filled q-input q-field--dense" style="padding: 0.4em;"><!----><div class="relative-position col self-stretch"><div class="q-field__control relative-position row no-wrap"><div class="col relative-position row no-wrap"><div class="q-field__label absolute">Title</div><!----></div></div><!----></div><!----></label>
-          </q-item-section>
-          <q-item-section>
-            Give your ARC a short title.
-          </q-item-section>
-        </q-item>
-        
-        <q-item>
-          <q-item-section>
-            <label class="q-field row no-wrap items-start q-field--filled q-input q-field--dense" style="padding: 0.4em;"><!----><div class="relative-position col self-stretch"><div class="q-field__control relative-position row no-wrap"><div class="col relative-position row no-wrap"><div class="q-field__label absolute">Description</div><!----></div></div><!----></div><!----></label>
-          </q-item-section>
-          <q-item-section>
-            Add a description about your investigation. This can be the abstract of your publication. 
-          </q-item-section>
-        </q-item>
-           
+    <q-list class="q-gutter-md">
+      <q-item class="row">
+        <q-item-section class="col">
+          <a_input label='Identifier' v-model='{ _: "YourIdentifier" }._' readonly />
+        </q-item-section>
+        <q-item-section class="col">
+          Your ARC's identifier is automatically added based on the name of your ARC and cannot be changed.
+        </q-item-section>
+      </q-item>
 
-        <q-item>
-          <q-item-section>
-            <div class="row">
-              <div class="col">
-                <button class="q-btn q-btn--rectangle bg-secondary text-white">
-                  <div class="col items-center justify-center row"><i class="q-icon on-left material-icons"
-                      role="img">check_circle</i>Update</div>
-                </button>
-              </div>
-              <div class="col">
-                <q-item-section>Once ready, click "update" to store your changes in the ARC.</q-item-section>
-              </div>
-            </div>
-          </q-item-section>
-        </q-item> 
+      <q-item class="row">
+        <q-item-section class="col">
+          <a_input label='Title' v-model='{ _: "Your investigation" }._' readonly-hidden />
+        </q-item-section>
+        <q-item-section class="col">
+          Give your ARC a short title.
+        </q-item-section>
+      </q-item>
 
-        <q-item>
-          <q-item-section>
-            <div class="row">
-              <div class="col">
-                <button class="q-btn q-btn--rectangle bg-secondary text-white">
-                  <div class="col items-center justify-center row"><i class="q-icon on-left material-icons"
-                      role="img">change_circle</i>reset</div>
-                </button>
-              </div>
-              <div class="col">
-                <q-item-section>Click "reset" to undo your changes.</q-item-section>
-              </div>
-            </div>
-          </q-item-section>
-        </q-item>
+      <q-item class="row">
+        <q-item-section class="col">
+          <a_input label='Description' readonly-hidden />
+        </q-item-section>
+        <q-item-section class="col">
+          Add a description about your investigation. This can be the abstract of your publication.
+        </q-item-section>
+      </q-item>
 
+    </q-list>
 
-      </q-list>
-      
-      <br>
     <q-separator inset />
 
-    <div class="q-item row">
-      <div class="q-item__section column q-item__section--side justify-center">
-        <i class="q-icon text-grey-8 material-icons">groups</i>
-      </div>
-      <div class="q-item__section column justify-center q-item__label">People</div>
-    </div>
+    <q-list>
+      <q-item>
+        <q-item-section avatar>
+          <q-icon color="grey-8" name="groups" />
+        </q-item-section>
+        <q-item-section>People</q-item-section>
+      </q-item>
+    </q-list>
 
-    <div class="q-pt-sm text-justify">
-      <q-list>
-        <q-item>
-          <q-item-section>
-            In the people section you can add authors and collaborators of your ARC.
-          </q-item-section>
-       </q-item>
+    <q-list>
+      <q-item>
+        <q-item-section>
+          In the people section you can add authors and collaborators of the investigation.
+        </q-item-section>
+      </q-item>
 
-        <q-item>
-          <q-item-section>
-            <div class="row">
-              <div class="col">
-                <button class="q-btn q-btn--rectangle bg-secondary text-white">
-                  <div class="col items-center justify-center row"><i class="q-icon on-left material-icons"
-                      role="img">person_add_alt_1</i>add person</div>
-                </button>
-              </div>
+      <q-item class="row">
+        <div class="col">
+          <a_btn label="add person" icon='person_add_alt_1' color="secondary" />
+        </div>
+        <q-item-section class="col">
+          Click to add a person
+        </q-item-section>
+      </q-item>
+    </q-list>
 
-                <q-item-section>Click "add person" to add a new person</q-item-section>
-
-            </div>
-          </q-item-section>
-        </q-item>
-
-
-      </q-list>
-      
-      <br>
     <q-separator inset />
 
-    <div class="q-item row">
-      <div class="q-item__section column q-item__section--side justify-center">
-        <i class="q-icon text-grey-8 material-icons">menu_book</i>
-      </div>
-      <div class="q-item__section column justify-center q-item__label">Publications</div>
-    </div>
+    <q-list>
+      <q-item v-ripple>
+        <q-item-section avatar>
+          <q-icon color="grey-8" name="menu_book" />
+        </q-item-section>
+        <q-item-section>Publications</q-item-section>
+      </q-item>
+    </q-list>
 
-    <div class="q-pt-sm text-justify">
-      <q-list>
-        <q-item>
-          <q-item-section>
-            In the people section you can add publications to your ARC.
-          </q-item-section>
-       </q-item>
+    <q-list>
+      <q-item>
+        <q-item-section>
+          In the publications section you can add publications to the investigation.
+        </q-item-section>
+      </q-item>
 
-        <q-item>
-          <q-item-section>
-            <div class="row">
-              <div class="col">
-                <button class="q-btn q-btn--rectangle bg-secondary text-white">
-                  <div class="col items-center justify-center row"><i class="q-icon on-left material-icons"
-                      role="img">bookmark_add</i>add pub</div>
-                </button>
-              </div>
+      <q-item class="row">
+        <q-item-section class="col">
+          <a_btn label="add publication" icon='bookmark_add' color="secondary" />
+        </q-item-section>
+        <q-item-section class="col">
+          Click to add a publication
+        </q-item-section>
+      </q-item>
+    </q-list>
 
-                <q-item-section>Click "add publication" to add a new publication</q-item-section>
-
-            </div>
-          </q-item-section>
-        </q-item>
-
-
-      </q-list>
-      </div>
-</div>
-</div>
-</div>
-
-
+  </div>
 </template>
-
-
-

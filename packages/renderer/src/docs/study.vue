@@ -12,7 +12,6 @@ import a_btn from '../components/a_btn.vue';
     <div class="text-body2 text-justify">
       In the Study menu you can adapt the metadata of one study added to your ARC.
     </div>
-    <br>
 
     <q-separator inset />
 
@@ -118,7 +117,7 @@ import a_btn from '../components/a_btn.vue';
 
       <q-item class="row">
         <q-item-section class="col">
-          <a_btn label="add person" icon='bookmark_add' color="secondary" />
+          <a_btn label="add publication" icon='bookmark_add' color="secondary" />
         </q-item-section>
         <q-item-section class="col">
           Click to add a publication
