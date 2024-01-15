@@ -138,7 +138,7 @@ export default {
             </q-item-section>
             <q-item-section style="margin-left: -1.2em;">Login</q-item-section>
             <q-item-section>
-              Login to the DataHUB
+              Login to the <a href="https://git.nfdi4plants.org/" target="_blank">DataHUB</a>
             </q-item-section>
           </q-item>
 
@@ -174,7 +174,7 @@ export default {
               Download ARC
             </q-item-section>
             <q-item-section>
-              Download an ARC from the DataHUB
+              Download an ARC from the <a href="https://git.nfdi4plants.org/" target="_blank">DataHUB</a>
             </q-item-section>
           </q-item>
 

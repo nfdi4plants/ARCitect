@@ -7,7 +7,7 @@ import a_btn from '../components/a_btn.vue';
   <div>
     <h5>Download ARC</h5>
     <div class="q-pa-sm text-body2 text-justify">
-      In the "Download ARC" menu, you can download ARCs from the DataHUB.
+      In the "Download ARC" menu, you can download ARCs from the <a href="https://git.nfdi4plants.org/" target="_blank">DataHUB</a>.
     </div>
 
     <div class="q-pt-sm text-justify" style="background-color: white;">
@@ -45,7 +45,7 @@ import a_btn from '../components/a_btn.vue';
             </q-field>
           </q-item-section>
           <q-item-section class="col">
-            Select a DataHUB host from the dropdown menu.
+            Select a <a href="https://git.nfdi4plants.org/" target="_blank">DataHUB</a> host from the dropdown menu.
           </q-item-section>
         </q-item>
 
@@ -69,7 +69,7 @@ import a_btn from '../components/a_btn.vue';
             <a_btn icon='search' />
           </div>
           <q-item-section class="col">
-            Check out an ARC in the DataHUB (opens a new browser window).
+            Check out an ARC in the <a href="https://git.nfdi4plants.org/" target="_blank">DataHUB</a> (opens a new browser window).
           </q-item-section>
         </q-item>
 
@@ -78,7 +78,7 @@ import a_btn from '../components/a_btn.vue';
             <a_btn icon='file_download' />
           </div>
           <q-item-section class="col">
-            Download (pull) the selected ARC from the DataHUB.
+            Download (pull) the selected ARC from the <a href="https://git.nfdi4plants.org/" target="_blank">DataHUB</a>.
           </q-item-section>
         </q-item>
 

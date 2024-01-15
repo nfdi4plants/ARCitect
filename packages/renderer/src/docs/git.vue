@@ -32,8 +32,8 @@ import a_btn from '../components/a_btn.vue';
         <q-item>
           <q-item-section>
             The Commit section allows you to "commit" your changes locally. This saves the changes of your local ARC
-            together with your DataHUB credentials (Name and eMail).
-            <!-- TODO: Link DataHUB-->
+            together with your <a href="https://git.nfdi4plants.org/" target="_blank">DataHUB</a> credentials (Name and eMail).
+            <!-- TODO: Link <a href="https://git.nfdi4plants.org/" target="_blank">DataHUB</a>-->
           </q-item-section>
         </q-item>
 
@@ -43,8 +43,8 @@ import a_btn from '../components/a_btn.vue';
             <a_input label='eMail' v-model='{ _: " " }._' readonly-hidden />
           </q-item-section>
           <q-item-section class="col">
-            Once logged in to the DataHUB your Name and eMail address are automatically filled out.
-            <!-- TODO: Link DataHUB-->
+            Once logged in to the <a href="https://git.nfdi4plants.org/" target="_blank">DataHUB</a> your Name and eMail address are automatically filled out.
+            <!-- TODO: Link <a href="https://git.nfdi4plants.org/" target="_blank">DataHUB</a>-->
           </q-item-section>
         </q-item>
 
@@ -142,8 +142,8 @@ import a_btn from '../components/a_btn.vue';
       <q-list>
         <q-item>
           <q-item-section>
-            The Push / Pull section allows you to synchronize your ARC with the DataHUB.
-            <!-- TODO: Link DataHUB-->
+            The Push / Pull section allows you to synchronize your ARC with the <a href="https://git.nfdi4plants.org/" target="_blank">DataHUB</a>.
+            <!-- TODO: Link <a href="https://git.nfdi4plants.org/" target="_blank">DataHUB</a>-->
           </q-item-section>
         </q-item>
 
@@ -171,7 +171,7 @@ import a_btn from '../components/a_btn.vue';
             <a_btn label="push" icon='cloud_upload' color="secondary" />
           </div>
           <q-item-section class="col">
-            Click "PUSH" to upload the current status of your ARC to the DataHUB.
+            Click "PUSH" to upload the current status of your ARC to the <a href="https://git.nfdi4plants.org/" target="_blank">DataHUB</a>.
           </q-item-section>
         </q-item>
 
@@ -180,7 +180,7 @@ import a_btn from '../components/a_btn.vue';
             <a_btn label="pull" icon='cloud_download' color="secondary" />
           </div>
           <q-item-section class="col">
-            Click "PULL" to download the latest stage of your ARC from the DataHUB.
+            Click "PULL" to download the latest stage of your ARC from the <a href="https://git.nfdi4plants.org/" target="_blank">DataHUB</a>.
           </q-item-section>
         </q-item>
 
