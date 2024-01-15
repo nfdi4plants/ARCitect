@@ -16,14 +16,12 @@ import a_btn from '../components/a_btn.vue';
 
     <q-separator inset />
 
-    <q-list>
       <q-item>
         <q-item-section avatar>
           <q-icon color="grey-8" name="biotech" />
         </q-item-section>
         <q-item-section>Study</q-item-section>
       </q-item>
-    </q-list>
 
     <q-list class="q-gutter-md">
       <q-item class="row">
