@@ -83,76 +83,7 @@ export default {
 }
 </script>
 
-
 <template>
-
-    <div class="q-pa-md q-gutter-sm" style="padding:1em;">
-    
-      <q-tree
-      :nodes="ARCtreeInv"
-      node-key="label"
-      dense
-      default-expand-all
-      />
-      
-      <q-tree
-      :nodes="ARCtreeInv"
-      node-key="label"
-      dense
-      selected-color='white'
-      v-model:selected="selectedInv"
-      default-expand-all
-      />
-
-      <q-tree
-      :nodes="addStudies"
-      node-key="label"
-      dense
-      default-expand-all
-      />
-    
-      <q-tree
-      :nodes="ARCtreeStudy"
-      node-key="label"
-      dense
-      selected-color='white'
-      v-model:selected="selectedStudy"
-      default-expand-all
-      />
-
-      <q-tree
-      :nodes="addAssays"
-      node-key="label"
-      dense
-      default-expand-all
-      />
-    
-      <q-tree
-      :nodes="ARCtreeAssay"
-      node-key="label"
-      dense
-      selected-color='white'
-      v-model:selected="selectedAssay"
-      default-expand-all
-      />
-
-      <q-tree
-      :nodes="addProtocols"
-      node-key="label"
-      dense
-      default-expand-all
-      />
-
-      <q-tree
-      :nodes="importDatasets"
-      node-key="label"
-      dense
-      default-expand-all
-      />    
-    
-    </div>
-
-
 
   <div class="q-pa-sm">
     <h5>Help</h5>
@@ -162,8 +93,7 @@ export default {
       Navigate the ARCitect via the sidebar on the left.
     </div>
 
-    <div class="text-justify">
-      <q-list>
+      <q-list class="text-justify">
         <q-item>
 
           <q-item class='bg-primary text-white' style="padding-top:1em;padding-bottom:1em;">
@@ -308,298 +238,17 @@ export default {
         </q-item>
 
       </q-list>
-
-    </div>
+</div>
 
     <q-separator size=".5em" />
-
 
     <div class="text-h6 text-weight-bold">File tree</div>
     <div class="q-pa-sm text-body2 text-justify">
       Access and edit the files in your ARC via the file tree.
     </div>
+    
+    <q-list class="q-pa-md q-gutter-sm">
 
-    <div class="q-pt-sm text-justify">
-      <q-list>
-        <q-item>
-          <q-item-section>
-            <div class="q-tree q-tree--dense" role="tree" style="padding: 1em;">
-              <div class="q-tree__node relative-position q-tree__node--parent">
-                <div class="q-tree__node-header relative-position row no-wrap items-center" tabindex="0" role="treeitem"
-                  aria-expanded="true">
-                  <div class="q-focus-helper" tabindex="-1"></div><i
-                    class="q-icon notranslate material-icons q-tree__arrow q-tree__arrow--rotate">play_arrow</i>
-                  <div class="q-tree__node-header-content col row no-wrap items-center"><i
-                      class="q-icon notranslate material-icons" style="padding: 0px 0.2em 0px 0px;">edit_square</i>
-                    <div style="flex: 100 1 0%; white-space: nowrap;">YourARC</div><!--v-if-->
-                  </div>
-                </div>
-                <div class="q-tree__node-collapsible" style="">
-                  <div class="q-tree__children" role="group">
-                    <div class="q-tree__node relative-position q-tree__node--parent">
-                      <div class="q-tree__node-header relative-position row no-wrap items-center" tabindex="0"
-                        role="treeitem" aria-expanded="false">
-                        <div class="q-focus-helper" tabindex="-1"></div><i
-                          class="q-icon notranslate material-icons q-tree__arrow">play_arrow</i>
-                        <div class="q-tree__node-header-content col row no-wrap items-center"><!--v-if-->
-                          <div style="flex: 100 1 0%; white-space: nowrap;">assays</div><!--v-if-->
-                        </div>
-                      </div>
-                      <div class="q-tree__node-collapsible" style="display: none;">
-                        <div class="q-tree__children" role="group">
-                          <div class="q-tree__node relative-position q-tree__node--parent">
-                            <div class="q-tree__node-header relative-position row no-wrap items-center" tabindex="0"
-                              role="treeitem" aria-expanded="true">
-                              <div class="q-focus-helper" tabindex="-1"></div><i
-                                class="q-icon notranslate material-icons q-tree__arrow q-tree__arrow--rotate">play_arrow</i>
-                              <div class="q-tree__node-header-content col row no-wrap items-center"><i
-                                  class="q-icon notranslate material-icons"
-                                  style="padding: 0px 0.2em 0px 0px;">edit_square</i>
-                                <div style="flex: 100 1 0%; white-space: nowrap;">rnaseq</div><!--v-if-->
-                              </div>
-                            </div>
-                            <div class="q-tree__node-collapsible" style="">
-                              <div class="q-tree__children" role="group">
-                                <div class="q-tree__node relative-position q-tree__node--parent">
-                                  <div class="q-tree__node-header relative-position row no-wrap items-center" tabindex="0"
-                                    role="treeitem" aria-expanded="true">
-                                    <div class="q-focus-helper" tabindex="-1"></div><i
-                                      class="q-icon notranslate material-icons q-tree__arrow q-tree__arrow--rotate">play_arrow</i>
-                                    <div class="q-tree__node-header-content col row no-wrap items-center"><!--v-if-->
-                                      <div style="flex: 100 1 0%; white-space: nowrap;">dataset</div><!--v-if-->
-                                    </div>
-                                  </div>
-                                  <div class="q-tree__node-collapsible" style="">
-                                    <div class="q-tree__children" role="group">
-                                      <div class="q-tree__node relative-position q-tree__node--child">
-                                        <div class="q-tree__node-header relative-position row no-wrap items-center"
-                                          tabindex="0" role="treeitem">
-                                          <div class="q-focus-helper" tabindex="-1"></div>
-                                          <div class="q-tree__node-header-content col row no-wrap items-center"><i
-                                              class="q-icon notranslate material-icons"
-                                              style="padding: 0px 0.2em 0px 0px;">add_box</i>
-                                            <div style="flex: 100 1 0%; white-space: nowrap;">Import Dataset Files</div>
-                                            <!--v-if-->
-                                          </div>
-                                        </div>
-                                      </div>
-                                      <div class="q-tree__node relative-position q-tree__node--child">
-                                        <div class="q-tree__node-header relative-position row no-wrap items-center"
-                                          tabindex="0" role="treeitem">
-                                          <div class="q-focus-helper" tabindex="-1"></div>
-                                          <div class="q-tree__node-header-content col row no-wrap items-center"><i
-                                              class="q-icon notranslate material-icons"
-                                              style="padding: 0px 0.2em 0px 0px;">add_box</i>
-                                            <div style="flex: 100 1 0%; white-space: nowrap;">Import Dataset Folders</div>
-                                            <!--v-if-->
-                                          </div>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-                                <div class="q-tree__node relative-position q-tree__node--parent">
-                                  <div class="q-tree__node-header relative-position row no-wrap items-center" tabindex="0"
-                                    role="treeitem">
-                                    <div class="q-focus-helper" tabindex="-1"></div><i
-                                      class="q-icon notranslate material-icons q-tree__arrow">play_arrow</i>
-                                    <div class="q-tree__node-header-content col row no-wrap items-center"><!--v-if-->
-                                      <div style="flex: 100 1 0%; white-space: nowrap;">protocols</div><!--v-if-->
-                                    </div>
-                                  </div>
-                                  <div class="q-tree__node-collapsible" style="display: none;">
-                                    <div class="q-tree__children" role="group"></div>
-                                  </div>
-                                </div>
-                                <div class="q-tree__node relative-position q-tree__node--child">
-                                  <div class="q-tree__node-header relative-position row no-wrap items-center" tabindex="0"
-                                    role="treeitem">
-                                    <div class="q-focus-helper" tabindex="-1"></div>
-                                    <div class="q-tree__node-header-content col row no-wrap items-center"><i
-                                        class="q-icon notranslate material-icons"
-                                        style="padding: 0px 0.2em 0px 0px;">edit_square</i>
-                                      <div style="flex: 100 1 0%; white-space: nowrap;">README.md</div>
-                                      <div style="flex: 1 1 0%; white-space: nowrap; margin-left: 1em;">0.00 B</div>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          <div class="q-tree__node relative-position q-tree__node--child">
-                            <div class="q-tree__node-header relative-position row no-wrap items-center" tabindex="0"
-                              role="treeitem">
-                              <div class="q-focus-helper" tabindex="-1"></div>
-                              <div class="q-tree__node-header-content col row no-wrap items-center"><i
-                                  class="q-icon notranslate material-icons"
-                                  style="padding: 0px 0.2em 0px 0px;">add_box</i>
-                                <div style="flex: 100 1 0%; white-space: nowrap;">Add Assay</div><!--v-if-->
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="q-tree__node relative-position q-tree__node--parent">
-                      <div class="q-tree__node-header relative-position row no-wrap items-center" tabindex="0"
-                        role="treeitem">
-                        <div class="q-focus-helper" tabindex="-1"></div><i
-                          class="q-icon notranslate material-icons q-tree__arrow">play_arrow</i>
-                        <div class="q-tree__node-header-content col row no-wrap items-center"><!--v-if-->
-                          <div style="flex: 100 1 0%; white-space: nowrap;">runs</div><!--v-if-->
-                        </div>
-                      </div>
-                      <div class="q-tree__node-collapsible" style="display: none;">
-                        <div class="q-tree__children" role="group"></div>
-                      </div>
-                    </div>
-                    <div class="q-tree__node relative-position q-tree__node--parent">
-                      <div class="q-tree__node-header relative-position row no-wrap items-center" tabindex="0"
-                        role="treeitem" aria-expanded="false">
-                        <div class="q-focus-helper" tabindex="-1"></div><i
-                          class="q-icon notranslate material-icons q-tree__arrow">play_arrow</i>
-                        <div class="q-tree__node-header-content col row no-wrap items-center"><!--v-if-->
-                          <div style="flex: 100 1 0%; white-space: nowrap;">studies</div><!--v-if-->
-                        </div>
-                      </div>
-                      <div class="q-tree__node-collapsible" style="display: none;">
-                        <div class="q-tree__children" role="group">
-                          <div class="q-tree__node relative-position q-tree__node--parent">
-                            <div class="q-tree__node-header relative-position row no-wrap items-center" tabindex="0"
-                              role="treeitem" aria-expanded="true">
-                              <div class="q-focus-helper" tabindex="-1"></div><i
-                                class="q-icon notranslate material-icons q-tree__arrow q-tree__arrow--rotate">play_arrow</i>
-                              <div class="q-tree__node-header-content col row no-wrap items-center"><i
-                                  class="q-icon notranslate material-icons"
-                                  style="padding: 0px 0.2em 0px 0px;">edit_square</i>
-                                <div style="flex: 100 1 0%; white-space: nowrap;">plants samples</div><!--v-if-->
-                              </div>
-                            </div>
-                            <div class="q-tree__node-collapsible" style="">
-                              <div class="q-tree__children" role="group">
-                                <div class="q-tree__node relative-position q-tree__node--parent">
-                                  <div class="q-tree__node-header relative-position row no-wrap items-center" tabindex="0"
-                                    role="treeitem" aria-expanded="true">
-                                    <div class="q-focus-helper" tabindex="-1"></div><i
-                                      class="q-icon notranslate material-icons q-tree__arrow q-tree__arrow--rotate">play_arrow</i>
-                                    <div class="q-tree__node-header-content col row no-wrap items-center"><!--v-if-->
-                                      <div style="flex: 100 1 0%; white-space: nowrap;">protocols</div><!--v-if-->
-                                    </div>
-                                  </div>
-                                  <div class="q-tree__node-collapsible" style="">
-                                    <div class="q-tree__children" role="group">
-                                      <div class="q-tree__node relative-position q-tree__node--child">
-                                        <div class="q-tree__node-header relative-position row no-wrap items-center"
-                                          tabindex="0" role="treeitem">
-                                          <div class="q-focus-helper" tabindex="-1"></div>
-                                          <div class="q-tree__node-header-content col row no-wrap items-center"><i
-                                              class="q-icon notranslate material-icons"
-                                              style="padding: 0px 0.2em 0px 0px;">add_box</i>
-                                            <div style="flex: 100 1 0%; white-space: nowrap;">Add Protocol</div>
-                                            <!--v-if-->
-                                          </div>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-                                <div class="q-tree__node relative-position q-tree__node--parent">
-                                  <div class="q-tree__node-header relative-position row no-wrap items-center" tabindex="0"
-                                    role="treeitem" aria-expanded="false">
-                                    <div class="q-focus-helper" tabindex="-1"></div><i
-                                      class="q-icon notranslate material-icons q-tree__arrow">play_arrow</i>
-                                    <div class="q-tree__node-header-content col row no-wrap items-center"><!--v-if-->
-                                      <div style="flex: 100 1 0%; white-space: nowrap;">resources</div><!--v-if-->
-                                    </div>
-                                  </div>
-                                  <div class="q-tree__node-collapsible" style="display: none;">
-                                    <div class="q-tree__children" role="group">
-                                      <div class="q-tree__node relative-position q-tree__node--child">
-                                        <div class="q-tree__node-header relative-position row no-wrap items-center"
-                                          tabindex="-1" role="treeitem">
-                                          <div class="q-focus-helper" tabindex="-1"></div>
-                                          <div class="q-tree__node-header-content col row no-wrap items-center"><i
-                                              class="q-icon notranslate material-icons"
-                                              style="padding: 0px 0.2em 0px 0px;">block</i>
-                                            <div style="flex: 100 1 0%; white-space: nowrap;">empty</div><!--v-if-->
-                                          </div>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-                                <div class="q-tree__node relative-position q-tree__node--child">
-                                  <div class="q-tree__node-header relative-position row no-wrap items-center" tabindex="0"
-                                    role="treeitem">
-                                    <div class="q-focus-helper" tabindex="-1"></div>
-                                    <div class="q-tree__node-header-content col row no-wrap items-center"><i
-                                        class="q-icon notranslate material-icons"
-                                        style="padding: 0px 0.2em 0px 0px;">edit_square</i>
-                                      <div style="flex: 100 1 0%; white-space: nowrap;">README.md</div>
-                                      <div style="flex: 1 1 0%; white-space: nowrap; margin-left: 1em;">0.00 B</div>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          <div class="q-tree__node relative-position q-tree__node--child">
-                            <div class="q-tree__node-header relative-position row no-wrap items-center" tabindex="0"
-                              role="treeitem">
-                              <div class="q-focus-helper" tabindex="-1"></div>
-                              <div class="q-tree__node-header-content col row no-wrap items-center"><i
-                                  class="q-icon notranslate material-icons"
-                                  style="padding: 0px 0.2em 0px 0px;">add_box</i>
-                                <div style="flex: 100 1 0%; white-space: nowrap;">Add Study</div><!--v-if-->
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="q-tree__node relative-position q-tree__node--parent">
-                      <div class="q-tree__node-header relative-position row no-wrap items-center" tabindex="0"
-                        role="treeitem" aria-expanded="false">
-                        <div class="q-focus-helper" tabindex="-1"></div><i
-                          class="q-icon notranslate material-icons q-tree__arrow">play_arrow</i>
-                        <div class="q-tree__node-header-content col row no-wrap items-center"><!--v-if-->
-                          <div style="flex: 100 1 0%; white-space: nowrap;">workflows</div><!--v-if-->
-                        </div>
-                      </div>
-                      <div class="q-tree__node-collapsible" style="display: none;">
-                        <div class="q-tree__children" role="group">
-                          <div class="q-tree__node relative-position q-tree__node--child">
-                            <div class="q-tree__node-header relative-position row no-wrap items-center" tabindex="0"
-                              role="treeitem">
-                              <div class="q-focus-helper" tabindex="-1"></div>
-                              <div class="q-tree__node-header-content col row no-wrap items-center"><i
-                                  class="q-icon notranslate material-icons"
-                                  style="padding: 0px 0.2em 0px 0px;">add_box</i>
-                                <div style="flex: 100 1 0%; white-space: nowrap;">Import Workflows Files</div><!--v-if-->
-                              </div>
-                            </div>
-                          </div>
-                          <div class="q-tree__node relative-position q-tree__node--child">
-                            <div class="q-tree__node-header relative-position row no-wrap items-center" tabindex="0"
-                              role="treeitem">
-                              <div class="q-focus-helper" tabindex="-1"></div>
-                              <div class="q-tree__node-header-content col row no-wrap items-center"><i
-                                  class="q-icon notranslate material-icons"
-                                  style="padding: 0px 0.2em 0px 0px;">add_box</i>
-                                <div style="flex: 100 1 0%; white-space: nowrap;">Import Workflows Folders</div>
-                                <!--v-if-->
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </q-item-section>
-        </q-item>
         <q-item>
           <q-item-section>
             The root of your ARC by default contains the folders: studies - assays - workflows - runs
@@ -608,170 +257,15 @@ export default {
 
         <q-separator inset />
 
+        <q-tree
+      :nodes="ARCtreeInv"
+      node-key="label"
+      dense
+      default-expand-all
+      />
+      
         <div class="text-subtitle1 text-weight-bold">Investigation</div>
 
-        <q-item>
-          <q-item-section>
-            <div class="q-tree q-tree--dense" role="tree" style="padding: 1em;">
-              <div class="q-tree__node relative-position q-tree__node--parent">
-                <div class="q-tree__node-header relative-position row no-wrap items-center  q-tree__node--selected"
-                  tabindex="0" role="treeitem" aria-expanded="true">
-                  <div class="q-focus-helper" tabindex="-1"></div><i
-                    class="q-icon notranslate material-icons q-tree__arrow q-tree__arrow--rotate">play_arrow</i>
-                  <div class="q-tree__node-header-content col row no-wrap items-center text-white"><i
-                      class="q-icon notranslate material-icons" style="padding: 0px 0.2em 0px 0px;">edit_square</i>
-                    <div style="flex: 100 1 0%; white-space: nowrap;">YourARC</div><!--v-if-->
-                  </div>
-                </div>
-                <div class="q-tree__node-collapsible" style="">
-                  <div class="q-tree__children" role="group">
-                    <div class="q-tree__node relative-position q-tree__node--parent">
-                      <div class="q-tree__node-header relative-position row no-wrap items-center   " tabindex="0"
-                        role="treeitem" aria-expanded="false">
-                        <div class="q-focus-helper" tabindex="-1"></div><i
-                          class="q-icon notranslate material-icons q-tree__arrow">play_arrow</i>
-                        <div class="q-tree__node-header-content col row no-wrap items-center"><!--v-if-->
-                          <div style="flex: 100 1 0%; white-space: nowrap;">assays</div><!--v-if-->
-                        </div>
-                      </div>
-                      <div class="q-tree__node-collapsible" style="display: none;">
-                        <div class="q-tree__children" role="group">
-                          <div class="q-tree__node relative-position q-tree__node--parent">
-                            <div class="q-tree__node-header relative-position row no-wrap items-center   " tabindex="0"
-                              role="treeitem" aria-expanded="false">
-                              <div class="q-focus-helper" tabindex="-1"></div><i
-                                class="q-icon notranslate material-icons q-tree__arrow">play_arrow</i>
-                              <div class="q-tree__node-header-content col row no-wrap items-center"><i
-                                  class="q-icon notranslate material-icons"
-                                  style="padding: 0px 0.2em 0px 0px;">edit_square</i>
-                                <div style="flex: 100 1 0%; white-space: nowrap;">rnaseq</div><!--v-if-->
-                              </div>
-                            </div>
-                            <div class="q-tree__node-collapsible" style="display: none;">
-                              <div class="q-tree__children" role="group">
-                                <div class="q-tree__node relative-position q-tree__node--parent">
-                                  <div class="q-tree__node-header relative-position row no-wrap items-center   "
-                                    tabindex="0" role="treeitem">
-                                    <div class="q-focus-helper" tabindex="-1"></div><i
-                                      class="q-icon notranslate material-icons q-tree__arrow">play_arrow</i>
-                                    <div class="q-tree__node-header-content col row no-wrap items-center"><!--v-if-->
-                                      <div style="flex: 100 1 0%; white-space: nowrap;">dataset</div><!--v-if-->
-                                    </div>
-                                  </div>
-                                  <div class="q-tree__node-collapsible" style="display: none;">
-                                    <div class="q-tree__children" role="group"></div>
-                                  </div>
-                                </div>
-                                <div class="q-tree__node relative-position q-tree__node--parent">
-                                  <div class="q-tree__node-header relative-position row no-wrap items-center   "
-                                    tabindex="0" role="treeitem">
-                                    <div class="q-focus-helper" tabindex="-1"></div><i
-                                      class="q-icon notranslate material-icons q-tree__arrow">play_arrow</i>
-                                    <div class="q-tree__node-header-content col row no-wrap items-center"><!--v-if-->
-                                      <div style="flex: 100 1 0%; white-space: nowrap;">protocols</div><!--v-if-->
-                                    </div>
-                                  </div>
-                                  <div class="q-tree__node-collapsible" style="display: none;">
-                                    <div class="q-tree__children" role="group"></div>
-                                  </div>
-                                </div>
-                                <div class="q-tree__node relative-position q-tree__node--child">
-                                  <div class="q-tree__node-header relative-position row no-wrap items-center   "
-                                    tabindex="0" role="treeitem">
-                                    <div class="q-focus-helper" tabindex="-1"></div>
-                                    <div class="q-tree__node-header-content col row no-wrap items-center"><i
-                                        class="q-icon notranslate material-icons"
-                                        style="padding: 0px 0.2em 0px 0px;">edit_square</i>
-                                      <div style="flex: 100 1 0%; white-space: nowrap;">README.md</div>
-                                      <div style="flex: 1 1 0%; white-space: nowrap; margin-left: 1em;">0.00 B</div>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          <div class="q-tree__node relative-position q-tree__node--child">
-                            <div class="q-tree__node-header relative-position row no-wrap items-center   " tabindex="0"
-                              role="treeitem">
-                              <div class="q-focus-helper" tabindex="-1"></div>
-                              <div class="q-tree__node-header-content col row no-wrap items-center"><i
-                                  class="q-icon notranslate material-icons"
-                                  style="padding: 0px 0.2em 0px 0px;">add_box</i>
-                                <div style="flex: 100 1 0%; white-space: nowrap;">Add Assay</div><!--v-if-->
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="q-tree__node relative-position q-tree__node--parent">
-                      <div class="q-tree__node-header relative-position row no-wrap items-center   " tabindex="0"
-                        role="treeitem" aria-expanded="false">
-                        <div class="q-focus-helper" tabindex="-1"></div><i
-                          class="q-icon notranslate material-icons q-tree__arrow">play_arrow</i>
-                        <div class="q-tree__node-header-content col row no-wrap items-center"><!--v-if-->
-                          <div style="flex: 100 1 0%; white-space: nowrap;">runs</div><!--v-if-->
-                        </div>
-                      </div>
-                      <div class="q-tree__node-collapsible" style="display: none;">
-                        <div class="q-tree__children" role="group">
-                          <div class="q-tree__node relative-position q-tree__node--child">
-                            <div class="q-tree__node-header relative-position row no-wrap items-center   " tabindex="0"
-                              role="treeitem">
-                              <div class="q-focus-helper" tabindex="-1"></div>
-                              <div class="q-tree__node-header-content col row no-wrap items-center"><i
-                                  class="q-icon notranslate material-icons"
-                                  style="padding: 0px 0.2em 0px 0px;">add_box</i>
-                                <div style="flex: 100 1 0%; white-space: nowrap;">Import Runs Files</div><!--v-if-->
-                              </div>
-                            </div>
-                          </div>
-                          <div class="q-tree__node relative-position q-tree__node--child">
-                            <div class="q-tree__node-header relative-position row no-wrap items-center   " tabindex="0"
-                              role="treeitem">
-                              <div class="q-focus-helper" tabindex="-1"></div>
-                              <div class="q-tree__node-header-content col row no-wrap items-center"><i
-                                  class="q-icon notranslate material-icons"
-                                  style="padding: 0px 0.2em 0px 0px;">add_box</i>
-                                <div style="flex: 100 1 0%; white-space: nowrap;">Import Runs Folders</div><!--v-if-->
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="q-tree__node relative-position q-tree__node--parent">
-                      <div class="q-tree__node-header relative-position row no-wrap items-center   " tabindex="0"
-                        role="treeitem">
-                        <div class="q-focus-helper" tabindex="-1"></div><i
-                          class="q-icon notranslate material-icons q-tree__arrow">play_arrow</i>
-                        <div class="q-tree__node-header-content col row no-wrap items-center"><!--v-if-->
-                          <div style="flex: 100 1 0%; white-space: nowrap;">studies</div><!--v-if-->
-                        </div>
-                      </div>
-                      <div class="q-tree__node-collapsible" style="display: none;">
-                        <div class="q-tree__children" role="group"></div>
-                      </div>
-                    </div>
-                    <div class="q-tree__node relative-position q-tree__node--parent">
-                      <div class="q-tree__node-header relative-position row no-wrap items-center   " tabindex="0"
-                        role="treeitem">
-                        <div class="q-focus-helper" tabindex="-1"></div><i
-                          class="q-icon notranslate material-icons q-tree__arrow">play_arrow</i>
-                        <div class="q-tree__node-header-content col row no-wrap items-center"><!--v-if-->
-                          <div style="flex: 100 1 0%; white-space: nowrap;">workflows</div><!--v-if-->
-                        </div>
-                      </div>
-                      <div class="q-tree__node-collapsible" style="display: none;">
-                        <div class="q-tree__children" role="group"></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </q-item-section>
-        </q-item>
         <q-item>
           <q-item-section>
             Click on your ARC's name to open the "Investigation" menu
@@ -779,118 +273,48 @@ export default {
         </q-item>
 
 
+      <q-tree
+      :nodes="ARCtreeInv"
+      node-key="label"
+      dense
+      selected-color='white'
+      v-model:selected="selectedInv"
+      default-expand-all
+      />
+
         <q-separator inset />
 
         <div class="text-subtitle1 text-weight-bold">Studies</div>
 
         <q-item>
           <q-item-section>
-            <div class="q-tree q-tree--dense" role="tree" style="padding: 1em;">
-              <div class="q-tree__node-header relative-position row no-wrap items-center   " tabindex="0" role="treeitem"
-                aria-expanded="true">
-                <div class="q-focus-helper" tabindex="-1"></div><i
-                  class="q-icon notranslate material-icons q-tree__arrow q-tree__arrow--rotate">play_arrow</i>
-                <div class="q-tree__node-header-content col row no-wrap items-center"><!--v-if-->
-                  <div style="flex: 100 1 0%; white-space: nowrap;">studies</div><!--v-if-->
-                </div>
-              </div>
-              <div class="q-tree__node-collapsible" style="">
-                <div class="q-tree__children" role="group">
-                  <div class="q-tree__node relative-position q-tree__node--child">
-                    <div class="q-tree__node-header relative-position row no-wrap items-center   " tabindex="0"
-                      role="treeitem">
-                      <div class="q-focus-helper" tabindex="-1"></div>
-                      <div class="q-tree__node-header-content col row no-wrap items-center"><i
-                          class="q-icon notranslate material-icons" style="padding: 0px 0.2em 0px 0px;">add_box</i>
-                        <div style="flex: 100 1 0%; white-space: nowrap;">Add Study</div><!--v-if-->
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </q-item-section>
-        </q-item>
-        <q-item>
-          <q-item-section>
             Unfold studies and click "Add Study" to add a new study to your ARC
           </q-item-section>
         </q-item>
 
+      <q-tree
+      :nodes="addStudies"
+      node-key="label"
+      dense
+      default-expand-all
+      />
+
         <q-separator inset />
-        <q-item>
-          <q-item-section>
-            <div class="q-tree q-tree--dense" role="tree" style="padding: 1em;">
-              <div class="q-tree__node relative-position q-tree__node--parent">
-                <div class="q-tree__node-header relative-position row no-wrap items-center  q-tree__node--selected"
-                  tabindex="0" role="treeitem" aria-expanded="true">
-                  <div class="q-focus-helper" tabindex="-1"></div><i
-                    class="q-icon notranslate material-icons q-tree__arrow q-tree__arrow--rotate">play_arrow</i>
-                  <div class="q-tree__node-header-content col row no-wrap items-center text-white"><i
-                      class="q-icon notranslate material-icons" style="padding: 0px 0.2em 0px 0px;">edit_square</i>
-                    <div style="flex: 100 1 0%; white-space: nowrap;">YourStudy</div><!--v-if-->
-                  </div>
-                </div>
-                <div class="q-tree__node-collapsible" style="">
-                  <div class="q-tree__children" role="group">
-                    <div class="q-tree__node relative-position q-tree__node--parent">
-                      <div class="q-tree__node-header relative-position row no-wrap items-center  " tabindex="0"
-                        role="treeitem">
-                        <div class="q-focus-helper" tabindex="-1"></div><i
-                          class="q-icon notranslate material-icons q-tree__arrow">play_arrow</i>
-                        <div class="q-tree__node-header-content col row no-wrap items-center"><!--v-if-->
-                          <div style="flex: 100 1 0%; white-space: nowrap;">protocols</div><!--v-if-->
-                        </div>
-                      </div>
-                      <div class="q-tree__node-collapsible" style="display: none;">
-                        <div class="q-tree__children" role="group"></div>
-                      </div>
-                    </div>
-                    <div class="q-tree__node relative-position q-tree__node--parent">
-                      <div class="q-tree__node-header relative-position row no-wrap items-center   " tabindex="0"
-                        role="treeitem">
-                        <div class="q-focus-helper" tabindex="-1"></div><i
-                          class="q-icon notranslate material-icons q-tree__arrow">play_arrow</i>
-                        <div class="q-tree__node-header-content col row no-wrap items-center"><!--v-if-->
-                          <div style="flex: 100 1 0%; white-space: nowrap;">resources</div><!--v-if-->
-                        </div>
-                      </div>
-                      <div class="q-tree__node-collapsible" style="display: none;">
-                        <div class="q-tree__children" role="group"></div>
-                      </div>
-                    </div>
-                    <div class="q-tree__node relative-position q-tree__node--child">
-                      <div class="q-tree__node-header relative-position row no-wrap items-center   " tabindex="0"
-                        role="treeitem">
-                        <div class="q-focus-helper" tabindex="-1"></div>
-                        <div class="q-tree__node-header-content col row no-wrap items-center"><i
-                            class="q-icon notranslate material-icons" style="padding: 0px 0.2em 0px 0px;">edit_square</i>
-                          <div style="flex: 100 1 0%; white-space: nowrap;">README.md</div>
-                          <div style="flex: 1 1 0%; white-space: nowrap; margin-left: 1em;">0.00 B</div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="q-tree__node relative-position q-tree__node--child">
-                <div class="q-tree__node-header relative-position row no-wrap items-center   " tabindex="0"
-                  role="treeitem">
-                  <div class="q-focus-helper" tabindex="-1"></div>
-                  <div class="q-tree__node-header-content col row no-wrap items-center"><i
-                      class="q-icon notranslate material-icons" style="padding: 0px 0.2em 0px 0px;">add_box</i>
-                    <div style="flex: 100 1 0%; white-space: nowrap;">Add Study</div><!--v-if-->
-                  </div>
-                </div>
-              </div>
-            </div>
-          </q-item-section>
-        </q-item>
+        
         <q-item>
           <q-item-section>
             Click on your study's name to open the "Study" menu
           </q-item-section>
         </q-item>
+
+        <q-tree
+      :nodes="ARCtreeStudy"
+      node-key="label"
+      dense
+      selected-color='white'
+      v-model:selected="selectedStudy"
+      default-expand-all
+      />
 
         <q-separator inset />
 
@@ -898,106 +322,20 @@ export default {
 
         <q-item>
           <q-item-section>
-            <div class="q-tree q-tree--dense" role="tree" style="padding: 1em;">
-              <div class="q-tree__node-header relative-position row no-wrap items-center   " tabindex="0" role="treeitem"
-                aria-expanded="true">
-                <div class="q-focus-helper" tabindex="-1"></div><i
-                  class="q-icon notranslate material-icons q-tree__arrow q-tree__arrow--rotate">play_arrow</i>
-                <div class="q-tree__node-header-content col row no-wrap items-center"><!--v-if-->
-                  <div style="flex: 100 1 0%; white-space: nowrap;">assays</div><!--v-if-->
-                </div>
-              </div>
-              <div class="q-tree__node-collapsible" style="">
-                <div class="q-tree__children" role="group">
-                  <div class="q-tree__node relative-position q-tree__node--child">
-                    <div class="q-tree__node-header relative-position row no-wrap items-center   " tabindex="0"
-                      role="treeitem">
-                      <div class="q-focus-helper" tabindex="-1"></div>
-                      <div class="q-tree__node-header-content col row no-wrap items-center"><i
-                          class="q-icon notranslate material-icons" style="padding: 0px 0.2em 0px 0px;">add_box</i>
-                        <div style="flex: 100 1 0%; white-space: nowrap;">Add Assay</div><!--v-if-->
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </q-item-section>
-        </q-item>
-        <q-item>
-          <q-item-section>
             Unfold assays and click "Add Assay" to add a new assay to your ARC
           </q-item-section>
-        </q-item>
+        </q-item>   
+      
+
+      <q-tree
+      :nodes="addAssays"
+      node-key="label"
+      dense
+      default-expand-all
+      />
 
         <q-separator inset />
-        <q-item>
-          <q-item-section>
-            <div class="q-tree q-tree--dense" role="tree" style="padding: 1em;">
-              <div class="q-tree__node relative-position q-tree__node--parent">
-                <div class="q-tree__node-header relative-position row no-wrap items-center q-tree__node--selected"
-                  tabindex="0" role="treeitem" aria-expanded="true">
-                  <div class="q-focus-helper" tabindex="-1"></div><i
-                    class="q-icon notranslate material-icons q-tree__arrow q-tree__arrow--rotate">play_arrow</i>
-                  <div class="q-tree__node-header-content col row no-wrap items-center text-white"><i
-                      class="q-icon notranslate material-icons" style="padding: 0px 0.2em 0px 0px;">edit_square</i>
-                    <div style="flex: 100 1 0%; white-space: nowrap;">YourAssay</div><!--v-if-->
-                  </div>
-                </div>
-                <div class="q-tree__node-collapsible" style="">
-                  <div class="q-tree__children" role="group">
-                    <div class="q-tree__node relative-position q-tree__node--parent">
-                      <div class="q-tree__node-header relative-position row no-wrap items-center" tabindex="0"
-                        role="treeitem">
-                        <div class="q-focus-helper" tabindex="-1"></div><i
-                          class="q-icon notranslate material-icons q-tree__arrow">play_arrow</i>
-                        <div class="q-tree__node-header-content col row no-wrap items-center"><!--v-if-->
-                          <div style="flex: 100 1 0%; white-space: nowrap;">dataset</div><!--v-if-->
-                        </div>
-                      </div>
-                      <div class="q-tree__node-collapsible" style="display: none;">
-                        <div class="q-tree__children" role="group"></div>
-                      </div>
-                    </div>
-                    <div class="q-tree__node relative-position q-tree__node--parent">
-                      <div class="q-tree__node-header relative-position row no-wrap items-center " tabindex="0"
-                        role="treeitem">
-                        <div class="q-focus-helper" tabindex="-1"></div><i
-                          class="q-icon notranslate material-icons q-tree__arrow">play_arrow</i>
-                        <div class="q-tree__node-header-content col row no-wrap items-center"><!--v-if-->
-                          <div style="flex: 100 1 0%; white-space: nowrap;">protocols</div><!--v-if-->
-                        </div>
-                      </div>
-                      <div class="q-tree__node-collapsible" style="display: none;">
-                        <div class="q-tree__children" role="group"></div>
-                      </div>
-                    </div>
-                    <div class="q-tree__node relative-position q-tree__node--child">
-                      <div class="q-tree__node-header relative-position row no-wrap items-center " tabindex="0"
-                        role="treeitem">
-                        <div class="q-focus-helper" tabindex="-1"></div>
-                        <div class="q-tree__node-header-content col row no-wrap items-center"><i
-                            class="q-icon notranslate material-icons" style="padding: 0px 0.2em 0px 0px;">edit_square</i>
-                          <div style="flex: 100 1 0%; white-space: nowrap;">README.md</div>
-                          <div style="flex: 1 1 0%; white-space: nowrap; margin-left: 1em;">0.00 B</div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="q-tree__node relative-position q-tree__node--child">
-                <div class="q-tree__node-header relative-position row no-wrap items-center " tabindex="0" role="treeitem">
-                  <div class="q-focus-helper" tabindex="-1"></div>
-                  <div class="q-tree__node-header-content col row no-wrap items-center"><i
-                      class="q-icon notranslate material-icons" style="padding: 0px 0.2em 0px 0px;">add_box</i>
-                    <div style="flex: 100 1 0%; white-space: nowrap;">Add Assay</div><!--v-if-->
-                  </div>
-                </div>
-              </div>
-            </div>
-          </q-item-section>
-        </q-item>
+
         <q-item>
           <q-item-section>
             Click on your assay's name to open the "Assay" menu
@@ -1005,105 +343,51 @@ export default {
         </q-item>
 
 
+    
+      <q-tree
+      :nodes="ARCtreeAssay"
+      node-key="label"
+      dense
+      selected-color='white'
+      v-model:selected="selectedAssay"
+      default-expand-all
+      />
 
 
         <q-separator inset />
 
-        <div class="text-subtitle1 text-weight-bold">Study / Assay protocols</div>
-        <q-item>
-          <q-item-section>
-            <div class="q-tree q-tree--dense" role="tree" style="padding: 1em;">
-              <div class="q-tree__node-header relative-position row no-wrap items-center " tabindex="0" role="treeitem"
-                aria-expanded="true">
-                <div class="q-focus-helper" tabindex="-1"></div><i
-                  class="q-icon notranslate material-icons q-tree__arrow q-tree__arrow--rotate">play_arrow</i>
-                <div class="q-tree__node-header-content col row no-wrap items-center"><!--v-if-->
-                  <div style="flex: 100 1 0%; white-space: nowrap;">protocols</div><!--v-if-->
-                </div>
-              </div>
-              <div class="q-tree__node-collapsible" style="">
-                <div class="q-tree__children" role="group">
-                  <div class="q-tree__node relative-position q-tree__node--child">
-                    <div class="q-tree__node-header relative-position row no-wrap items-center " tabindex="0"
-                      role="treeitem">
-                      <div class="q-focus-helper" tabindex="-1"></div>
-                      <div class="q-tree__node-header-content col row no-wrap items-center"><i
-                          class="q-icon notranslate material-icons" style="padding: 0px 0.2em 0px 0px;">add_box</i>
-                        <div style="flex: 100 1 0%; white-space: nowrap;">Add Protocol</div><!--v-if-->
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </q-item-section>
-        </q-item>
+        <div class="text-subtitle1 text-weight-bold">Protocols</div>
+
         <q-item>
           <q-item-section>
             Protocols can be added to individual studies or assays, respectively.
           </q-item-section>
         </q-item>
 
+      <q-tree
+      :nodes="addProtocols"
+      node-key="label"
+      dense
+      default-expand-all
+      />
 
         <q-separator inset />
 
-        <div class="text-subtitle1 text-weight-bold">Assay datasets</div>
+        <div class="text-subtitle1 text-weight-bold">Datasets</div>
+
         <q-item>
           <q-item-section>
-            <div class="q-tree q-tree--dense" role="tree" style="padding: 1em;">
-              <div class="q-tree__node-header relative-position row no-wrap items-center " tabindex="0" role="treeitem"
-                aria-expanded="true">
-                <div class="q-focus-helper" tabindex="-1"></div><i
-                  class="q-icon notranslate material-icons q-tree__arrow q-tree__arrow--rotate">play_arrow</i>
-                <div class="q-tree__node-header-content col row no-wrap items-center"><!--v-if-->
-                  <div style="flex: 100 1 0%; white-space: nowrap;">dataset</div><!--v-if-->
-                </div>
-              </div>
-              <div class="q-tree__node-collapsible" style="">
-                <div class="q-tree__children" role="group">
-                  <div class="q-tree__node relative-position q-tree__node--child">
-                    <div class="q-tree__node-header relative-position row no-wrap items-center " tabindex="0"
-                      role="treeitem">
-                      <div class="q-focus-helper" tabindex="-1"></div>
-                      <div class="q-tree__node-header-content col row no-wrap items-center"><i
-                          class="q-icon notranslate material-icons" style="padding: 0px 0.2em 0px 0px;">add_box</i>
-                        <div style="flex: 100 1 0%; white-space: nowrap;">Import Dataset Files</div><!--v-if-->
-                      </div>
-                    </div>
-                  </div>
-                  <div class="q-tree__node relative-position q-tree__node--child">
-                    <div class="q-tree__node-header relative-position row no-wrap items-center " tabindex="0"
-                      role="treeitem">
-                      <div class="q-focus-helper" tabindex="-1"></div>
-                      <div class="q-tree__node-header-content col row no-wrap items-center"><i
-                          class="q-icon notranslate material-icons" style="padding: 0px 0.2em 0px 0px;">add_box</i>
-                        <div style="flex: 100 1 0%; white-space: nowrap;">Import Dataset Folders</div><!--v-if-->
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </q-item-section>
-        </q-item>
-        <q-item>
-          <q-item-section>
-            Dataset files or folders can imported to individual assays.
+            Dataset files or folders can be imported to individual assays.
           </q-item-section>
         </q-item>
 
+      <q-tree
+      :nodes="importDatasets"
+      node-key="label"
+      dense
+      default-expand-all
+      />
 
       </q-list>
-    </div>
 
-  </div>
 </template>
-
-
-
-<!-- TODO: remove these classes to not render elements "actionable"
-q-tree__node--link
-q-focusable
-q-hoverable
--->
-
