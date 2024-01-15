@@ -1,5 +1,3 @@
-<!-- TODO fix button / column design -->
-
 <script setup> 
 import a_input from '../components/a_input.vue';
 import a_btn from '../components/a_btn.vue';

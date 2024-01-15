@@ -188,7 +188,6 @@ export default {
               Save ARC
             </q-item-section>
             <q-item-section>
-              <!-- TODO -->
               Save the ARC locally
             </q-item-section>
           </q-item>
