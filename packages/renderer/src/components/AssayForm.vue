@@ -146,7 +146,7 @@ const updateAssignemnt = ()=>{
 
       <q-card-actions align='right' style="padding:2.1em;">
         <q-btn label="Delete" icon='delete' color="red-9" @click='deleteAssay'/>
-        <!-- <q-btn label="Edit Table" icon='edit' @click='editTable' color="secondary"/> -->
+        <q-btn label="Edit Table" icon='edit' @click='editTable' color="secondary"/>
       </q-card-actions>
     </q-card>
   </ViewItem>

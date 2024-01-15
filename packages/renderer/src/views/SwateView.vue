@@ -4,8 +4,8 @@ import ArcControlService from '../ArcControlService.ts';
 import AppProperties from '../AppProperties.ts';
 import SwateControlService from '../SwateControlService.ts';
 import { ArcAssay, ArcStudy } from '@nfdi4plants/arctrl';
-import { ArcAssay_fromJsonString, ArcAssay_toJsonString } from '@nfdi4plants/arctrl/ISA/ISA.Json/ArcTypes/ArcAssay.js'
-import { ArcStudy_fromJsonString, ArcStudy_toJsonString } from '@nfdi4plants/arctrl/ISA/ISA.Json/ArcTypes/ArcStudy.js'
+import { ArcAssay_fromArcJsonString, ArcAssay_toArcJsonString } from '@nfdi4plants/arctrl/ISA/ISA.Json/ArcTypes/ArcAssay.js'
+import { ArcStudy_fromArcJsonString, ArcStudy_toArcJsonString } from '@nfdi4plants/arctrl/ISA/ISA.Json/ArcTypes/ArcStudy.js'
 
 let iframe: any | HTMLElement = ref({})
 
@@ -37,7 +37,7 @@ const send = (msg: Msg, data: any = null): void => {
   switch (msg) {
     case Msg.AssayToSwate:
       if (data instanceof ArcAssay) {
-        const jsonString = ArcAssay_toJsonString(data);
+        const jsonString = ArcAssay_toArcJsonString(data);
         toSwate({ ArcAssayJsonString: jsonString });
       } else {
         console.error('Invalid data type for Msg.AssayToSwate');
@@ -46,7 +46,7 @@ const send = (msg: Msg, data: any = null): void => {
       break;
     case Msg.StudyToSwate:
       if (data instanceof ArcStudy) {
-        const jsonString = ArcStudy_toJsonString(data);
+        const jsonString = ArcStudy_toArcJsonString(data);
         toSwate({ ArcStudyJsonString: jsonString });
       } else {
         console.error('Invalid data type for Msg.AssayToSwate');
@@ -85,13 +85,13 @@ const SwateAPI: SwateAPI = {
     }
   },
   AssayToARCitect: (assayJsonString: string) => {
-    let assay = ArcAssay_fromJsonString(assayJsonString);
+    let assay = ArcAssay_fromArcJsonString(assayJsonString);
     ArcControlService.props.arc.ISA.SetAssay(assay.Identifier, assay);
   },
   StudyToARCitect: (studyJsonString: string) => {
     /// ignore assays, I am actually not sure why this must be create, but it will be empty. Must talk to Lukas Weil about this.
     /// ~Kevin F. 12.01.2024
-    let [study, assays] = ArcStudy_fromJsonString(studyJsonString);
+    let study = ArcStudy_fromArcJsonString(studyJsonString);
     ArcControlService.props.arc.ISA.SetStudy(study.Identifier, study);
   },
   TriggerSwateClose: () => {
