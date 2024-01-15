@@ -31,7 +31,7 @@ import a_btn from '../components/a_btn.vue';
             <q-checkbox label='LFS' dense readonly-hidden />
           </q-item-section>
           <q-item-section class="col">
-            (Un)check the LFS box to (not) download LFS objects
+            (Un)check the LFS box to (not) download <a href="https://nfdi4plants.org/nfdi4plants.knowledgebase/docs/guides/arc_WorkingWithLargeDataFiles.html" target="_blank">large file storage (LFS)</a> objects
           </q-item-section>
         </q-item>
 
