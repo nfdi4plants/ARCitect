@@ -63,8 +63,8 @@ import a_btn from '../components/a_btn.vue';
             <a_input label='Large File Storage Limit in MB' v-model='{ _: " " }._' readonly-hidden />
           </q-item-section>
           <q-item-section class="col">
-            <!-- You can adapt the <a href="https://nfdi4plants.org/nfdi4plants.knowledgebase/docs/guides/arc_WorkingWithLargeDataFiles.html" target="_blank">large file storage (LFS)</a> Limit as needed. -->
-            You can adapt the large file storage (LFS) Limit as needed.
+            You can adapt the <a href="https://nfdi4plants.org/nfdi4plants.knowledgebase/docs/guides/arc_WorkingWithLargeDataFiles.html" target="_blank">large file storage (LFS)</a> Limit as needed.
+            <!-- You can adapt the large file storage (LFS) Limit as needed. -->
           </q-item-section>
         </q-item>
 
