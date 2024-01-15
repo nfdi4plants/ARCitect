@@ -54,7 +54,7 @@ const autoComplete = async ()=>{
     const pub = await window.ipc.invoke('DataHubService.getPublicationByPubMedID', iProps.publication.PubMedID);
     iProps.loading = false;
     console.log(pub)
-    if(!pub || pub===[]) return iProps.error = 'Unable to find Publication.';
+    if(!pub || pub==[]) return iProps.error = 'Unable to find Publication.';
 
     iProps.publication.Title = pub.title;
     iProps.publication.Authors = pub.author.map(a=>a.given+' '+a.family).join(', ');

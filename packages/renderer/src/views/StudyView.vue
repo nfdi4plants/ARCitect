@@ -4,6 +4,7 @@ import { reactive, onBeforeMount, watch, ref } from 'vue';
 import StudyForm from '../components/StudyForm.vue';
 import PeopleList from '../components/PeopleList.vue';
 import PublicationsList from '../components/PublicationsList.vue';
+import SwateForm from '../components/SwateForm.vue';
 
 import AppProperties from '../AppProperties.ts';
 import ArcControlService from '../ArcControlService.ts';
@@ -19,7 +20,7 @@ const init = async ()=>{
 
   const study = ArcControlService.props.arc.ISA.TryGetStudy(AppProperties.active_study);
   if (!study) return;
-  iProps.study = study
+  iProps.study = study;
   iProps.people = study.Contacts;
   iProps.publications = study.Publications;
 };
@@ -37,5 +38,7 @@ watch( ()=>AppProperties.active_study, init );
     <PeopleList :items='iProps.people' group='sgroup'></PeopleList>
     <q-separator />
     <PublicationsList :items='iProps.publications' group='sgroup'></PublicationsList>
+    <q-separator />
+    <SwateForm :owner='iProps.study' group='agroup'></SwateForm>
   </q-list>
 </template>

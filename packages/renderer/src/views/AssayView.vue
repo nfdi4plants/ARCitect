@@ -3,6 +3,7 @@ import { reactive, watch, onBeforeMount } from 'vue';
 
 import AssayForm from '../components/AssayForm.vue';
 import PeopleList from '../components/PeopleList.vue';
+import SwateForm from '../components/SwateForm.vue';
 
 import ArcControlService from '../ArcControlService.ts';
 import AppProperties from '../AppProperties.ts';
@@ -32,5 +33,7 @@ watch( ()=>AppProperties.active_assay, init );
     <AssayForm :assay='iProps.assay' group="agroup" :defaultOpened='true'></AssayForm>
     <q-separator />
     <PeopleList :items='iProps.people' group='agroup'></PeopleList>
+    <q-separator />
+    <SwateForm :owner='iProps.assay' group='agroup'></SwateForm>
   </q-list>
 </template>
