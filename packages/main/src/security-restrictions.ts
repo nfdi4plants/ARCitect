@@ -28,7 +28,8 @@ const ALLOWED_EXTERNAL_ORIGINS = new Set<`https://${string}`>([
   'https://www.google.com',
   'https://git.nfdi4plants.org',
   'https://gitlab.nfdi4plants.de',
-  'https://gitlab.plantmicrobe.de'
+  'https://gitlab.plantmicrobe.de',
+  'https://swate-alpha.nfdi4plants.org'
 ]);
 
 

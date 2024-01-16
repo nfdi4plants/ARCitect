@@ -105,7 +105,7 @@ const SwateAPI: SwateAPI = {
 
 onMounted(() => {
   window.addEventListener("message", SwateAPI.handleEvent);
-  iframe.value.setAttribute("src", "http://localhost:8080/?is_swatehost=1")
+  iframe.value.setAttribute("src", "https://swate-alpha.nfdi4plants.org?is_swatehost=1")
 });
 
 onUnmounted(() => {
