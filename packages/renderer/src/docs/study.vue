@@ -61,9 +61,9 @@ import a_btn from '../components/a_btn.vue';
         <div class="col">
           <a_btn label="edit table" icon='edit' color="secondary" />
         </div>
-        <q-item-section class="col">
-          Edit experimental metdata.
-        </q-item-section>
+        <div class="col">
+          Edit experimental metadata using <a href="https://nfdi4plants.org/nfdi4plants.knowledgebase/docs/implementation/Swate.html" target="_blank">Swate</a>.
+        </div>
       </q-item>
     </q-list>
 
