@@ -4,13 +4,15 @@ import a_btn from '../components/a_btn.vue';
 </script>
 
 <template>
-  <h5>Download ARC</h5>
-  <div class="text-body2 text-justify">
-    In the "Download ARC" menu, you can download ARCs from the <a href="https://git.nfdi4plants.org/"
-      target="_blank">DataHUB</a>.
-  </div>
+  <div class="q-pt-sm">
+  
+  <h5 style="margin-bottom:0.5em;">Download ARC</h5>
+  <div class="text-body2 text-justify" style="padding-bottom:1em;">
+      In the "Download ARC" menu, you can download ARCs from the <a href="https://git.nfdi4plants.org/"
+        target="_blank">DataHUB</a>.
+    </div>
 
-  <q-card class="q-gutter-xs">
+  <q-card>
 
     <q-card-section>
 
@@ -111,4 +113,5 @@ import a_btn from '../components/a_btn.vue';
 
     </q-card-section>
   </q-card>
+</div>
 </template>

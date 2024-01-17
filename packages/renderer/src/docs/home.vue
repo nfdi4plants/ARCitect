@@ -91,7 +91,7 @@ export default {
 <template>
   <div class="q-pa-sm">
 
-    <h5>Help</h5>
+    <h5 style="margin-bottom:0.5em;">Help</h5>
 
     <div class="q-pa-sm text-body2 text-justify">
       The ARCitect is divided into three panels: sidebar, file tree and main menu.
