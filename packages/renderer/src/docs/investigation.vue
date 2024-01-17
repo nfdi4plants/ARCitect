@@ -21,30 +21,30 @@ import a_btn from '../components/a_btn.vue';
       <q-item-section>Investigation</q-item-section>
     </q-item>
 
-    <q-list class="q-gutter-md">
-      <q-item class="row">
-        <q-item-section class="col">
+    <q-list class="q-gutter-xs">
+      <q-item>
+        <q-item-section>
           <a_input label='Identifier' v-model='{ _: "YourIdentifier" }._' readonly />
         </q-item-section>
-        <q-item-section class="col">
+        <q-item-section>
           Your ARC's identifier is automatically added based on the name of your ARC and cannot be changed.
         </q-item-section>
       </q-item>
 
-      <q-item class="row">
-        <q-item-section class="col">
+      <q-item>
+        <q-item-section>
           <a_input label='Title' v-model='{ _: "Your investigation" }._' readonly-hidden />
         </q-item-section>
-        <q-item-section class="col">
+        <q-item-section>
           Give your ARC a short title.
         </q-item-section>
       </q-item>
 
-      <q-item class="row">
-        <q-item-section class="col">
+      <q-item>
+        <q-item-section>
           <a_input label='Description' readonly-hidden />
         </q-item-section>
-        <q-item-section class="col">
+        <q-item-section>
           Add a description about your investigation. This can be the abstract of your publication.
         </q-item-section>
       </q-item>
@@ -62,18 +62,20 @@ import a_btn from '../components/a_btn.vue';
       </q-item>
     </q-list>
 
-    <q-list>
+    <q-list class="q-gutter-xs">
       <q-item>
         <q-item-section>
           In the people section you can add authors and collaborators of the investigation.
         </q-item-section>
       </q-item>
 
-      <q-item class="row">
-        <div class="col">
-          <a_btn label="add person" icon='person_add_alt_1' color="secondary" />
-        </div>
-        <q-item-section class="col">
+      <q-item>
+        <q-item-section>
+          <div>
+            <a_btn label="add person" icon='person_add_alt_1' color="secondary" />
+          </div>
+        </q-item-section>
+        <q-item-section>
           Click to add a person
         </q-item-section>
       </q-item>
@@ -97,11 +99,13 @@ import a_btn from '../components/a_btn.vue';
         </q-item-section>
       </q-item>
 
-      <q-item class="row">
-        <q-item-section class="col">
-          <a_btn label="add publication" icon='bookmark_add' color="secondary" />
+      <q-item>
+        <q-item-section>
+          <div>
+            <a_btn label="add publication" icon='bookmark_add' color="secondary" />
+          </div>
         </q-item-section>
-        <q-item-section class="col">
+        <q-item-section>
           Click to add a publication
         </q-item-section>
       </q-item>

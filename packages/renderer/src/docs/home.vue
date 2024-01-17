@@ -5,7 +5,7 @@ TODO: fix logo import
 <script lang="ts">
 import { ref } from 'vue'
 
-import logoURL from '/assets/dpLogo2_w.png';  
+import logoURL from '/assets/dpLogo2_w.png';
 
 export default {
   setup() {
@@ -94,9 +94,9 @@ export default {
     <h5>Help</h5>
 
     <div class="q-pa-sm text-body2 text-justify">
-      The ARCitect is divided into three panels: sidebar, file tree and main menu. 
+      The ARCitect is divided into three panels: sidebar, file tree and main menu.
     </div>
-    
+
     <q-tabs v-model="tab" dense class="text-grey" active-color="primary" indicator-color="primary" align="justify"
       narrow-indicator>
       <q-tab name="sidebar" label="Sidebar" />
@@ -271,7 +271,7 @@ export default {
             <q-item-section>
               The root of your ARC by default contains the folders: studies - assays - workflows - runs
             </q-item-section>
-          </q-item>          
+          </q-item>
 
           <q-tree :nodes="ARCtreeInv" node-key="label" dense default-expand-all />
 
