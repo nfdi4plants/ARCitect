@@ -182,7 +182,7 @@ const readDir_ = async (path: string) => {
   };
 
   const isMarkdown = l => {
-    return ['md','txt','py','xml','cwl','json'].some( i=>new RegExp(`\\.${i}$`,'g').test(l.toLowerCase()))
+    return ['md','txt','py','xml','cwl','json','gitignore'].some( i=>new RegExp(`\\.${i}$`,'g').test(l.toLowerCase()))
   }
 
   const isImage = l => {
