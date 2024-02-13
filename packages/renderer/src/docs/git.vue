@@ -1,7 +1,7 @@
-
 <script setup>
-import a_input from '../components/a_input.vue';
-import a_btn from '../components/a_btn.vue';
+import d_input from '../components/d_input.vue';
+import d_btn from '../components/d_btn.vue';
+import d_checkbox from '../components/d_checkbox.vue';
 
 </script>
 
@@ -37,8 +37,8 @@ import a_btn from '../components/a_btn.vue';
 
           <q-item>
             <q-item-section>
-              <a_input label='Name' v-model='{ _: " " }._' readonly-hidden />
-              <a_input label='eMail' v-model='{ _: " " }._' readonly-hidden />
+              <d_input label='Name' value='Jon'/>
+              <d_input label='eMail' value='Doe'/>
             </q-item-section>
             <q-item-section>
               <div>
@@ -50,7 +50,7 @@ import a_btn from '../components/a_btn.vue';
 
           <q-item>
             <q-item-section>
-              <a_input label='Commit Message' readonly-hidden />
+              <d_input label='Commit Message' value='Added Readme'/>
             </q-item-section>
             <q-item-section>
               <div>
@@ -63,7 +63,7 @@ import a_btn from '../components/a_btn.vue';
 
           <q-item>
             <q-item-section>
-              <a_input label='Large File Storage Limit in MB' v-model='{ _: " " }._' readonly-hidden />
+              <d_input label='Large File Storage Limit in MB' value='1' />
             </q-item-section>
             <q-item-section>
               <div>
@@ -116,7 +116,7 @@ import a_btn from '../components/a_btn.vue';
           <q-item>
             <q-item-section>
               <div>
-                <a_btn label="commit" icon='check_circle' color="secondary" />
+                <d_btn label="commit" icon='check_circle' color="secondary" doc />
               </div>
             </q-item-section>
             <q-item-section>
@@ -127,7 +127,7 @@ import a_btn from '../components/a_btn.vue';
           <q-item>
             <q-item-section>
               <div>
-                <a_btn label="reset" icon='change_circle' color="secondary" />
+                <d_btn label="reset" icon='change_circle' color="secondary" />
               </div>
             </q-item-section>
             <q-item-section>
@@ -169,7 +169,7 @@ import a_btn from '../components/a_btn.vue';
 
           <q-item>
             <q-item-section>
-              <q-checkbox label='Use Large File Storage' dense readonly-hidden />
+              <d_checkbox label='Use Large File Storage' />
             </q-item-section>
             <q-item-section>
               <div>
@@ -183,7 +183,7 @@ import a_btn from '../components/a_btn.vue';
           <q-item>
             <q-item-section>
               <div>
-                <a_btn label="push" icon='cloud_upload' color="secondary" />
+                <d_btn label="push" icon='cloud_upload' color="secondary" />
               </div>
             </q-item-section>
             <q-item-section>
@@ -197,7 +197,7 @@ import a_btn from '../components/a_btn.vue';
           <q-item>
             <q-item-section>
               <div>
-                <a_btn label="pull" icon='cloud_download' color="secondary" />
+                <d_btn label="pull" icon='cloud_download' color="secondary" />
               </div>
             </q-item-section>
             <q-item-section>
