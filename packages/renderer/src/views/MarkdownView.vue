@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 
-import { reactive, watch, onMounted } from 'vue';
+import { reactive, watch, onMounted, onUnmounted} from 'vue';
 
 import Markdown from 'vue3-markdown-it';
 import ViewItem from '../components/ViewItem.vue';
@@ -28,11 +28,13 @@ const init = async ()=>{
 };
 
 const save = async ()=>{
+  if(!iProps.property.dirty()) return;
   await window.ipc.invoke('LocalFileSystemService.writeFile', [iProps.path,iProps.text]);
   init();
 };
 
 onMounted(init);
+onUnmounted(save);
 watch( ()=>AppProperties.active_markdown, init );
 
 </script>
