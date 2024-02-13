@@ -135,6 +135,7 @@ export const LocalFileSystemService = {
     listener
       .on('add', path=>updatePath(path,'file_add'))
       .on('unlink', path=>updatePath(path,'file_rm'))
+      .on('change', path=>updatePath(path,'file_ch'))
       .on('addDir', path=>updatePath(path,'dir_add'))
       .on('unlinkDir', path=>updatePath(path,'dir_rm'))
       // .on('all', (event, path) => {
@@ -165,6 +166,7 @@ export const LocalFileSystemService = {
   },
 
   writeFile: async (e,[path,data,options])=>{
+    console.log(path)
     options = options || {encoding:'UTF-8'};
     path = path_to_system(path);
     FS.mkdirSync(PATH.dirname(path),{recursive:true});

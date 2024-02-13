@@ -27,6 +27,7 @@ defineEmits([
 ]);
 
 const processGitStream = async row=>{
+  if(props.state===1) return;
   const last_row = iProps.rows[iProps.rows.length-1];
   const prefix0 = last_row.substring(0,14);
   const prefix1 = row.substring(0,14);

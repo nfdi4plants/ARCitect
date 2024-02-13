@@ -9,7 +9,6 @@ import GitHistory from '../components/GitHistory.vue';
 </script>
 
 <template>
-
   <q-list bordered class="rounded-borders">
     <GitCommitForm></GitCommitForm>
     <q-separator />
@@ -17,6 +16,5 @@ import GitHistory from '../components/GitHistory.vue';
     <q-separator />
     <GitHistory></GitHistory>
   </q-list>
-
 </template>
 

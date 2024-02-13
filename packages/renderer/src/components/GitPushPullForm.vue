@@ -307,6 +307,7 @@ const inspectArc = url =>{
         </div>
         <div class='row'>
           <div class='col'>
+            <a_checkbox v-model='iProps.lfs_pull' label="Use large File Storage" style="float:right;"/>
             <a_checkbox v-model='iProps.lfs_pull' label="Use Large File Storage" style="float:right;"/>
           </div>
         </div>

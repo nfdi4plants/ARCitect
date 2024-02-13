@@ -60,7 +60,7 @@ const { dialogRef, onDialogHide, onDialogOK, onDialogCancel } = useDialogPluginC
       <q-card-actions align="right" style="margin:0 1.5em 1.5em;">
         <a_btn v-if='props.error' color="red-10" icon='warning' :label="iProps.error" no-caps style="margin-right:auto"/>
         <a_btn v-if='props.succ' icon='check_circle' :label="props.succ" no-caps style="margin-right:auto"/>
-        <a_btn :label="props.ok_title" @click="onDialogOK" type='submit' :disabled='!props.error && props.items[props.items.length-1][1]!==1'/>
+        <a_btn :label="props.ok_title" :loading='props.items[props.items.length-1][1]!==1' @click="onDialogOK" type='submit' :disabled='!props.error && props.items[props.items.length-1][1]!==1'/>
         <a_btn v-if='props.cancel_title' :label="props.cancel_title" @click="onDialogCancel" :disabled='props.items[props.items.length-1][1]<1'/>
       </q-card-actions>
     </q-card>

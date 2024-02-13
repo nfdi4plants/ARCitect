@@ -18,6 +18,7 @@ export const GitService = {
     }
 
     const [args,o,resolve] = GitService.queue.pop();
+    console.log(GitService.queue.length, 'git '+args.join(' '));
 
     // console.log('git',args);
 

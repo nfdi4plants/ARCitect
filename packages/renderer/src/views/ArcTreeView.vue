@@ -3,6 +3,7 @@ import { reactive, ref, nextTick, watch, onMounted, onUnmounted, h } from 'vue';
 import ContextMenu from '@imengyu/vue3-context-menu'
 import AppProperties from '../AppProperties';
 import ArcControlService from '../ArcControlService';
+import SwateControlService from '../SwateControlService';
 import {Investigation, Assays, Studies, Workflows, Runs, Dataset, Protocols} from '../ArcControlService';
 import StringDialog from '../dialogs/StringDialog.vue';
 import AddProtocolDialog from '../dialogs/AddProtocolDialog.vue';
@@ -315,11 +316,9 @@ const onSelectionChanged = id =>{
     case formatNodeEditString(Investigation):
       return AppProperties.state=AppProperties.STATES.EDIT_INVESTIGATION;
     case formatNodeEditString(Studies):
-      AppProperties.active_study = n.label;
-      return AppProperties.state=AppProperties.STATES.EDIT_STUDY;
+      return SwateControlService.LoadSwateState(1,n.label);
     case formatNodeEditString(Assays):
-      AppProperties.active_assay = n.label;
-      return AppProperties.state=AppProperties.STATES.EDIT_ASSAY;
+      return SwateControlService.LoadSwateState(0,n.label);
     case formatNodeEditString(Markdown):
       AppProperties.active_markdown = n.id;
       return AppProperties.state=AppProperties.STATES.EDIT_MARKDOWN;
@@ -332,7 +331,7 @@ const onSelectionChanged = id =>{
 };
 
 const updatePath = async ([path,type]) => {
-  if (!arcTree.value)
+  if (!arcTree.value || type==='file_ch')
     return;
 
   const parentPath = path.split('/').slice(0,-1).join('/');

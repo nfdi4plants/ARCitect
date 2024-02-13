@@ -44,6 +44,7 @@ const showUserData = ()=>{
     component: UserDialog,
   }).onOk( async ()=>{
     AppProperties.user = null;
+    AppProperties.state = AppProperties.STATES.HOME;
   });
 }
 

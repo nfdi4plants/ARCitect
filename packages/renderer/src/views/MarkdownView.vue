@@ -67,7 +67,7 @@ watch( ()=>AppProperties.active_markdown, init );
             <FormInput class='toppad' :property='iProps.property' autogrow></FormInput>
             <q-card-actions align='right' style="padding:0.5em 1em;">
               <q-btn label="Save" type="submit" icon='check_circle' color="secondary" @click='save'/>
-              <q-btn label="Reset" type="submit" icon='check_circle' color="secondary" @click='init'/>
+              <q-btn label="Reset" type="submit" icon='refresh' color="secondary" @click='init'/>
             </q-card-actions>
           </q-tab-panel>
 

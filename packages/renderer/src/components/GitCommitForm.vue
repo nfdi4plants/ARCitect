@@ -134,31 +134,12 @@ const commit = async()=>{
     args: ['commit','-m',msg],
     cwd: ArcControlService.props.arc_root
   });
-  dialogProps.succ = 'Commit Complete';
+  // dialogProps.succ = 'Commit Complete';
   dialogProps.items[4][1] = 1;
 };
 
 const isTrackedWithLFS = item=>{
   return item[2]>iProps.lfs_limit;
-};
-
-const getGitUser = async()=>{
-  const response = await window.ipc.invoke('GitService.run', {
-    args: [`config`,`--list`],
-    cwd: ArcControlService.props.arc_root
-  });
-  let name='';
-  let email='';
-  for(let row of response[1].split('\n')){
-    if(row.includes('user.name='))
-      name = row.split('user.name=').pop();
-    else if(row.includes('user.email='))
-      email = row.split('user.email=').pop();
-  }
-  return {
-    name: name,
-    email: email
-  };
 };
 
 const reset = async()=>{
@@ -173,43 +154,46 @@ const reset = async()=>{
   $q.dialog({
     component: GitDialog,
     componentProps: dialogProps
+  }).onOk( async () => {
+    ArcControlService.readARC();
+    init();
   });
 
   const response = await window.ipc.invoke('GitService.run', {
     args: [`reset`,`--hard`],
     cwd: ArcControlService.props.arc_root
   });
-
   dialogProps.state = response[0] ? 1 : 2;
-
-  ArcControlService.readARC();
-  init();
 };
 
 const init = async()=>{
 
+  if(!AppProperties.user)
+    AppProperties.state = AppProperties.STATES.HOME;
+
   iProps.error = '';
   await getStatus();
 
-  let user = null;
-  if(AppProperties.user)
-    user = AppProperties.user;
-  else
-    user = await getGitUser();
-
-  iProps.commit.name = user.name;
-  iProps.commit.email = user.email;
+  iProps.commit.name = AppProperties.user.name;
+  iProps.commit.email = AppProperties.user.email;
   iProps.commit.msg = '';
+};
+
+const filteredGetStatus = ([path,type])=>{
+  console.log('x',path)
+  if(path.startsWith(ArcControlService.props.arc_root+'/.git')) return;
+  console.log(path)
+  getStatus();
 };
 
 onMounted(()=>{
   watch(()=>AppProperties.user, init);
   watch(()=>AppProperties.force_commit_update, init);
-  window.ipc.on('LocalFileSystemService.updatePath', getStatus);
+  window.ipc.on('LocalFileSystemService.updatePath', filteredGetStatus);
   init();
 });
 onUnmounted(()=>{
-  window.ipc.off('LocalFileSystemService.updatePath', getStatus);
+  window.ipc.off('LocalFileSystemService.updatePath', filteredGetStatus);
 });
 
 </script>
@@ -226,16 +210,16 @@ onUnmounted(()=>{
       <q-card-section style="padding-bottom:0;margin-bottom:-1.2em;">
         <div class='row' >
           <div class='col'>
-            <a_input v-model='iProps.commit.name' label="Name"/>
+            <a_input v-model='iProps.commit.name' label="Name" readonly/>
           </div>
           <div class='col'>
-            <a_input v-model='iProps.commit.email' label="eMail"/>
+            <a_input v-model='iProps.commit.email' label="eMail" readonly/>
           </div>
         </div>
 
         <div class='row' >
           <div class='col'>
-            <a_input v-model='iProps.commit.msg' label='Commit Message' type="textarea"/>
+            <a_input v-model='iProps.commit.msg' label='Commit Message' type="textarea" autogrow/>
           </div>
         </div>
 

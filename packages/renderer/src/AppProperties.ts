@@ -2,9 +2,7 @@ import { reactive } from 'vue'
 
 const AppProperties: {
   STATES: any,
-  state: number,
-  active_study: string | null
-  active_assay: string | null
+  state: number
 } = reactive({
   STATES: {
     HOME: 0,
@@ -14,8 +12,6 @@ const AppProperties: {
     OPEN_NEW: 102,
 
     EDIT_INVESTIGATION: 200,
-    EDIT_STUDY: 201,
-    EDIT_ASSAY: 202,
 
     EDIT_SWATE: 203,
 
@@ -31,8 +27,6 @@ const AppProperties: {
   },
   STATES_I: {},
   state: 0,
-  active_study: null,
-  active_assay: null,
 
   user: null,
   path_sep: null,

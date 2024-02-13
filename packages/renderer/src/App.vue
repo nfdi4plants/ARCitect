@@ -141,9 +141,9 @@ const test = async ()=>{
 
           <q-separator />
 
-          <ToolbarButton text='Save ARC' icon='save' requiresARC @clicked='saveLocalArc()'></ToolbarButton>
           <ToolbarButton text='Refresh ARC' icon='refresh' requiresARC @clicked='refreshLocalArc()'></ToolbarButton>
-          <ToolbarButton text='Versioning' icon='mediation' requiresARC @clicked='AppProperties.state=AppProperties.STATES.GIT'></ToolbarButton>
+          <ToolbarButton text='Save ARC' icon='save' requiresARC @clicked='saveLocalArc()'></ToolbarButton>
+          <ToolbarButton text='Upload ARC' icon='cloud_upload' requiresARC requiresUser @clicked='AppProperties.state=AppProperties.STATES.GIT'></ToolbarButton>
           <ToolbarButton text='Explorer' icon='folder_open' requiresARC @clicked='ArcControlService.openArcInExplorer()'></ToolbarButton>
           <q-separator />
 
@@ -209,8 +209,6 @@ const test = async ()=>{
                 <!--<HomeView v-if ='AppProperties.state===AppProperties.STATES.HOME'></HomeView>-->
                 <DataHubView v-if='AppProperties.state===AppProperties.STATES.OPEN_DATAHUB'></DataHubView>
                 <InvestigationView v-else-if='AppProperties.state===AppProperties.STATES.EDIT_INVESTIGATION'></InvestigationView>
-                <AssayView v-else-if='AppProperties.state===AppProperties.STATES.EDIT_ASSAY'></AssayView>
-                <StudyView v-else-if='AppProperties.state===AppProperties.STATES.EDIT_STUDY'></StudyView>
                 <MarkdownView v-else-if='AppProperties.state===AppProperties.STATES.EDIT_MARKDOWN'></MarkdownView>
                 <ImageView v-else-if='AppProperties.state===AppProperties.STATES.EDIT_IMAGE'></ImageView>
                 <GitView v-else-if='AppProperties.state===AppProperties.STATES.GIT'></GitView>

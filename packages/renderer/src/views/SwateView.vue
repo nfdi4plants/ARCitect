@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { onMounted, onUnmounted, ref } from 'vue';
+import { onMounted, onUnmounted, ref, watch } from 'vue';
 import ArcControlService from '../ArcControlService.ts';
 import AppProperties from '../AppProperties.ts';
 import SwateControlService from '../SwateControlService.ts';
@@ -69,19 +69,9 @@ const SwateAPI: SwateAPI = {
   },
   Init: (msg: string) => {
     console.log(msg);
-    switch (SwateControlService.props.SourceState) { 
-      case AppProperties.STATES.EDIT_ASSAY:
-        if (!ArcControlService.props.arc || !AppProperties.active_assay) return;
-        const assay = ArcControlService.props.arc.ISA.TryGetAssay(AppProperties.active_assay);
-        if (!assay) return;
-        send(Msg.AssayToSwate, assay)
-        break;
-      case AppProperties.STATES.EDIT_STUDY:
-      if (!ArcControlService.props.arc || !AppProperties.active_study) return;
-        const study = ArcControlService.props.arc.ISA.TryGetStudy(AppProperties.active_study);
-        if (!study) return;
-        send(Msg.StudyToSwate, study)
-        break;
+    switch(SwateControlService.props.type){
+      case 0: return send(Msg.AssayToSwate, SwateControlService.props.object);
+      case 1: return send(Msg.StudyToSwate, SwateControlService.props.object);
     }
   },
   AssayToARCitect: (assayJsonString: string) => {
@@ -95,7 +85,7 @@ const SwateAPI: SwateAPI = {
     ArcControlService.props.arc.ISA.SetStudy(study.Identifier, study);
   },
   TriggerSwateClose: () => {
-    AppProperties.state=SwateControlService.props.SourceState
+    AppProperties.state=SwateControlService.props.HOME
     SwateControlService.Reset()
   },
   Error: (e) => {
@@ -103,9 +93,14 @@ const SwateAPI: SwateAPI = {
   }
 }
 
+const init = async ()=>{
+  iframe.value.setAttribute("src", "https://swate-alpha.nfdi4plants.org?is_swatehost=1");
+};
+
 onMounted(() => {
   window.addEventListener("message", SwateAPI.handleEvent);
-  iframe.value.setAttribute("src", "https://swate-alpha.nfdi4plants.org?is_swatehost=1")
+  watch(()=>SwateControlService.props.object, init);
+  init();
 });
 
 onUnmounted(() => {
