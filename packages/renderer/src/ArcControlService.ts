@@ -163,7 +163,7 @@ const ArcControlService = {
     await ArcControlService.readARC(path);
 
     await window.ipc.invoke('GitService.run', {
-      args: ['init'],
+      args: ['init','-b','main'],
       cwd: path
     });
   },
