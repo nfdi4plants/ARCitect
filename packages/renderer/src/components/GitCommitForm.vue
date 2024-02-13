@@ -180,9 +180,7 @@ const init = async()=>{
 };
 
 const filteredGetStatus = ([path,type])=>{
-  console.log('x',path)
   if(path.startsWith(ArcControlService.props.arc_root+'/.git')) return;
-  console.log(path)
   getStatus();
 };
 

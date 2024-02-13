@@ -12,19 +12,27 @@ const iProps = reactive({
 const getHistory = async ()=>{
   // get log
   const response = await window.ipc.invoke('GitService.run', {
-    args: [`log`,`--pretty=format:{"ref":"%H", "authorName":"%aN", "authorEmail":"%aE", "ts": "%cI", "title":"%s"},`],
+    args: [`log`,`--pretty=format:%H_$$_%aN_$$_%aE_$$_%cI_$$_%s_$$$_`],
     cwd: ArcControlService.props.arc_root
   });
   if(response[1].startsWith('fatal'))
     return iProps.git_log = [];
 
+  const log = [];
+  const lines = response[1].split('_$$$_');
   const format = x => ('00' + x).slice(-2);
-  const log = JSON.parse('['+response[1].slice(0,-1)+']');
-  for(let l of log){
-    const d = new Date(Date.parse(l.ts))
-    l.ts = `${format(d.getDate())}.${format(d.getMonth()+1)}.${d.getFullYear()} ${format(d.getHours())}:${format(d.getMinutes())}`
+  for(let line of lines){
+    const temp = line.split('_$$_');
+    const d = new Date(Date.parse(temp[3]));
+    log.push({
+      ref: temp[0],
+      authorName: temp[1],
+      authorEmail: temp[2],
+      ts: `${format(d.getDate())}.${format(d.getMonth()+1)}.${d.getFullYear()} ${format(d.getHours())}:${format(d.getMinutes())}`,
+      title: temp[4],
+    });
   }
-  iProps.git_log = log
+  iProps.git_log = log;
 }
 
 </script>
