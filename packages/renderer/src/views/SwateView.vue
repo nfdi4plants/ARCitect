@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { onMounted, onUnmounted, ref, watch } from 'vue';
+import { onMounted, onUnmounted, ref, watch, reactive } from 'vue';
 import ArcControlService from '../ArcControlService.ts';
 import AppProperties from '../AppProperties.ts';
 import SwateControlService from '../SwateControlService.ts';
@@ -8,6 +8,10 @@ import { ArcAssay_fromArcJsonString, ArcAssay_toArcJsonString } from '@nfdi4plan
 import { ArcStudy_fromArcJsonString, ArcStudy_toArcJsonString } from '@nfdi4plants/arctrl/ISA/ISA.Json/ArcTypes/ArcStudy.js'
 
 let iframe: any | HTMLElement = ref({})
+
+const iProps = reactive({
+  loading: false
+});
 
 enum Msg {
   Error,
@@ -70,9 +74,10 @@ const SwateAPI: SwateAPI = {
   Init: (msg: string) => {
     console.log(msg);
     switch(SwateControlService.props.type){
-      case 0: return send(Msg.AssayToSwate, SwateControlService.props.object);
-      case 1: return send(Msg.StudyToSwate, SwateControlService.props.object);
+      case 0: send(Msg.AssayToSwate, SwateControlService.props.object); break;
+      case 1: send(Msg.StudyToSwate, SwateControlService.props.object); break;
     }
+    iProps.loading = false;
   },
   AssayToARCitect: (assayJsonString: string) => {
     let assay = ArcAssay_fromArcJsonString(assayJsonString);
@@ -94,6 +99,7 @@ const SwateAPI: SwateAPI = {
 }
 
 const init = async ()=>{
+  iProps.loading = true;
   iframe.value.setAttribute("src", "https://swate-alpha.nfdi4plants.org?is_swatehost=1");
 };
 
@@ -110,6 +116,24 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <iframe class='fit' style="border: 0; overflow: hidden; margin-bottom: -1em" ref="iframe">
+
+  <Transition>
+    <div>
+      <q-linear-progress size="45px" indeterminate color="primary" class='justify-start' v-show='iProps.loading'/>
+    </div>
+  </Transition>
+  <iframe class='fit' style="border: 0; overflow: hidden; margin-bottom: -1em" ref="iframe" v-show='!iProps.loading'>
   </iframe>
 </template>
+
+<style>
+.v-enter-active,
+.v-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.v-enter-from,
+.v-leave-to {
+  opacity: 0;
+}
+</style>
