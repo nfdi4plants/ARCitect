@@ -122,8 +122,7 @@ const test = async ()=>{
         content-class="column justify-between no-wrap bg-grey-1"
       >
         <q-list class='column' style="height:100%">
-          <q-item v-ripple clickable clas
-          s='bg-primary text-white' @click="showHomeView" style="padding-top:1em;padding-bottom:1em;">
+          <q-item v-ripple clickable class='bg-primary text-white' @click="showHomeView" style="padding-top:1em;padding-bottom:1em;">
             <q-item-section avatar>
               <q-icon size="2.5rem" style="margin: 0 -0.20em;" :name="'img:'+logoURL" @click='showHomeView'></q-icon>
             </q-item-section>

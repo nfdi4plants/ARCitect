@@ -50,6 +50,7 @@ watch( ()=>AppProperties.active_markdown, init );
     >
       <q-card flat>
         <q-tabs
+          v-if='iProps.path.endsWith(".md")'
           v-model="iProps.tab"
           dense
           class="text-grey"
