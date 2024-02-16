@@ -11,13 +11,17 @@ const SwateControlService = {
   }),
   /**
    * This function manages all state changes required to load Swate
-   * @param type object type: 0 assay, 1 study
+   * @param type object type: 0 investigation, 1 study, 2 assay
    * @param identifier object identifier
    */
   LoadSwateState: (type: number, identifier: string) => {
-    const methods = ['TryGetAssay','TryGetStudy'];
+    const methods = [null,'TryGetStudy','TryGetAssay'];
     SwateControlService.props.type = type;
-    SwateControlService.props.object = ArcControlService.props.arc.ISA[methods[type]](identifier);
+    if(type===0){
+      SwateControlService.props.object = ArcControlService.props.arc.ISA;
+    } else {
+      SwateControlService.props.object = ArcControlService.props.arc.ISA[methods[type]](identifier);
+    }
     AppProperties.state = AppProperties.STATES.EDIT_SWATE;
   }
 }

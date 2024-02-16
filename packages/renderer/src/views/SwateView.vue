@@ -3,9 +3,10 @@ import { onMounted, onUnmounted, ref, watch, reactive } from 'vue';
 import ArcControlService from '../ArcControlService.ts';
 import AppProperties from '../AppProperties.ts';
 import SwateControlService from '../SwateControlService.ts';
-import { ArcAssay, ArcStudy } from '@nfdi4plants/arctrl';
+import { ArcInvestigation, ArcAssay, ArcStudy } from '@nfdi4plants/arctrl';
 import { ArcAssay_fromArcJsonString, ArcAssay_toArcJsonString } from '@nfdi4plants/arctrl/ISA/ISA.Json/ArcTypes/ArcAssay.js'
 import { ArcStudy_fromArcJsonString, ArcStudy_toArcJsonString } from '@nfdi4plants/arctrl/ISA/ISA.Json/ArcTypes/ArcStudy.js'
+import { ArcInvestigation_fromArcJsonString, ArcInvestigation_toArcJsonString } from '@nfdi4plants/arctrl/ISA/ISA.Json/ArcTypes/ArcInvestigation.js'
 
 let iframe: any | HTMLElement = ref({})
 
@@ -16,7 +17,8 @@ const iProps = reactive({
 enum Msg {
   Error,
   AssayToSwate,
-  StudyToSwate
+  StudyToSwate,
+  InvestigationToSwate
 }
 
 interface Message {
@@ -39,23 +41,23 @@ const send = (msg: Msg, data: any = null): void => {
     iframe.value.contentWindow?.postMessage(content, '*');
   };
   switch (msg) {
+    case Msg.InvestigationToSwate:
+      if (data instanceof ArcInvestigation) {
+        const jsonString = ArcInvestigation_toArcJsonString(data);
+        toSwate({ ArcInvestigationJsonString: jsonString });
+      } else return console.error('Invalid data type for Msg.InvestigationToSwate');
+      break;
     case Msg.AssayToSwate:
       if (data instanceof ArcAssay) {
         const jsonString = ArcAssay_toArcJsonString(data);
         toSwate({ ArcAssayJsonString: jsonString });
-      } else {
-        console.error('Invalid data type for Msg.AssayToSwate');
-        return;
-      }
+      } else return console.error('Invalid data type for Msg.AssayToSwate');
       break;
     case Msg.StudyToSwate:
       if (data instanceof ArcStudy) {
         const jsonString = ArcStudy_toArcJsonString(data);
         toSwate({ ArcStudyJsonString: jsonString });
-      } else {
-        console.error('Invalid data type for Msg.AssayToSwate');
-        return;
-      }
+      } else return console.error('Invalid data type for Msg.AssayToSwate');
       break;
     default:
       toSwate(data)
@@ -74,10 +76,15 @@ const SwateAPI: SwateAPI = {
   Init: (msg: string) => {
     console.log(msg);
     switch(SwateControlService.props.type){
-      case 0: send(Msg.AssayToSwate, SwateControlService.props.object); break;
+      case 0: send(Msg.InvestigationToSwate, SwateControlService.props.object); break;
       case 1: send(Msg.StudyToSwate, SwateControlService.props.object); break;
+      case 2: send(Msg.AssayToSwate, SwateControlService.props.object); break;
     }
     iProps.loading = false;
+  },
+  InvestigationToARCitect: (investigationJsonString: string) => {
+    let investigation = ArcInvestigation_fromArcJsonString(investigationJsonString);
+    ArcControlService.props.arc.ISA = investigation;
   },
   AssayToARCitect: (assayJsonString: string) => {
     let assay = ArcAssay_fromArcJsonString(assayJsonString);
@@ -99,6 +106,7 @@ const SwateAPI: SwateAPI = {
 }
 
 const init = async ()=>{
+  console.log('init');
   iProps.loading = true;
   iframe.value.setAttribute("src", "https://swate-alpha.nfdi4plants.org?is_swatehost=1");
 };

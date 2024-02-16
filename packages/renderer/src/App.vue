@@ -5,9 +5,9 @@ import ArcTreeView from './views/ArcTreeView.vue';
 
 import HomeView from './views/HomeView.vue';
 
-import InvestigationView from './views/InvestigationView.vue';
-import AssayView from './views/AssayView.vue';
-import StudyView from './views/StudyView.vue';
+// import InvestigationView from './views/InvestigationView.vue';
+// import AssayView from './views/AssayView.vue';
+// import StudyView from './views/StudyView.vue';
 import MarkdownView from './views/MarkdownView.vue';
 import ImageView from './views/ImageView.vue';
 import HelpView from './views/HelpView.vue';
@@ -122,7 +122,8 @@ const test = async ()=>{
         content-class="column justify-between no-wrap bg-grey-1"
       >
         <q-list class='column' style="height:100%">
-          <q-item v-ripple clickable class='bg-primary text-white' @click="showHomeView" style="padding-top:1em;padding-bottom:1em;">
+          <q-item v-ripple clickable clas
+          s='bg-primary text-white' @click="showHomeView" style="padding-top:1em;padding-bottom:1em;">
             <q-item-section avatar>
               <q-icon size="2.5rem" style="margin: 0 -0.20em;" :name="'img:'+logoURL" @click='showHomeView'></q-icon>
             </q-item-section>
@@ -208,7 +209,6 @@ const test = async ()=>{
               <!--<q-scroll-area class='fit' style="height: 100%;">-->
                 <!--<HomeView v-if ='AppProperties.state===AppProperties.STATES.HOME'></HomeView>-->
                 <DataHubView v-if='AppProperties.state===AppProperties.STATES.OPEN_DATAHUB'></DataHubView>
-                <InvestigationView v-else-if='AppProperties.state===AppProperties.STATES.EDIT_INVESTIGATION'></InvestigationView>
                 <MarkdownView v-else-if='AppProperties.state===AppProperties.STATES.EDIT_MARKDOWN'></MarkdownView>
                 <ImageView v-else-if='AppProperties.state===AppProperties.STATES.EDIT_IMAGE'></ImageView>
                 <GitView v-else-if='AppProperties.state===AppProperties.STATES.GIT'></GitView>

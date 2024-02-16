@@ -30,7 +30,8 @@ const ALLOWED_EXTERNAL_ORIGINS = new Set<`https://${string}`>([
   'https://nfdi4plants.org',
   'https://gitlab.nfdi4plants.de',
   'https://gitlab.plantmicrobe.de',
-  'https://swate-alpha.nfdi4plants.org'
+  'https://swate-alpha.nfdi4plants.org',
+  'https://isa-specs.readthedocs.io'
 ]);
 
 

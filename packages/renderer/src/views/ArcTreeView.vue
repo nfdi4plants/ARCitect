@@ -314,11 +314,11 @@ const onSelectionChanged = id =>{
 
   switch (type) {
     case formatNodeEditString(Investigation):
-      return AppProperties.state=AppProperties.STATES.EDIT_INVESTIGATION;
+      return SwateControlService.LoadSwateState(0);
     case formatNodeEditString(Studies):
       return SwateControlService.LoadSwateState(1,n.label);
     case formatNodeEditString(Assays):
-      return SwateControlService.LoadSwateState(0,n.label);
+      return SwateControlService.LoadSwateState(2,n.label);
     case formatNodeEditString(Markdown):
       AppProperties.active_markdown = n.id;
       return AppProperties.state=AppProperties.STATES.EDIT_MARKDOWN;

@@ -11,8 +11,6 @@ const AppProperties: {
     OPEN_DATAHUB: 101,
     OPEN_NEW: 102,
 
-    EDIT_INVESTIGATION: 200,
-
     EDIT_SWATE: 203,
 
     ADD_STUDY: 301,
