@@ -130,7 +130,13 @@ onUnmounted(() => {
       <q-linear-progress size="45px" indeterminate color="primary" class='justify-start' v-show='iProps.loading'/>
     </div>
   </Transition>
-  <iframe class='fit' style="border: 0; overflow: hidden; margin-bottom: -1em" ref="iframe" v-show='!iProps.loading'>
+  <iframe
+    class='fit'
+    style="border: 0; overflow: hidden; margin-bottom: -1em"
+    ref="iframe"
+    v-show='!iProps.loading'
+    allow='clipboard-read;clipboard-write;'
+  >
   </iframe>
 </template>
 

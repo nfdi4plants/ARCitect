@@ -9,6 +9,8 @@ import { Xlsx } from '@fslab/fsspreadsheet/Xlsx.js';
 import {FileSystemTree} from '@nfdi4plants/arctrl/FileSystem/FileSystemTree.js'
 import {Contract} from '@nfdi4plants/arctrl/Contract/Contract.js'
 
+import pDebounce from 'p-debounce';
+
 export const Investigation = "investigation";
 export const Studies = "studies";
 export const Assays = "assays";
@@ -180,8 +182,7 @@ const ArcControlService = {
     // track add/rm assays/studies through file explorer
     const requires_update = path.includes('isa.assay.xlsx') || path.includes('isa.study.xlsx');
     if(!requires_update) return;
-
-    await ArcControlService.readARC();
+    debouncedReadARC();
   },
 
   updateGitIgnore: async (path:string) => {
@@ -215,8 +216,9 @@ const ArcControlService = {
     await window.ipc.invoke('LocalFileSystemService.writeFile', [ArcControlService.props.arc_root+'/.gitignore', ignore_entries.join(line_delimiter)]);
     AppProperties.force_commit_update++;
   }
-
 };
+
+const debouncedReadARC = pDebounce(ArcControlService.readARC, 300);
 
 window.ipc.on('LocalFileSystemService.updatePath', ArcControlService.updateARCfromFS);
 

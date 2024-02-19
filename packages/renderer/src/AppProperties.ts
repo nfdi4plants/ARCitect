@@ -18,7 +18,9 @@ const AppProperties: {
 
     LOGIN: 400,
 
-    GIT: 500,
+    GIT_COMMIT: 501,
+    GIT_SYNC: 502,
+    GIT_HISTORY: 503,
 
     EDIT_MARKDOWN: 600,
     EDIT_IMAGE: 601,

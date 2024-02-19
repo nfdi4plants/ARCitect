@@ -128,6 +128,7 @@ export const LocalFileSystemService = {
     changeListeners.set(path, listener);
 
     const updatePath = (path,type) => {
+      // console.log('------>',path)
       const window = BrowserWindow.getAllWindows().find(w => !w.isDestroyed());
       window?.webContents.send('LocalFileSystemService.updatePath', [path_to_arcitect(path),type]);
     };

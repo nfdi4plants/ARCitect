@@ -66,16 +66,16 @@ app.on('web-contents-created', (_, contents) => {
    *
    * @see https://www.electronjs.org/docs/latest/tutorial/security#5-handle-session-permission-requests-from-remote-content
    */
-  contents.session.setPermissionRequestHandler((webContents, permission, callback) => {
-    const {origin} = new URL(webContents.getURL());
+  // contents.session.setPermissionRequestHandler((webContents, permission, callback) => {
+  //   const {origin} = new URL(webContents.getURL());
 
-    const permissionGranted = !!ALLOWED_ORIGINS_AND_PERMISSIONS.get(origin)?.has(permission);
-    callback(permissionGranted);
+  //   const permissionGranted = !!ALLOWED_ORIGINS_AND_PERMISSIONS.get(origin)?.has(permission);
+  //   callback(permissionGranted);
 
-    if (!permissionGranted && import.meta.env.DEV) {
-      console.warn(`${origin} requested permission for '${permission}', but was blocked.`);
-    }
-  });
+  //   if (!permissionGranted && import.meta.env.DEV) {
+  //     console.warn(`${origin} requested permission for '${permission}', but was blocked.`);
+  //   }
+  // });
 
 
   /**

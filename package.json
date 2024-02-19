@@ -38,6 +38,7 @@
     "fs-extra": "^11.2.0",
     "image-type": "^5.2.0",
     "isomorphic-fetch": "^3.0.0",
+    "p-debounce": "^4.0.0",
     "quasar": "^2.14.2",
     "query-string": "^8.1.0",
     "vue": "^v3.4.5",

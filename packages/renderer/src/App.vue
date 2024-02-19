@@ -5,14 +5,13 @@ import ArcTreeView from './views/ArcTreeView.vue';
 
 import HomeView from './views/HomeView.vue';
 
-// import InvestigationView from './views/InvestigationView.vue';
-// import AssayView from './views/AssayView.vue';
-// import StudyView from './views/StudyView.vue';
 import MarkdownView from './views/MarkdownView.vue';
 import ImageView from './views/ImageView.vue';
 import HelpView from './views/HelpView.vue';
 import LoginView from './views/LoginView.vue';
-import GitView from './views/GitView.vue';
+import GitCommitView from './views/GitCommitView.vue';
+import GitSyncView from './views/GitSyncView.vue';
+import GitHistoryView from './views/GitHistoryView.vue';
 import SwateView from './views/SwateView.vue';
 
 import DataHubView from './views/DataHubView.vue';
@@ -141,10 +140,14 @@ const test = async ()=>{
 
           <q-separator />
 
-          <ToolbarButton text='Refresh ARC' icon='refresh' requiresARC @clicked='refreshLocalArc()'></ToolbarButton>
+          <!--<ToolbarButton text='Refresh ARC' icon='refresh' requiresARC @clicked='refreshLocalArc()'></ToolbarButton>-->
           <ToolbarButton text='Save ARC' icon='save' requiresARC @clicked='saveLocalArc()'></ToolbarButton>
-          <ToolbarButton text='Upload ARC' icon='cloud_upload' requiresARC requiresUser @clicked='AppProperties.state=AppProperties.STATES.GIT'></ToolbarButton>
           <ToolbarButton text='Explorer' icon='folder_open' requiresARC @clicked='ArcControlService.openArcInExplorer()'></ToolbarButton>
+          <q-separator />
+
+          <ToolbarButton text='Commit' icon='verified' requiresARC requiresUser @clicked='AppProperties.state=AppProperties.STATES.GIT_COMMIT'></ToolbarButton>
+          <ToolbarButton text='DataHUB Sync' icon='published_with_changes' requiresARC requiresUser @clicked='AppProperties.state=AppProperties.STATES.GIT_SYNC'></ToolbarButton>
+          <ToolbarButton text='Commit' icon='history' requiresARC requiresUser @clicked='AppProperties.state=AppProperties.STATES.GIT_HISTORY'></ToolbarButton>
           <q-separator />
 
           <q-item class="col-grow"></q-item>
@@ -205,16 +208,14 @@ const test = async ()=>{
                   </q-card-actions>
                 </q-card>
               </q-dialog>
-              <!--<q-scroll-area class='fit' style="height: 100%;">-->
-                <!--<HomeView v-if ='AppProperties.state===AppProperties.STATES.HOME'></HomeView>-->
-                <DataHubView v-if='AppProperties.state===AppProperties.STATES.OPEN_DATAHUB'></DataHubView>
-                <MarkdownView v-else-if='AppProperties.state===AppProperties.STATES.EDIT_MARKDOWN'></MarkdownView>
-                <ImageView v-else-if='AppProperties.state===AppProperties.STATES.EDIT_IMAGE'></ImageView>
-                <GitView v-else-if='AppProperties.state===AppProperties.STATES.GIT'></GitView>
-                <SwateView v-else-if='AppProperties.state===AppProperties.STATES.EDIT_SWATE'></SwateView>
-                <HomeView v-else></HomeView>
-                <!--<div v-else></div>-->
-              <!--</q-scroll-area>-->
+              <DataHubView v-if='AppProperties.state===AppProperties.STATES.OPEN_DATAHUB'></DataHubView>
+              <MarkdownView v-else-if='AppProperties.state===AppProperties.STATES.EDIT_MARKDOWN'></MarkdownView>
+              <ImageView v-else-if='AppProperties.state===AppProperties.STATES.EDIT_IMAGE'></ImageView>
+              <GitCommitView v-else-if='AppProperties.state===AppProperties.STATES.GIT_COMMIT' />
+              <GitSyncView v-else-if='AppProperties.state===AppProperties.STATES.GIT_SYNC' />
+              <GitHistoryView v-else-if='AppProperties.state===AppProperties.STATES.GIT_HISTORY' />
+              <SwateView v-else-if='AppProperties.state===AppProperties.STATES.EDIT_SWATE'></SwateView>
+              <HomeView v-else></HomeView>
             </template>
           </q-splitter>
         </q-page>

@@ -20,8 +20,6 @@ export const GitService = {
     const [args,o,resolve] = GitService.queue.pop();
     console.log(GitService.queue.length, 'git '+args.join(' '));
 
-    // console.log('git',args);
-
     let window = BrowserWindow.getAllWindows().find(w => !w.isDestroyed());
     window.webContents.send('GitService.MSG', 'git '+args.join(' '));
 
