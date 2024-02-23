@@ -108,7 +108,7 @@ const SwateAPI: SwateAPI = {
 const init = async ()=>{
   console.log('init');
   iProps.loading = true;
-  iframe.value.setAttribute("src", "https://swate-alpha.nfdi4plants.org?is_swatehost=1");
+  iframe.value.setAttribute("src", "https://swate-alpha.nfdi4plants.org?is_swatehost=1&random="+SwateControlService.props.cacheNumber);
 };
 
 onMounted(() => {

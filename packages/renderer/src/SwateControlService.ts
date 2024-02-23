@@ -6,6 +6,7 @@ import ArcControlService from './ArcControlService.ts';
 const SwateControlService = {
 
   props: reactive({
+    cacheNumber: Math.random()*1000,
     object: null,
     type: 0,
   }),
