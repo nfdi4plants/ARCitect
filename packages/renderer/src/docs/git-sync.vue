@@ -7,31 +7,19 @@ import d_checkbox from '../components/d_checkbox.vue';
 
 <template>
   <div class="q-py-sm">
-    <h5 style="margin-bottom:0.5em;">DataHUB Sync</h5>
-    <div class="text-body2 text-justify" style="padding-bottom:1em;">
-      Versioning helps you keep track of your ARC's changes. If you are new to the ARC, the <strong>Commit</strong> and <strong>DataHUB Sync</strong>
-      menus are likely a more complex feature of the ARC and ARCitect. Feel free to <a href="https://helpdesk.nfdi4plants.org"
-        target="_blank">contact DataPLANT</a> for data steward support.
-
-    </div>
-
+    <h5 style="margin-bottom:0.5em;">
+      <q-icon color="grey-8" name="published_with_changes" />
+      DataHUB Sync
+    </h5>
+    
     <q-card>
 
-
       <q-card-section>
-<!-- 
-        <q-item>
-          <q-item-section avatar>
-            <q-icon color="grey-8" name="wifi_protected_setup" />
-          </q-item-section>
-          <q-item-section>Push / Pull</q-item-section>
-        </q-item> -->
 
         <q-list class="q-gutter-xs">
           <q-item>
             <div>
-              The Push / Pull section allows you to synchronize your ARC with the <a href="https://git.nfdi4plants.org/"
-                target="_blank">DataHUB</a>
+              Here you can synchronize your ARC with the <a href="https://git.nfdi4plants.org/" target="_blank">DataHUB</a>
             </div>
           </q-item>
 
@@ -118,6 +106,15 @@ import d_checkbox from '../components/d_checkbox.vue';
 
       </q-card-section>
 
+  </q-card>
+
+  <q-card>
+    <q-card-section>
+    <div class="text-body2 text-justify" style="padding-bottom:1em;">
+        Versioning helps you keep track of your ARC's changes. If you are new to the ARC, the <strong>Commit</strong> and <strong>DataHUB Sync</strong>
+        menus are likely a more complex feature of the ARC and ARCitect. Feel free to <a href="https://helpdesk.nfdi4plants.org"
+          target="_blank">contact DataPLANT</a> for data steward support.</div>
+    </q-card-section>
   </q-card>
 
 </div></template>

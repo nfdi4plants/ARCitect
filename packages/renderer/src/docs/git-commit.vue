@@ -7,29 +7,19 @@ import d_checkbox from '../components/d_checkbox.vue';
 
 <template>
   <div class="q-py-sm">
-    <h5 style="margin-bottom:0.5em;">Commit Changes</h5>
-    <div class="text-body2 text-justify" style="padding-bottom:1em;">
-      Versioning helps you keep track of your ARC's changes. If you are new to the ARC, the <strong>Commit</strong> and <strong>DataHUB Sync</strong>
-      menus are likely a more complex feature of the ARC and ARCitect. Feel free to <a href="https://helpdesk.nfdi4plants.org"
-        target="_blank">contact DataPLANT</a> for data steward support.
 
-    </div>
+    <h5 style="margin-bottom:0.5em;"> 
+      <q-icon color="grey-8" name="verified" /> Commit Changes
+    </h5>   
 
     <q-card>
 
       <q-card-section>
 
-        <q-item>
-          <q-item-section avatar>
-            <q-icon color="grey-8" name="verified" />
-          </q-item-section>
-          <q-item-section>Commit</q-item-section>
-        </q-item>
-
         <q-list class="q-gutter-xs">
           <q-item>
             <div>
-              The Commit menu allows you to "commit" your changes locally. This saves the changes of your local ARC
+              This menu allows you to "commit" your changes locally. This saves the changes of your local ARC
               together with your <a href="https://git.nfdi4plants.org/" target="_blank">DataHUB</a> credentials (Name and
               eMail).
             </div>
@@ -43,14 +33,25 @@ import d_checkbox from '../components/d_checkbox.vue';
             <q-item-section>
               <div>
                 Once logged in to the <a href="https://git.nfdi4plants.org/" target="_blank">DataHUB</a> your Name and
-                eMail address are automatically filled out.
+                eMail address are automatically filled out
+              </div>
+            </q-item-section>
+          </q-item>
+          
+          <q-item>
+            <q-item-section>
+              <d_input label='Branch' value='main'/>
+            </q-item-section>
+            <q-item-section>
+              <div>
+                You can add (<q-icon name="add_circle" color="secondary" />), delete (<q-icon name="delete" color="grey-8" />), or switch between branches of your ARC
               </div>
             </q-item-section>
           </q-item>
 
           <q-item>
             <q-item-section>
-              <d_input label='Commit Message' value='Added Readme'/>
+              <d_input label='Commit Message' value='Add Readme'/>
             </q-item-section>
             <q-item-section>
               <div>
@@ -139,6 +140,15 @@ import d_checkbox from '../components/d_checkbox.vue';
 
       </q-card-section>
 
+  </q-card>
+
+  <q-card>
+    <q-card-section>
+    <div class="text-body2 text-justify" style="padding-bottom:1em;">
+        Versioning helps you keep track of your ARC's changes. If you are new to the ARC, the <strong>Commit</strong> and <strong>DataHUB Sync</strong>
+        menus are likely a more complex feature of the ARC and ARCitect. Feel free to <a href="https://helpdesk.nfdi4plants.org"
+          target="_blank">contact DataPLANT</a> for data steward support.</div>
+    </q-card-section>
   </q-card>
 
 </div></template>

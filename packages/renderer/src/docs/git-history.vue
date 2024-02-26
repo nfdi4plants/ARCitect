@@ -7,24 +7,15 @@ import d_checkbox from '../components/d_checkbox.vue';
 
 <template>
   <div class="q-py-sm">
-    <h5 style="margin-bottom:0.5em;">History</h5>
-    <!-- <div class="text-body2 text-justify" style="padding-bottom:1em;">
-      Versioning helps you keep track of your ARC's changes. If you are new to the ARC, the <strong>Versioning</strong>
-      menu is likely a more complex feature of the ARCitect. Feel free to <a href="https://helpdesk.nfdi4plants.org"
-        target="_blank">contact DataPLANT</a> for data steward support.
-
-    </div> -->
+    
+    <h5 style="margin-bottom:0.5em;">
+      <q-icon color="grey-8" name="history" />
+      History
+    </h5>
 
     <q-card>
 
       <q-card-section>
-
-        <!-- <q-item>
-          <q-item-section avatar>
-            <q-icon color="grey-8" name="history" />
-          </q-item-section>
-          <q-item-section>Log</q-item-section>
-        </q-item> -->
 
         <q-item>
           <div>
