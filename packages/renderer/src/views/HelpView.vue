@@ -9,7 +9,7 @@ import AssayHelp from '../docs/assay.vue';
 import StudyHelp from '../docs/study.vue';
 import DataHubHelp from '../docs/datahub.vue';
 import HomeHelp from '../docs/home.vue';
-import InvestigationHelp from '../docs/investigation.vue';
+import SwateHelp from '../docs/swate.vue';
 
 </script>
 
@@ -18,7 +18,7 @@ import InvestigationHelp from '../docs/investigation.vue';
     <GitCommitHelp v-if='appProperties.state===appProperties.STATES.GIT_COMMIT'></GitCommitHelp>
     <GitSyncHelp v-else-if='appProperties.state===appProperties.STATES.GIT_SYNC'></GitSyncHelp>
     <GitHistoryHelp v-else-if='appProperties.state===appProperties.STATES.GIT_HISTORY'></GitHistoryHelp>
-    <InvestigationHelp v-else-if='appProperties.state===appProperties.STATES.EDIT_INVESTIGATION'></InvestigationHelp>
+    <SwateHelp v-else-if='appProperties.state===appProperties.STATES.EDIT_SWATE'></SwateHelp>
     <DataHubHelp v-else-if='appProperties.state===appProperties.STATES.OPEN_DATAHUB'></DataHubHelp>
     <AssayHelp v-else-if='appProperties.state===appProperties.STATES.EDIT_ASSAY'></AssayHelp>
     <StudyHelp v-else-if='appProperties.state===appProperties.STATES.EDIT_STUDY'></StudyHelp>
