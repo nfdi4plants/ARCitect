@@ -1,17 +1,21 @@
 <script setup>
-import a_input from '../components/a_input.vue';
-import a_btn from '../components/a_btn.vue';
+import d_input from '../components/d_input.vue';
+import d_btn from '../components/d_btn.vue';
+import d_checkbox from '../components/d_checkbox.vue';
 </script>
 
 <template>
   <div class="q-pt-sm">
   
-  <h5 style="margin-bottom:0.5em;">Download ARC</h5>
+    <h5 style="margin-bottom:0.5em;">
+      <q-icon color="grey-8" name="cloud_download" />
+      Download ARC
+    </h5>
+
   <div class="text-body2 text-justify" style="padding-bottom:1em;">
-      In the "Download ARC" menu, you can download ARCs from the <a href="https://git.nfdi4plants.org/"
+      Here you can download ARCs from the <a href="https://git.nfdi4plants.org/"
         target="_blank">DataHUB</a>.
     </div>
-
   <q-card>
 
     <q-card-section>
@@ -33,7 +37,7 @@ import a_btn from '../components/a_btn.vue';
 
       <q-item>
         <q-item-section>
-          <q-checkbox label='LFS' dense readonly-hidden />
+          <d_checkbox label='LFS' />
         </q-item-section>
         <q-item-section>
           <div>
@@ -63,7 +67,7 @@ import a_btn from '../components/a_btn.vue';
       <q-item>
         <q-item-section>
           <div>
-            <a_btn icon='refresh' />
+            <d_btn icon='refresh' />
           </div>
         </q-item-section>
         <q-item-section>
@@ -87,7 +91,7 @@ import a_btn from '../components/a_btn.vue';
       <q-item>
         <q-item-section>
           <div>
-            <a_btn icon='search' />
+            <d_btn icon='search' />
           </div>
         </q-item-section>
         <q-item-section>
@@ -101,7 +105,7 @@ import a_btn from '../components/a_btn.vue';
       <q-item>
         <q-item-section>
           <div>
-            <a_btn icon='file_download' />
+            <d_btn icon='file_download' />
           </div>
         </q-item-section>
         <q-item-section>
