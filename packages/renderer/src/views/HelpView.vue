@@ -2,7 +2,9 @@
 
 import appProperties from '../AppProperties.ts';
 
-import GitHelp from '../docs/git.vue';
+import GitCommitHelp from '../docs/git-commit.vue';
+import GitSyncHelp from '../docs/git-sync.vue';
+import GitHistoryHelp from '../docs/git-history.vue';
 import AssayHelp from '../docs/assay.vue';
 import StudyHelp from '../docs/study.vue';
 import DataHubHelp from '../docs/datahub.vue';
@@ -13,7 +15,9 @@ import InvestigationHelp from '../docs/investigation.vue';
 
 <template>
   <div style='margin:-2.5em 2em 0 1em'>
-    <GitHelp v-if='appProperties.state===appProperties.STATES.GIT'></GitHelp>
+    <GitCommitHelp v-if='appProperties.state===appProperties.STATES.GIT_COMMIT'></GitCommitHelp>
+    <GitSyncHelp v-else-if='appProperties.state===appProperties.STATES.GIT_SYNC'></GitSyncHelp>
+    <GitHistoryHelp v-else-if='appProperties.state===appProperties.STATES.GIT_HISTORY'></GitHistoryHelp>
     <InvestigationHelp v-else-if='appProperties.state===appProperties.STATES.EDIT_INVESTIGATION'></InvestigationHelp>
     <DataHubHelp v-else-if='appProperties.state===appProperties.STATES.OPEN_DATAHUB'></DataHubHelp>
     <AssayHelp v-else-if='appProperties.state===appProperties.STATES.EDIT_ASSAY'></AssayHelp>

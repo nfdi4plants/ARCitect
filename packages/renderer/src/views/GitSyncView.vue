@@ -252,7 +252,7 @@ const inspectArc = url =>{
   <q-list bordered class="rounded-borders">
     <ViewItem
       icon="published_with_changes"
-      label="Push / Pull"
+      label="DataHUB Sync"
       caption="Synchronize the ARC with a DataHub"
       group="git"
       defaultOpened
