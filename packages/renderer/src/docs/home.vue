@@ -191,31 +191,7 @@ export default {
               Save the ARC locally
             </q-item-section>
           </q-item>
-
-          <q-item>
-            <q-item-section avatar>
-              <q-icon color="grey-7" name="refresh" />
-            </q-item-section>
-            <q-item-section style="margin-left: -1.2em;">
-              Refresh ARC
-            </q-item-section>
-            <q-item-section>
-              Refresh the open ARC (Reopens the latest state stored on your computer)
-            </q-item-section>
-          </q-item>
-
-          <q-item>
-            <q-item-section avatar>
-              <q-icon color="grey-7" name="mediation" />
-            </q-item-section>
-            <q-item-section style="margin-left: -1.2em;">
-              Versioning
-            </q-item-section>
-            <q-item-section>
-              Track and communicate changes of your ARC
-            </q-item-section>
-          </q-item>
-
+          
           <q-item>
             <q-item-section avatar>
               <q-icon color="grey-7" name="folder_open" />
@@ -224,7 +200,45 @@ export default {
               Explorer
             </q-item-section>
             <q-item-section>
-              Open the ARC in the explorer on your computer
+              Open the ARC in your Explorer or Finder on your computer
+            </q-item-section>
+          </q-item>
+
+          <q-separator inset />
+
+          <q-item>
+            <q-item-section avatar>
+              <q-icon color="grey-7" name="verified" />
+            </q-item-section>
+            <q-item-section style="margin-left: -1.2em;">
+              Commit
+            </q-item-section>
+            <q-item-section>
+              Track and communicate changes of your ARC
+            </q-item-section>
+          </q-item>
+
+          <q-item>
+            <q-item-section avatar>
+              <q-icon color="grey-7" name="published_with_changes" />
+            </q-item-section>
+            <q-item-section style="margin-left: -1.2em;">
+              DataHUB Sync
+            </q-item-section>
+            <q-item-section>
+              Synchronize the ARC with a DataHub
+            </q-item-section>
+          </q-item>
+          
+          <q-item>
+            <q-item-section avatar>
+              <q-icon color="grey-7" name="history" />
+            </q-item-section>
+            <q-item-section style="margin-left: -1.2em;">
+              History
+            </q-item-section>
+            <q-item-section>
+              Inspect the ARC's history
             </q-item-section>
           </q-item>
 

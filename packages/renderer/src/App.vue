@@ -147,7 +147,7 @@ const test = async ()=>{
 
           <ToolbarButton text='Commit' icon='verified' requiresARC requiresUser @clicked='AppProperties.state=AppProperties.STATES.GIT_COMMIT'></ToolbarButton>
           <ToolbarButton text='DataHUB Sync' icon='published_with_changes' requiresARC requiresUser @clicked='AppProperties.state=AppProperties.STATES.GIT_SYNC'></ToolbarButton>
-          <ToolbarButton text='Commit' icon='history' requiresARC requiresUser @clicked='AppProperties.state=AppProperties.STATES.GIT_HISTORY'></ToolbarButton>
+          <ToolbarButton text='History' icon='history' requiresARC requiresUser @clicked='AppProperties.state=AppProperties.STATES.GIT_HISTORY'></ToolbarButton>
           <q-separator />
 
           <q-item class="col-grow"></q-item>
