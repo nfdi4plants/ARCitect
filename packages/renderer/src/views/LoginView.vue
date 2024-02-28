@@ -11,8 +11,26 @@ import ErrorDialog from '../dialogs/ErrorDialog.vue';
 import { useQuasar } from 'quasar'
 const $q = useQuasar();
 
+const authenticate = async host=>{
+  const res = await window.ipc.invoke('DataHubService.authenticate', host);
+  if(res) return;
+
+  $q.dialog({
+    component: ErrorDialog,
+    componentProps: {
+      error: `Unable to authenticate at host "${host}"`,
+    }
+  });
+};
+
 window.ipc.on('DataHubService.authentificationData', async user=>{
+  if(AppProperties.user)
+    clearTimeout(AppProperties.user.refresh_func)
   AppProperties.user = user;
+  AppProperties.user.refresh_func = setTimeout(
+    ()=>authenticate(AppProperties.user.host),
+    AppProperties.user.token.expires_in*1000 // refresh after token expires
+  );
 });
 
 const login = ()=>{
@@ -26,23 +44,14 @@ const login = ()=>{
       ok_label: 'Login',
       cancel_label: 'Cancel'
     }
-  }).onOk( async host => {
-    const res = await window.ipc.invoke('DataHubService.authenticate', host);
-    if(res) return;
-
-    $q.dialog({
-      component: ErrorDialog,
-      componentProps: {
-        error: `Unable to authenticate at host "${host}"`,
-      }
-    });
-  });
+  }).onOk( authenticate );
 }
 
 const showUserData = ()=>{
   $q.dialog({
     component: UserDialog,
   }).onOk( async ()=>{
+    clearTimeout(AppProperties.user.refresh_func)
     AppProperties.user = null;
     AppProperties.state = AppProperties.STATES.HOME;
   });
