@@ -63,21 +63,18 @@ export const LocalFileSystemService = {
     return path ? path_to_arcitect(path) : null;
   },
 
-  selectAnyFiles: async ()=>{
+  selectAnyFiles: async (options: Electron.OpenDialogOptions = {}) => {
+    // Do not add 'openDirectory' option below. This will replace 'openFile' in windows and linux.
+    options.properties = options.properties || ['openFile','multiSelections'] // if given from outside don't set, otherwise set default.
     const window = BrowserWindow.getAllWindows().find(w => !w.isDestroyed())
-    const result = await dialog.showOpenDialog(window, {
-      // Do not add 'openDirectory' option below. This will replace 'openFile' in windows and linux.
-      properties: ['openFile','multiSelections']
-    });
+    const result = await dialog.showOpenDialog(window, options);
     return result ? result.filePaths.map(path_to_arcitect) : null;
   },
 
-  selectAnyFolders: async ()=>{
+  selectAnyFolders: async (options: Electron.OpenDialogOptions = {})=> {
+    options.properties = options.properties || ['openDirectory','multiSelections'] // if given from outside don't set, otherwise set default.
     const window = BrowserWindow.getAllWindows().find(w => !w.isDestroyed())
-    const result = await dialog.showOpenDialog(window, {
-      // Do not add 'openDirectory' option below. This will replace 'openFile' in windows and linux.
-      properties: ['openDirectory','multiSelections']
-    });
+    const result = await dialog.showOpenDialog(window, options);
     return result ? result.filePaths.map(path_to_arcitect) : null;
   },
 

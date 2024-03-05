@@ -29,7 +29,7 @@
   "dependencies": {
     "@fslab/fsspreadsheet": "^5.0.0",
     "@imengyu/vue3-context-menu": "^1.3.5",
-    "@nfdi4plants/arctrl": "^1.0.4",
+    "@nfdi4plants/arctrl": "^1.1.0",
     "@nfdi4plants/exceljs": "0.2.0",
     "@quasar/extras": "^1.16.9",
     "chokidar": "^3.5.3",

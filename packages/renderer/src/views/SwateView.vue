@@ -18,7 +18,8 @@ enum Msg {
   Error,
   AssayToSwate,
   StudyToSwate,
-  InvestigationToSwate
+  InvestigationToSwate,
+  PathsToSwate
 }
 
 interface Message {
@@ -59,6 +60,10 @@ const send = (msg: Msg, data: any = null): void => {
         toSwate({ ArcStudyJsonString: jsonString });
       } else return console.error('Invalid data type for Msg.AssayToSwate');
       break;
+    case Msg.PathsToSwate:
+      let paths: [string] = data
+      toSwate({ paths: paths });
+      break;
     default:
       toSwate(data)
       break;
@@ -82,6 +87,21 @@ const SwateAPI: SwateAPI = {
     }
     iProps.loading = false;
   },
+  RequestPaths: async (selectDirectories: boolean) => {
+    let selection = null;
+    let options: Electron.OpenDialogOptions = {}
+    options.defaultPath = ArcControlService.props.arc_root!;
+    if (selectDirectories) {
+      selection = await window.ipc.invoke("LocalFileSystemService.selectAnyFolders") 
+    } else {
+      selection = await window.ipc.invoke("LocalFileSystemService.selectAnyFiles")
+    }
+    if (selection === null || selection.length < 1) return;
+    if (selection[0].startsWith(ArcControlService.props.arc_root)) {
+      selection = selection.map((p: string) => p.replaceAll(ArcControlService.props.arc_root!, "."))
+    }
+    console.log(selection)
+  },
   InvestigationToARCitect: (investigationJsonString: string) => {
     let investigation = ArcInvestigation_fromArcJsonString(investigationJsonString);
     ArcControlService.props.arc.ISA = investigation;
@@ -95,10 +115,6 @@ const SwateAPI: SwateAPI = {
     /// ~Kevin F. 12.01.2024
     let study = ArcStudy_fromArcJsonString(studyJsonString);
     ArcControlService.props.arc.ISA.SetStudy(study.Identifier, study);
-  },
-  TriggerSwateClose: () => {
-    AppProperties.state=SwateControlService.props.HOME
-    SwateControlService.Reset()
   },
   Error: (e) => {
     console.log(e)
