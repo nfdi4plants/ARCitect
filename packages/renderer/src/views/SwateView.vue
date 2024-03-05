@@ -100,7 +100,7 @@ const SwateAPI: SwateAPI = {
     if (selection[0].startsWith(ArcControlService.props.arc_root)) {
       selection = selection.map((p: string) => p.replaceAll(ArcControlService.props.arc_root!, "."))
     }
-    console.log(selection)
+    send(Msg.PathsToSwate, selection)
   },
   InvestigationToARCitect: (investigationJsonString: string) => {
     let investigation = ArcInvestigation_fromArcJsonString(investigationJsonString);
@@ -124,7 +124,8 @@ const SwateAPI: SwateAPI = {
 const init = async ()=>{
   console.log('init');
   iProps.loading = true;
-  iframe.value.setAttribute("src", "https://swate-alpha.nfdi4plants.org?is_swatehost=1&random="+SwateControlService.props.cacheNumber);
+  // iframe.value.setAttribute("src", "https://swate-alpha.nfdi4plants.org?is_swatehost=1&random="+SwateControlService.props.cacheNumber);
+  iframe.value.setAttribute("src", "http://localhost:8080?is_swatehost=1&random="+SwateControlService.props.cacheNumber);
 };
 
 onMounted(() => {
