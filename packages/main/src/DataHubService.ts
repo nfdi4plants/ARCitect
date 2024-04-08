@@ -11,6 +11,10 @@ let authApp = null;
 const authPort = 7890;
 
 const CREDENTIALS = {
+  'git2.nfdi4plants.org': {
+    id: 'af897fa1ef8474855feff07186adc6f26dee06971ee9ce4027f8f9c709a84c73',
+    secret: 'd578e4df6370f219b9d55b04fbaf90315bdf655fb11405a16a43505c032650de',
+  },
   'git.nfdi4plants.org': {
     id: 'af897fa1ef8474855feff07186adc6f26dee06971ee9ce4027f8f9c709a84c73',
     secret: 'd578e4df6370f219b9d55b04fbaf90315bdf655fb11405a16a43505c032650de',
