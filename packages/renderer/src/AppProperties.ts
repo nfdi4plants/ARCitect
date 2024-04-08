@@ -32,6 +32,7 @@ const AppProperties: {
   path_sep: null,
 
   datahub_hosts: [
+    'git2.nfdi4plants.org',
     'git.nfdi4plants.org',
     'gitlab.nfdi4plants.de',
     'gitlab.plantmicrobe.de'

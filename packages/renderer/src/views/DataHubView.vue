@@ -21,7 +21,7 @@ const props = reactive({
   localUrl: '',
   search_text: '',
   download_lfs: false,
-  host: 'git.nfdi4plants.org',
+  host: 'git2.nfdi4plants.org',
   error: ''
 });
 
