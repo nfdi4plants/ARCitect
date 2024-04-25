@@ -19,7 +19,8 @@ const getHistory = async ()=>{
     return iProps.git_log = [];
 
   const log = [];
-  const lines = response[1].split('_$$$_');
+
+  const lines = (response[1]+'\n').split('_$$$_\n').slice(0,-1);
   const format = x => ('00' + x).slice(-2);
   for(let line of lines){
     const temp = line.split('_$$_');

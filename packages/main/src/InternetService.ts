@@ -1,13 +1,52 @@
 import {
   ipcMain,
-  shell
+  shell,
+  net
 } from 'electron';
 
 import https from 'https';
 
 let req = null;
 
+const default_header = {
+  'Content-Type': 'application/json',
+  'Accept': 'application/json',
+  'user-agent': 'node.js'
+};
+
 export const InternetService = {
+
+  getWebPageAsJson: (e,options) => {
+    return new Promise(
+      (resolve, reject) => {
+        try {
+          const request = net.request(options);
+          const header = options.header || default_header;
+          for(let h in header)
+            request.setHeader(h,header[h]);
+
+          request.on('response', (response) => {
+            if(response.statusCode===200){
+              let output = '';
+              response.on('data', chunk => {
+                output += chunk;
+              });
+              response.on('end', () => {
+                resolve(JSON.parse(output));
+              });
+            } else {
+              // console.error('response',response);
+              resolve(null);
+            }
+          })
+          request.end()
+        } catch(err){
+          console.error('catch',err);
+          resolve(null);
+        }
+      }
+    );
+  },
 
   callSwateAPI: (event, data)=>{
     return new Promise(
@@ -67,10 +106,22 @@ export const InternetService = {
     return;
   },
 
+  getArcitectVersions: async (e)=>{
+    return await InternetService.getWebPageAsJson(
+      null,
+      {
+        host: 'api.github.com',
+        path: '/repos/nfdi4plants/ARCitect/tags',
+        method: 'GET'
+      }
+    );
+  },
+
   init: async () => {
     ipcMain.handle('InternetService.openExternalURL', InternetService.openExternalURL );
     ipcMain.handle('InternetService.getTemplates', InternetService.getTemplates );
     ipcMain.handle('InternetService.callSwateAPI', InternetService.callSwateAPI );
+    ipcMain.handle('InternetService.getArcitectVersions', InternetService.getArcitectVersions );
   }
 
 };

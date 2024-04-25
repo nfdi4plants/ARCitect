@@ -40,6 +40,7 @@ const iProps = reactive({
   error: false,
   error_text: '',
   version: '',
+  new_version: ''
 });
 
 const openLocalArc = async (path: string | null | void) =>{
@@ -90,19 +91,19 @@ onMounted(async () => {
     iProps.error_text = 'Unable to detect GIT.<br>Please verify that GIT is installed.';
     iProps.error = true;
   }
-  // iProps.toolbarMinimized = true;
-  // openLocalArc('/home/jones/external/projects/TEMP/ArcPrototype');
-  // await ArcCommanderService.init();
-  // AppProperties.state=AppProperties.STATES.HOME;
-  // AppProperties.path_sep = await window.ipc.invoke('LocalFileSystemService.getPathSeparator');
 
-  // // TODO
-  // await window.ipc.invoke('ArcControlService.open', '/home/jones/external/projects/TEMP/GeoSampleArc/');
-  // // await window.ipc.invoke('ArcControlService.open', '/home/jones/external/projects/TEMP/test3/');
+  const versions = await window.ipc.invoke('InternetService.getArcitectVersions');
+  const latest_version = versions[0].name;
+  if(latest_version !== iProps.version)
+    iProps.new_version = latest_version;
 });
 
+const downloadArcitect = async ()=>{
+  await window.ipc.invoke('InternetService.openExternalURL','https://github.com/nfdi4plants/ARCitect/releases');
+};
+
 const test = async ()=>{
-}
+};
 
 </script>
 
@@ -154,8 +155,16 @@ const test = async ()=>{
           <ToolbarButton text='Toggle Help' icon='help' @clicked='iProps.showHelp=!iProps.showHelp;'></ToolbarButton>
           <ToolbarButton :text="iProps.toolbarMinimized ? '' : 'Minimize Sidebar'" :icon="iProps.toolbarMinimized ? 'chevron_right' : 'chevron_left'" @clicked='iProps.toolbarMinimized=!iProps.toolbarMinimized;'></ToolbarButton>
           <q-separator />
-          <q-item class='justify-center bg-grey-4' style="margin:0;padding:0.2rem;" dense>
-            {{iProps.version}}
+
+          <q-item v-ripple clickable dense @click='downloadArcitect'>
+            <q-item-section avatar>
+              <q-icon color='red-9' name="error" v-if='iProps.new_version'>
+                <q-tooltip>
+                  New Version Available!
+                </q-tooltip>
+              </q-icon>
+            </q-item-section>
+            <q-item-section style="margin-left:-1.2em;">{{iProps.version}}</q-item-section>
           </q-item>
         </q-list>
       </q-drawer>
