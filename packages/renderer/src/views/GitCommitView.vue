@@ -63,9 +63,9 @@ const setGitUser = async(name,email)=>{
 };
 
 const trackChanges = async progress =>{
-  let git_lfs = ['lfs','track'];
-  let git_add = ['add'];
-  let git_rm = ['rm'];
+  let git_lfs = [];
+  let git_add = [];
+  let git_rm = [];
   for(let item of iProps.git_status){
     if(item[0].includes('D'))
       git_rm.push(item[1]);
@@ -80,26 +80,20 @@ const trackChanges = async progress =>{
     }
   }
 
-  if(git_rm.length>1)
-    await window.ipc.invoke('GitService.run', {
-      args: git_rm,
-      cwd: ArcControlService.props.arc_root
-    });
-  progress[1][1]=1;
-
-  if(git_lfs.length>2)
-    await window.ipc.invoke('GitService.run', {
-      args: git_lfs,
-      cwd: ArcControlService.props.arc_root
-    });
-  progress[2][1]=1;
-
-  if(git_add.length>1)
-    await window.ipc.invoke('GitService.run', {
-      args: git_add,
-      cwd: ArcControlService.props.arc_root
-    });
-  progress[3][1]=1;
+  for(let [a,b,c] of [
+    [['rm'],git_rm,1],
+    [['lfs','untrack'],git_rm,1],
+    [['lfs','track'],git_lfs,2],
+    [['add'],git_add,3]
+  ]){
+    for(let i=0; i<b.length; i+=200){
+      await window.ipc.invoke('GitService.run', {
+        args: a.concat(b.slice(i,i+200)),
+        cwd: ArcControlService.props.arc_root
+      });
+    }
+    progress[c][1]=1;
+  }
 };
 
 const commit = async()=>{
@@ -144,7 +138,7 @@ const commit = async()=>{
 };
 
 const isTrackedWithLFS = item=>{
-  return item[2]>iProps.lfs_limit;
+  return item[2]>=parseFloat(iProps.lfs_limit);
 };
 
 const reset = async()=>{
@@ -270,7 +264,7 @@ onUnmounted(()=>{
                 <q-icon :color="state[0].includes('D') ? 'red-10' : 'secondary'" :name="state[0].includes('M') ? 'edit_square' : state[0].includes('D') ? 'indeterminate_check_box' : 'add_box'"></q-icon>
               </q-item-section>
               <q-item-section>
-                <q-item-label>{{state[1]}} <span :style="state[2]>=iProps.lfs_limit ? 'font-weight:bold':''">{{!state[0].includes("D") ? `(${state[2].toFixed(2)} MB)` : ''}}</span></q-item-label>
+                <q-item-label>{{state[1]}} <span :style="isTrackedWithLFS(state) ? 'font-weight:bold':''">{{!state[0].includes("D") ? `(${state[2].toFixed(2)} MB)` : ''}}</span></q-item-label>
               </q-item-section>
             </q-item>
           </q-list>
