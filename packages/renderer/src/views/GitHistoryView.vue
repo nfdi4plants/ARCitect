@@ -12,7 +12,7 @@ const iProps = reactive({
 const getHistory = async ()=>{
   // get log
   const response = await window.ipc.invoke('GitService.run', {
-    args: [`log`,`--pretty=format:%H_$$_%aN_$$_%aE_$$_%cI_$$_%s_$$$_`],
+    args: [`log`,`--pretty=format:%H_**_%aN_**_%aE_**_%cI_**_%s_***_`],
     cwd: ArcControlService.props.arc_root
   });
   if(response[1].startsWith('fatal'))
@@ -20,10 +20,10 @@ const getHistory = async ()=>{
 
   const log = [];
 
-  const lines = (response[1]+'\n').split('_$$$_\n').slice(0,-1);
+  const lines = (response[1]+'\n').split('_***_\n').slice(0,-1);
   const format = x => ('00' + x).slice(-2);
   for(let line of lines){
-    const temp = line.split('_$$_');
+    const temp = line.split('_**_');
     const d = new Date(Date.parse(temp[3]));
     log.push({
       ref: temp[0],

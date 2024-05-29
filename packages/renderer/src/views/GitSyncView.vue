@@ -18,7 +18,7 @@ const iProps = reactive({
   git_status: [],
   error: '',
 
-  lfs_pull: false,
+  use_lfs: false,
 
   remote: null,
   remotes: {},
@@ -100,14 +100,31 @@ const push = async()=>{
   const branches = await getBranches();
   if(!branches.current) return dialogProps.state=2;
 
-  // patch remote
-  const patched_remote = patchRemote(iProps.remotes[iProps.remote].url);
-  if(!patched_remote) return dialogProps.state=2;
+  // credentials
+  await window.ipc.invoke('GitService.run', {
+    args: [ 'config', 'credential.helper', `'!f() { echo "username=$GIT_USR"; echo "password=$GIT_PWD"; }; f'` ],
+    cwd: ArcControlService.props.arc_root
+  });
 
   // push
+  const args = [
+    `push`,
+    `--verbose`,
+    `--atomic`,
+    `--progress`,
+    iProps.remote,
+    branches.current
+  ];
+  if(!iProps.use_lfs)
+    args.push('--no-verify');
+
   response = await window.ipc.invoke('GitService.run', {
-    args: [`-c`,`core.askPass=true`,`push`,`--verbose`,`--atomic`,`--progress`,patched_remote,branches.current],
-    cwd: ArcControlService.props.arc_root
+    args: args,
+    cwd: ArcControlService.props.arc_root,
+    env: {
+      GIT_USR: 'oauth2',
+      GIT_PWD: AppProperties.user.token.access_token
+    }
   });
 
   dialogProps.state=1;
@@ -143,19 +160,30 @@ const pull = async()=>{
   const branches = await getBranches();
   if(!branches.current) return dialogProps.state=2;
 
-  // patch remote
-  const patched_remote = patchRemote(iProps.remotes[iProps.remote].url);
-  if(!patched_remote) return dialogProps.state=2;
+  // credentials
+  await window.ipc.invoke('GitService.run', {
+    args: [ 'config', 'credential.helper', `'!f() { echo "username=$GIT_USR"; echo "password=$GIT_PWD"; }; f'` ],
+    cwd: ArcControlService.props.arc_root
+  });
 
   // pull
   response = await window.ipc.invoke('GitService.run', {
-    args: [`pull`,patched_remote,branches.current,'--progress'],
-    cwd: ArcControlService.props.arc_root
+    args: [`pull`,iProps.remote,branches.current,'--progress'],
+    cwd: ArcControlService.props.arc_root,
+    env: {
+      GIT_LFS_SKIP_SMUDGE: iProps.use_lfs?0:1,
+      GIT_USR: 'oauth2',
+      GIT_PWD: AppProperties.user.token.access_token,
+    }
   });
-  if(iProps.lfs_pull){
+  if(iProps.use_lfs){
     response = await window.ipc.invoke('GitService.run', {
-      args: [`lfs`,`pull`,patched_remote,branches.current],
-      cwd: ArcControlService.props.arc_root
+      args: [`lfs`,`pull`,iProps.remote,branches.current],
+      cwd: ArcControlService.props.arc_root,
+      env: {
+        GIT_USR: 'oauth2',
+        GIT_PWD: AppProperties.user.token.access_token
+      }
     });
   }
 
@@ -174,11 +202,14 @@ const checkRemotes = async()=>{
   const latest_local_hash = hash_response[1].trim();
 
   for(let id in iProps.remotes){
-    const fetch_response = await window.ipc.invoke('GitService.run', {
-      args: [`-c`,`core.askPass=true`,`ls-remote`,patchRemote(iProps.remotes[id].url),`-h`,`refs/heads/${branches.current}`],
-      cwd: ArcControlService.props.arc_root
-    });
-    iProps.remotes[id].dirty = fetch_response[0] && latest_local_hash!==fetch_response[1].split('\t')[0];
+    const url = patchRemote(iProps.remotes[id].url);
+    if(AppProperties.user && url.includes(AppProperties.user.host)){
+      const fetch_response = await window.ipc.invoke('GitService.run', {
+        args: [`ls-remote`,url,`-h`,`refs/heads/${branches.current}`],
+        cwd: ArcControlService.props.arc_root
+      });
+      iProps.remotes[id].dirty = fetch_response[0] && latest_local_hash!==fetch_response[1].split('\t')[0];
+    }
   }
 };
 
@@ -311,7 +342,7 @@ const inspectArc = url =>{
           </div>
           <div class='row'>
             <div class='col'>
-              <a_checkbox v-model='iProps.lfs_pull' label="Use large File Storage" style="float:right;"/>
+              <a_checkbox v-model='iProps.use_lfs' label="Use Large File Storage" style="float:right;"/>
             </div>
           </div>
 

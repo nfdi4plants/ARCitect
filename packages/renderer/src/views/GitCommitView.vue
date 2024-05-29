@@ -73,7 +73,7 @@ const trackChanges = async progress =>{
       git_add.push(item[1]);
 
     if(isTrackedWithLFS(item)){
-      const gitattributes = ArcControlService.props.arc_root + '/.gitattributes';
+      const gitattributes = '.gitattributes';
       if(!git_add.includes(gitattributes))
         git_add.push(gitattributes);
       git_lfs.push(item[1]);
@@ -88,7 +88,7 @@ const trackChanges = async progress =>{
   ]){
     for(let i=0; i<b.length; i+=200){
       await window.ipc.invoke('GitService.run', {
-        args: a.concat(b.slice(i,i+200)),
+        args: a.concat(b.slice(i,i+200).map(x=>'"'+x+'"')),
         cwd: ArcControlService.props.arc_root
       });
     }

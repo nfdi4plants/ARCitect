@@ -99,6 +99,9 @@ const getBranches = async () => {
     list: [],
     current: null
   };
+  if(branches_raw.length<1)
+    branches_raw.push('* main')
+
   for(let branch of branches_raw){
     const branch_name = branch.slice(2);
     branches.list.push(branch_name);

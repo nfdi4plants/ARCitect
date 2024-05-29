@@ -17,7 +17,7 @@ export const GitService = {
       return;
     }
 
-    const [args,o,resolve] = GitService.queue.pop();
+    const [args,o,resolve] = GitService.queue.shift();
     console.log(GitService.queue.length, 'git '+args.join(' '));
 
     let window = BrowserWindow.getAllWindows().find(w => !w.isDestroyed());
@@ -65,12 +65,17 @@ export const GitService = {
   run: (e,options) => {
 
     return new Promise( (resolve, reject) => {
-      const args = typeof options === 'string' ? [options] : options.args;
+      let args = typeof options === 'string' ? [options] : options.args;
       const o = typeof options === 'string' ? {} : options;
       o.env = Object.assign({}, o.env || {}, process.env);
 
-      o.cwd = (o.cwd || '').split('/').join(PATH.sep);
+      // disable terminal prompts
+      o.env['GIT_TERMINAL_PROMPT']=0;
+      o.env['GIT_ASKPASS']=true;
 
+      o.shell = true;
+
+      // verbose
       // o.env['GIT_TRACE'] = 1;
       // o.env['GIT_TRACE_PACKET'] = 1;
       // o.env['GIT_TRACE_PERFORMANCE'] = 1;
@@ -78,6 +83,8 @@ export const GitService = {
       // o.env['GIT_CURL_VERBOSE'] = 1;
       // o.env['GIT_TRANSFER_TRACE'] = 1;
       // o.stdio = 'inherit';
+
+      o.cwd = (o.cwd || '').split('/').join(PATH.sep);
 
       GitService.queue.push([args, o, resolve]);
       if(!GitService.processing){

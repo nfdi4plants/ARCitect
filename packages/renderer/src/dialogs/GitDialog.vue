@@ -61,7 +61,6 @@ const { dialogRef, onDialogHide, onDialogOK, onDialogCancel } = useDialogPluginC
             <div v-if='row.split(": ").length>=2'><b>{{row.split(': ').slice(0,-1).join(': ')}}: </b>{{row.split(': ').pop()}}</div>
             <div v-else>{{row}}</div>
           </div>
-          <div v-if='props.state===1'><b>Complete</b></div>
         </q-scroll-area>
       </q-card-section>
 
