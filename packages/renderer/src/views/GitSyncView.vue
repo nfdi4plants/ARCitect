@@ -100,9 +100,11 @@ const push = async()=>{
   const branches = await getBranches();
   if(!branches.current) return dialogProps.state=2;
 
-  // credentials
-  await window.ipc.invoke('GitService.run', {
-    args: [ 'config', 'credential.helper', `'!f() { echo "username=$GIT_USR"; echo "password=$GIT_PWD"; }; f'` ],
+  // patch remote
+  const remote = iProps.remotes[iProps.remote].url;
+  const patched_remote = patchRemote(iProps.remotes[iProps.remote].url);
+  response = await window.ipc.invoke('GitService.run', {
+    args: [`remote`,`set-url`,iProps.remote,patched_remote],
     cwd: ArcControlService.props.arc_root
   });
 
@@ -120,11 +122,13 @@ const push = async()=>{
 
   response = await window.ipc.invoke('GitService.run', {
     args: args,
-    cwd: ArcControlService.props.arc_root,
-    env: {
-      GIT_USR: 'oauth2',
-      GIT_PWD: AppProperties.user.token.access_token
-    }
+    cwd: ArcControlService.props.arc_root
+  });
+
+  // unpatch
+  response = await window.ipc.invoke('GitService.run', {
+    args: [`remote`,`set-url`,iProps.remote,remote],
+    cwd: ArcControlService.props.arc_root
   });
 
   dialogProps.state=1;
@@ -160,9 +164,11 @@ const pull = async()=>{
   const branches = await getBranches();
   if(!branches.current) return dialogProps.state=2;
 
-  // credentials
-  await window.ipc.invoke('GitService.run', {
-    args: [ 'config', 'credential.helper', `'!f() { echo "username=$GIT_USR"; echo "password=$GIT_PWD"; }; f'` ],
+  // patch remote
+  const remote = iProps.remotes[iProps.remote].url;
+  const patched_remote = patchRemote(iProps.remotes[iProps.remote].url);
+  response = await window.ipc.invoke('GitService.run', {
+    args: [`remote`,`set-url`,iProps.remote,patched_remote],
     cwd: ArcControlService.props.arc_root
   });
 
@@ -171,21 +177,21 @@ const pull = async()=>{
     args: [`pull`,iProps.remote,branches.current,'--progress'],
     cwd: ArcControlService.props.arc_root,
     env: {
-      GIT_LFS_SKIP_SMUDGE: iProps.use_lfs?0:1,
-      GIT_USR: 'oauth2',
-      GIT_PWD: AppProperties.user.token.access_token,
+      GIT_LFS_SKIP_SMUDGE: iProps.use_lfs?0:1
     }
   });
   if(iProps.use_lfs){
     response = await window.ipc.invoke('GitService.run', {
       args: [`lfs`,`pull`,iProps.remote,branches.current],
-      cwd: ArcControlService.props.arc_root,
-      env: {
-        GIT_USR: 'oauth2',
-        GIT_PWD: AppProperties.user.token.access_token
-      }
+      cwd: ArcControlService.props.arc_root
     });
   }
+
+  // unpatch
+  response = await window.ipc.invoke('GitService.run', {
+    args: [`remote`,`set-url`,iProps.remote,remote],
+    cwd: ArcControlService.props.arc_root
+  });
 
   dialogProps.state=1;
 
