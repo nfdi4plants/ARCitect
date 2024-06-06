@@ -91,6 +91,13 @@ onMounted(async () => {
     iProps.error_text = 'Unable to detect GIT.<br>Please verify that GIT is installed.';
     iProps.error = true;
   }
+  console.log(git_running[1]);
+  const git_lfs_running = await window.ipc.invoke('GitService.run',{args:['lfs','--version']});
+  if(!git_lfs_running[0]){
+    iProps.error_text = 'Unable to detect GIT LFS.<br>Please verify that GIT LFS is installed.';
+    iProps.error = true;
+  }
+  console.log(git_lfs_running[1]);
 
   const versions = await window.ipc.invoke('InternetService.getArcitectVersions');
   const latest_version = versions[0].name;
