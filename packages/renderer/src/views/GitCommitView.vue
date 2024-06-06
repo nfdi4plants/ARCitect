@@ -130,7 +130,7 @@ const commit = async()=>{
   await trackChanges(dialogProps.items);
 
   await window.ipc.invoke('GitService.run', {
-    args: ['commit','-m',msg],
+    args: ['commit','-m','"'+msg+'"'],
     cwd: ArcControlService.props.arc_root
   });
   // dialogProps.succ = 'Commit Complete';
