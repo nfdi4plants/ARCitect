@@ -67,16 +67,16 @@ const trackChanges = async progress =>{
   let git_add = [];
   let git_rm = [];
   for(let item of iProps.git_status){
-    if(item[0].includes('D'))
+    if(item[0].includes('D')){
       git_rm.push(item[1]);
-    else
+    } else {
       git_add.push(item[1]);
-
-    if(isTrackedWithLFS(item)){
-      const gitattributes = '.gitattributes';
-      if(!git_add.includes(gitattributes))
-        git_add.push(gitattributes);
-      git_lfs.push(item[1]);
+      if(isTrackedWithLFS(item)){
+        const gitattributes = '.gitattributes';
+        if(!git_add.includes(gitattributes))
+          git_add.push(gitattributes);
+        git_lfs.push(item[1]);
+      }
     }
   }
 
