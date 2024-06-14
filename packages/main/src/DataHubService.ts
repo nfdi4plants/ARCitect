@@ -10,14 +10,18 @@ import {Credentials} from '/@/DataHubService.d';
 import { Request, Response } from 'express';
 import querystring from 'query-string';
 const express = require('express');
-const { createHash } = require('crypto');
-
+//const crypto = require('crypto');
+//const { createHash } = require('crypto');
+import { createHash, randomInt} from 'crypto';
 let authApp = null;
 const authPort = 7890;
 
 type Host = string | null;
 type User = {token: string; host: string}
 
+// credentials for different repositories 
+// if secret is left out pkce will be used for authentification
+// that requires the confidential setting in the gitlab app to be turned off 
 const CREDENTIALS: Credentials = {
   'git.nfdi4plants.org': {
     id: 'af897fa1ef8474855feff07186adc6f26dee06971ee9ce4027f8f9c709a84c73',
@@ -33,15 +37,38 @@ const CREDENTIALS: Credentials = {
   },
 };
 
+// alphabets for random string generation
+const ALPHABET = 'abcdefghijklmnopqrstuvwxyz';
+const ALPHANUMERIC = (ALPHABET+ALPHABET.toUpperCase()+'0123456789').split('')
+
+/** generates sha256 hash of input word and base64 encodes it urlsafe */
+function sha256Base64UrlsafeEncode(word: string){
+  // sha256 hash
+  let sha256Digest = createHash('sha256').update(word).digest();
+  // base64 encoding
+  return sha256Digest.toString('base64')
+  .replace(/\+/g, '-')
+  .replace(/\//g, '_')
+  .replace(/=+$/, '');
+}
+
+/** generates a random string for a given set of strings of a given length */
+function randomString(alphabet: Array<string>, string_length: number): string { 
+  return Array.from({length: string_length}, (_, i) => alphabet[randomInt(alphabet.length)]).join('');
+}
+
+
 export const DataHubService = {
 
   auth_host: null,
   code_verifier: '', 
   code_challenge: '',
+  pkce_state: '',
 
   generateCodeChallenge: (): void => {
-    DataHubService.code_verifier = 'oj23e9j93jd9w3j0d9cj9w3920r3f9j0f32j0923uf0923u0r9uw0fjw039fu0wf09wf'//window.crypto.randomUUID();
-    DataHubService.code_challenge = createHash('sha256').update(DataHubService.code_verifier).digest('base64url');
+    DataHubService.pkce_state = randomString(ALPHANUMERIC, 48);
+    DataHubService.code_verifier = randomString(ALPHANUMERIC.concat(['-','.','_','~']), 128);
+    DataHubService.code_challenge = sha256Base64UrlsafeEncode(DataHubService.code_verifier);
   },
 
   getPublicationByDOI: async (e: IpcMainInvokeEvent, doi: string ) => {
@@ -114,22 +141,17 @@ export const DataHubService = {
         redirect_uri: 'http://localhost:7890',
         client_id: CREDENTIALS[host].id,
         scope: `openid read_api email profile read_repository write_repository`,
-        state: "stateshouldberandom",
+        state: DataHubService.pkce_state,
         code_challenge: DataHubService.code_challenge,
         code_challenge_method:"S256"
       };
       auth_url = `https://${host}/oauth/authorize?${querystring.stringify(url_params)}`;
-      console.log(auth_url)
     }
     shell.openExternal(auth_url);
-
-    //client_id=APP_ID&redirect_uri=REDIRECT_URI&response_type=code&state=STATE&scope=REQUESTED_SCOPES&code_challenge=CODE_CHALLENGE&code_challenge_method=S256
-
     return true;
   },
 
   getToken: async ( e: IpcMainInvokeEvent | null, code: string, host: string ) => {
-    console.log("get token");
     if (!CREDENTIALS[host]) return null;
     let path = '';
 
@@ -143,7 +165,6 @@ export const DataHubService = {
       };
       path = `/oauth/token?${querystring.stringify(url_params)}`;
     } else {
-      console.log("without secret");
       const url_params = {
         code: code,
         client_id: CREDENTIALS[host].id,
@@ -152,9 +173,6 @@ export const DataHubService = {
         code_verifier: DataHubService.code_verifier
       };
       path = `/oauth/token?${querystring.stringify(url_params)}`;
-      console.log(path)
-      //parameters = 'client_id=APP_ID&code=RETURNED_CODE&grant_type=authorization_code&redirect_uri=REDIRECT_URI&code_verifier=CODE_VERIFIER'
-      //RestClient.post 'https://gitlab.example.com/oauth/token', parameters
     }
 
     let returnvalue = await InternetService.getWebPageAsJson(
@@ -166,7 +184,6 @@ export const DataHubService = {
         method: 'POST'
       }
     );
-    console.log(returnvalue);
     return returnvalue
   },
 
@@ -208,21 +225,21 @@ export const DataHubService = {
 
     authApp = express()
     authApp.get('/', async (req: Request, res: Response) => {
-      console.log("redirect got called");
       if(!req.url || !req.url.startsWith('/?code=')){
-        console.log("inv request 1");
         return res.send('Invalid Request.');
-        
       }
 
       if(DataHubService.auth_host === null){
-        console.log("inv request 2");
-        return res.send('Invalid Request.');
+        return res.send('<h1>Authentification Failed.</h1>');
       }
       
       const code = req.url.split('/?code=')[1].split('&')[0];
-      console.log(code)
       const token = await DataHubService.getToken(null, code, DataHubService.auth_host);
+      
+      if (token === null) {
+        return res.send('<h1>Authentification Failed.</h1>');
+      }
+      
       const user = await DataHubService.getUser(null, token.access_token, DataHubService.auth_host);
       user.token = token;
       user.host = DataHubService.auth_host;
@@ -238,8 +255,6 @@ export const DataHubService = {
     });
     authApp.listen(authPort, () => {
       console.log(`Authentification service listening on port ${authPort}`);
-      
-      console.log(DataHubService.code_challenge);
     });
   }
 
