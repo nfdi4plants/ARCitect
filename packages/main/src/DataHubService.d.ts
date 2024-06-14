@@ -16,4 +16,4 @@ export interface Credentials {
     [key : string] : AuthWithSecret | AuthIdOnly ;
 }
   
-  
+type User = {token: string; host: string}

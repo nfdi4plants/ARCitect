@@ -6,18 +6,15 @@ import {
 } from 'electron';
 
 import {InternetService} from '/@/InternetService';
-import {Credentials} from '/@/DataHubService.d';
+import {Credentials, User} from '/@/DataHubService.d';
 import { Request, Response } from 'express';
 import querystring from 'query-string';
 const express = require('express');
-//const crypto = require('crypto');
-//const { createHash } = require('crypto');
 import { createHash, randomInt} from 'crypto';
 let authApp = null;
 const authPort = 7890;
 
-type Host = string | null;
-type User = {token: string; host: string}
+
 
 // credentials for different repositories 
 // if secret is left out pkce will be used for authentification
