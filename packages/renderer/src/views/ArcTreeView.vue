@@ -362,8 +362,23 @@ const onCellContextMenu = (e,node) => {
       y: e.y,
       theme: 'flat',
       items: [
+        // {
+        //   label: "Rename",
+        //   icon: h(
+        //     'i',
+        //     {
+        //       class: 'q-icon on-left notranslate material-icons',
+        //       role:'img',
+        //       style:{fontSize: '1.5em',color:'#333'}
+        //     },
+        //     ['edit']
+        //   ),
+        //   onClick: () =>{
+        //     console.log('rename')
+        //   }
+        // },
         {
-          label: "Delete Assay",
+          label: "Delete",
           icon: h(
             'i',
             {
@@ -384,8 +399,23 @@ const onCellContextMenu = (e,node) => {
       y: e.y,
       theme: 'flat',
       items: [
+        // {
+        //   label: "Rename",
+        //   icon: h(
+        //     'i',
+        //     {
+        //       class: 'q-icon on-left notranslate material-icons',
+        //       role:'img',
+        //       style:{fontSize: '1.5em',color:'#333'}
+        //     },
+        //     ['edit']
+        //   ),
+        //   onClick: () =>{
+        //     console.log('rename')
+        //   }
+        // },
         {
-          label: "Delete Study",
+          label: "Delete",
           icon: h(
             'i',
             {
