@@ -3,7 +3,7 @@ import { useDialogPluginComponent } from 'quasar';
 import { reactive, onMounted, watch, ref } from 'vue';
 import ArcControlService from '../ArcControlService.ts';
 import {ArcStudy} from "@nfdi4plants/arctrl"
-import {checkValidCharacters} from '@nfdi4plants/arctrl/ISA/ISA/Identifier.js'
+import {checkValidCharacters} from '@nfdi4plants/arctrl/Core/Helper/Identifier.js'
 import * as internal from 'stream';
 
 export type NewAssayInformation = {
