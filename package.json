@@ -1,6 +1,6 @@
 {
   "name": "ARCitect",
-  "version": "v0.0.33",
+  "version": "v0.0.35",
   "author": "nfdi4plants.org",
   "description": "Tool to edit Annotated Research Contexts (ARCs).",
   "private": true,
@@ -18,7 +18,9 @@
     "compile": "cross-env MODE=production npm run build && electron-builder build --config electron-builder.config.cjs",
     "compilew": "cross-env MODE=production npm run build && electron-builder build --config electron-builder.config.cjs --win",
     "compilem": "cross-env MODE=production npm run build && electron-builder build --config electron-builder.config.cjs --mac",
-    "publish": "cross-env MODE=production npm run build && electron-builder build --config electron-builder.config.cjs --publish always",
+    "publish:win": "cross-env MODE=production npm run build && electron-builder build --config electron-builder.config.cjs --publish always",
+    "publish:mac": "cross-env MODE=production npm run build && electron-builder build --universal --config electron-builder.config.cjs --publish always",
+    "publish:lnx": "cross-env MODE=production npm run build && electron-builder build --config electron-builder.config.cjs --publish always",
     "start": "node scripts/debug.js",
     "lint": "eslint . --ext js,ts,vue",
     "typecheck:main": "tsc --noEmit -p packages/main/tsconfig.json",

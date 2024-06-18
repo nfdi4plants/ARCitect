@@ -17,7 +17,8 @@ const config = {
   },
   mac: {
     "extraResources": ['git-binaries/mac'],
-    "target": ["dmg"]
+    "target": ["dmg"],
+    "x64ArchFiles": "*"
   },
   linux: {
     "target": ["AppImage"]
