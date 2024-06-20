@@ -1,6 +1,6 @@
 import { reactive, watch, ref } from 'vue';
 
-import {OntologyAnnotation} from '@nfdi4plants/arctrl/ISA/ISA/JsonTypes/OntologyAnnotation.js';
+import {OntologyAnnotation} from '@nfdi4plants/arctrl';
 
 const autoLabel = property => {
   let words = property
@@ -26,7 +26,7 @@ const Property = (model: any,property: string, config?: any)=>{
   // console.log(property, model[property]);
   config = config || {};
   if(config.type==='ontology' && !model[property])
-    model[property] = OntologyAnnotation.fromString('');
+    model[property] = new OntologyAnnotation('');
 
   const p = reactive({
     model: model,

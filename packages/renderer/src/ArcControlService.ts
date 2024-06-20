@@ -2,11 +2,9 @@ import { reactive } from 'vue'
 
 import AppProperties from './AppProperties.ts';
 
-import { ARC } from "@nfdi4plants/arctrl/ARC.js";
-import { ArcInvestigation } from "@nfdi4plants/arctrl/ISA/ISA/ArcTypes/ArcTypes.js";
-import { gitignoreContract } from "@nfdi4plants/arctrl/Contracts/Contracts.Git.js";
+import { ARC, ArcInvestigation } from "@nfdi4plants/arctrl";
+import { gitignoreContract } from "@nfdi4plants/arctrl/Contract/Git";
 import { Xlsx } from '@fslab/fsspreadsheet/Xlsx.js';
-import {FileSystemTree} from '@nfdi4plants/arctrl/FileSystem/FileSystemTree.js'
 import {Contract} from '@nfdi4plants/arctrl/Contract/Contract.js'
 
 import pDebounce from 'p-debounce';

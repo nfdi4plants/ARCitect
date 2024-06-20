@@ -2,7 +2,7 @@
 
 import { date } from 'quasar'
 
-import {OntologyAnnotation} from '@nfdi4plants/arctrl/ISA/ISA/JsonTypes/OntologyAnnotation.js';
+import {OntologyAnnotation} from '@nfdi4plants/arctrl';
 
 export interface Props {
   property: Object
@@ -40,7 +40,7 @@ const isValidTerm = ()=>{
       :options="props.property.options"
       :option-id="'TermAccessionNumber'"
       :option-label="a=> a ? a.NameText : ''"
-      @input-value="v=>{if(props.property.model[props.property.property].NameText!==v){props.property.model[props.property.property] = OntologyAnnotation.fromString(v)}}"
+      @input-value="v=>{if(props.property.model[props.property.property].NameText!==v){props.property.model[props.property.property] = new OntologyAnnotation(v)}}"
       @filter="props.property.filter"
       :disable="props.property.disabled"
       options-dense
@@ -83,7 +83,7 @@ const isValidTerm = ()=>{
       :options="props.property.options"
       :option-id="'TermAccessionNumber'"
       :option-label="a=> a ? a.NameText : ''"
-      @input-value="v=>{if(props.property.model[props.property.property].NameText!==v){props.property.model[props.property.property] = OntologyAnnotation.fromString(v)}}"
+      @input-value="v=>{if(props.property.model[props.property.property].NameText!==v){props.property.model[props.property.property] = new OntologyAnnotation(v)}}"
       @filter="props.property.filter"
       :disable="props.property.disabled"
       options-dense
