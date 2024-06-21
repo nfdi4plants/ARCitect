@@ -3,10 +3,7 @@ import { onMounted, onUnmounted, ref, watch, reactive } from 'vue';
 import ArcControlService from '../ArcControlService.ts';
 import AppProperties from '../AppProperties.ts';
 import SwateControlService from '../SwateControlService.ts';
-import { ArcInvestigation, ArcAssay, ArcStudy } from '@nfdi4plants/arctrl';
-import { ArcAssay_fromArcJsonString, ArcAssay_toArcJsonString } from '@nfdi4plants/arctrl/ISA/ISA.Json/ArcTypes/ArcAssay.js'
-import { ArcStudy_fromArcJsonString, ArcStudy_toArcJsonString } from '@nfdi4plants/arctrl/ISA/ISA.Json/ArcTypes/ArcStudy.js'
-import { ArcInvestigation_fromArcJsonString, ArcInvestigation_toArcJsonString } from '@nfdi4plants/arctrl/ISA/ISA.Json/ArcTypes/ArcInvestigation.js'
+import { ArcInvestigation, ArcAssay, ArcStudy, JsonController } from '@nfdi4plants/arctrl';
 
 let iframe: any | HTMLElement = ref({})
 
@@ -44,19 +41,19 @@ const send = (msg: Msg, data: any = null): void => {
   switch (msg) {
     case Msg.InvestigationToSwate:
       if (data instanceof ArcInvestigation) {
-        const jsonString = ArcInvestigation_toArcJsonString(data);
+        const jsonString = JsonController.Investigation.toJsonString(data,0)
         toSwate({ ArcInvestigationJsonString: jsonString });
       } else return console.error('Invalid data type for Msg.InvestigationToSwate');
       break;
     case Msg.AssayToSwate:
       if (data instanceof ArcAssay) {
-        const jsonString = ArcAssay_toArcJsonString(data);
+        const jsonString = JsonController.Assay.toJsonString(data,0)
         toSwate({ ArcAssayJsonString: jsonString });
       } else return console.error('Invalid data type for Msg.AssayToSwate');
       break;
     case Msg.StudyToSwate:
       if (data instanceof ArcStudy) {
-        const jsonString = ArcStudy_toArcJsonString(data);
+        const jsonString = JsonController.Study.toJsonString(data,0);
         toSwate({ ArcStudyJsonString: jsonString });
       } else return console.error('Invalid data type for Msg.AssayToSwate');
       break;
@@ -103,17 +100,17 @@ const SwateAPI: SwateAPI = {
     send(Msg.PathsToSwate, selection)
   },
   InvestigationToARCitect: (investigationJsonString: string) => {
-    let investigation = ArcInvestigation_fromArcJsonString(investigationJsonString);
+    let investigation = JsonController.Investigation.fromJsonString(investigationJsonString);
     ArcControlService.props.arc.ISA = investigation;
   },
   AssayToARCitect: (assayJsonString: string) => {
-    let assay = ArcAssay_fromArcJsonString(assayJsonString);
+    let assay = JsonController.Assay.fromJsonString(assayJsonString);
     ArcControlService.props.arc.ISA.SetAssay(assay.Identifier, assay);
   },
   StudyToARCitect: (studyJsonString: string) => {
     /// ignore assays, I am actually not sure why this must be create, but it will be empty. Must talk to Lukas Weil about this.
     /// ~Kevin F. 12.01.2024
-    let study = ArcStudy_fromArcJsonString(studyJsonString);
+    let study = JsonController.Study.fromJsonString(studyJsonString);
     ArcControlService.props.arc.ISA.SetStudy(study.Identifier, study);
   },
   Error: (e) => {

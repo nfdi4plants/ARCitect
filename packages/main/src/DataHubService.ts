@@ -1,17 +1,25 @@
 import {
   ipcMain,
   BrowserWindow,
-  shell
+  shell,
+  IpcMainInvokeEvent,
 } from 'electron';
 
 import {InternetService} from '/@/InternetService';
-
+import {Credentials, User} from '/@/DataHubService.d';
+import { Request, Response } from 'express';
 import querystring from 'query-string';
 const express = require('express');
+import { createHash, randomInt} from 'crypto';
 let authApp = null;
 const authPort = 7890;
 
-const CREDENTIALS = {
+
+
+// credentials for different repositories 
+// if secret is left out pkce will be used for authentification
+// that requires the confidential setting in the gitlab app to be turned off 
+const CREDENTIALS: Credentials = {
   'git.nfdi4plants.org': {
     id: 'af897fa1ef8474855feff07186adc6f26dee06971ee9ce4027f8f9c709a84c73',
     secret: 'd578e4df6370f219b9d55b04fbaf90315bdf655fb11405a16a43505c032650de',
@@ -26,11 +34,41 @@ const CREDENTIALS = {
   },
 };
 
+// alphabets for random string generation
+const ALPHABET = 'abcdefghijklmnopqrstuvwxyz';
+const ALPHANUMERIC = (ALPHABET+ALPHABET.toUpperCase()+'0123456789').split('')
+
+/** generates sha256 hash of input word and base64 encodes it urlsafe */
+function sha256Base64UrlsafeEncode(word: string){
+  // sha256 hash
+  let sha256Digest = createHash('sha256').update(word).digest();
+  // base64 encoding
+  return sha256Digest.toString('base64')
+  .replace(/\+/g, '-')
+  .replace(/\//g, '_')
+  .replace(/=+$/, '');
+}
+
+/** generates a random string for a given set of strings of a given length */
+function randomString(alphabet: Array<string>, string_length: number): string { 
+  return Array.from({length: string_length}, (_, i) => alphabet[randomInt(alphabet.length)]).join('');
+}
+
+
 export const DataHubService = {
 
   auth_host: null,
+  code_verifier: '', 
+  code_challenge: '',
+  pkce_state: '',
 
-  getPublicationByDOI: async (e,doi)=>{
+  generateCodeChallenge: (): void => {
+    DataHubService.pkce_state = randomString(ALPHANUMERIC, 48);
+    DataHubService.code_verifier = randomString(ALPHANUMERIC.concat(['-','.','_','~']), 128);
+    DataHubService.code_challenge = sha256Base64UrlsafeEncode(DataHubService.code_verifier);
+  },
+
+  getPublicationByDOI: async (e: IpcMainInvokeEvent, doi: string ) => {
     return await InternetService.getWebPageAsJson(
       null,
       {
@@ -41,18 +79,18 @@ export const DataHubService = {
     );
   },
 
-  getPublicationByPubMedID: async (e,id)=>{
+  getPublicationByPubMedID: async ( e: IpcMainInvokeEvent, id: string ) => {
     return await InternetService.getWebPageAsJson(
       null,
       {
         host: 'api.ncbi.nlm.nih.gov',
-        path: '/lit/ctxp/v1/pubmed/?format=csl&id='+ id,
+        path: '/lit/ctxp/v1/pubmed/?format=csl&id=' + id,
         method: 'GET'
       }
     );
   },
 
-  getPersonByORCID: async (e,id)=>{
+  getPersonByORCID: async (e: IpcMainInvokeEvent, id: string)=>{
     return await InternetService.getWebPageAsJson(
       null,
       {
@@ -63,7 +101,7 @@ export const DataHubService = {
     );
   },
 
-  getArcs: async (e,[host,token])=>{
+  getArcs: async (e: IpcMainInvokeEvent, [host, token]:[string, string]) => {
     return await InternetService.getWebPageAsJson(
       null,
       {
@@ -74,52 +112,79 @@ export const DataHubService = {
     );
   },
 
-  inspectArc: async (e,url)=>{
+  inspectArc: async (e: IpcMainInvokeEvent, url: string) => {
     shell.openExternal(url);
     return;
   },
 
-  authenticate: async (e,host)=>{
+  authenticate: async (e: IpcMainInvokeEvent, host: any) => {
     if(!CREDENTIALS[host]) return false;
 
-    DataHubService.auth_host  = host;
-    const url_params = {
-      response_type: 'code',
-      redirect_uri: 'http://localhost:7890',
-      client_id: CREDENTIALS[host].id,
-      scope: `openid read_api email profile read_repository write_repository`
-    };
-    const auth_url = `https://${host}/oauth/authorize?${querystring.stringify(url_params)}`;
-    shell.openExternal(auth_url);
+    DataHubService.auth_host = host;
+    let auth_url = '';
 
+    if ('secret' in CREDENTIALS[host]) { 
+      const url_params = {
+        response_type: 'code',
+        redirect_uri: 'http://localhost:7890',
+        client_id: CREDENTIALS[host].id,
+        scope: `openid read_api email profile read_repository write_repository`
+      };
+      auth_url = `https://${host}/oauth/authorize?${querystring.stringify(url_params)}`;
+    } else {
+      DataHubService.generateCodeChallenge();
+      const url_params = {
+        response_type: 'code',
+        redirect_uri: 'http://localhost:7890',
+        client_id: CREDENTIALS[host].id,
+        scope: `openid read_api email profile read_repository write_repository`,
+        state: DataHubService.pkce_state,
+        code_challenge: DataHubService.code_challenge,
+        code_challenge_method:"S256"
+      };
+      auth_url = `https://${host}/oauth/authorize?${querystring.stringify(url_params)}`;
+    }
+    shell.openExternal(auth_url);
     return true;
   },
 
-  getToken: async (e,code,host)=>{
-    if(!CREDENTIALS[host]) return null;
+  getToken: async ( e: IpcMainInvokeEvent | null, code: string, host: string ) => {
+    if (!CREDENTIALS[host]) return null;
+    let path = '';
 
-    const url_params = {
-      code: code,
-      client_id: CREDENTIALS[host].id,
-      client_secret: CREDENTIALS[host].secret,
-      grant_type: 'authorization_code',
-      redirect_uri: 'http://localhost:7890'
-    };
+    if ('secret' in CREDENTIALS[host]) { 
+      const url_params = {
+        code: code,
+        client_id: CREDENTIALS[host].id,
+        client_secret: CREDENTIALS[host].secret,
+        grant_type: 'authorization_code',
+        redirect_uri: 'http://localhost:7890'
+      };
+      path = `/oauth/token?${querystring.stringify(url_params)}`;
+    } else {
+      const url_params = {
+        code: code,
+        client_id: CREDENTIALS[host].id,
+        grant_type: 'authorization_code',
+        redirect_uri: 'http://localhost:7890',
+        code_verifier: DataHubService.code_verifier
+      };
+      path = `/oauth/token?${querystring.stringify(url_params)}`;
+    }
 
-    const path = `/oauth/token?${querystring.stringify(url_params)}`;
-
-    return await InternetService.getWebPageAsJson(
-        null,
-        {
-          host: host,
-          path: path,
-          port: 443,
-          method: 'POST'
-        }
-      );
+    let returnvalue = await InternetService.getWebPageAsJson(
+      null,
+      {
+        host: host,
+        path: path,
+        port: 443,
+        method: 'POST'
+      }
+    );
+    return returnvalue
   },
 
-  getGroups: async (e,[host,token])=>{
+  getGroups: async ( e: IpcMainInvokeEvent, [host, token]: [string, string] ) => {
     return await InternetService.getWebPageAsJson(
         null,
         {
@@ -134,7 +199,7 @@ export const DataHubService = {
       );
   },
 
-  getUser: async (e,token,host)=>{
+  getUser: async ( e: IpcMainInvokeEvent | null, token: string, host: string ): Promise<User> => {
     return await InternetService.getWebPageAsJson(
         null,
         {
@@ -156,21 +221,34 @@ export const DataHubService = {
     ipcMain.handle('DataHubService.getPersonByORCID', DataHubService.getPersonByORCID );
 
     authApp = express()
-    authApp.get('/', async (req, res) => {
+    authApp.get('/', async (req: Request, res: Response) => {
       if(!req.url || !req.url.startsWith('/?code=')){
         return res.send('Invalid Request.');
       }
 
-      const code = req.url.split('/?code=')[1];
-      const token = await DataHubService.getToken(null,code,DataHubService.auth_host);
-      const user = await DataHubService.getUser(null,token.access_token,DataHubService.auth_host);
+      if(DataHubService.auth_host === null){
+        return res.send('<h1>Authentification Failed.</h1>');
+      }
+      
+      const code = req.url.split('/?code=')[1].split('&')[0];
+      const token = await DataHubService.getToken(null, code, DataHubService.auth_host);
+      
+      if (token === null) {
+        return res.send('<h1>Authentification Failed.</h1>');
+      }
+      
+      const user = await DataHubService.getUser(null, token.access_token, DataHubService.auth_host);
       user.token = token;
       user.host = DataHubService.auth_host;
 
       res.send('<h1>Login and Authorization Complete. You can now return to ARCitect.</h1><script>window.close()</script>');
       let window = BrowserWindow.getAllWindows().find(w => !w.isDestroyed());
-      window.webContents.send('DataHubService.authentificationData', user);
-      window.focus();
+      
+      if( window !== undefined){
+        window.webContents.send('DataHubService.authentificationData', user);
+        window.focus();
+      }
+
     });
     authApp.listen(authPort, () => {
       console.log(`Authentification service listening on port ${authPort}`);

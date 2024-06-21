@@ -10,7 +10,7 @@ import AddProtocolDialog from '../dialogs/AddProtocolDialog.vue';
 import NewAssayDialog from '../dialogs/NewAssayDialog.vue';
 import { NewAssayInformation } from '../dialogs/NewAssayDialog.vue';
 import { useQuasar } from 'quasar'
-import {ArcStudy, ArcAssay} from '@nfdi4plants/arctrl/ISA/ISA/ArcTypes/ArcTypes.js';
+import {ArcStudy, ArcAssay} from '@nfdi4plants/arctrl';
 import NewStudyDialog from '../dialogs/NewStudyDialog.vue';
 
 const Image = 'image';

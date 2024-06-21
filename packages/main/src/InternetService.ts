@@ -16,7 +16,7 @@ const default_header = {
 
 export const InternetService = {
 
-  getWebPageAsJson: (e,options) => {
+  getWebPageAsJson: (e,options): Promise<any> => {
     return new Promise(
       (resolve, reject) => {
         try {
