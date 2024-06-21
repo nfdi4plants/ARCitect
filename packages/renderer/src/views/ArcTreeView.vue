@@ -45,7 +45,6 @@ const props = reactive(init);
 const arcTree = ref(null);
 const selected = ref(null);
 
-
 watch(()=>ArcControlService.props.arc_root, async (newValue, oldValue) => {
   if(oldValue)
     window.ipc.invoke('LocalFileSystemService.unregisterChangeListener', oldValue);
@@ -353,83 +352,103 @@ const formatSize = size => {
   return (size / Math.pow(1024,log)).toFixed(2) + ' ' + suffix;
 };
 
+const createFile = async node=>{
+  $q.dialog({
+    component: StringDialog,
+    componentProps: {
+      title: 'Add File',
+      property: 'Filename',
+      icon: 'note_add'
+    }
+  }).onOk( async name => {
+    const path = node.id + '/' + name;
+    await window.ipc.invoke('LocalFileSystemService.writeFile', [path,'']);
+  });
+};
+
 const onCellContextMenu = (e,node) => {
   // console.log(node);
+
+  const items = [];
+
+  if(node.isDirectory){
+    items.push(
+      {
+        label: "New Text File",
+        icon: h(
+          'i',
+          {
+            class: 'q-icon on-left notranslate material-icons',
+            role:'img',
+            style:{fontSize: '1.5em',color:'#333'}
+          },
+          ['note_add']
+        ),
+        onClick: ()=>createFile(node)
+      }
+    );
+  } else {
+    items.push(
+      {
+        label: "Delete File",
+        icon: h(
+          'i',
+          {
+            class: 'q-icon on-left notranslate material-icons',
+            role:'img',
+            style:{fontSize: '1.5em',color:'#333'}
+          },
+          ['delete']
+        ),
+        onClick: ()=>window.ipc.invoke('LocalFileSystemService.remove', node.id)
+      }
+    );
+  }
+
   if(node.type===formatNodeEditString(Assays)){
-    e.preventDefault();
-    ContextMenu.showContextMenu({
-      x: e.x,
-      y: e.y,
-      theme: 'flat',
-      items: [
-        // {
-        //   label: "Rename",
-        //   icon: h(
-        //     'i',
-        //     {
-        //       class: 'q-icon on-left notranslate material-icons',
-        //       role:'img',
-        //       style:{fontSize: '1.5em',color:'#333'}
-        //     },
-        //     ['edit']
-        //   ),
-        //   onClick: () =>{
-        //     console.log('rename')
-        //   }
-        // },
-        {
-          label: "Delete",
-          icon: h(
-            'i',
-            {
-              class: 'q-icon on-left notranslate material-icons',
-              role:'img',
-              style:{fontSize: '1.5em',color:'#333'}
-            },
-            ['delete']
-          ),
-          onClick: () =>{ArcControlService.deleteAssay(node.label)}
-        },
-      ]
-    });
+    items.push(
+      {
+        label: "Delete",
+        icon: h(
+          'i',
+          {
+            class: 'q-icon on-left notranslate material-icons',
+            role:'img',
+            style:{fontSize: '1.5em',color:'#333'}
+          },
+          ['delete']
+        ),
+        onClick: () =>{ArcControlService.deleteAssay(node.label)}
+      }
+    );
   } else if (node.type===formatNodeEditString(Studies)){
+    items.push(
+      {
+        label: "Delete",
+        icon: h(
+          'i',
+          {
+            class: 'q-icon on-left notranslate material-icons',
+            role:'img',
+            style:{fontSize: '1.5em',color:'#333'}
+          },
+          ['delete']
+        ),
+        onClick: () =>{ArcControlService.deleteStudy(node.label)}
+      }
+    );
+  }
+
+  if(items.length){
     e.preventDefault();
     ContextMenu.showContextMenu({
       x: e.x,
       y: e.y,
       theme: 'flat',
-      items: [
-        // {
-        //   label: "Rename",
-        //   icon: h(
-        //     'i',
-        //     {
-        //       class: 'q-icon on-left notranslate material-icons',
-        //       role:'img',
-        //       style:{fontSize: '1.5em',color:'#333'}
-        //     },
-        //     ['edit']
-        //   ),
-        //   onClick: () =>{
-        //     console.log('rename')
-        //   }
-        // },
-        {
-          label: "Delete",
-          icon: h(
-            'i',
-            {
-              class: 'q-icon on-left notranslate material-icons',
-              role:'img',
-              style:{fontSize: '1.5em',color:'#333'}
-            },
-            ['delete']
-          ),
-          onClick: () =>{ArcControlService.deleteStudy(node.label)}
-        },
-      ]
+      items: items
     });
   }
+
   // work in progress for adding files to gitignore
   // else if (
   //   !node.type.startsWith('empty') && !node.type.startsWith(NodeAdd_PreFix)

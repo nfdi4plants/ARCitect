@@ -38,6 +38,7 @@ const onSubmit = async () => {
         <q-card-section>
           <q-input
             filled
+            autofocus
             v-model="iProps.value"
             :label="props.property"
             :rules="[

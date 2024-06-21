@@ -164,7 +164,6 @@ export const LocalFileSystemService = {
   },
 
   writeFile: async (e,[path,data,options])=>{
-    console.log(path)
     options = options || {encoding:'UTF-8'};
     path = path_to_system(path);
     FS.mkdirSync(PATH.dirname(path),{recursive:true});
