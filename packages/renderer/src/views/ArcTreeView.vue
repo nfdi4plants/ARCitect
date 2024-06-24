@@ -8,6 +8,8 @@ import {Investigation, Assays, Studies, Workflows, Runs, Dataset, Protocols} fro
 import StringDialog from '../dialogs/StringDialog.vue';
 import AddProtocolDialog from '../dialogs/AddProtocolDialog.vue';
 import NewAssayDialog from '../dialogs/NewAssayDialog.vue';
+import GitDialog from '../dialogs/GitDialog.vue';
+import ErrorDialog from '../dialogs/ErrorDialog.vue';
 import { NewAssayInformation } from '../dialogs/NewAssayDialog.vue';
 import { useQuasar } from 'quasar'
 import {ArcStudy, ArcAssay} from '@nfdi4plants/arctrl';
@@ -210,20 +212,17 @@ const readDir_ = async (path: string) => {
   for(const n of nodes){
     n.label = n.id.split('/').pop();
     n.lazy = n.isDirectory;
+    n.selectable = true;
     if(isEditable(n,parent)){
       n.type = formatNodeEditString(parent);
       n.icon = 'edit_square';
-      n.selectable = true;
     } else if(isMarkdown(n.label)){
       n.type = formatNodeEditString(Markdown);
       n.icon = 'edit_square';
-      n.selectable = true;
     } else if(isImage(n.label)){
       n.type = formatNodeEditString(Image);
       n.icon = 'image';
-      n.selectable = true;
     } else {
-      n.selectable = false;
       n.type = 'node';
     }
   };
@@ -366,8 +365,15 @@ const createFile = async node=>{
   });
 };
 
-const onCellContextMenu = (e,node) => {
-  // console.log(node);
+const patchRemote = url => {
+  return AppProperties.user && url.includes(AppProperties.user.host)
+    ? `https://oauth2:${AppProperties.user.token.access_token}@${AppProperties.user.host}` + url.split(AppProperties.user.host)[1]
+    : null;
+};
+
+const onCellContextMenu = async (e,node) => {
+  if(node.type==='empty') return;
+  e.preventDefault();
 
   const items = [];
 
@@ -388,9 +394,28 @@ const onCellContextMenu = (e,node) => {
       }
     );
   } else {
-    items.push(
-      {
-        label: "Delete File",
+    items.push({
+      label: "Delete File",
+      icon: h(
+        'i',
+        {
+          class: 'q-icon on-left notranslate material-icons',
+          role:'img',
+          style:{fontSize: '1.5em',color:'#333'}
+        },
+        ['delete']
+      ),
+      onClick: ()=>window.ipc.invoke('LocalFileSystemService.remove', node.id)
+    });
+
+    const rel_file_path = node.id.replaceAll(ArcControlService.props.arc_root+'/','');
+    const lfs_files = await window.ipc.invoke('GitService.run', {
+      args: ['lfs','ls-files','-n'],
+      cwd: ArcControlService.props.arc_root
+    });
+    if(lfs_files[0] && lfs_files[1].includes(rel_file_path)){
+      items.push({
+        label: "Download LFS File",
         icon: h(
           'i',
           {
@@ -398,11 +423,79 @@ const onCellContextMenu = (e,node) => {
             role:'img',
             style:{fontSize: '1.5em',color:'#333'}
           },
-          ['delete']
+          ['cloud_download']
         ),
-        onClick: ()=>window.ipc.invoke('LocalFileSystemService.remove', node.id)
-      }
-    );
+        onClick: async ()=>{
+          let response = null;
+
+          // get remote name and url
+          response = await window.ipc.invoke('GitService.run', {
+            args: [`remote`],
+            cwd: ArcControlService.props.arc_root
+          });
+          if(!response[0]) return $q.dialog({
+            component: ErrorDialog,
+            componentProps: {
+              error: 'Unable to determine remote name'
+            }
+          });
+          const remote_name = response[1].split('\n')[0];
+          response = await window.ipc.invoke('GitService.run', {
+            args: [`remote`,`get-url`,remote_name],
+            cwd: ArcControlService.props.arc_root
+          });
+          if(!response[0]) return $q.dialog({
+            component: ErrorDialog,
+            componentProps: {
+              error: 'Unable to determine remote url'
+            }
+          });
+          const remote_url = response[1].split('\n')[0];
+
+          // patch remote
+          const patched_remote_url = patchRemote(remote_url);
+          if(!patched_remote_url){
+            return $q.dialog({
+              component: ErrorDialog,
+              componentProps: {
+                error: 'LFS download requires login'
+              }
+            });
+          }
+          response = await window.ipc.invoke('GitService.run', {
+            args: [`remote`,`set-url`,remote_name,patched_remote_url],
+            cwd: ArcControlService.props.arc_root
+          });
+          console.log(response);
+          if(!response[0]) return;
+
+          const dialogProps = reactive({
+            title: 'Pulling Individual LFS File',
+            ok_title: 'Ok',
+            cancel_title: null,
+            state: 0,
+          });
+
+          $q.dialog({
+            component: GitDialog,
+            componentProps: dialogProps
+          });
+
+          await window.ipc.invoke('GitService.run', {
+            args: ['lfs','pull','--include',rel_file_path],
+            cwd: ArcControlService.props.arc_root
+          });
+
+          // unpatch
+          response = await window.ipc.invoke('GitService.run', {
+            args: [`remote`,`set-url`,remote_name,remote_url],
+            cwd: ArcControlService.props.arc_root
+          });
+
+          dialogProps.state=1;
+        }
+      });
+    }
   }
 
   if(node.type===formatNodeEditString(Assays)){
@@ -439,7 +532,10 @@ const onCellContextMenu = (e,node) => {
     );
   }
 
+  console.log(items);
+
   if(items.length){
+    console.log(node.id);
     e.preventDefault();
     ContextMenu.showContextMenu({
       x: e.x,
