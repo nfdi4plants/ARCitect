@@ -20,11 +20,11 @@ export const Runs = 'runs';
 export const Workflows = 'workflows';
 
 let init: {
-    arc_root: null | string ,
+    arc_root: undefined | string ,
     busy: boolean,
     arc: null | ARC
 } = {
-    arc_root: null ,
+    arc_root: undefined ,
     busy: false,
     arc: null
 }
@@ -38,7 +38,7 @@ const ArcControlService = {
   props: reactive(init),
 
   closeARC: async() => {
-    ArcControlService.props.arc_root = null;
+    ArcControlService.props.arc_root = undefined;
     ArcControlService.props.busy = false;
     ArcControlService.props.arc = null;
     AppProperties.active_assay = null;
@@ -77,33 +77,43 @@ const ArcControlService = {
   },
 
   handleARCContracts: async (contracts: Contract []) => {
+    console.log("!HandleContracts!")
+    console.log(contracts.length)
     let arc = ArcControlService.props.arc;
     let arc_root = ArcControlService.props.arc_root;
     if(!arc || !arc_root)
       return;
-
+    console.log("HandleContracts")
     ArcControlService.props.busy = true;
     arc.UpdateFileSystem();
     for(const contract of contracts) {
+      console.log(contract.Path)
       switch (contract.Operation) {
         case 'DELETE':
-          return await window.ipc.invoke(
+          await window.ipc.invoke(
             'LocalFileSystemService.remove',
             relative_to_absolute_path(contract.Path)
           );
-        case 'UPDATE': case 'WRITE':
+          break;
+        case 'UPDATE': case 'CREATE':
+          console.log("UPDATE/CREATE")
           if(['ISA_Investigation','ISA_Study','ISA_Assay'].includes(contract.DTOType)){
             const buffer = await Xlsx.toBytes(contract.DTO);
-            return await window.ipc.invoke(
+            const absolutePath = relative_to_absolute_path(contract.Path)
+            console.log("path", contract.Path)
+            console.log("abs-path", absolutePath)
+            await window.ipc.invoke(
               'LocalFileSystemService.writeFile',
               [
-                relative_to_absolute_path(contract.Path),
+                absolutePath,
                 buffer,
                 {}
               ]
             );
+            break;
           } else if(contract.DTOType==='PlainText'){
-            return await window.ipc.invoke('LocalFileSystemService.writeFile', [
+            console.log("PLAINTEXT")
+            await window.ipc.invoke('LocalFileSystemService.writeFile', [
               arc_root+'/'+contract.Path,
               contract.DTO || '',
               {encoding:'UTF-8', flag: 'wx'}
@@ -111,14 +121,16 @@ const ArcControlService = {
           } else {
             return console.log('unable to resolve write contract', contract);
           }
+          break;
         case 'RENAME':
-          return await window.ipc.invoke(
+          await window.ipc.invoke(
             'LocalFileSystemService.rename',
             [
               relative_to_absolute_path(contract.Path),
               relative_to_absolute_path(contract.DTO)
             ]
           );
+          break;
         default:
           console.log(`Warning. 'handleARCContracts' hit unknown expression for contract type: ${contract.Operation} in ${contract}.`)
           break;
@@ -127,14 +139,18 @@ const ArcControlService = {
   },
 
   saveARC: async (options:{
-      arc_root: string | null,
-      arc: ARC | void,
-      force:boolean
+      arc_root?: string,
+      arc?: ARC,
+      force?:boolean
   })=>{
     const arc = options.arc || ArcControlService.props.arc;
+    if(!ArcControlService.props.arc)
+      ArcControlService.props.arc = arc;
     if(!arc)
       return;
     const arc_root = options.arc_root || ArcControlService.props.arc_root;
+    if(!ArcControlService.props.arc_root)
+      ArcControlService.props.arc_root = options.arc_root;
     if(!arc_root)
       return;
 
@@ -142,6 +158,8 @@ const ArcControlService = {
 
     arc.UpdateFileSystem();
     let contracts = options.force ? arc.GetWriteContracts() : arc.GetUpdateContracts();
+    console.log("Save ARC")
+    console.log(contracts)
 
     /// Add default .gitignore if it does not exist
     const ignore_exists = await window.ipc.invoke(
@@ -188,7 +206,7 @@ const ArcControlService = {
       ArcInvestigation.init(path.split('/').pop())
     );
     await ArcControlService.saveARC({
-      path:path,
+      arc_root:path,
       arc:arc,
       force: true
     });
@@ -219,7 +237,7 @@ const ArcControlService = {
     const entry = path.replace(ArcControlService.props.arc_root,'');
     const ignore_exists = await window.ipc.invoke('LocalFileSystemService.exists', ArcControlService.props.arc_root+'/.gitignore');
     if(!ignore_exists)
-      await ArcControlService.writeARC();
+      await ArcControlService.saveARC({});
 
     const ignore_string = await window.ipc.invoke('LocalFileSystemService.readFile', ArcControlService.props.arc_root+'/.gitignore');
     const line_delimiter = ignore_string.indexOf('\r\n')<0 ? '\n' : '\r\n';

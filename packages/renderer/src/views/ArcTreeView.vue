@@ -106,7 +106,7 @@ const addStudy_ = async (identifier: string, skip_io: boolean | void)=>{
   const study = new ArcStudy(identifier,identifier);
   ArcControlService.props.arc.ISA.AddRegisteredStudy(study)
   if(!skip_io){
-    await ArcControlService.writeARC();
+    await ArcControlService.saveARC({});
     await ArcControlService.readARC();
     AppProperties.active_study = identifier;
   }
@@ -122,6 +122,7 @@ const addAssay = async ()=>{
   $q.dialog({
     component: NewAssayDialog
   }).onOk( async (data: NewAssayInformation) => {
+    console.log("Add assay")
     const assay = new ArcAssay(data.assayIdentifier);
     ArcControlService.props.arc.ISA.AddAssay(assay);
 
@@ -137,7 +138,7 @@ const addAssay = async ()=>{
         }
     };
 
-    await ArcControlService.writeARC(ArcControlService.props.arc_root, undefined, undefined);
+    await ArcControlService.saveARC({arc_root: ArcControlService.props.arc_root});
     await ArcControlService.readARC();
     AppProperties.active_assay = data.assayIdentifier;
   });
