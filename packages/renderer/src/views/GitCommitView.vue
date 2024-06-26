@@ -13,7 +13,6 @@ import AppProperties from '../AppProperties.ts';
 
 import pDebounce from 'p-debounce';
 
-import ProgressDialog from '../dialogs/ProgressDialog.vue';
 import GitDialog from '../dialogs/GitDialog.vue';
 import StringDialog from '../dialogs/StringDialog.vue';
 import { useQuasar } from 'quasar'
@@ -56,13 +55,15 @@ const setGitUser = async(name,email)=>{
     args: [`config`,`user.name`,name],
     cwd: ArcControlService.props.arc_root
   });
+  if(!response[0]) return response;
   response = await window.ipc.invoke('GitService.run', {
     args: [`config`,`user.email`,email],
     cwd: ArcControlService.props.arc_root
   });
+  return response;
 };
 
-const trackChanges = async progress =>{
+const trackChanges = async () => {
   let git_lfs = [];
   let git_add = [];
   let git_rm = [];
@@ -80,20 +81,36 @@ const trackChanges = async progress =>{
     }
   }
 
+  const string_limit = 2000;
   for(let [a,b,c] of [
     [['rm'],git_rm,1],
     [['lfs','untrack'],git_rm,1],
     [['lfs','track'],git_lfs,2],
     [['add'],git_add,3]
   ]){
-    for(let i=0; i<b.length; i+=200){
-      await window.ipc.invoke('GitService.run', {
-        args: a.concat(b.slice(i,i+200).map(x=>'"'+x+'"')),
+    if(b.length<1) continue;
+
+    let string = a+' ';
+    const chunks = [0];
+    for(let i=0; i<b.length; i++){
+      string += ' "'+b[i]+"'";
+      if(string.length>string_limit){
+        chunks.push(i);
+        string = a+' ';
+      }
+    }
+    chunks.push(b.length);
+
+    for(let i=0; i<chunks.length-1; i++){
+      const args = a.concat(b.slice(chunks[i],chunks[i+1]).map(x=>'"'+x+'"'));
+      const response = await window.ipc.invoke('GitService.run', {
+        args: args,
         cwd: ArcControlService.props.arc_root
       });
+      if(!response[0]) return response;
     }
-    progress[c][1]=1;
   }
+  return [1];
 };
 
 const commit = async()=>{
@@ -107,34 +124,33 @@ const commit = async()=>{
     title: 'Committing Changes',
     ok_title: 'Ok',
     cancel_title: null,
-    error: '',
-    succ: '',
-    items: [
-      ['Retrieving User Credentials',0],
-      ['Removing Files',0],
-      ['Tracking LFS Files',0],
-      ['Adding Files',0],
-      ['Performing Commit',0],
-    ]
+    state: 0,
   });
 
   $q.dialog({
-    component: ProgressDialog,
+    component: GitDialog,
     componentProps: dialogProps
   }).onOk( async () => {
     await init();
   });
 
-  await setGitUser(name,email);
-  dialogProps.items[0][1] = 1;
-  await trackChanges(dialogProps.items);
+  let response=null;
+  response = await setGitUser(name,email);
+  if(!response[0])
+    return dialogProps.state=2;
 
-  await window.ipc.invoke('GitService.run', {
+  response = await trackChanges();
+  if(!response[0])
+    return dialogProps.state=2;
+
+  response = await window.ipc.invoke('GitService.run', {
     args: ['commit','-m','"'+msg+'"'],
     cwd: ArcControlService.props.arc_root
   });
-  // dialogProps.succ = 'Commit Complete';
-  dialogProps.items[4][1] = 1;
+  if(!response[0])
+    return dialogProps.state=2;
+
+  dialogProps.state = 1;
 };
 
 const isTrackedWithLFS = item=>{
