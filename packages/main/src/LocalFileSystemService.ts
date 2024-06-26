@@ -71,7 +71,7 @@ export const LocalFileSystemService = {
     return result ? result.filePaths.map(path_to_arcitect) : null;
   },
 
-  selectAnyFolders: async (options: Electron.OpenDialogOptions = {})=> {
+  selectAnyDirectories: async (options: Electron.OpenDialogOptions = {})=> {
     options.properties = options.properties || ['openDirectory','multiSelections'] // if given from outside don't set, otherwise set default.
     const window = BrowserWindow.getAllWindows().find(w => !w.isDestroyed())
     const result = await dialog.showOpenDialog(window, options);
@@ -163,6 +163,13 @@ export const LocalFileSystemService = {
     return fpath;
   },
 
+  enforcePath: async (e,path)=>{
+    try {
+      FS.mkdirSync(path_to_system(path),{recursive:true});
+    } catch (err) {
+    }
+  },
+
   writeFile: async (e,[path,data,options])=>{
     options = options || {encoding:'UTF-8'};
     path = path_to_system(path);
@@ -191,6 +198,13 @@ export const LocalFileSystemService = {
       sizes.push( size );
     }
     return sizes;
+  },
+
+  rename: async (e,[oldPath,newPath])=>{
+    try {
+      FS.renameSync( oldPath, newPath );
+      return true;
+    } catch {return false;}
   },
 
   exists: async (e,path)=>{
@@ -226,10 +240,11 @@ export const LocalFileSystemService = {
     ipcMain.handle('LocalFileSystemService.readDir', LocalFileSystemService.readDir);
     ipcMain.handle('LocalFileSystemService.readFile', LocalFileSystemService.readFile);
     ipcMain.handle('LocalFileSystemService.readImage', LocalFileSystemService.readImage);
+    ipcMain.handle('LocalFileSystemService.enforcePath', LocalFileSystemService.enforcePath);
     ipcMain.handle('LocalFileSystemService.writeFile', LocalFileSystemService.writeFile);
     ipcMain.handle('LocalFileSystemService.selectDir', LocalFileSystemService.selectDir);
     ipcMain.handle('LocalFileSystemService.selectAnyFiles', LocalFileSystemService.selectAnyFiles);
-    ipcMain.handle('LocalFileSystemService.selectAnyFolders', LocalFileSystemService.selectAnyFolders);
+    ipcMain.handle('LocalFileSystemService.selectAnyDirectories', LocalFileSystemService.selectAnyDirectories);
     ipcMain.handle('LocalFileSystemService.saveFile', LocalFileSystemService.saveFile);
     ipcMain.handle('LocalFileSystemService.copy', LocalFileSystemService.copy);
     ipcMain.handle('LocalFileSystemService.createEmptyFile', LocalFileSystemService.createEmptyFile);
@@ -240,5 +255,6 @@ export const LocalFileSystemService = {
     ipcMain.handle('LocalFileSystemService.getFileSizes', LocalFileSystemService.getFileSizes);
     ipcMain.handle('LocalFileSystemService.exists', LocalFileSystemService.exists);
     ipcMain.handle('LocalFileSystemService.openPath', LocalFileSystemService.openPath);
+    ipcMain.handle('LocalFileSystemService.rename', LocalFileSystemService.rename);
   }
 }

@@ -1,3 +1,4 @@
+
 import { reactive } from 'vue'
 
 import AppProperties from './AppProperties.ts';
@@ -6,6 +7,7 @@ import { ARC, ArcInvestigation } from "@nfdi4plants/arctrl";
 import { gitignoreContract } from "@nfdi4plants/arctrl/Contract/Git";
 import { Xlsx } from '@fslab/fsspreadsheet/Xlsx.js';
 import {Contract} from '@nfdi4plants/arctrl/Contract/Contract.js'
+
 
 import pDebounce from 'p-debounce';
 
@@ -27,7 +29,7 @@ let init: {
     arc: null
 }
 
-function relativePath_to_absolute(relativePath: string) {
+function relative_to_absolute_path(relativePath: string) {
   return ArcControlService.props.arc_root + '/' + relativePath
 }
 
@@ -82,15 +84,41 @@ const ArcControlService = {
 
     ArcControlService.props.busy = true;
     arc.UpdateFileSystem();
-    for (const contract of contracts) {
+    for(const contract of contracts) {
       switch (contract.Operation) {
         case 'DELETE':
-          await window.ipc.invoke('LocalFileSystemService.remove', relativePath_to_absolute(contract.Path));
-          break;
+          return await window.ipc.invoke(
+            'LocalFileSystemService.remove',
+            relative_to_absolute_path(contract.Path)
+          );
         case 'UPDATE': case 'WRITE':
-          const buffer = await Xlsx.toBytes(contract.DTO);
-          await window.ipc.invoke('LocalFileSystemService.writeFile', [relativePath_to_absolute(contract.Path),buffer,{}]);
-          break;
+          if(['ISA_Investigation','ISA_Study','ISA_Assay'].includes(contract.DTOType)){
+            const buffer = await Xlsx.toBytes(contract.DTO);
+            return await window.ipc.invoke(
+              'LocalFileSystemService.writeFile',
+              [
+                relative_to_absolute_path(contract.Path),
+                buffer,
+                {}
+              ]
+            );
+          } else if(contract.DTOType==='PlainText'){
+            return await window.ipc.invoke('LocalFileSystemService.writeFile', [
+              arc_root+'/'+contract.Path,
+              contract.DTO || '',
+              {encoding:'UTF-8', flag: 'wx'}
+            ]);
+          } else {
+            return console.log('unable to resolve write contract', contract);
+          }
+        case 'RENAME':
+          return await window.ipc.invoke(
+            'LocalFileSystemService.rename',
+            [
+              relative_to_absolute_path(contract.Path),
+              relative_to_absolute_path(contract.DTO)
+            ]
+          );
         default:
           console.log(`Warning. 'handleARCContracts' hit unknown expression for contract type: ${contract.Operation} in ${contract}.`)
           break;
@@ -98,38 +126,32 @@ const ArcControlService = {
     }
   },
 
-  writeARC: async (arc_root: string | null, filter, arc: ARC | void)=>{
-    arc = arc || ArcControlService.props.arc;
+  saveARC: async (options:{
+      arc_root: string | null,
+      arc: ARC | void,
+      force:boolean
+  })=>{
+    const arc = options.arc || ArcControlService.props.arc;
     if(!arc)
       return;
-    if(!arc_root)
-      arc_root = ArcControlService.props.arc_root;
+    const arc_root = options.arc_root || ArcControlService.props.arc_root;
     if(!arc_root)
       return;
 
     ArcControlService.props.busy = true;
 
     arc.UpdateFileSystem();
-    let contracts = arc.GetWriteContracts();
-    /// Add default .gitignore
-    contracts.push(gitignoreContract)
-    if(filter)
-      contracts = contracts.filter( x=>filter.includes(x.DTOType) );
+    let contracts = options.force ? arc.GetWriteContracts() : arc.GetUpdateContracts();
 
-    for(const contract of contracts){
-      if(['ISA_Investigation','ISA_Study','ISA_Assay'].includes(contract.DTOType)){
-        const buffer = await Xlsx.toBytes(contract.DTO);
-        await window.ipc.invoke('LocalFileSystemService.writeFile', [arc_root+'/'+contract.Path,buffer,{}]);
-      } else if(contract.DTOType==='PlainText'){
-        await window.ipc.invoke('LocalFileSystemService.writeFile', [
-          arc_root+'/'+contract.Path,
-          contract.DTO || '',
-          {encoding:'UTF-8', flag: 'wx'}
-        ]);
-      } else {
-        console.log('unable to resolve write contract', contract);
-      }
-    }
+    /// Add default .gitignore if it does not exist
+    const ignore_exists = await window.ipc.invoke(
+      'LocalFileSystemService.exists',
+      relative_to_absolute_path('/.gitignore')
+    );
+    if(!ignore_exists)
+      contracts.push(gitignoreContract);
+
+    await ArcControlService.handleARCContracts(contracts);
 
     ArcControlService.props.busy = false;
   },
@@ -142,7 +164,14 @@ const ArcControlService = {
     };
     let contracts = ArcControlService.props.arc.RemoveAssay(assay_identifier)
     await ArcControlService.handleARCContracts(contracts);
-    await ArcControlService.readARC();
+  },
+
+  rename: async (method:string, old_identifier:string, new_identifier:string) => {
+    const contracts = ArcControlService.props.arc[method](
+      old_identifier,
+      new_identifier
+    );
+    ArcControlService.handleARCContracts(contracts);
   },
 
   deleteStudy: async (study_identifier: string) => {
@@ -152,14 +181,17 @@ const ArcControlService = {
     };
     let contracts = ArcControlService.props.arc.RemoveStudy(study_identifier)
     await ArcControlService.handleARCContracts(contracts);
-    await ArcControlService.readARC();
   },
 
   new_arc: async (path: string) =>{
     const arc = new ARC(
       ArcInvestigation.init(path.split('/').pop())
     );
-    await ArcControlService.writeARC(path,null,arc);
+    await ArcControlService.saveARC({
+      path:path,
+      arc:arc,
+      force: true
+    });
     await ArcControlService.readARC(path);
 
     await window.ipc.invoke('GitService.run', {

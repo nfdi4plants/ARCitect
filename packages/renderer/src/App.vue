@@ -55,8 +55,10 @@ const openLocalArc = async (path: string | null | void) =>{
   AppProperties.state=AppProperties.STATES.HOME;
 };
 
-const saveLocalArc = async () =>{
-  await ArcControlService.writeARC();
+const saveLocalArc = async (force) =>{
+  await ArcControlService.saveARC({
+    force: force
+  });
 };
 
 const refreshLocalArc = async () =>{

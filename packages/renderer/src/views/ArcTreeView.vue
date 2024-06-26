@@ -5,6 +5,7 @@ import AppProperties from '../AppProperties';
 import ArcControlService from '../ArcControlService';
 import SwateControlService from '../SwateControlService';
 import {Investigation, Assays, Studies, Workflows, Runs, Dataset, Protocols} from '../ArcControlService';
+import ConfirmationDialog from '../dialogs/ConfirmationDialog.vue';
 import StringDialog from '../dialogs/StringDialog.vue';
 import AddProtocolDialog from '../dialogs/AddProtocolDialog.vue';
 import NewAssayDialog from '../dialogs/NewAssayDialog.vue';
@@ -157,17 +158,9 @@ const addProtocol = async n=>{
   });
 };
 
-const importFiles = async n=>{
-  const path = n.id.split('/').slice(0,-1).join('/');
-  const paths = await window.ipc.invoke('LocalFileSystemService.selectAnyFiles');
-  for(const path_ of paths){
-    await window.ipc.invoke('LocalFileSystemService.copy', [path_,path]);
-  }
-};
-
-const importFolders = async n => {
-  const path = n.id.split('/').slice(0,-1).join('/');
-  const paths = await window.ipc.invoke('LocalFileSystemService.selectAnyFolders');
+const importFilesOrDirectories = async (n,method)=>{
+  const path = n.id+'/';
+  const paths = await window.ipc.invoke('LocalFileSystemService.'+method);
   for(const path_ of paths){
     await window.ipc.invoke('LocalFileSystemService.copy', [path_,path]);
   }
@@ -249,24 +242,6 @@ const readDir_ = async (path: string) => {
       case Protocols:
         let addProcotolNode = createAddNode("Add Protocol", addProtocol)
         nodes.push(addProcotolNode);
-        break;
-      case Dataset:
-        let importDatasetFilesNode = createAddNode("Import Dataset Files", importFiles)
-        let importDatasetFoldersNode = createAddNode("Import Dataset Folders", importFolders)
-        nodes.push(importDatasetFilesNode);
-        nodes.push(importDatasetFoldersNode);
-        break;
-      case Runs:
-        let importRunsFilesNode = createAddNode("Import Runs Files", importFiles)
-        let importRunsFoldersNode = createAddNode("Import Runs Folders", importFolders)
-        nodes.push(importRunsFilesNode);
-        nodes.push(importRunsFoldersNode);
-        break;
-      case Workflows:
-        let importWorkflowsFilesNode = createAddNode("Import Workflows Files", importFiles)
-        let importWorkflowsFoldersNode = createAddNode("Import Workflows Folders", importFolders)
-        nodes.push(importWorkflowsFilesNode);
-        nodes.push(importWorkflowsFoldersNode);
         break;
     }
   };
@@ -365,6 +340,20 @@ const createFile = async node=>{
   });
 };
 
+const createDirectory = async node=>{
+  $q.dialog({
+    component: StringDialog,
+    componentProps: {
+      title: 'Add Directory',
+      property: 'Name',
+      icon: 'create_new_folder'
+    }
+  }).onOk( async name => {
+    const path = node.id + '/' + name;
+    await window.ipc.invoke('LocalFileSystemService.enforcePath', path);
+  });
+};
+
 const patchRemote = url => {
   return AppProperties.user && url.includes(AppProperties.user.host)
     ? `https://oauth2:${AppProperties.user.token.access_token}@${AppProperties.user.host}` + url.split(AppProperties.user.host)[1]
@@ -377,36 +366,34 @@ const onCellContextMenu = async (e,node) => {
 
   const items = [];
 
+  const icon_style = {
+    class: 'q-icon on-left notranslate material-icons material-symbols',
+    role:'img',
+    style:{fontSize: '1.5em',color:'#666'}
+  };
+
   if(node.isDirectory){
-    items.push(
-      {
-        label: "New Text File",
-        icon: h(
-          'i',
-          {
-            class: 'q-icon on-left notranslate material-icons',
-            role:'img',
-            style:{fontSize: '1.5em',color:'#333'}
-          },
-          ['note_add']
-        ),
-        onClick: ()=>createFile(node)
-      }
-    );
-  } else {
     items.push({
-      label: "Delete File",
-      icon: h(
-        'i',
-        {
-          class: 'q-icon on-left notranslate material-icons',
-          role:'img',
-          style:{fontSize: '1.5em',color:'#333'}
-        },
-        ['delete']
-      ),
-      onClick: ()=>window.ipc.invoke('LocalFileSystemService.remove', node.id)
+      label: "New Text File",
+      icon: h( 'i', icon_style, ['note_add'] ),
+      onClick: ()=>createFile(node)
     });
+    items.push({
+      label: "New Directory",
+      icon: h( 'i', icon_style, ['create_new_folder'] ),
+      onClick: ()=>createDirectory(node)
+    });
+    items.push({
+      label: "Import Files",
+      icon: h( 'i', icon_style, ['upload_file'] ),
+      onClick: ()=>importFilesOrDirectories(node,'selectAnyFiles')
+    });
+    items.push({
+      label: "Import Directories",
+      icon: h( 'i', icon_style, ['drive_folder_upload'] ),
+      onClick: ()=>importFilesOrDirectories(node,'selectAnyDirectories')
+    });
+  } else {
 
     const rel_file_path = node.id.replaceAll(ArcControlService.props.arc_root+'/','');
     const lfs_files = await window.ipc.invoke('GitService.run', {
@@ -416,15 +403,7 @@ const onCellContextMenu = async (e,node) => {
     if(lfs_files[0] && lfs_files[1].includes(rel_file_path)){
       items.push({
         label: "Download LFS File",
-        icon: h(
-          'i',
-          {
-            class: 'q-icon on-left notranslate material-icons',
-            role:'img',
-            style:{fontSize: '1.5em',color:'#333'}
-          },
-          ['cloud_download']
-        ),
+        icon: h( 'i', icon_style, ['cloud_download'] ),
         onClick: async ()=>{
           let response = null;
 
@@ -498,44 +477,74 @@ const onCellContextMenu = async (e,node) => {
     }
   }
 
+  const confirm_delete = async (node,callback)=>{
+    $q.dialog({
+      component: ConfirmationDialog,
+      componentProps: {
+        msg: `Are you sure you want to delete:<br><b><i>${node.id}</i></b><br>`,
+        ok_text: 'Delete',
+        ok_icon: 'delete',
+        ok_color: 'red-9',
+        cancel_text: 'Cancel',
+        cancel_icon: 'cancel',
+        cancel_color: 'secondary',
+      }
+    }).onOk(callback);
+  };
+
   if(node.type===formatNodeEditString(Assays)){
-    items.push(
-      {
-        label: "Delete",
-        icon: h(
-          'i',
-          {
-            class: 'q-icon on-left notranslate material-icons',
-            role:'img',
-            style:{fontSize: '1.5em',color:'#333'}
-          },
-          ['delete']
-        ),
-        onClick: () =>{ArcControlService.deleteAssay(node.label)}
+    items.push({
+      label: "Rename",
+      icon: h( 'i', icon_style, ['edit_note'] ),
+      onClick: async () => {
+        $q.dialog({
+          component: StringDialog,
+          componentProps: {
+            title: 'Rename',
+            property: 'Name',
+            icon: 'edit_note'
+          }
+        }).onOk(
+          async new_identifier => ArcControlService.rename('RenameAssay',node.label,new_identifier)
+        );
       }
-    );
+    });
+    items.push({
+      label: "Delete",
+      icon: h( 'i', icon_style, ['delete'] ),
+      onClick: ()=>confirm_delete(node,()=>ArcControlService.deleteAssay(node.label))
+    });
   } else if (node.type===formatNodeEditString(Studies)){
-    items.push(
-      {
-        label: "Delete",
-        icon: h(
-          'i',
-          {
-            class: 'q-icon on-left notranslate material-icons',
-            role:'img',
-            style:{fontSize: '1.5em',color:'#333'}
-          },
-          ['delete']
-        ),
-        onClick: () =>{ArcControlService.deleteStudy(node.label)}
+    items.push({
+      label: "Rename",
+      icon: h( 'i', icon_style, ['edit_note'] ),
+      onClick: async () => {
+        $q.dialog({
+          component: StringDialog,
+          componentProps: {
+            title: 'Rename',
+            property: 'Name',
+            icon: 'edit_note'
+          }
+        }).onOk(
+          async new_identifier => ArcControlService.rename('RenameStudy',node.label,new_identifier)
+        );
       }
-    );
+    });
+    items.push({
+      label: "Delete",
+      icon: h( 'i', icon_style, ['delete'] ),
+      onClick: ()=>confirm_delete(node,()=>ArcControlService.deleteStudy(node.label))
+    });
+  } else {
+    items.push({
+      label: "Delete",
+      icon: h( 'i', icon_style, ['delete'] ),
+      onClick: ()=>confirm_delete(node,()=>window.ipc.invoke('LocalFileSystemService.remove', node.id))
+    });
   }
 
-  console.log(items);
-
   if(items.length){
-    console.log(node.id);
     e.preventDefault();
     ContextMenu.showContextMenu({
       x: e.x,
