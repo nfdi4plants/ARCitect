@@ -18,7 +18,19 @@ import StringDialog from '../dialogs/StringDialog.vue';
 import { useQuasar } from 'quasar'
 const $q = useQuasar();
 
-const iProps = reactive({
+interface Props {
+  git_status: string[][],
+  error: string,
+  lfs_limit: number,
+  commit: {
+    name: string,
+    email: string,
+    msg: string
+  }
+}
+ 
+
+const iProps : Props = reactive({
   git_status: [],
   error: '',
   lfs_limit: 1,
