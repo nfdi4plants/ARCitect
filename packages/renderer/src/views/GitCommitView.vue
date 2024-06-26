@@ -95,11 +95,12 @@ const trackChanges = async () => {
     for(let i=0; i<b.length; i++){
       string += ' "'+b[i]+"'";
       if(string.length>string_limit){
-        chunks.push(i);
+        chunks.push(i===0 || i===chunks[chunks.length-1] ? i+1 : i);
         string = a+' ';
       }
     }
-    chunks.push(b.length);
+    if(chunks[chunks.length-1]!==b.length)
+      chunks.push(b.length);
 
     for(let i=0; i<chunks.length-1; i++){
       const args = a.concat(b.slice(chunks[i],chunks[i+1]).map(x=>'"'+x+'"'));
