@@ -83,17 +83,13 @@ const ArcControlService = {
   },
 
   handleARCContracts: async (contracts: Contract []) => {
-    console.log("!HandleContracts!")
-    console.log(contracts.length)
     let arc = ArcControlService.props.arc;
     let arc_root = ArcControlService.props.arc_root;
     if(!arc || !arc_root)
       return;
-    console.log("HandleContracts")
     ArcControlService.props.busy = true;
     arc.UpdateFileSystem();
     for(const contract of contracts) {
-      console.log(contract.Path)
       switch (contract.Operation) {
         case 'DELETE':
           await window.ipc.invoke(
@@ -102,12 +98,9 @@ const ArcControlService = {
           );
           break;
         case 'UPDATE': case 'CREATE':
-          console.log("UPDATE/CREATE")
           if(['ISA_Investigation','ISA_Study','ISA_Assay'].includes(contract.DTOType)){
             const buffer = await Xlsx.toBytes(contract.DTO);
             const absolutePath = relative_to_absolute_path(contract.Path)
-            console.log("path", contract.Path)
-            console.log("abs-path", absolutePath)
             await window.ipc.invoke(
               'LocalFileSystemService.writeFile',
               [
@@ -118,7 +111,6 @@ const ArcControlService = {
             );
             break;
           } else if(contract.DTOType==='PlainText'){
-            console.log("PLAINTEXT")
             await window.ipc.invoke('LocalFileSystemService.writeFile', [
               arc_root+'/'+contract.Path,
               contract.DTO || '',
@@ -164,8 +156,6 @@ const ArcControlService = {
 
     arc.UpdateFileSystem();
     let contracts = options.force ? arc.GetWriteContracts() : arc.GetUpdateContracts();
-    console.log("Save ARC")
-    console.log(contracts)
 
     /// Add default .gitignore if it does not exist
     const ignore_exists = await window.ipc.invoke(

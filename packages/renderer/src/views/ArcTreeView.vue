@@ -109,7 +109,6 @@ const addAssay = async ()=>{
   $q.dialog({
     component: NewAssayDialog
   }).onOk( async (data: NewAssayInformation) => {
-    console.log("Add assay")
     const assay = new ArcAssay(data.assayIdentifier);
     ArcControlService.props.arc.ISA.AddAssay(assay);
     await ArcControlService.saveARC({arc_root: ArcControlService.props.arc_root});
@@ -411,7 +410,7 @@ const onCellContextMenu = async (e,node) => {
             args: [`remote`,`set-url`,remote_name,patched_remote_url],
             cwd: ArcControlService.props.arc_root
           });
-          console.log(response);
+          console.log('[GitService.run-response]', response);
           if(!response[0]) return;
 
           const dialogProps = reactive({
