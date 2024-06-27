@@ -70,18 +70,6 @@ watch(()=>ArcControlService.props.arc_root, async (newValue, oldValue) => {
   arcTree._value.setExpanded(props.root);
 });
 
-watch(()=>AppProperties.active_study, async (newValue, oldValue) => {
-  await nextTick();
-  selected._value = `${ArcControlService.props.arc_root}/${Studies}/${newValue}`;
-  onSelectionChanged(selected.value);
-});
-
-watch(()=>AppProperties.active_assay, async (newValue, oldValue) => {
-  await nextTick();
-  selected._value = `${ArcControlService.props.arc_root}/${Assays}/${newValue}`;
-  onSelectionChanged(selected.value);
-});
-
 watch(()=>AppProperties.state, async (newValue, oldValue) => {
   if([
     AppProperties.STATES.HOME,
@@ -104,11 +92,10 @@ let uniqueLabelCounter = 0;
 
 const addStudy_ = async (identifier: string, skip_io: boolean | void)=>{
   const study = new ArcStudy(identifier,identifier);
-  ArcControlService.props.arc.ISA.AddRegisteredStudy(study)
+  ArcControlService.props.arc.ISA.AddStudy(study)
   if(!skip_io){
     await ArcControlService.saveARC({});
     await ArcControlService.readARC();
-    AppProperties.active_study = identifier;
   }
 };
 
@@ -125,22 +112,8 @@ const addAssay = async ()=>{
     console.log("Add assay")
     const assay = new ArcAssay(data.assayIdentifier);
     ArcControlService.props.arc.ISA.AddAssay(assay);
-
-    if (data.studyIdentifier !== null) {
-      for(let studyIdentifier of data.studyIdentifier)
-        try {
-          ArcControlService.props.arc.ISA.RegisterAssay(studyIdentifier,data.assayIdentifier);
-        } catch {
-          console.log("Unfound study identifier: '", studyIdentifier, "'. Created new Study for identifier.")
-          const study = new ArcStudy(studyIdentifier);
-          ArcControlService.props.arc.ISA.AddRegisteredStudy(study);
-          ArcControlService.props.arc.ISA.RegisterAssay(studyIdentifier,data.assayIdentifier);
-        }
-    };
-
     await ArcControlService.saveARC({arc_root: ArcControlService.props.arc_root});
     await ArcControlService.readARC();
-    AppProperties.active_assay = data.assayIdentifier;
   });
 };
 
@@ -220,14 +193,6 @@ const readDir_ = async (path: string) => {
       n.type = 'node';
     }
   };
-
-  // Here check loose assays/studies ~ WIP, Kevin
-  // function checkVacantStudies() {
-  //   const arc : ARC = ArcControlService.props.arc
-  //   console.log("HIT")
-  //   if (!arc) return;
-  //   console.log(arc.ISA.RegisteredStudyIdentifiers)
-  // }
 
   if(needsAddElement(parent)) {
     switch (parent) {
