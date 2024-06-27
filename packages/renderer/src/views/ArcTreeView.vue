@@ -538,11 +538,14 @@ const onCellContextMenu = async (e,node) => {
       onClick: ()=>confirm_delete(node,()=>ArcControlService.deleteStudy(node.label))
     });
   } else {
-    items.push({
-      label: "Delete",
-      icon: h( 'i', icon_style, ['delete'] ),
-      onClick: ()=>confirm_delete(node,()=>window.ipc.invoke('LocalFileSystemService.remove', node.id))
-    });
+    //verify that the file/directory is not a MUST keep file/directory
+    if (["assays", "studies", "runs", "workflows", "dataset", "protocols", "resources"].includes(node.label.toLowerCase()) === false) {
+      items.push({
+        label: "Delete",
+        icon: h( 'i', icon_style, ['delete'] ),
+        onClick: ()=>confirm_delete(node,()=>window.ipc.invoke('LocalFileSystemService.remove', node.id))
+      });
+    } 
   }
 
   if(items.length){
