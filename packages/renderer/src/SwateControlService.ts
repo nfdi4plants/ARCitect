@@ -2,14 +2,23 @@ import { reactive } from 'vue'
 
 import AppProperties from './AppProperties.ts';
 import ArcControlService from './ArcControlService.ts';
+import {ArcInvestigation, ArcAssay, ArcStudy} from "@nfdi4plants/arctrl";
+
+interface Props {
+  cacheNumber: number,
+  object: null | ArcInvestigation | ArcAssay | ArcStudy,
+  type: number,
+}
+
+const init : Props = {
+  cacheNumber: Math.random()*1000,
+  object: null,
+  type: 0,
+}
 
 const SwateControlService = {
 
-  props: reactive({
-    cacheNumber: Math.random()*1000,
-    object: null,
-    type: 0,
-  }),
+  props: reactive(init),
   /**
    * This function manages all state changes required to load Swate
    * @param type object type: 0 investigation, 1 study, 2 assay
