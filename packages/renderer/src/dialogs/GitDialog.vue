@@ -29,13 +29,22 @@ defineEmits([
 const processGitStream = async row=>{
   if(props.state===1) return;
   const last_row = iProps.rows[iProps.rows.length-1];
-  const prefix0 = last_row.substring(0,14);
-  const prefix1 = row.substring(0,14);
-  if(prefix0===prefix1){
+  let replace = false;
+  for(let p of [
+    'Receiving objects:',
+    'Resolving deltas:',
+    'Enumerating objects:',
+    'Counting objects:',
+    'Compressing objects:',
+    'Writing objects:',
+  ])
+    if(last_row.includes(p) && row.includes(p))
+      replace = true;
+
+  if(replace)
     iProps.rows[iProps.rows.length-1] = row;
-  } else {
+  else
     iProps.rows.push(row);
-  }
 };
 
 onMounted(   ()=>{

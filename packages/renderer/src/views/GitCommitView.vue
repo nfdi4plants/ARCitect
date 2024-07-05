@@ -28,7 +28,7 @@ interface Props {
     msg: string
   }
 }
- 
+
 
 const iProps : Props = reactive({
   git_status: [],
@@ -64,7 +64,7 @@ const setGitUser = async(name,email)=>{
 
   // set git user and email
   response = await window.ipc.invoke('GitService.run', {
-    args: [`config`,`user.name`,name],
+    args: [`config`,`user.name`,'"'+name+'"'],
     cwd: ArcControlService.props.arc_root
   });
   if(!response[0]) return response;

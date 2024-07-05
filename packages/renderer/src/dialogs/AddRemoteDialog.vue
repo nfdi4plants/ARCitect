@@ -18,6 +18,7 @@ const iProps = reactive({
   account: '',
   accounts: {},
   url: '',
+  personal_access_token: '',
   error: ''
 });
 
@@ -68,8 +69,26 @@ const onSubmit = async () => {
   else if (!iProps.url)
     return iProps.error = 'Remote requires URL';
 
+  if(iProps.personal_access_token){
+    iProps.url = `https://${iProps.account}:${iProps.personal_access_token}@${iProps.url.slice(8)}`
+  }
+
   onDialogOK(iProps);
 };
+
+const openAccessTokenHelp = ()=>{
+  window.ipc.invoke(
+    'InternetService.openExternalURL',
+    `https://nfdi4plants.org/nfdi4plants.knowledgebase/docs/ArcCommanderManual/arc_access.html#create-and-store-a-configurable-datahub-access-token-for-your-project`
+  );
+}
+const openAccessTokenEditor = ()=>{
+  const host = props.user.host || 'git.nfdi4plants.org';
+  window.ipc.invoke(
+    'InternetService.openExternalURL',
+    `https://${host}/-/profile/personal_access_tokens`
+  );
+}
 
 </script>
 
@@ -98,6 +117,28 @@ const onSubmit = async () => {
           <div class='row'>
             <div class='col'>
               <a_input v-model='iProps.url' label="URL"/>
+            </div>
+          </div>
+          <div class='row'>
+            <div class='col'>
+              <a_input v-model='iProps.personal_access_token' label="Personal Access Token (Optional)">
+                <template v-slot:append>
+                  <q-icon class='cursor-pointer' name="key" color="grey-5" @click='()=>openAccessTokenEditor()'>
+                    <q-tooltip>
+                      <div style="float:right;font-size:1.4em;max-width:22em;">
+                        Open the DataHub to create an access token.
+                      </div>
+                    </q-tooltip>
+                  </q-icon>
+                  <q-icon class='cursor-pointer' name="help" color="grey-5" @click='()=>openAccessTokenHelp()'>
+                    <q-tooltip>
+                      <div style="float:right;font-size:1.4em;max-width:20em;">
+                        Data up- and downloads taking more than one hour require a personal access token.
+                      </div>
+                    </q-tooltip>
+                  </q-icon>
+                </template>
+              </a_input>
             </div>
           </div>
         </q-card-section>

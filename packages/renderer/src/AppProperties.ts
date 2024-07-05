@@ -29,7 +29,6 @@ const AppProperties: {
   state: 0,
 
   user: null,
-  path_sep: null,
 
   datahub_hosts: [
     'git.nfdi4plants.org',

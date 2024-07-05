@@ -26,6 +26,7 @@ const authenticate = async host=>{
 window.ipc.on('DataHubService.authentificationData', async user=>{
   if(AppProperties.user)
     clearTimeout(AppProperties.user.refresh_func)
+  console.log(user)
   AppProperties.user = user;
   AppProperties.user.refresh_func = setTimeout(
     ()=>authenticate(AppProperties.user.host),

@@ -63,8 +63,16 @@ const getBranches = async () => {
   return branches;
 };
 
+const getUrlCredentials = url => {
+  // Regular expression to match URLs with embedded credentials
+  const regex = /^(https?|git|ssh):\/\/([^\/:@]+(:[^\/:@]+)?@)?([^\/:]+)(:[0-9]+)?(\/.*)?$/;
+  // Test the URL against the regular expression
+  const match = url.match(regex);
+  return match ? (match[2] || '') : '';
+};
+
 const patchRemote = url => {
-  return AppProperties.user && url.includes(AppProperties.user.host)
+  return AppProperties.user && url.includes(AppProperties.user.host) && getUrlCredentials(url)===''
     ? `https://oauth2:${AppProperties.user.token.access_token}@${AppProperties.user.host}` + url.split(AppProperties.user.host)[1]
     : url;
 };
@@ -103,10 +111,11 @@ const push = async()=>{
   // patch remote
   const remote = iProps.remotes[iProps.remote].url;
   const patched_remote = patchRemote(iProps.remotes[iProps.remote].url);
-  response = await window.ipc.invoke('GitService.run', {
-    args: [`remote`,`set-url`,iProps.remote,patched_remote],
-    cwd: ArcControlService.props.arc_root
-  });
+  if(iProps.remotes[iProps.remote].url!==patched_remote)
+    response = await window.ipc.invoke('GitService.run', {
+      args: [`remote`,`set-url`,iProps.remote,patched_remote],
+      cwd: ArcControlService.props.arc_root
+    });
 
   // push
   const args = [
@@ -126,10 +135,11 @@ const push = async()=>{
   });
 
   // unpatch
-  response = await window.ipc.invoke('GitService.run', {
-    args: [`remote`,`set-url`,iProps.remote,remote],
-    cwd: ArcControlService.props.arc_root
-  });
+  if(iProps.remotes[iProps.remote].url!==patched_remote)
+    response = await window.ipc.invoke('GitService.run', {
+      args: [`remote`,`set-url`,iProps.remote,remote],
+      cwd: ArcControlService.props.arc_root
+    });
 
   dialogProps.state=1;
 
@@ -167,10 +177,11 @@ const pull = async()=>{
   // patch remote
   const remote = iProps.remotes[iProps.remote].url;
   const patched_remote = patchRemote(iProps.remotes[iProps.remote].url);
-  response = await window.ipc.invoke('GitService.run', {
-    args: [`remote`,`set-url`,iProps.remote,patched_remote],
-    cwd: ArcControlService.props.arc_root
-  });
+  if(iProps.remotes[iProps.remote].url!==patched_remote)
+    response = await window.ipc.invoke('GitService.run', {
+      args: [`remote`,`set-url`,iProps.remote,patched_remote],
+      cwd: ArcControlService.props.arc_root
+    });
 
   // pull
   response = await window.ipc.invoke('GitService.run', {
@@ -188,10 +199,11 @@ const pull = async()=>{
   }
 
   // unpatch
-  response = await window.ipc.invoke('GitService.run', {
-    args: [`remote`,`set-url`,iProps.remote,remote],
-    cwd: ArcControlService.props.arc_root
-  });
+  if(iProps.remotes[iProps.remote].url!==patched_remote)
+    response = await window.ipc.invoke('GitService.run', {
+      args: [`remote`,`set-url`,iProps.remote,remote],
+      cwd: ArcControlService.props.arc_root
+    });
 
   dialogProps.state=1;
 
@@ -311,12 +323,18 @@ const inspectArc = url =>{
                   <q-item-section no-wrap>
                     <q-item-label>{{id}}</q-item-label>
                     <q-item-label caption style="overflow:hidden;">
-                      {{iProps.remotes[id].url}}
+                      {{iProps.remotes[id].url.replace(getUrlCredentials(iProps.remotes[id].url),'')}}
                     </q-item-label>
                   </q-item-section>
 
                   <q-item-section side>
                     <div class="text-grey-8 q-gutter-xs">
+                      <q-btn v-if='getUrlCredentials(iProps.remotes[id].url)' class="gt-xs" size="12px" flat dense round icon="key" color='gray-7'>
+                        <q-tooltip>
+                          Remote uses an access token.
+                        </q-tooltip>
+                      </q-btn>
+
                       <q-btn v-if='iProps.remotes[id].dirty' class="gt-xs" size="12px" flat dense round icon="running_with_errors" color='gray-7' @click='inspectArc(iProps.remotes[id].url)'>
                         <q-tooltip>
                           ARC is out of Sync!
@@ -346,16 +364,21 @@ const inspectArc = url =>{
               </q-list>
             </div>
           </div>
-          <div class='row'>
-            <div class='col'>
-              <a_checkbox v-model='iProps.use_lfs' label="Use Large File Storage" style="float:right;"/>
-            </div>
-          </div>
-
         </q-card-section>
 
         <q-card-actions align='right' style="padding:0 2.1em 1em 2.1em;">
           <a_btn v-if='iProps.error' color="red-10" icon='warning' :label="iProps.error" no-caps style="margin-right:auto"/>
+          <div>
+            <a_checkbox v-model='iProps.use_lfs' label="Use Large File Storage"/>
+            <q-tooltip>
+              <div style="float:left; padding:0.5em 1em 0 0">
+                <q-icon name="warning" color="grey-3" size="3em"/>
+              </div>
+              <div style="float:right;font-size:1.4em;max-width:20em;">
+                Data up- and downloads taking more than one hour require a personal access token.
+              </div>
+            </q-tooltip>
+          </div>
           <a_btn label="Push" @click="push" icon='cloud_upload' :disabled='!iProps.remote || !AppProperties.user'/>
           <a_btn label="Pull" @click="pull" icon='cloud_download' :disabled='!iProps.remote'/>
         </q-card-actions>
