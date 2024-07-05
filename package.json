@@ -29,9 +29,9 @@
     "typecheck": "npm run typecheck:main && npm run typecheck:preload && npm run typecheck:renderer"
   },
   "dependencies": {
-    "@fslab/fsspreadsheet": "^6.1.3",
+    "@fslab/fsspreadsheet": "^6.2.0",
     "@imengyu/vue3-context-menu": "^1.3.5",
-    "@nfdi4plants/arctrl": "^2.0.0-beta.1",
+    "@nfdi4plants/arctrl": "^2.0.0-beta.2",
     "@nfdi4plants/exceljs": "0.2.0",
     "@quasar/extras": "^1.16.9",
     "chokidar": "^3.5.3",

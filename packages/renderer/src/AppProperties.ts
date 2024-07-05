@@ -7,16 +7,8 @@ const AppProperties: {
   STATES: {
     HOME: 0,
 
-    OPEN_ARC: 100,
     OPEN_DATAHUB: 101,
-    OPEN_NEW: 102,
-
     EDIT_SWATE: 203,
-
-    ADD_STUDY: 301,
-    ADD_ASSAY: 302,
-
-    LOGIN: 400,
 
     GIT_COMMIT: 501,
     GIT_SYNC: 502,

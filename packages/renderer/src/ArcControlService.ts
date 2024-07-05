@@ -9,7 +9,6 @@ import { gitignoreContract } from "@nfdi4plants/arctrl/Contract/Git";
 import { Xlsx } from '@fslab/fsspreadsheet/Xlsx.js';
 import {Contract} from '@nfdi4plants/arctrl/Contract/Contract.js'
 
-
 import pDebounce from 'p-debounce';
 
 export const Investigation = "investigation";
@@ -28,13 +27,6 @@ let init: {
     arc_root: undefined ,
     busy: false,
     arc: null
-}
-
-function closeSwate() {
-  if (AppProperties.state === AppProperties.STATES.EDIT_SWATE) {
-    AppProperties.state = AppProperties.STATES.OPEN_ARC;
-    SwateControlService.props.object = null;
-  }
 }
 
 function relative_to_absolute_path(relativePath: string) {
@@ -90,6 +82,7 @@ const ArcControlService = {
     ArcControlService.props.busy = true;
     arc.UpdateFileSystem();
     for(const contract of contracts) {
+      // console.log(contract);
       switch (contract.Operation) {
         case 'DELETE':
           await window.ipc.invoke(
@@ -171,17 +164,11 @@ const ArcControlService = {
   },
 
   deleteAssay: async (assay_identifier: string) => {
-    if (SwateControlService.props.object !== null && SwateControlService.props.object.Identifier === assay_identifier) {
-      closeSwate();
-    }
     let contracts = ArcControlService.props.arc.RemoveAssay(assay_identifier)
     await ArcControlService.handleARCContracts(contracts);
   },
 
   rename: async (method:string, old_identifier:string, new_identifier:string) => {
-    if (SwateControlService.props.object !== null && SwateControlService.props.object.Identifier === old_identifier) {
-      closeSwate();
-    }
     const contracts = ArcControlService.props.arc[method](
       old_identifier,
       new_identifier
@@ -190,9 +177,6 @@ const ArcControlService = {
   },
 
   deleteStudy: async (study_identifier: string) => {
-    if (SwateControlService.props.object !== null && SwateControlService.props.object.Identifier === study_identifier) {
-      closeSwate();
-    }
     let contracts = ArcControlService.props.arc.RemoveStudy(study_identifier)
     await ArcControlService.handleARCContracts(contracts);
   },

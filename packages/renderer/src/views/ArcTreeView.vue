@@ -1,3 +1,4 @@
+
 <script lang="ts" setup>
 import { reactive, ref, nextTick, watch, onMounted, onUnmounted, h } from 'vue';
 import ContextMenu from '@imengyu/vue3-context-menu'
@@ -18,7 +19,6 @@ import NewStudyDialog from '../dialogs/NewStudyDialog.vue';
 
 const Image = 'image';
 const Markdown = 'markdown';
-const NodeAdd_PreFix = "node_add_"
 const NodeEdit_PreFix = "node_edit_"
 
 const $q = useQuasar();
@@ -144,35 +144,16 @@ const readDir_ = async (path: string) => {
 
   const parent = path.split('/').pop().toLowerCase();
 
-  const needsAddElement = (l: string) => {
-    return [Studies,Assays,Protocols, Dataset, Runs, Workflows].includes( l.toLowerCase() );
-  };
-
   const isMarkdown = l => {
     return ['md','txt','py','xml','cwl','fsx','json','yml','html','csv','css','js','log','gitignore'].some( i=>new RegExp(`\\.${i}$`,'g').test(l.toLowerCase()))
-  }
+  };
 
   const isImage = l => {
     return ['png','jpeg','jpg'].some( i=>new RegExp(`\\.${i}$`,'g').test(l.toLowerCase()))
-  }
+  };
 
   const isEditable = (n,p)=>{
     return n.isDirectory && [Studies, Assays].includes(p);
-  };
-
-  function createAddNode (label: string, handler: ((n:any) => Promise<void>) ) {
-    const node = {
-      type: formatNodeAddString(label),
-      label: label,
-      isDirectory: false,
-      lazy: false,
-      icon: 'add_box',
-      id: path+'/'+'add$'+(uniqueLabelCounter++),
-      selectable: true,
-      tickable: false,
-      handler: handler
-    }
-    return node;
   };
 
   for(const n of nodes){
@@ -188,28 +169,20 @@ const readDir_ = async (path: string) => {
     } else if(isImage(n.label)){
       n.type = formatNodeEditString(Image);
       n.icon = 'image';
+    } else if(n.label==='assays'){
+      n.type = 'assays';
+      n.icon = 'storage';
+    } else if(n.label==='studies'){
+      n.type = 'studies';
+      n.icon = 'science';
+    } else if(n.label==='workflows'){
+      n.icon = 'settings';
+    } else if(n.label==='runs'){
+      n.icon = 'timer';
     } else {
       n.type = 'node';
     }
-  };
-
-  if(needsAddElement(parent)) {
-    switch (parent) {
-      case Studies:
-        let addStudyNode = createAddNode("Add Study", addStudy);
-        // checkVacantStudies()
-        nodes.push(addStudyNode);
-        break;
-      case Assays:
-        let addAssayNode = createAddNode("Add Assay", addAssay);
-        nodes.push(addAssayNode);
-        break;
-      case Protocols:
-        let addProcotolNode = createAddNode("Add Protocol", addProtocol)
-        nodes.push(addProcotolNode);
-        break;
-    }
-  };
+  }
 
   if(nodes.length<1){
     nodes.push({
@@ -230,11 +203,6 @@ const readDir_ = async (path: string) => {
       return 1;
     }
 
-    if(a.type.startsWith(NodeAdd_PreFix) && !b.type.startsWith(NodeAdd_PreFix)){
-      return 1;
-    } else if (!a.type.startsWith(NodeAdd_PreFix) && b.type.startsWith(NodeAdd_PreFix)){
-      return -1;
-    }
     return a.label.localeCompare(b.label);
   });
 
@@ -271,6 +239,14 @@ const onSelectionChanged = id =>{
 const updatePath = async ([path,type]) => {
   if (!arcTree.value || type==='file_ch')
     return;
+
+  // check if swate view needs to be closed
+  if(type==='dir_rm'){
+    const elements = path.replace(ArcControlService.props.arc_root+'/','').split('/');
+    // if a study or assay was deleted/renamed that is currently opened in swate then close the view
+    if(elements.length===2 && ['assays','studies'].includes(elements[0]) && SwateControlService.props.object.Identifier===elements[1])
+      AppProperties.state=AppProperties.STATES.HOME;
+  }
 
   const parentPath = path.split('/').slice(0,-1).join('/');
   const n = arcTree.value.getNodeByKey(parentPath);
@@ -337,7 +313,26 @@ const onCellContextMenu = async (e,node) => {
     style:{fontSize: '1.5em',color:'#666'}
   };
 
+  const rel_path = node.id.replaceAll(ArcControlService.props.arc_root+'/','');
+  const rel_path_elements = rel_path.split('/');
+
   if(node.isDirectory){
+    if(rel_path_elements.length===1){
+      if(rel_path_elements[0]==='assays'){
+        items.push({
+          label: "Add Assay",
+          icon: h( 'i', icon_style, ['add'] ),
+          onClick: ()=>addAssay(node)
+        });
+      } else if (rel_path_elements[0]==='studies') {
+        items.push({
+          label: "Add Study",
+          icon: h( 'i', icon_style, ['add'] ),
+          onClick: ()=>addStudy()
+        });
+      }
+    }
+
     items.push({
       label: "New Text File",
       icon: h( 'i', icon_style, ['note_add'] ),
@@ -360,12 +355,11 @@ const onCellContextMenu = async (e,node) => {
     });
   } else {
 
-    const rel_file_path = node.id.replaceAll(ArcControlService.props.arc_root+'/','');
     const lfs_files = await window.ipc.invoke('GitService.run', {
       args: ['lfs','ls-files','-n'],
       cwd: ArcControlService.props.arc_root
     });
-    if(lfs_files[0] && lfs_files[1].includes(rel_file_path)){
+    if(lfs_files[0] && lfs_files[1].includes(rel_path)){
       items.push({
         label: "Download LFS File",
         icon: h( 'i', icon_style, ['cloud_download'] ),
@@ -426,7 +420,7 @@ const onCellContextMenu = async (e,node) => {
           });
 
           await window.ipc.invoke('GitService.run', {
-            args: ['lfs','pull','--include',rel_file_path],
+            args: ['lfs','pull','--include',rel_path],
             cwd: ArcControlService.props.arc_root
           });
 
@@ -509,7 +503,7 @@ const onCellContextMenu = async (e,node) => {
         icon: h( 'i', icon_style, ['delete'] ),
         onClick: ()=>confirm_delete(node,()=>window.ipc.invoke('LocalFileSystemService.remove', node.id))
       });
-    } 
+    }
   }
 
   if(items.length){
@@ -559,7 +553,7 @@ onUnmounted( ()=>{window.ipc.off('LocalFileSystemService.updatePath', updatePath
   <div class='q-pa-md'>
     <div v-if="ArcControlService.props.arc" class='text-h6 text-grey-7' style="font-size:0.9em;border-bottom:0.1em solid #ccc;line-height:1em;padding:0 0 0.7em 0;">{{(props.root.replace(' ', '&nbsp;') || '').split('/').join(' /&nbsp;')}}</div>
     <q-tree
-    v-if="ArcControlService.props.arc"
+      v-if="ArcControlService.props.arc"
       ref='arcTree'
       :nodes="props.nodes"
       node-key="id"
@@ -573,9 +567,12 @@ onUnmounted( ()=>{window.ipc.off('LocalFileSystemService.updatePath', updatePath
       no-selection-unset
     >
       <template v-slot:default-header="prop">
-        <q-icon v-if='prop.node.icon' :name='prop.node.icon' style="padding:0 0.2em 0 0;"></q-icon>
-        <div style="flex:100;white-space: nowrap;" @contextmenu="e=>onCellContextMenu(e,prop.node)">{{ prop.node.label }}</div>
-        <div v-if='!prop.node.isDirectory && !["add_box","block"].includes(prop.node.icon)' style="flex:1;white-space: nowrap;margin-left:1em;">{{ formatSize(prop.node.size) }}</div>
+        <div @contextmenu="e=>onCellContextMenu(e,prop.node)" style="flex:1;">
+          <q-icon v-if='prop.node.icon' :name='prop.node.icon' style="padding:0 0.2em 0 0;"></q-icon>
+          {{ prop.node.label }}
+          <q-icon v-if='prop.node.type==="assays"' name='add' class='tree_add_button' @click='addAssay()'></q-icon>
+          <q-icon v-if='prop.node.type==="studies"' name='add' class='tree_add_button' @click='addStudy()'></q-icon>
+        </div>
       </template>
     </q-tree>
 
@@ -597,4 +594,17 @@ onUnmounted( ()=>{window.ipc.off('LocalFileSystemService.updatePath', updatePath
 .q-tree__node--selected .q-icon {
   color:#fff;
 }
+
+.tree_add_button{
+  text-align: center;
+  padding: 0;
+  margin: 0;
+  border-radius: 1em;
+  float:right;
+}
+
+.tree_add_button:hover{
+  background:#ccc;
+}
+
 </style>
