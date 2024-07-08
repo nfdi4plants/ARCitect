@@ -121,6 +121,7 @@ export const InternetService = {
     ipcMain.handle('InternetService.openExternalURL', InternetService.openExternalURL );
     ipcMain.handle('InternetService.getTemplates', InternetService.getTemplates );
     ipcMain.handle('InternetService.callSwateAPI', InternetService.callSwateAPI );
+    ipcMain.handle('InternetService.getWebPageAsJson', InternetService.getWebPageAsJson );
     ipcMain.handle('InternetService.getArcitectVersions', InternetService.getArcitectVersions );
   }
 

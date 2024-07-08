@@ -16,6 +16,8 @@ const AppProperties: {
 
     EDIT_MARKDOWN: 600,
     EDIT_IMAGE: 601,
+
+    VALIDATION: 700,
   },
   STATES_I: {},
   state: 0,

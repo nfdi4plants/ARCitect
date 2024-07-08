@@ -13,6 +13,7 @@ import GitCommitView from './views/GitCommitView.vue';
 import GitSyncView from './views/GitSyncView.vue';
 import GitHistoryView from './views/GitHistoryView.vue';
 import SwateView from './views/SwateView.vue';
+import ValidationView from './views/ValidationView.vue';
 
 import DataHubView from './views/DataHubView.vue';
 
@@ -157,14 +158,17 @@ const test = async ()=>{
           <ToolbarButton text='Explorer' icon='folder_open' requiresARC @clicked='ArcControlService.openArcInExplorer()'></ToolbarButton>
           <q-separator />
 
-          <ToolbarButton text='Commit' icon='verified' requiresARC requiresUser @clicked='AppProperties.state=AppProperties.STATES.GIT_COMMIT'></ToolbarButton>
+          <ToolbarButton text='Commit' icon='rule' requiresARC requiresUser @clicked='AppProperties.state=AppProperties.STATES.GIT_COMMIT'></ToolbarButton>
           <ToolbarButton text='DataHUB Sync' icon='published_with_changes' requiresARC requiresUser @clicked='AppProperties.state=AppProperties.STATES.GIT_SYNC'></ToolbarButton>
           <ToolbarButton text='History' icon='history' requiresARC requiresUser @clicked='AppProperties.state=AppProperties.STATES.GIT_HISTORY'></ToolbarButton>
           <q-separator />
 
+          <ToolbarButton text='Validation' icon='verified' requiresARC @clicked='AppProperties.state=AppProperties.STATES.VALIDATION'></ToolbarButton>
+          <q-separator />
+
           <q-item class="col-grow"></q-item>
           <ToolbarButton text='Toggle Help' icon='help' @clicked='iProps.showHelp=!iProps.showHelp;'></ToolbarButton>
-          <ToolbarButton :text="iProps.toolbarMinimized ? '' : 'Minimize Sidebar'" :icon="iProps.toolbarMinimized ? 'chevron_right' : 'chevron_left'" @clicked='iProps.toolbarMinimized=!iProps.toolbarMinimized;'></ToolbarButton>
+          <ToolbarButton :text="iProps.toolbarMinimized ? '' : 'Toggle Sidebar'" :icon="iProps.toolbarMinimized ? 'chevron_right' : 'chevron_left'" @clicked='iProps.toolbarMinimized=!iProps.toolbarMinimized;'></ToolbarButton>
           <q-separator />
 
           <q-item v-ripple clickable dense @click='downloadArcitect'>
@@ -235,6 +239,7 @@ const test = async ()=>{
               <GitSyncView v-else-if='AppProperties.state===AppProperties.STATES.GIT_SYNC' />
               <GitHistoryView v-else-if='AppProperties.state===AppProperties.STATES.GIT_HISTORY' />
               <SwateView v-else-if='AppProperties.state===AppProperties.STATES.EDIT_SWATE'></SwateView>
+              <ValidationView v-else-if='AppProperties.state===AppProperties.STATES.VALIDATION'></ValidationView>
               <HomeView v-else></HomeView>
             </template>
           </q-splitter>

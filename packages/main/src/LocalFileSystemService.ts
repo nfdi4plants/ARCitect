@@ -93,8 +93,12 @@ export const LocalFileSystemService = {
       path = parameters[0];
       options = parameters[1];
     }
-    path = path_to_system(path)
-    return FS.readFileSync(path,options);
+    path = path_to_system(path);
+    try {
+      return FS.readFileSync(path,options);
+    } catch (err) {
+      return null;
+    }
   },
 
   readImage: async (e,path)=>{
