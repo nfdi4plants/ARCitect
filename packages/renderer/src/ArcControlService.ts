@@ -48,7 +48,7 @@ const ArcControlService = {
   readARC: async (arc_root: string | void | null) =>{
     arc_root = arc_root || ArcControlService.props.arc_root;
     if(!arc_root)
-      return;
+      return false;
 
     const isARC = await window.ipc.invoke('LocalFileSystemService.exists', arc_root+'/isa.investigation.xlsx');
 
@@ -74,26 +74,26 @@ const ArcControlService = {
     return true;
   },
 
-  handleARCContracts: async (contracts: Contract []) => {
-    let arc = ArcControlService.props.arc;
-    let arc_root = ArcControlService.props.arc_root;
+  handleARCContracts: async (contracts: Contract [], arc: ARC, arc_root: string) => {
+    arc = arc || ArcControlService.props.arc;
+    arc_root = arc_root || ArcControlService.props.arc_root;
     if(!arc || !arc_root)
       return;
     ArcControlService.props.busy = true;
     arc.UpdateFileSystem();
     for(const contract of contracts) {
-      // console.log(contract);
+      console.log('CONTRACT',contract);
       switch (contract.Operation) {
         case 'DELETE':
           await window.ipc.invoke(
             'LocalFileSystemService.remove',
-            relative_to_absolute_path(contract.Path)
+            arc_root + '/' +contract.Path
           );
           break;
         case 'UPDATE': case 'CREATE':
           if(['ISA_Investigation','ISA_Study','ISA_Assay'].includes(contract.DTOType)){
             const buffer = await Xlsx.toBytes(contract.DTO);
-            const absolutePath = relative_to_absolute_path(contract.Path)
+            const absolutePath = arc_root + '/' +contract.Path;
             await window.ipc.invoke(
               'LocalFileSystemService.writeFile',
               [
@@ -117,8 +117,8 @@ const ArcControlService = {
           await window.ipc.invoke(
             'LocalFileSystemService.rename',
             [
-              relative_to_absolute_path(contract.Path),
-              relative_to_absolute_path(contract.DTO)
+              arc_root + '/' + contract.Path,
+              arc_root + '/' + contract.DTO
             ]
           );
           break;
@@ -135,13 +135,9 @@ const ArcControlService = {
       force?:boolean
   })=>{
     const arc = options.arc || ArcControlService.props.arc;
-    if(!ArcControlService.props.arc)
-      ArcControlService.props.arc = arc;
     if(!arc)
       return;
     const arc_root = options.arc_root || ArcControlService.props.arc_root;
-    if(!ArcControlService.props.arc_root)
-      ArcControlService.props.arc_root = options.arc_root;
     if(!arc_root)
       return;
 
@@ -153,12 +149,12 @@ const ArcControlService = {
     /// Add default .gitignore if it does not exist
     const ignore_exists = await window.ipc.invoke(
       'LocalFileSystemService.exists',
-      relative_to_absolute_path('/.gitignore')
+      arc_root + '/.gitignore'
     );
     if(!ignore_exists)
       contracts.push(gitignoreContract);
 
-    await ArcControlService.handleARCContracts(contracts);
+    await ArcControlService.handleARCContracts(contracts, arc, arc_root);
 
     ArcControlService.props.busy = false;
   },
@@ -181,7 +177,7 @@ const ArcControlService = {
     await ArcControlService.handleARCContracts(contracts);
   },
 
-  new_arc: async (path: string) =>{
+  newARC: async (path: string) =>{
     const arc = new ARC(
       ArcInvestigation.init(path.split('/').pop())
     );
@@ -191,7 +187,6 @@ const ArcControlService = {
       force: true
     });
     await ArcControlService.readARC(path);
-
     await window.ipc.invoke('GitService.run', {
       args: ['init','-b','main'],
       cwd: path

@@ -79,7 +79,8 @@ const newLocalArc = async ()=>{
     return;
 
   AppProperties.state=AppProperties.STATES.HOME;
-  await ArcControlService.new_arc(path);
+  await ArcControlService.newARC(path);
+  await openLocalArc(path);
 };
 
 const showHomeView = ()=>{
