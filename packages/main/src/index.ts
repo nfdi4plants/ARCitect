@@ -56,6 +56,12 @@ const initCore = async () => {
 }
 
 /**
+ * Do this to allow swate hosting with https 
+ */
+if (!app.isPackaged)
+  app.commandLine.appendSwitch('ignore-certificate-errors');
+
+/**
  * Create app window when background process will be ready
  */
 app.whenReady()
