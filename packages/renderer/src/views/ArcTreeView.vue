@@ -9,13 +9,11 @@ import {Investigation, Assays, Studies, Workflows, Runs, Dataset, Protocols} fro
 import ConfirmationDialog from '../dialogs/ConfirmationDialog.vue';
 import StringDialog from '../dialogs/StringDialog.vue';
 import AddProtocolDialog from '../dialogs/AddProtocolDialog.vue';
-import NewAssayDialog from '../dialogs/NewAssayDialog.vue';
 import GitDialog from '../dialogs/GitDialog.vue';
 import ErrorDialog from '../dialogs/ErrorDialog.vue';
-import { NewAssayInformation } from '../dialogs/NewAssayDialog.vue';
 import { useQuasar } from 'quasar'
 import {ArcStudy, ArcAssay} from '@nfdi4plants/arctrl';
-import NewStudyDialog from '../dialogs/NewStudyDialog.vue';
+import IdentifierDialog from '../dialogs/IdentifierDialog.vue';
 
 const Image = 'image';
 const Markdown = 'markdown';
@@ -63,7 +61,6 @@ watch(()=>ArcControlService.props.arc_root, async (newValue, oldValue) => {
     label: props.root.split('/').pop(),
     lazy: true,
     icon: 'edit_square',
-    selectable: true,
     isDirectory: true
   }];
   await nextTick();
@@ -90,28 +87,40 @@ function formatNodeAddString(label: string) {
 
 let uniqueLabelCounter = 0;
 
-const addStudy_ = async (identifier: string, skip_io: boolean | void)=>{
-  const study = new ArcStudy(identifier,identifier);
-  ArcControlService.props.arc.ISA.AddStudy(study)
-  if(!skip_io){
-    await ArcControlService.saveARC({});
-    await ArcControlService.readARC();
+const addStudy = async (e,n) => {
+  if(n && arcTree.value.isExpanded(n.id)){
+    e.preventDefault();
+    e.stopPropagation();
   }
+  $q.dialog({
+    component: IdentifierDialog,
+    componentProps: {
+      label: 'Add Study',
+      existing_identifiers: ArcControlService.props.arc.ISA.StudyIdentifiers
+    }
+  }).onOk( async (identifier: string) => {
+    const study = new ArcStudy(identifier,identifier);
+    ArcControlService.props.arc.ISA.AddStudy(study);
+    await ArcControlService.saveARC();
+    await ArcControlService.readARC();
+  });
 };
 
-const addStudy = async ()=>{
+const addAssay = async (e,n) => {
+  if(n && arcTree.value.isExpanded(n.id)){
+    e.preventDefault();
+    e.stopPropagation();
+  }
   $q.dialog({
-    component: NewStudyDialog
-  }).onOk( async data => await addStudy_(data));
-};
-
-const addAssay = async ()=>{
-  $q.dialog({
-    component: NewAssayDialog
-  }).onOk( async (data: NewAssayInformation) => {
-    const assay = new ArcAssay(data.assayIdentifier);
+    component: IdentifierDialog,
+    componentProps: {
+      label: 'Add Assay',
+      existing_identifiers: ArcControlService.props.arc.ISA.AssayIdentifiers
+    }
+  }).onOk( async (identifier: string) => {
+    const assay = new ArcAssay(identifier);
     ArcControlService.props.arc.ISA.AddAssay(assay);
-    await ArcControlService.saveARC({arc_root: ArcControlService.props.arc_root});
+    await ArcControlService.saveARC();
     await ArcControlService.readARC();
   });
 };
@@ -213,23 +222,27 @@ const readDir = async ({ node, key, done, fail }) => {
   done( await readDir_(key) );
 };
 
-const onSelectionChanged = id =>{
-  if (!arcTree._value) return;
-  const n = arcTree._value.getNodeByKey(id);
-  const type = n ? n.type : null;
-
+const triggerNode = (e,node) => {
+  const skip = e => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+  const type = node ? node.type : null;
   switch (type) {
     case formatNodeEditString(Investigation):
+      skip(e);
       return SwateControlService.LoadSwateState(0);
     case formatNodeEditString(Studies):
-      return SwateControlService.LoadSwateState(1,n.label);
+      skip(e);
+      return SwateControlService.LoadSwateState(1,node.label);
     case formatNodeEditString(Assays):
-      return SwateControlService.LoadSwateState(2,n.label);
+      skip(e);
+      return SwateControlService.LoadSwateState(2,node.label);
     case formatNodeEditString(Markdown):
-      AppProperties.active_markdown = n.id;
+      AppProperties.active_markdown = node.id;
       return AppProperties.state=AppProperties.STATES.EDIT_MARKDOWN;
     case formatNodeEditString(Image):
-      AppProperties.active_image = n.id;
+      AppProperties.active_image = node.id;
       return AppProperties.state=AppProperties.STATES.EDIT_IMAGE;
     // default:
     //   return AppProperties.state=AppProperties.STATES.HOME;
@@ -322,7 +335,7 @@ const onCellContextMenu = async (e,node) => {
         items.push({
           label: "Add Assay",
           icon: h( 'i', icon_style, ['add'] ),
-          onClick: ()=>addAssay(node)
+          onClick: ()=>addAssay()
         });
       } else if (rel_path_elements[0]==='studies') {
         items.push({
@@ -551,33 +564,43 @@ onUnmounted( ()=>{window.ipc.off('LocalFileSystemService.updatePath', updatePath
 
 <template>
   <div class='q-pa-md'>
-    <div v-if="ArcControlService.props.arc" class='text-h6 text-grey-7' style="font-size:0.9em;border-bottom:0.1em solid #ccc;line-height:1em;padding:0 0 0.7em 0;">{{(props.root.replace(' ', '&nbsp;') || '').split('/').join(' /&nbsp;')}}</div>
+    <div
+      v-if='ArcControlService.props.arc'
+      class='text-h6 text-grey-7'
+      style='font-size:0.9em;border-bottom:0.1em solid #ccc;line-height:1em;padding:0 0 0.7em 0;'
+    >{{(props.root.replace(' ', '&nbsp;') || '').split('/').join(' /&nbsp;')}}</div>
     <q-tree
       v-if="ArcControlService.props.arc"
       ref='arcTree'
       :nodes="props.nodes"
       node-key="id"
       dense
-      v-model:selected="selected"
       @lazy-load="readDir"
-      @update:selected="onSelectionChanged"
       style="padding:1em;"
       no-nodes-label=' '
-      selected-color='white'
-      no-selection-unset
     >
       <template v-slot:default-header="prop">
-        <div @contextmenu="e=>onCellContextMenu(e,prop.node)" style="flex:1;">
+        <div
+          v-ripple
+          class='text-grey-6'
+          style="flex:1;cursor:pointer;white-space: nowrap;"
+          @contextmenu="e=>onCellContextMenu(e,prop.node)"
+          @click='e=>triggerNode(e,prop.node)'
+        >
           <q-icon v-if='prop.node.icon' :name='prop.node.icon' style="padding:0 0.2em 0 0;"></q-icon>
-          {{ prop.node.label }}
-          <q-icon v-if='prop.node.type==="assays"' name='add' class='tree_add_button' @click='addAssay()'></q-icon>
-          <q-icon v-if='prop.node.type==="studies"' name='add' class='tree_add_button' @click='addStudy()'></q-icon>
+          <span class='text-black'>{{ prop.node.label }}</span>
+          <q-icon v-if='prop.node.type==="assays"' name='add' class='tree_add_button' @click='e=>addAssay(e,prop.node)'></q-icon>
+          <q-icon v-if='prop.node.type==="studies"' name='add' class='tree_add_button' @click='e=>addStudy(e,prop.node)'></q-icon>
         </div>
       </template>
     </q-tree>
 
-    <div class="column" style="text-align: center; color:#ccc; cursor: pointer;" v-if="props.nodes.length < 1" @click='emit("openArc")'>
-      <!-- <q-icon name="account_tree" size="15em" style='color:#ccc' /> -->
+    <div
+      class="column"
+      style="text-align: center; color:#ccc; cursor: pointer;"
+      v-if="props.nodes.length < 1"
+      @click='emit("openArc")'
+    >
       <q-icon name="find_in_page" size="15em" style="width: 100%"/>
       <h6>Open ARC</h6>
     </div>
@@ -585,14 +608,12 @@ onUnmounted( ()=>{window.ipc.off('LocalFileSystemService.updatePath', updatePath
 </template>
 
 <style>
-.q-tree__node--selected {
-  background-color: #26a69a;
-}
 .q-tree__node .q-icon {
   color:#777;
 }
-.q-tree__node--selected .q-icon {
-  color:#fff;
+
+.q-tree__node-header:hover{
+  background-color: #eee;
 }
 
 .tree_add_button{

@@ -42,7 +42,7 @@ const onSubmit = async () => {
             v-model="iProps.value"
             :label="props.property"
             :rules="[
-                val => !!val || `invalid ${props.property}`,
+                val => (!!val && val.trim().length>0) || `invalid ${props.property}`
               ]"
             lazy-rules
           />

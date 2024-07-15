@@ -134,6 +134,7 @@ const ArcControlService = {
       arc?: ARC,
       force?:boolean
   })=>{
+    options = options || {};
     const arc = options.arc || ArcControlService.props.arc;
     if(!arc)
       return;
