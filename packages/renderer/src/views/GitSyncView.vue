@@ -18,7 +18,7 @@ const iProps = reactive({
   git_status: [],
   error: '',
 
-  use_lfs: false,
+  use_lfs: true,
 
   remote: null,
   remotes: {},
