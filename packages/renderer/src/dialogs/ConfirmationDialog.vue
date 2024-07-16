@@ -27,14 +27,14 @@ const { dialogRef, onDialogHide, onDialogOK, onDialogCancel } = useDialogPluginC
 <template>
 
   <q-dialog ref="dialogRef" persistent>
-    <q-card class="q-dialog-plugin">
+    <q-card class="q-dialog-plugin" style="width:auto;max-width:50vw;">
       <q-card-section>
         <div class="text-h6">Confirm</div>
       </q-card-section>
 
-      <q-card-section class="row no-wrap items-center" style="padding:0 0.2em;">
+      <q-card-section class="row no-wrap items-center" style="padding:0 2em 0 0.5em;">
         <q-icon class='col-grow' name="warning" color="grey-7" size="2em" style="padding:0 0.25em"/>
-        <div class="col" v-html='props.msg'></div>
+        <div class="col" v-html='props.msg' style="white-space:nowrap"></div>
       </q-card-section>
 
       <q-card-actions align="right" style="margin:0 1.5em 1.5em;">

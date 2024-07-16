@@ -15,6 +15,9 @@ import GitHistoryView from './views/GitHistoryView.vue';
 import SwateView from './views/SwateView.vue';
 import ValidationView from './views/ValidationView.vue';
 
+import ConfirmationDialog from './dialogs/ConfirmationDialog.vue';
+import GitDialog from './dialogs/GitDialog.vue';
+
 import DataHubView from './views/DataHubView.vue';
 
 import logoURL from '../assets/dpLogo2_w.png';
@@ -26,6 +29,9 @@ import { onMounted, ref, reactive } from 'vue';
 import AppProperties from './AppProperties';
 import ArcControlService from './ArcControlService';
 setCssVar('primary', '#2d3e50');
+
+import { useQuasar } from 'quasar'
+const $q = useQuasar();
 
 // import { useQuasar } from 'quasar'
 // const $q = useQuasar()
@@ -47,13 +53,53 @@ const iProps = reactive({
 const openLocalArc = async (path: string | null | void) =>{
   if(!path) path = await window.ipc.invoke('LocalFileSystemService.selectDir', ['Select local ARC','Select local ARC']);
   if(!path) return;
+
+  AppProperties.state=AppProperties.STATES.HOME;
+
   let isOpen = await ArcControlService.readARC(path);
   if(!isOpen){
     iProps.error_text = 'Invalid ARC format:<br>'+path;
     iProps.error = true;
     return;
   }
-  AppProperties.state=AppProperties.STATES.HOME;
+  const git_initialized = await window.ipc.invoke('GitService.run',{
+    args: [`status`],
+    cwd: path
+  });
+  ArcControlService.props.arc.git_initialized = git_initialized[0];
+  if(!ArcControlService.props.arc.git_initialized){
+    $q.dialog({
+      component: ConfirmationDialog,
+      componentProps: {
+        msg: `ARC is not a Git repository.<br>Do you want to initialize Git?`,
+        ok_text: 'Initialize Git',
+        ok_icon: 'sym_r_folder_data',
+        ok_color: 'secondary',
+        cancel_text: 'Cancel',
+        cancel_icon: 'cancel',
+        cancel_color: 'red-8',
+      }
+    }).onOk( async ()=>{
+      const dialogProps = reactive({
+        title: 'Initializing Git',
+        ok_title: 'Ok',
+        cancel_title: null,
+        state: 0,
+      });
+      $q.dialog({
+        component: GitDialog,
+        componentProps: dialogProps
+      }).onOk(async ()=>{
+        await ArcControlService.saveARC();
+        openLocalArc(path);
+      });
+      const response = await window.ipc.invoke('GitService.run',{
+        args: ['init','-b','main'],
+        cwd: path
+      });
+      dialogProps.state = response[0] ? 1 : 2;
+    });
+  }
 };
 
 const saveLocalArc = async (force) =>{
@@ -159,9 +205,9 @@ const test = async ()=>{
           <ToolbarButton text='Explorer' icon='folder_open' requiresARC @clicked='ArcControlService.openArcInExplorer()'></ToolbarButton>
           <q-separator />
 
-          <ToolbarButton text='Commit' icon='rule' requiresARC requiresUser @clicked='AppProperties.state=AppProperties.STATES.GIT_COMMIT'></ToolbarButton>
-          <ToolbarButton text='DataHUB Sync' icon='published_with_changes' requiresARC requiresUser @clicked='AppProperties.state=AppProperties.STATES.GIT_SYNC'></ToolbarButton>
-          <ToolbarButton text='History' icon='history' requiresARC requiresUser @clicked='AppProperties.state=AppProperties.STATES.GIT_HISTORY'></ToolbarButton>
+          <ToolbarButton text='Commit' icon='rule' requiresARC requiresUser requiresGit @clicked='AppProperties.state=AppProperties.STATES.GIT_COMMIT'></ToolbarButton>
+          <ToolbarButton text='DataHUB Sync' icon='published_with_changes' requiresARC requiresUser requiresGit @clicked='AppProperties.state=AppProperties.STATES.GIT_SYNC'></ToolbarButton>
+          <ToolbarButton text='History' icon='history' requiresARC requiresUser requiresGit @clicked='AppProperties.state=AppProperties.STATES.GIT_HISTORY'></ToolbarButton>
           <q-separator />
 
           <ToolbarButton text='Validation' icon='verified' requiresARC @clicked='AppProperties.state=AppProperties.STATES.VALIDATION'></ToolbarButton>
@@ -345,6 +391,14 @@ body {
   font-size:0.7em;
   color:#ddd;
   padding:0 0 0 0.2em;
+}
+
+.material-symbols-rounded {
+  font-variation-settings:
+  'FILL' 1,
+  'wght' 400,
+  'GRAD' 0,
+  'opsz' 24
 }
 
 </style>

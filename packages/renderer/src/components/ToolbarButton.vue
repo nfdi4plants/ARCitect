@@ -7,20 +7,22 @@ export interface Props {
   icon: string,
   text: string,
   requiresARC?: boolean,
-  requiresUser?: boolean
+  requiresUser?: boolean,
+  requiresGit?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
   icon: 'help',
   text: 'TODO',
   requiresARC: false,
-  requiresUser: false
+  requiresUser: false,
+  requiresGit: false
 });
 
 const emit = defineEmits(['clicked']);
 
 const enabled = ()=>{
-  return (!props.requiresARC || ArcControlService.props.arc_root) && (!props.requiresUser || appProperties.user);
+  return (!props.requiresARC || ArcControlService.props.arc_root) && (!props.requiresUser || appProperties.user) && (!props.requiresGit || (ArcControlService.props.arc && ArcControlService.props.arc.git_initialized));
 }
 
 </script>
