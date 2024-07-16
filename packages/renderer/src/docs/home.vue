@@ -208,7 +208,7 @@ export default {
 
           <q-item>
             <q-item-section avatar>
-              <q-icon color="grey-7" name="verified" />
+              <q-icon color="grey-7" name="rule" />
             </q-item-section>
             <q-item-section style="margin-left: -1.2em;">
               Commit
@@ -239,6 +239,20 @@ export default {
             </q-item-section>
             <q-item-section>
               Inspect the ARC's history
+            </q-item-section>
+          </q-item>
+
+          <q-separator inset />
+                    
+          <q-item>
+            <q-item-section avatar>
+              <q-icon color="grey-7" name="verified" />
+            </q-item-section>
+            <q-item-section style="margin-left: -1.2em;">
+              Validation
+            </q-item-section>
+            <q-item-section>
+              Choose ARC validation
             </q-item-section>
           </q-item>
 
