@@ -5,9 +5,8 @@ import appProperties from '../AppProperties.ts';
 import GitCommitHelp from '../docs/git-commit.vue';
 import GitSyncHelp from '../docs/git-sync.vue';
 import GitHistoryHelp from '../docs/git-history.vue';
-import AssayHelp from '../docs/assay.vue';
-import StudyHelp from '../docs/study.vue';
 import DataHubHelp from '../docs/datahub.vue';
+import ValidationHelp from '../docs/validation.vue';
 import HomeHelp from '../docs/home.vue';
 import SwateHelp from '../docs/swate.vue';
 
@@ -20,8 +19,7 @@ import SwateHelp from '../docs/swate.vue';
     <GitHistoryHelp v-else-if='appProperties.state===appProperties.STATES.GIT_HISTORY'></GitHistoryHelp>
     <SwateHelp v-else-if='appProperties.state===appProperties.STATES.EDIT_SWATE'></SwateHelp>
     <DataHubHelp v-else-if='appProperties.state===appProperties.STATES.OPEN_DATAHUB'></DataHubHelp>
-    <AssayHelp v-else-if='appProperties.state===appProperties.STATES.EDIT_ASSAY'></AssayHelp>
-    <StudyHelp v-else-if='appProperties.state===appProperties.STATES.EDIT_STUDY'></StudyHelp>
+    <ValidationHelp v-else-if='appProperties.state===appProperties.STATES.VALIDATION'></ValidationHelp>
     <HomeHelp v-else></HomeHelp>
   </div>
 </template>
