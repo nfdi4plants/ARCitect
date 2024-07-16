@@ -36,7 +36,7 @@ setCssVar('primary', '#2d3e50');
 const iProps = reactive({
   showToolbar: true,
   toolbarMinimized: false,
-  showHelp: false,
+  showHelp: true,
   splitterModel: 300,
   error: false,
   error_text: '',
