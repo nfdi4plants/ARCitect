@@ -74,7 +74,7 @@ export async function restoreOrCreateWindow() {
         {
           label: 'Tutorials',
           click: async () => {
-            shell.openExternal('https://nfdi4plants.org/nfdi4plants.knowledgebase/docs/tutorials/QuickStart_swate.html');
+            shell.openExternal('https://nfdi4plants.org/nfdi4plants.knowledgebase/docs/guides/arcitect_QuickStart.html');
           }
         },
         {
