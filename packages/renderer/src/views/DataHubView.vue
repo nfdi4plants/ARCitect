@@ -207,7 +207,7 @@ onUnmounted(async () => {
             <q-item-label :style="'color:#666;' + (item.isOwner ? 'font-weight:bold;' :'')">{{item.namespace.name}}</q-item-label>
           </q-item-section>
           <q-item-section avatar>
-            <q-btn unelevated color="secondary" v-on:click="inspectArc(item.http_url_to_repo)" icon='search'></q-btn>
+            <q-btn unelevated color="secondary" v-on:click="inspectArc(item.http_url_to_repo)" icon='sym_r_captive_portal'></q-btn>
           </q-item-section>
           <q-item-section avatar>
             <q-btn unelevated color="secondary" v-on:click="importArc(item.http_url_to_repo)" icon='file_download'></q-btn>

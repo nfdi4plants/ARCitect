@@ -102,6 +102,7 @@ const push = async()=>{
     componentProps: dialogProps
   });
 
+
   let response = null;
 
   // get current branch
@@ -341,7 +342,7 @@ const inspectArc = url =>{
                         </q-tooltip>
                       </q-btn>
 
-                      <q-btn class="gt-xs" size="12px" flat dense round icon="search" color='gray-7' @click='inspectArc(iProps.remotes[id].url)'>
+                      <q-btn class="gt-xs" size="12px" flat dense round icon="sym_r_captive_portal" color='gray-7' @click='inspectArc(iProps.remotes[id].url)'>
                         <q-tooltip>
                           Inspect Remote in the Browser
                         </q-tooltip>
