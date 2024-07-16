@@ -6,7 +6,7 @@ import ArcCommanderService from '../ArcCommanderService.ts';
 import AppProperties from '../AppProperties.ts';
 import SelectionDialog from '../dialogs/SelectionDialog.vue';
 import UserDialog from '../dialogs/UserDialog.vue';
-import ErrorDialog from '../dialogs/ErrorDialog.vue';
+import ConfirmationDialog from '../dialogs/ConfirmationDialog.vue';
 
 import { useQuasar } from 'quasar'
 const $q = useQuasar();
@@ -16,9 +16,10 @@ const authenticate = async host=>{
   if(res) return;
 
   $q.dialog({
-    component: ErrorDialog,
+    component: ConfirmationDialog,
     componentProps: {
-      error: `Unable to authenticate at host "${host}"`,
+      title: 'Error',
+      msg: `Unable to authenticate at host "${host}"`
     }
   });
 };

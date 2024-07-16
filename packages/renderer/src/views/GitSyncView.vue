@@ -11,12 +11,12 @@ import AppProperties from '../AppProperties.ts';
 
 import AddRemoteDialog from '../dialogs/AddRemoteDialog.vue';
 import GitDialog from '../dialogs/GitDialog.vue';
+import ConfirmationDialog from '../dialogs/ConfirmationDialog.vue';
 import { useQuasar } from 'quasar'
 const $q = useQuasar();
 
 const iProps = reactive({
   git_status: [],
-  error: '',
 
   use_lfs: true,
 
@@ -25,11 +25,6 @@ const iProps = reactive({
 
   userListener: ()=>{}
 });
-
-const raiseError = err => {
-  iProps.error = err;
-  return false;
-};
 
 const getStatus = async()=>{
   const response = await window.ipc.invoke('GitService.run', {
@@ -77,18 +72,20 @@ const patchRemote = url => {
     : url;
 };
 
+const showError = async msg=>{
+  $q.dialog({
+    component: ConfirmationDialog,
+    componentProps: {
+      title: 'Error',
+      msg: msg
+    }
+  });
+};
+
 const push = async()=>{
-  iProps.error = '';
-
-  if(!iProps.remote)
-    return raiseError('Pushing requires remote.');
-
-  if(!AppProperties.user)
-    return raiseError('Pushing requires login.');
-
   await getStatus();
   if(iProps.git_status.length>0)
-    return raiseError('Commit changes before pushing.');
+    return showError('Commit changes before pulling.');
 
   const dialogProps = reactive({
     title: 'Pushing ARC',
@@ -100,8 +97,9 @@ const push = async()=>{
   $q.dialog({
     component: GitDialog,
     componentProps: dialogProps
+  }).onOk(async ()=>{
+    await checkRemotes();
   });
-
 
   let response = null;
 
@@ -143,19 +141,12 @@ const push = async()=>{
     });
 
   dialogProps.state=1;
-
-  await checkRemotes();
 };
 
 const pull = async()=>{
-  iProps.error = '';
-
-  if(!iProps.remote)
-    return raiseError('Pulling requires remote.');
-
   await getStatus();
   if(iProps.git_status.length>0)
-    return raiseError('Commit changes before pulling.');
+    return showError('Commit changes before pulling.');
 
   const dialogProps = reactive({
     title: 'Pulling ARC',
@@ -167,6 +158,8 @@ const pull = async()=>{
   $q.dialog({
     component: GitDialog,
     componentProps: dialogProps
+  }).onOk(async ()=>{
+    await checkRemotes();
   });
 
   let response = null;
@@ -207,8 +200,6 @@ const pull = async()=>{
     });
 
   dialogProps.state=1;
-
-  await checkRemotes();
 };
 
 const checkRemotes = async()=>{
@@ -254,7 +245,6 @@ const getRemotes = async()=>{
 };
 
 const init = async()=>{
-  iProps.error = '';
   await getRemotes();
   await checkRemotes();
 };

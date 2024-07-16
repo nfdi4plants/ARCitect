@@ -22,7 +22,7 @@ const props = withDefaults(defineProps<Props>(), {
 const emit = defineEmits(['clicked']);
 
 const enabled = ()=>{
-  return (!props.requiresARC || ArcControlService.props.arc_root) && (!props.requiresUser || appProperties.user) && (!props.requiresGit || (ArcControlService.props.arc && ArcControlService.props.arc.git_initialized));
+  return (!props.requiresARC || ArcControlService.props.arc_root) && (!props.requiresUser || appProperties.user) && (!props.requiresGit || ArcControlService.props.git_initialized);
 }
 
 </script>

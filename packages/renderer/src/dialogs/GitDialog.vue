@@ -27,7 +27,6 @@ defineEmits([
 ]);
 
 const processGitStream = async row=>{
-  if(props.state===1) return;
   const last_row = iProps.rows[iProps.rows.length-1];
   let replace = false;
   for(let p of [
@@ -47,7 +46,7 @@ const processGitStream = async row=>{
     iProps.rows.push(row);
 };
 
-onMounted(   ()=>{
+onMounted( ()=>{
   iProps.rows = [''];
   window.ipc.on('GitService.MSG', processGitStream);
 });

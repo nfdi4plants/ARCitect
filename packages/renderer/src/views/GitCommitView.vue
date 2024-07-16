@@ -27,8 +27,7 @@ interface Props {
     email: string,
     msg: string
   }
-}
-
+};
 
 const iProps : Props = reactive({
   git_status: [],
@@ -171,7 +170,6 @@ const isTrackedWithLFS = item=>{
 };
 
 const reset = async()=>{
-
   const dialogProps = reactive({
     title: 'Resetting ARC',
     ok_title: 'Ok',

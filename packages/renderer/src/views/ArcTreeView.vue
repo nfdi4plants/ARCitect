@@ -10,7 +10,6 @@ import ConfirmationDialog from '../dialogs/ConfirmationDialog.vue';
 import StringDialog from '../dialogs/StringDialog.vue';
 import AddProtocolDialog from '../dialogs/AddProtocolDialog.vue';
 import GitDialog from '../dialogs/GitDialog.vue';
-import ErrorDialog from '../dialogs/ErrorDialog.vue';
 import { useQuasar } from 'quasar'
 import {ArcStudy, ArcAssay} from '@nfdi4plants/arctrl';
 import IdentifierDialog from '../dialogs/IdentifierDialog.vue';
@@ -385,9 +384,10 @@ const onCellContextMenu = async (e,node) => {
             cwd: ArcControlService.props.arc_root
           });
           if(!response[0]) return $q.dialog({
-            component: ErrorDialog,
+            component: ConfirmationDialog,
             componentProps: {
-              error: 'Unable to determine remote name'
+              title: 'Error',
+              msg: 'Unable to determine remote name'
             }
           });
           const remote_name = response[1].split('\n')[0];
@@ -396,9 +396,10 @@ const onCellContextMenu = async (e,node) => {
             cwd: ArcControlService.props.arc_root
           });
           if(!response[0]) return $q.dialog({
-            component: ErrorDialog,
+            component: ConfirmationDialog,
             componentProps: {
-              error: 'Unable to determine remote url'
+              title: 'Error',
+              msg: 'Unable to determine remote url'
             }
           });
           const remote_url = response[1].split('\n')[0];
@@ -407,9 +408,10 @@ const onCellContextMenu = async (e,node) => {
           const patched_remote_url = patchRemote(remote_url);
           if(!patched_remote_url){
             return $q.dialog({
-              component: ErrorDialog,
+              component: ConfirmationDialog,
               componentProps: {
-                error: 'LFS download requires login'
+                title: 'Error',
+                msg: 'LFS download requires login'
               }
             });
           }

@@ -22,11 +22,13 @@ export const Workflows = 'workflows';
 let init: {
     arc_root: undefined | string ,
     busy: boolean,
-    arc: null | ARC
+    arc: null | ARC,
+    git_initialized: boolean
 } = {
     arc_root: undefined ,
     busy: false,
-    arc: null
+    arc: null,
+    git_initialized: false
 }
 
 function relative_to_absolute_path(relativePath: string) {
@@ -69,6 +71,13 @@ const ArcControlService = {
     arc.SetISAFromContracts(contracts);
     ArcControlService.props.arc = arc;
     ArcControlService.props.arc_root = arc_root;
+
+    const git_initialized = await window.ipc.invoke('GitService.run',{
+      args: [`status`],
+      cwd: arc_root
+    });
+    ArcControlService.props.git_initialized = git_initialized[0];
+
     ArcControlService.props.busy = false;
     console.log(arc);
     return true;
@@ -153,7 +162,8 @@ const ArcControlService = {
       arc_root + '/.gitignore'
     );
     if(!ignore_exists)
-      contracts.push(gitignoreContract);
+      contracts.push(
+        );
 
     await ArcControlService.handleARCContracts(contracts, arc, arc_root);
 

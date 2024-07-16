@@ -62,15 +62,11 @@ const openLocalArc = async (path: string | null | void) =>{
     iProps.error = true;
     return;
   }
-  const git_initialized = await window.ipc.invoke('GitService.run',{
-    args: [`status`],
-    cwd: path
-  });
-  ArcControlService.props.arc.git_initialized = git_initialized[0];
-  if(!ArcControlService.props.arc.git_initialized){
+  if(!ArcControlService.props.git_initialized){
     $q.dialog({
       component: ConfirmationDialog,
       componentProps: {
+        title: `Warning`,
         msg: `ARC is not a Git repository.<br>Do you want to initialize Git?`,
         ok_text: 'Initialize Git',
         ok_icon: 'sym_r_folder_data',
@@ -97,7 +93,7 @@ const openLocalArc = async (path: string | null | void) =>{
         args: ['init','-b','main'],
         cwd: path
       });
-      dialogProps.state = response[0] ? 1 : 2;
+      dialogProps.state=response[0]?1:2;
     });
   }
 };
