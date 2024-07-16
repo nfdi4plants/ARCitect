@@ -42,7 +42,7 @@ const $q = useQuasar();
 const iProps = reactive({
   showToolbar: true,
   toolbarMinimized: false,
-  showHelp: false,
+  showHelp: true,
   splitterModel: 300,
   error: false,
   error_text: '',

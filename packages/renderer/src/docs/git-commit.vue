@@ -9,7 +9,7 @@ import d_checkbox from '../components/d_checkbox.vue';
   <div class="q-py-sm">
 
     <h5 style="margin-bottom:0.5em;"> 
-      <q-icon color="grey-8" name="verified" /> Commit Changes
+      <q-icon color="grey-8" name="rule" /> Commit Changes
     </h5>   
 
     <q-card>

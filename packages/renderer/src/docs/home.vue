@@ -93,6 +93,8 @@ export default {
 
     <h5 style="margin-bottom:0.5em;">Help</h5>
 
+    Click <q-icon color="grey-7" name="help" />Toggle Help in the sidebar to show or hide the help menu.
+
     <div class="q-pa-sm text-body2 text-justify">
       The ARCitect is divided into three panels: sidebar, file tree and main menu.
     </div>
@@ -208,7 +210,7 @@ export default {
 
           <q-item>
             <q-item-section avatar>
-              <q-icon color="grey-7" name="verified" />
+              <q-icon color="grey-7" name="rule" />
             </q-item-section>
             <q-item-section style="margin-left: -1.2em;">
               Commit
@@ -239,6 +241,20 @@ export default {
             </q-item-section>
             <q-item-section>
               Inspect the ARC's history
+            </q-item-section>
+          </q-item>
+
+          <q-separator inset />
+                    
+          <q-item>
+            <q-item-section avatar>
+              <q-icon color="grey-7" name="verified" />
+            </q-item-section>
+            <q-item-section style="margin-left: -1.2em;">
+              Validation
+            </q-item-section>
+            <q-item-section>
+              Choose ARC validation
             </q-item-section>
           </q-item>
 

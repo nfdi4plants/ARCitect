@@ -226,7 +226,7 @@ onUnmounted(()=>{
 <template>
   <q-list bordered class="rounded-borders">
     <ViewItem
-      icon="verified"
+      icon="rule"
       label="Commit Changes"
       caption="Track changes of the ARC with git"
       group="git"
