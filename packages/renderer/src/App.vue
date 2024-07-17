@@ -147,9 +147,11 @@ onMounted(async () => {
   }
   console.log(git_lfs_running[1]);
 
+  const version_ = iProps.version.slice(1).split('.').map(x=>parseFloat(x));
   const versions = await window.ipc.invoke('InternetService.getArcitectVersions');
-  const latest_version = versions[0].name;
-  if(latest_version !== iProps.version)
+  const latest_version = versions[0].tag_name;
+  const latest_version_ = latest_version.slice(1).split('.').map(x=>parseFloat(x));
+  if(version_[0]<latest_version_[0] || version_[1]<latest_version_[1] || version_[2]<latest_version_[2])
     iProps.new_version = latest_version;
 });
 

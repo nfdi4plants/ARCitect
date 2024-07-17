@@ -111,7 +111,7 @@ export const InternetService = {
       null,
       {
         host: 'api.github.com',
-        path: '/repos/nfdi4plants/ARCitect/tags',
+        path: '/repos/nfdi4plants/ARCitect/releases',
         method: 'GET'
       }
     );
