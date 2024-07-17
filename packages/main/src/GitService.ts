@@ -69,10 +69,11 @@ export const GitService = {
       const o = typeof options === 'string' ? {} : options;
       o.env = Object.assign({}, o.env || {}, process.env);
 
-      // disable terminal prompts
+      // adjust terminal prompts
       o.env['GIT_TERMINAL_PROMPT']=0;
       o.env['GIT_ASKPASS']=true;
-
+      o.env['GIT_LFS_FORCE_PROGRESS']=1;
+      o.detached=false;
       o.shell = true;
 
       // verbose

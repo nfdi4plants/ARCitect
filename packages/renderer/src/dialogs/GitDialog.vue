@@ -30,12 +30,15 @@ const processGitStream = async row=>{
   const last_row = iProps.rows[iProps.rows.length-1];
   let replace = false;
   for(let p of [
+    'POST ',
     'Receiving objects:',
     'Resolving deltas:',
     'Enumerating objects:',
     'Counting objects:',
     'Compressing objects:',
     'Writing objects:',
+    'Uploading LFS objects:',
+    'Downloading LFS objects:',
   ])
     if(last_row.includes(p) && row.includes(p))
       replace = true;

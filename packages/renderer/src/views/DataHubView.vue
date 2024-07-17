@@ -70,7 +70,7 @@ const importArc = async url =>{
   });
 
   const response = await window.ipc.invoke('GitService.run', {
-    args: [`clone`,url_with_credentials,'--progress'],
+    args: [`clone`,url_with_credentials,'--progress','--verbose'],
     cwd: destination,
     env: {GIT_LFS_SKIP_SMUDGE: (props.download_lfs?0:1)}
   });
