@@ -92,29 +92,14 @@ const trackChanges = async () => {
     }
   }
 
-  const string_limit = 2000;
   for(let [a,b,c] of [
     [['rm'],git_rm,1],
     [['lfs','untrack'],git_rm,1],
     [['lfs','track'],git_lfs,2],
     [['add'],git_add,3]
   ]){
-    if(b.length<1) continue;
-
-    let string = a+' ';
-    const chunks = [0];
     for(let i=0; i<b.length; i++){
-      string += ' "'+b[i]+"'";
-      if(string.length>string_limit){
-        chunks.push(i===0 || i===chunks[chunks.length-1] ? i+1 : i);
-        string = a+' ';
-      }
-    }
-    if(chunks[chunks.length-1]!==b.length)
-      chunks.push(b.length);
-
-    for(let i=0; i<chunks.length-1; i++){
-      const args = a.concat(b.slice(chunks[i],chunks[i+1]).map(x=>'"'+x+'"'));
+      const args = a.concat(['"'+b[i]+'"']);
       const response = await window.ipc.invoke('GitService.run', {
         args: args,
         cwd: ArcControlService.props.arc_root
