@@ -9,36 +9,35 @@ To install ARCitect, navigate to the [releases page](https://github.com/nfdi4pla
 - **Windows**:  ARCitect-x.x.xx-win.zip
 - **MacOS** ARCitect-x.x.xx-universal.dmg
 - **Linux**: ARCitect-x.x.xx.AppImage
+    <details>
+    <summary>Installation on <b>Linux</b> might require additional steps</summary>
 
-<details>
-<summary>Installation on <b>Linux</b> might require additional steps</summary>
+    #### Install Git dependencies
 
-#### Install Git dependencies
-
-ARCitect depends on [git](https://git-scm.com/download/linux) and [git-lfs](https://github.com/git-lfs/git-lfs/blob/main/INSTALLING.md). Please follow the linked guides for installation. 
-
-#### Make the ARCitect installer executable
-
-##### (A) with the user interface
-
-- right-click the file and select properties
-- go to the "permissions" tab and tick the field "execute"
-- now double-clicking the AppImage should start the ARCitect
-
-##### (B) from the command line (you might need specific rights for this)
-
-- open a terminal
-- move to the directory where you have saved your AppImage (e.g. Downloads)
-```
-cd Downloads
-```
-- make the file executable (use the appropriate name of the file)
-```
-chmod u+x ARCitect-x.x.xx.AppImage
-```
-- now double-clicking the AppImage should start the ARCitect
-
-</details>
+    ARCitect depends on [git](https://git-scm.com/download/linux) and [git-lfs](https://github.com/git-lfs/git-lfs/blob/main/INSTALLING.md). Please follow the linked guides for installation. 
+    
+    #### Make the ARCitect installer executable
+    
+    ##### (A) with the user interface
+    
+    - right-click the file and select properties
+    - go to the "permissions" tab and tick the field "execute"
+    - now double-clicking the AppImage should start the ARCitect
+    
+    ##### (B) from the command line (you might need specific rights for this)
+    
+    - open a terminal
+    - move to the directory where you have saved your AppImage (e.g. Downloads)
+    ```
+    cd Downloads
+    ```
+    - make the file executable (use the appropriate name of the file)
+    ```
+    chmod u+x ARCitect-x.x.xx.AppImage
+    ```
+    - now double-clicking the AppImage should start the ARCitect
+    
+    </details>
 
 :bulb: For more detailed instructions and ARCitect QuickStarts, please checkout the [DataPLANT Knowledge Base](https://nfdi4plants.org/nfdi4plants.knowledgebase/docs/ARCitect-Manual/index.html).
 
