@@ -42,7 +42,6 @@ const $q = useQuasar();
 const iProps = reactive({
   showToolbar: true,
   toolbarMinimized: false,
-  showHelp: true,
   splitterModel: 300,
   error: false,
   error_text: '',
@@ -212,7 +211,7 @@ const test = async ()=>{
           <q-separator />
 
           <q-item class="col-grow"></q-item>
-          <ToolbarButton text='Toggle Help' icon='help' @clicked='iProps.showHelp=!iProps.showHelp;'></ToolbarButton>
+          <ToolbarButton text='Toggle Help' icon='help' @clicked='AppProperties.showHelp=!AppProperties.showHelp;'></ToolbarButton>
           <ToolbarButton :text="iProps.toolbarMinimized ? '' : 'Toggle Sidebar'" :icon="iProps.toolbarMinimized ? 'chevron_right' : 'chevron_left'" @clicked='iProps.toolbarMinimized=!iProps.toolbarMinimized;'></ToolbarButton>
           <q-separator />
 
@@ -230,7 +229,7 @@ const test = async ()=>{
       </q-drawer>
 
       <q-drawer
-        v-model="iProps.showHelp"
+        v-model="AppProperties.showHelp"
         side="right"
         bordered
         :breakpoint='0'

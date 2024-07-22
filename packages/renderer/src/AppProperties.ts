@@ -30,7 +30,9 @@ const AppProperties: {
     'gitlab.plantmicrobe.de'
   ],
 
-  force_commit_update: 0
+  force_commit_update: 0,
+
+  showHelp: false
 });
 
 for(let k in AppProperties.STATES){

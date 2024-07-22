@@ -3,8 +3,9 @@ import {onMounted,onUnmounted,reactive,ref,nextTick,watch} from 'vue';
 
 import AppProperties from '../AppProperties.ts';
 import ViewItem from '../components/ViewItem.vue';
+import a_btn from '../components/a_btn.vue';
+import a_tooltip from '../components/a_tooltip.vue';
 
-// import ProgressDialog from '../dialogs/ProgressDialog.vue';
 import GitDialog from '../dialogs/GitDialog.vue';
 
 import ArcControlService from '../ArcControlService.ts';
@@ -155,19 +156,23 @@ onUnmounted(async () => {
             <q-icon v-if="props.search_text!==''" name="close" @click="props.search_text=''" class="cursor-pointer" />
             <q-icon name="search" />
           </template>
-          <template v-slot:hint>
-            Field hint
-          </template>
+          <a_tooltip>
+            Use the search field to find an ARC by the name of the ARC or its creator
+          </a_tooltip>
         </q-input>
 
         <q-checkbox class='' v-model="props.download_lfs" label="LFS" dense color='secondary' style="min-width:50px;">
-          <q-tooltip class='text-body2'>
-            Download Large Files
-          </q-tooltip>
+          <a_tooltip>
+            (Un)check the LFS box to (not) download large file storage (LFS) objects
+          </a_tooltip>
         </q-checkbox>
 
-        <q-select class='' v-model="props.host" :options="AppProperties.datahub_hosts" label="Host" dense/>
-        <q-btn class='' label="" icon='refresh' color="secondary" @click='init()' no-wrap/>
+        <q-select class='' v-model="props.host" :options="AppProperties.datahub_hosts" label="Host" dense>
+          <a_tooltip>Select a DataHUB host from the dropdown menu</a_tooltip>
+        </q-select>
+        <a_btn label="" icon='refresh' @click='init()' no-wrap>
+          <a_tooltip>Refresh the list of available ARCs</a_tooltip>
+        </a_btn>
       </div>
       <br>
       <q-separator/>
@@ -207,10 +212,18 @@ onUnmounted(async () => {
             <q-item-label :style="'color:#666;' + (item.isOwner ? 'font-weight:bold;' :'')">{{item.namespace.name}}</q-item-label>
           </q-item-section>
           <q-item-section avatar>
-            <q-btn unelevated color="secondary" v-on:click="inspectArc(item.http_url_to_repo)" icon='sym_r_captive_portal'></q-btn>
+            <a_btn color="secondary" v-on:click="inspectArc(item.http_url_to_repo)" icon='sym_r_captive_portal'>
+              <a_tooltip>
+                Open the DataHUB repository in the browser
+              </a_tooltip>
+            </a_btn>
           </q-item-section>
           <q-item-section avatar>
-            <q-btn unelevated color="secondary" v-on:click="importArc(item.http_url_to_repo)" icon='file_download'></q-btn>
+            <a_btn color="secondary" v-on:click="importArc(item.http_url_to_repo)" icon='file_download'>
+              <a_tooltip>
+                Download (clone) selected ARC from the DataHUB
+              </a_tooltip>
+            </a_btn>
           </q-item-section>
         </q-item>
       </q-list>
