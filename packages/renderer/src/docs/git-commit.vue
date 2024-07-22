@@ -34,7 +34,11 @@
             href="https://nfdi4plants.org/nfdi4plants.knowledgebase/docs/guides/arc_WorkingWithLargeDataFiles.html"
             target="_blank">large file storage (LFS)</a> and
           <a href="https://nfdi4plants.org/nfdi4plants.knowledgebase/docs/guides/arc_SyncingRecommendation.html"
-            target="_blank">commit messages </a>.
+            target="_blank">commit messages</a>.
+
+
+            <!-- TODO: add explanation about branches  -->
+
         </div>
       </q-item>
     </q-card>
