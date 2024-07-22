@@ -8,6 +8,8 @@ import SelectionDialog from '../dialogs/SelectionDialog.vue';
 import UserDialog from '../dialogs/UserDialog.vue';
 import ConfirmationDialog from '../dialogs/ConfirmationDialog.vue';
 
+import a_tooltip from '../components/a_tooltip.vue';
+
 import { useQuasar } from 'quasar'
 const $q = useQuasar();
 
@@ -77,6 +79,9 @@ const showUserData = ()=>{
       <q-item-label style="">{{AppProperties.user.name}}</q-item-label>
       <q-item-label caption style="font-size:0.8em;">{{AppProperties.user.host}}</q-item-label>
     </q-item-section>
+    <a_tooltip>
+      Login to a DataHUB
+    </a_tooltip>
   </q-item>
 
 </template>

@@ -2,6 +2,7 @@
 
 import ToolbarButton from './components/ToolbarButton.vue';
 import ArcTreeView from './views/ArcTreeView.vue';
+import a_tooltip from './components/a_tooltip.vue';
 
 import HomeView from './views/HomeView.vue';
 
@@ -185,6 +186,9 @@ const test = async ()=>{
             <q-item-section style="margin:0.6em 0 0 -1.2em">
               <q-item-label><b style="font-size:2em">ARC</b><span style="font-size:1.2em">itect</span></q-item-label>
             </q-item-section>
+            <a_tooltip>
+            Return to home view
+            </a_tooltip>
           </q-item>
 
           <LoginView />
@@ -218,9 +222,9 @@ const test = async ()=>{
           <q-item v-ripple clickable dense @click='downloadArcitect'>
             <q-item-section avatar>
               <q-icon color='red-9' name="error" v-if='iProps.new_version'>
-                <q-tooltip>
+                <a_tooltip>
                   New Version Available!
-                </q-tooltip>
+                </a_tooltip>
               </q-icon>
             </q-item-section>
             <q-item-section style="margin-left:-1.2em;">{{iProps.version}}</q-item-section>
