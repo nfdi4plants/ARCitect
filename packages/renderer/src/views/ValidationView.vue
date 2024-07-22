@@ -220,9 +220,7 @@ onMounted(init);
                 />
               </td>
               <a_tooltip>
-                By default every ARC is validated against the <a
-                href="https://github.com/nfdi4plants/ARC-specification"
-                target="_blank">ARC specification</a> to guarantee ARC intactness.
+                By default every ARC is validated against the ARC specification to guarantee ARC intactness.
               </a_tooltip>
             </tr>
             <tr>
@@ -232,10 +230,7 @@ onMounted(init);
               <td class='thh' colspan="3">Custom Validation Packages</td>
               <a_tooltip>
                 Here you can add or remove additional validation packages. <br>
-                For instance, if you want to publish your ARC and receive a DOI via the DataHUB, select and add the "invenio" validation. <br>
-                Please check out the <a
-                  href="https://nfdi4plants.org/nfdi4plants.knowledgebase/docs/DataHUB-Manual/datahub-data-publications.html"
-                  target="_blank">DataPLANT knowledge base</a> for more information about publishing your ARC.
+                For instance, if you want to publish your ARC and receive a DOI via the DataHUB, select and add the "invenio" validation.
               </a_tooltip>
             </tr>
             <tr>
