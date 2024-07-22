@@ -148,6 +148,8 @@ const commit = async()=>{
     return dialogProps.state=2;
 
   dialogProps.state = 1;
+
+  AppProperties.force_lfs_update++;
 };
 
 const isTrackedWithLFS = item=>{

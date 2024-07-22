@@ -33,48 +33,19 @@ interface ArcTreeViewNode {
 
 let init: {
   nodes: ArcTreeViewNode [];
-  root: string
+  root: string,
+  lfs_file_paths: string []
 } = {
   nodes: [],
-  root: ''
-}
+  root: '',
+  lfs_file_paths: []
+};
 
 const emit = defineEmits(['openArc']);
 
 const props = reactive(init);
 const arcTree = ref(null);
 const selected = ref(null);
-
-watch(()=>ArcControlService.props.arc_root, async (newValue, oldValue) => {
-  if(oldValue)
-    window.ipc.invoke('LocalFileSystemService.unregisterChangeListener', oldValue);
-  if(!newValue) return
-
-  window.ipc.invoke('LocalFileSystemService.registerChangeListener', newValue);
-
-  props.root = newValue;
-  props.nodes = [{
-    header: 'root',
-    type: `node_edit_${Investigation}`,
-    id: props.root,
-    label: props.root.split('/').pop(),
-    lazy: true,
-    icon: 'edit_square',
-    isDirectory: true
-  }];
-  await nextTick();
-  arcTree._value.setExpanded(props.root);
-});
-
-watch(()=>AppProperties.state, async (newValue, oldValue) => {
-  if([
-    AppProperties.STATES.HOME,
-    AppProperties.STATES.OPEN_DATAHUB,
-    AppProperties.STATES.GIT,
-  ].includes(newValue)){
-    selected.value = null
-  }
-});
 
 function formatNodeEditString(contentType: string) {
   return NodeEdit_PreFix + contentType;
@@ -166,6 +137,7 @@ const readDir_ = async (path: string) => {
 
   for(const n of nodes){
     n.label = n.id.split('/').pop();
+    n.id_rel = n.id.replace(ArcControlService.props.arc_root+'/', '');
     n.lazy = n.isDirectory;
     n.selectable = true;
     if(isEditable(n,parent)){
@@ -307,10 +279,29 @@ const createDirectory = async node=>{
   });
 };
 
+const getUrlCredentials = url => {
+  // Regular expression to match URLs with embedded credentials
+  const regex = /^(https?|git|ssh):\/\/([^\/:@]+(:[^\/:@]+)?@)?([^\/:]+)(:[0-9]+)?(\/.*)?$/;
+  // Test the URL against the regular expression
+  const match = url.match(regex);
+  return match ? (match[2] || '') : '';
+};
+
 const patchRemote = url => {
-  return AppProperties.user && url.includes(AppProperties.user.host)
+  return AppProperties.user && url.includes(AppProperties.user.host) && getUrlCredentials(url)===''
     ? `https://oauth2:${AppProperties.user.token.access_token}@${AppProperties.user.host}` + url.split(AppProperties.user.host)[1]
-    : null;
+    : url;
+};
+
+const updateLFSFiles = async ()=>{
+  const lfs_files = await window.ipc.invoke('GitService.run', {
+    args: ['lfs','ls-files','-n'],
+    cwd: ArcControlService.props.arc_root
+  });
+  if(!lfs_files[0])
+    return console.error('unable to fetch LFS file list');
+
+  props.lfs_file_paths = lfs_files[1].split('\n');
 };
 
 const onCellContextMenu = async (e,node) => {
@@ -325,8 +316,7 @@ const onCellContextMenu = async (e,node) => {
     style:{fontSize: '1.5em',color:'#666'}
   };
 
-  const rel_path = node.id.replaceAll(ArcControlService.props.arc_root+'/','');
-  const rel_path_elements = rel_path.split('/');
+  const rel_path_elements = (node.id_rel || '').split('/');
 
   if(node.isDirectory){
     if(rel_path_elements.length===1){
@@ -367,11 +357,7 @@ const onCellContextMenu = async (e,node) => {
     });
   } else {
 
-    const lfs_files = await window.ipc.invoke('GitService.run', {
-      args: ['lfs','ls-files','-n'],
-      cwd: ArcControlService.props.arc_root
-    });
-    if(lfs_files[0] && lfs_files[1].includes(rel_path)){
+    if(props.lfs_file_paths.includes(node.id_rel)){
       items.push({
         label: "Download LFS File",
         icon: h( 'i', icon_style, ['cloud_download'] ),
@@ -435,7 +421,7 @@ const onCellContextMenu = async (e,node) => {
           });
 
           await window.ipc.invoke('GitService.run', {
-            args: ['lfs','pull','--include',rel_path],
+            args: ['lfs','pull','--include',node.id_rel],
             cwd: ArcControlService.props.arc_root
           });
 
@@ -562,6 +548,42 @@ const onCellContextMenu = async (e,node) => {
 onMounted( ()=>{window.ipc.on('LocalFileSystemService.updatePath', updatePath);} );
 onUnmounted( ()=>{window.ipc.off('LocalFileSystemService.updatePath', updatePath);} );
 
+watch(()=>AppProperties.force_lfs_update, updateLFSFiles);
+
+watch(()=>ArcControlService.props.arc_root, async (newValue, oldValue) => {
+  if(oldValue)
+    window.ipc.invoke('LocalFileSystemService.unregisterChangeListener', oldValue);
+  if(!newValue) return
+
+  window.ipc.invoke('LocalFileSystemService.registerChangeListener', newValue);
+
+
+  props.root = newValue;
+  props.nodes = [{
+    header: 'root',
+    type: `node_edit_${Investigation}`,
+    id: props.root,
+    label: props.root.split('/').pop(),
+    lazy: true,
+    icon: 'edit_square',
+    isDirectory: true
+  }];
+  await nextTick();
+  arcTree._value.setExpanded(props.root);
+
+  await updateLFSFiles();
+});
+
+watch(()=>AppProperties.state, async (newValue, oldValue) => {
+  if([
+    AppProperties.STATES.HOME,
+    AppProperties.STATES.OPEN_DATAHUB,
+    AppProperties.STATES.GIT,
+  ].includes(newValue)){
+    selected.value = null
+  }
+});
+
 </script>
 
 <template>
@@ -589,10 +611,19 @@ onUnmounted( ()=>{window.ipc.off('LocalFileSystemService.updatePath', updatePath
           @contextmenu="e=>onCellContextMenu(e,prop.node)"
           @click='e=>triggerNode(e,prop.node)'
         >
-          <q-icon v-if='prop.node.icon' :name='prop.node.icon' style="padding:0 0.2em 0 0;"></q-icon>
-          <span class='text-black'>{{ prop.node.label }}</span>
-          <q-icon v-if='prop.node.type==="assays"' name='add' class='tree_add_button' @click='e=>addAssay(e,prop.node)'></q-icon>
-          <q-icon v-if='prop.node.type==="studies"' name='add' class='tree_add_button' @click='e=>addStudy(e,prop.node)'></q-icon>
+          <table class='tree_node'><tr>
+            <td>
+              <q-icon v-if='prop.node.icon' :name='prop.node.icon' style="padding:0 0.2em 0 0;"></q-icon>
+              <span class='text-black'>{{ prop.node.label }}</span>
+            </td>
+            <td style="text-align:right">
+              <q-icon v-if='prop.node.type==="assays"' name='add' class='tree_button' @click='e=>addAssay(e,prop.node)'></q-icon>
+              <q-icon v-if='prop.node.type==="studies"' name='add' class='tree_button' @click='e=>addStudy(e,prop.node)'></q-icon>
+              <q-badge v-if='props.lfs_file_paths.includes(prop.node.id_rel)' color="secondary" text-color="white" label="LFS" class='tree_button'/>
+            </td>
+          </tr></table>
+          <!--<q-icon v-if='prop.node.icon' :name='prop.node.icon' style="padding:0 0.2em 0 0;"></q-icon>-->
+          <!--<span class='text-black'>{{ prop.node.id_rel }}</span>-->
         </div>
       </template>
     </q-tree>
@@ -618,15 +649,24 @@ onUnmounted( ()=>{window.ipc.off('LocalFileSystemService.updatePath', updatePath
   background-color: #eee;
 }
 
-.tree_add_button{
+.tree_node {
+  width: 100%;
+  padding: 0;
+  margin: 0;
+}
+.tree_node td {
+  padding: 0;
+  margin: 0;
+}
+
+.tree_button{
   text-align: center;
   padding: 0;
   margin: 0;
   border-radius: 1em;
-  float:right;
 }
 
-.tree_add_button:hover{
+.tree_button:hover{
   background:#ccc;
 }
 

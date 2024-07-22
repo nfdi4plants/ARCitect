@@ -58,6 +58,7 @@ const getBranches = async () => {
   return branches;
 };
 
+
 const getUrlCredentials = url => {
   // Regular expression to match URLs with embedded credentials
   const regex = /^(https?|git|ssh):\/\/([^\/:@]+(:[^\/:@]+)?@)?([^\/:]+)(:[0-9]+)?(\/.*)?$/;
@@ -200,6 +201,8 @@ const pull = async()=>{
     });
 
   dialogProps.state=1;
+
+  AppProperties.force_lfs_update++;
 };
 
 const checkRemotes = async()=>{
