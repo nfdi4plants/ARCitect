@@ -230,7 +230,7 @@ onUnmounted(()=>{
               <a_input v-model='iProps.commit.email' label="eMail" readonly/>
             </div>
             <a_tooltip>
-              Once logged in to the <a href="https://git.nfdi4plants.org/" target="_blank">DataHUB</a> your Name and eMail address are automatically filled out
+              Once logged in to the DataHUB your Name and eMail address are automatically filled out
             </a_tooltip>
           </div>
 
@@ -238,7 +238,7 @@ onUnmounted(()=>{
             <div class='col'>
               <a_select_git_branch />
               <a_tooltip>
-                You can add (<q-icon name="add_circle" color="secondary" />), delete (<q-icon name="delete" color="grey-8" />), or switch between branches of your ARC
+                You can add (<q-icon name="add_circle" color="secondary" />), delete (<q-icon name="delete" color="grey-9" />), or switch between branches of your ARC
               </a_tooltip>
             </div>
           </div>
@@ -247,9 +247,7 @@ onUnmounted(()=>{
             <div class='col'>
               <a_input v-model='iProps.commit.msg' label='Commit Message' type="textarea" autogrow/>
               <a_tooltip>
-                Add a <a
-                  href="https://nfdi4plants.org/nfdi4plants.knowledgebase/docs/guides/arc_SyncingRecommendation.html"
-                  target="_blank">commit message </a> to document and communicate your changes
+                Add a commit message to document and communicate your changes
               </a_tooltip>
             </div>
           </div>
@@ -258,9 +256,7 @@ onUnmounted(()=>{
             <div class='col'>
               <a_input type="number" v-model='iProps.lfs_limit' label="Large File Storage Limit in MB"/>
               <a_tooltip>
-                You can adapt the <a
-                  href="https://nfdi4plants.org/nfdi4plants.knowledgebase/docs/guides/arc_WorkingWithLargeDataFiles.html"
-                  target="_blank">large file storage (LFS)</a> Limit as needed
+                You can adapt the large file storage (LFS) Limit as needed
               </a_tooltip>
             </div>
           </div>

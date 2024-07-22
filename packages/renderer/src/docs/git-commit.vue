@@ -1,4 +1,3 @@
-
 <template>
   <div class="q-py-sm">
 
@@ -16,13 +15,26 @@
         </div>
       </q-item>
 
-
       <q-item>
         <div class="text-body2 text-justify" style="padding-bottom:1em;">
           Versioning helps you keep track of your ARC's changes. If you are new to the ARC, the <strong>Commit</strong>
           and <strong>DataHUB Sync</strong>
           menus are likely a more complex feature of the ARC and ARCitect. Feel free to <a
             href="https://helpdesk.nfdi4plants.org" target="_blank">contact DataPLANT</a> for data steward support.
+        </div>
+      </q-item>
+    </q-card>
+
+    <q-separator />
+
+    <q-card>
+      <q-item>
+        <div>
+          Check out the DataPLANT knowledgebase to learn more about <a
+            href="https://nfdi4plants.org/nfdi4plants.knowledgebase/docs/guides/arc_WorkingWithLargeDataFiles.html"
+            target="_blank">large file storage (LFS)</a> and
+          <a href="https://nfdi4plants.org/nfdi4plants.knowledgebase/docs/guides/arc_SyncingRecommendation.html"
+            target="_blank">commit messages </a>.
         </div>
       </q-item>
     </q-card>
