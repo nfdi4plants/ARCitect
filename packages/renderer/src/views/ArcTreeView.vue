@@ -304,6 +304,72 @@ const updateLFSFiles = async ()=>{
   props.lfs_file_paths = lfs_files[1].split('\n');
 };
 
+const downloadLFSFiles = async paths => {
+
+  let response = null;
+
+  // get remote name and url
+  response = await window.ipc.invoke('GitService.run', {
+    args: [`remote`],
+    cwd: ArcControlService.props.arc_root
+  });
+  if(!response[0]) return $q.dialog({
+    component: ConfirmationDialog,
+    componentProps: {
+      title: 'Error',
+      msg: 'Unable to determine remote name'
+    }
+  });
+  const remote_name = response[1].split('\n')[0];
+  response = await window.ipc.invoke('GitService.run', {
+    args: [`remote`,`get-url`,remote_name],
+    cwd: ArcControlService.props.arc_root
+  });
+  if(!response[0]) return $q.dialog({
+    component: ConfirmationDialog,
+    componentProps: {
+      title: 'Error',
+      msg: 'Unable to determine remote url'
+    }
+  });
+  const remote_url = response[1].split('\n')[0];
+
+  // patch remote
+  const patched_remote_url = patchRemote(remote_url);
+
+  response = await window.ipc.invoke('GitService.run', {
+    args: [`remote`,`set-url`,remote_name,patched_remote_url],
+    cwd: ArcControlService.props.arc_root
+  });
+  if(!response[0]) return;
+
+  const dialogProps = reactive({
+    title: 'Pulling Individual LFS File',
+    ok_title: 'Ok',
+    cancel_title: null,
+    state: 0,
+  });
+
+  $q.dialog({
+    component: GitDialog,
+    componentProps: dialogProps
+  });
+
+  for(let path of paths)
+    await window.ipc.invoke('GitService.run', {
+      args: ['lfs','pull','--include',path],
+      cwd: ArcControlService.props.arc_root
+    });
+
+  // unpatch
+  response = await window.ipc.invoke('GitService.run', {
+    args: [`remote`,`set-url`,remote_name,remote_url],
+    cwd: ArcControlService.props.arc_root
+  });
+
+  dialogProps.state=1;
+};
+
 const onCellContextMenu = async (e,node) => {
   if(node.type==='empty') return;
   e.preventDefault();
@@ -355,84 +421,20 @@ const onCellContextMenu = async (e,node) => {
       icon: h( 'i', icon_style, ['drive_folder_upload'] ),
       onClick: ()=>importFilesOrDirectories(node,'selectAnyDirectories')
     });
-  } else {
 
+    const lfs_files_in_directory = props.lfs_file_paths.filter(x=>x.includes(node.id_rel));
+    if(lfs_files_in_directory.length)
+      items.push({
+        label: "Download LFS Files",
+        icon: h( 'i', icon_style, ['cloud_download'] ),
+        onClick: ()=>downloadLFSFiles(lfs_files_in_directory)
+      });
+  } else {
     if(props.lfs_file_paths.includes(node.id_rel)){
       items.push({
         label: "Download LFS File",
         icon: h( 'i', icon_style, ['cloud_download'] ),
-        onClick: async ()=>{
-          let response = null;
-
-          // get remote name and url
-          response = await window.ipc.invoke('GitService.run', {
-            args: [`remote`],
-            cwd: ArcControlService.props.arc_root
-          });
-          if(!response[0]) return $q.dialog({
-            component: ConfirmationDialog,
-            componentProps: {
-              title: 'Error',
-              msg: 'Unable to determine remote name'
-            }
-          });
-          const remote_name = response[1].split('\n')[0];
-          response = await window.ipc.invoke('GitService.run', {
-            args: [`remote`,`get-url`,remote_name],
-            cwd: ArcControlService.props.arc_root
-          });
-          if(!response[0]) return $q.dialog({
-            component: ConfirmationDialog,
-            componentProps: {
-              title: 'Error',
-              msg: 'Unable to determine remote url'
-            }
-          });
-          const remote_url = response[1].split('\n')[0];
-
-          // patch remote
-          const patched_remote_url = patchRemote(remote_url);
-          if(!patched_remote_url){
-            return $q.dialog({
-              component: ConfirmationDialog,
-              componentProps: {
-                title: 'Error',
-                msg: 'LFS download requires login'
-              }
-            });
-          }
-          response = await window.ipc.invoke('GitService.run', {
-            args: [`remote`,`set-url`,remote_name,patched_remote_url],
-            cwd: ArcControlService.props.arc_root
-          });
-          console.log('[GitService.run-response]', response);
-          if(!response[0]) return;
-
-          const dialogProps = reactive({
-            title: 'Pulling Individual LFS File',
-            ok_title: 'Ok',
-            cancel_title: null,
-            state: 0,
-          });
-
-          $q.dialog({
-            component: GitDialog,
-            componentProps: dialogProps
-          });
-
-          await window.ipc.invoke('GitService.run', {
-            args: ['lfs','pull','--include',node.id_rel],
-            cwd: ArcControlService.props.arc_root
-          });
-
-          // unpatch
-          response = await window.ipc.invoke('GitService.run', {
-            args: [`remote`,`set-url`,remote_name,remote_url],
-            cwd: ArcControlService.props.arc_root
-          });
-
-          dialogProps.state=1;
-        }
+        onClick: ()=>downloadLFSFiles([node.id_rel])
       });
     }
   }
