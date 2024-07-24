@@ -12,7 +12,7 @@
     <q-card>
       <q-item>
           <div>
-            With the LFS checkbox you can select wether or not download large files. Read more about <a
+            With the LFS checkbox you can select whether or not download large files. Read more about <a
               href="https://nfdi4plants.org/nfdi4plants.knowledgebase/docs/guides/arc_WorkingWithLargeDataFiles.html"
               target="_blank">large file storage (LFS)</a> in the DataPLANT knowledgebase.
           </div>
@@ -24,7 +24,7 @@
     <q-card>
       <q-item>
           <div>
-            If you are logged in, the list of ARCs will include public and private ARCs that you have access to.
+            If you are logged in, the list of ARCs will include public and private ARCs that you can access. 
           </div>
       </q-item>
     </q-card>
