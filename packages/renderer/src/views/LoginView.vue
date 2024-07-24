@@ -64,12 +64,14 @@ const showUserData = ()=>{
 </script>
 
 <template>
-
   <q-item v-if='!AppProperties.user' clickable v-ripple @click='login'>
     <q-item-section avatar>
       <q-icon color='grey-7' name="exit_to_app"></q-icon>
     </q-item-section>
     <q-item-section style="margin-left:-1.2em;">Login</q-item-section>
+    <a_tooltip>
+      Login to a DataHUB
+    </a_tooltip>
   </q-item>
   <q-item v-else clickable v-ripple @click='showUserData'>
     <q-item-section avatar>
@@ -80,7 +82,7 @@ const showUserData = ()=>{
       <q-item-label caption style="font-size:0.8em;">{{AppProperties.user.host}}</q-item-label>
     </q-item-section>
     <a_tooltip>
-      Login to a DataHUB
+      DataHUB user info and logout.
     </a_tooltip>
   </q-item>
 
