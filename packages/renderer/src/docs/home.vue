@@ -107,7 +107,7 @@ export default {
 
       <q-list>
         <q-item>
-          This help menu provides explanations, additional context, and helpful links related to the selected menu.
+          This help menu provides explanations, additional context, and helpful links related to the selected menu. You can return to this main help menu by clicking the ARCitect logo in the top-left corner.
         </q-item>
         <q-item>
           <q-icon color="grey-7" name="help" />Toggle Help in the sidebar to show or hide the help menu.
