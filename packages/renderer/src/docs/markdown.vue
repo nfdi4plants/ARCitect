@@ -20,7 +20,7 @@
      -->
     <q-card>
       <q-card-section>
-        Paste the following example into the Editor and click on Preview to see how it displays:
+        Paste the following example into the EDITOR and click on PREVIEW to see how it displays:
       </q-card-section>
       <q-separator/>
       <q-card-section>        
