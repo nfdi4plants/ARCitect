@@ -313,11 +313,13 @@ onUnmounted(()=>{
               Click RESET to undo your latest changes and convert the ARC to the last saved commit
             </a_tooltip>
           </a_btn>
-          <a_btn label="Commit" @click="commit" icon='check_circle' :disabled='iProps.git_status.length'>
+          <a_btn label="Commit" @click="commit" icon='check_circle' :disabled='iProps.git_status.length<1'/>
+
+          <!-- <a_btn label="Commit" @click="commit" icon='check_circle' :disabled='iProps.git_status.length'>
             <a_tooltip>
               Once ready, click COMMIT to store your changes locally
             </a_tooltip>
-          </a_btn>
+          </a_btn> -->
         </q-card-actions>
 
       </q-card>
