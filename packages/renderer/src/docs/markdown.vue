@@ -22,16 +22,26 @@
       <q-card-section>
         Paste the following example into the EDITOR and click on PREVIEW to see how it displays:
       </q-card-section>
-      <q-separator/>
-      <q-card-section>        
+      <q-card-section class='bg-grey-3' dense style="border-radius:0.3em; margin:0.2em;">
         <code>
-        # This is a first level header
+        # First level header
+        <br><br>
+        ## Second level header
+        <br><br>
+        ### Third level header
+        <br><br>
+        ### A list
+        <br><br>
+        - item 1 <br>
+        - item 2 <br>
+        - item 3 <br>     
         <br>
-        <br>
-        ## This is a second level header
-        <br>
-        <br>
-        ### This is a third level header
+        ### Highlighted text
+        <br><br>
+        *This is italic* <br>
+        _This is also italic_  <br>   
+        **This is bold**   <br>
+        __This is also bold__  <br>
         </code>
       </q-card-section>
     </q-card>
