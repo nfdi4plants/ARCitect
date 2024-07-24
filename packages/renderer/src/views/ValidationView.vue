@@ -183,7 +183,7 @@ onMounted(init);
     <ViewItem
       icon="verified"
       label="Validation"
-      caption="Validate ARC against Specifications"
+      caption="Validate ARC against specifications"
       group='mgroup'
       defaultOpened
     >
