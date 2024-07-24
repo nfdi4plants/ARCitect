@@ -219,7 +219,10 @@ const test = async ()=>{
             <a_tooltip>Open the ARC in your Explorer or Finder</a_tooltip>
           </ToolbarButton>
           <q-separator />
-          <a_tooltip>The menus "Commit", "DataHUB Sync" and "History" become available when an ARC is open and a user is logged in</a_tooltip>
+          <a_tooltip>
+            The menus "Save ARC", "Explorer" and "Validation" are available on open ARCs.<br>
+            The menus "Commit", "DataHUB Sync" and "History" are available after login
+          </a_tooltip>
           <ToolbarButton text='Commit' icon='rule' requiresARC requiresUser requiresGit @clicked='AppProperties.state=AppProperties.STATES.GIT_COMMIT'>
             <a_tooltip>Track changes of the ARC with git</a_tooltip>            
           </ToolbarButton>
