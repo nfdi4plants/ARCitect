@@ -219,9 +219,9 @@ const test = async ()=>{
             <a_tooltip>Open the ARC in your Explorer or Finder</a_tooltip>
           </ToolbarButton>
           <q-separator />
-
+          <a_tooltip>The menus "Commit", "DataHUB Sync" and "History" become available when an ARC is open and a user is logged in</a_tooltip>
           <ToolbarButton text='Commit' icon='rule' requiresARC requiresUser requiresGit @clicked='AppProperties.state=AppProperties.STATES.GIT_COMMIT'>
-            <a_tooltip>Track changes of the ARC with git</a_tooltip>
+            <a_tooltip>Track changes of the ARC with git</a_tooltip>            
           </ToolbarButton>
           <ToolbarButton text='DataHUB Sync' icon='published_with_changes' requiresARC requiresUser requiresGit @clicked='AppProperties.state=AppProperties.STATES.GIT_SYNC'>
             <a_tooltip>Synchronize the ARC with a DataHUB</a_tooltip>
@@ -237,8 +237,12 @@ const test = async ()=>{
           <q-separator />
 
           <q-item class="col-grow"></q-item>
-          <ToolbarButton text='Toggle Help' icon='help' @clicked='AppProperties.showHelp=!AppProperties.showHelp;'></ToolbarButton>
-          <ToolbarButton text='Toggle Tooltips' :icon='AppProperties.showTooltips? "sym_r_mark_chat_read":"sym_r_chat_bubble" ' @clicked='AppProperties.showTooltips=!AppProperties.showTooltips;'></ToolbarButton>
+          <ToolbarButton text='Toggle Help' icon='help' @clicked='AppProperties.showHelp=!AppProperties.showHelp;'>
+            <a_tooltip>Show or hide the help menu.</a_tooltip>
+          </ToolbarButton>
+          <ToolbarButton text='Toggle Tooltips' :icon='AppProperties.showTooltips? "sym_r_mark_chat_read":"sym_r_chat_bubble" ' @clicked='AppProperties.showTooltips=!AppProperties.showTooltips;'>
+            <a_tooltip>Show or hide tooltips.</a_tooltip>
+          </ToolbarButton>
           <ToolbarButton :text="iProps.toolbarMinimized ? '' : 'Toggle Sidebar'" :icon="iProps.toolbarMinimized ? 'chevron_right' : 'chevron_left'" @clicked='iProps.toolbarMinimized=!iProps.toolbarMinimized;'></ToolbarButton>
           <q-separator />
 
