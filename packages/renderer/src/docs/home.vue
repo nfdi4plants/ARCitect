@@ -236,7 +236,7 @@ export default {
               DataHUB Sync
             </q-item-section>
             <q-item-section>
-              Synchronize the ARC with a DataHub
+              Synchronize the ARC with a DataHUB
             </q-item-section>
           </q-item>
           
