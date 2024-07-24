@@ -93,7 +93,15 @@ export default {
 
     <h5 style="margin-bottom:0.5em;">Help</h5>
 
-    Click <q-icon color="grey-7" name="help" />Toggle Help in the sidebar to show or hide the help menu.
+    <q-card>
+      <q-card-section>
+        Click <q-icon color="grey-7" name="help" />Toggle Help in the sidebar to show or hide the help menu.
+      </q-card-section>
+      <q-separator/>
+      <q-card-section>
+        Click <q-icon color="grey-7" name="sym_r_tooltip" />Toggle Tooltips in the sidebar to show or hide hover-over help texts at various functions.
+      </q-card-section>
+    </q-card>
 
     <div class="q-pa-sm text-body2 text-justify">
       The ARCitect is divided into three panels: sidebar, file tree and main menu.
