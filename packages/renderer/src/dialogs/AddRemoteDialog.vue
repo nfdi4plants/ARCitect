@@ -106,18 +106,28 @@ const openAccessTokenEditor = ()=>{
         <q-card-section>
           <div class='row'>
             <div class='col'>
-              <a_input
-                v-model='iProps.name'
-                label="Remote Name"
-              />
+              <a_input v-model='iProps.name' label="Remote Name">
+                <a_tooltip>
+                  The DataHUB is selected based on your decision during login.
+                </a_tooltip>              
+              </a_input>
             </div>
             <div class='col'>
-              <a_select v-model='iProps.account' :options='Object.keys(iProps.accounts)' label="DataHub Account" :readonly='!props.user' @filter="getAccounts" @update:model-value='setDataHubURL()'/>
+              <a_select v-model='iProps.account' :options='Object.keys(iProps.accounts)' label="DataHub Account" :readonly='!props.user' @filter="getAccounts" @update:model-value='setDataHubURL()'>
+                <a_tooltip>
+                  Choose a DataHUB personal account or group namespace to which you want to sync your ARC. 
+                </a_tooltip>
+              </a_select>
             </div>
           </div>
           <div class='row'>
             <div class='col'>
-              <a_input v-model='iProps.url' label="URL"/>
+              <a_input v-model='iProps.url' label="URL">
+                <a_tooltip>
+                  The full DataHUB address your ARC is synced to
+                </a_tooltip>
+              </a_input>
+
             </div>
           </div>
           <div class='row'>
