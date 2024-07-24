@@ -4,6 +4,7 @@ import { useDialogPluginComponent } from 'quasar';
 
 import a_input from '../components/a_input.vue';
 import a_select from '../components/a_select.vue';
+import a_tooltip from '../components/a_tooltip.vue';
 import ArcControlService from '../ArcControlService.ts';
 
 export interface Props {
@@ -122,20 +123,19 @@ const openAccessTokenEditor = ()=>{
           <div class='row'>
             <div class='col'>
               <a_input v-model='iProps.personal_access_token' label="Personal Access Token (Optional)">
+                <a_tooltip>
+                  Please paste your PAT here
+                </a_tooltip>
                 <template v-slot:append>
                   <q-icon class='cursor-pointer' name="key" color="grey-5" @click='()=>openAccessTokenEditor()'>
-                    <q-tooltip>
-                      <div style="float:right;font-size:1.4em;max-width:22em;">
+                    <a_tooltip>
                         Open the DataHub to create an access token.
-                      </div>
-                    </q-tooltip>
+                    </a_tooltip>
                   </q-icon>
                   <q-icon class='cursor-pointer' name="help" color="grey-5" @click='()=>openAccessTokenHelp()'>
-                    <q-tooltip>
-                      <div style="float:right;font-size:1.4em;max-width:20em;">
-                        Data up- and downloads taking more than one hour require a personal access token.
-                      </div>
-                    </q-tooltip>
+                    <a_tooltip>
+                        Data up- and downloads taking more than one hour require a personal access token (PAT).
+                    </a_tooltip>
                   </q-icon>
                 </template>
               </a_input>
