@@ -32,7 +32,8 @@ const AppProperties: {
 
   force_commit_update: 0,
 
-  showHelp: false
+  showHelp: false,
+  showTooltips: true
 });
 
 for(let k in AppProperties.STATES){

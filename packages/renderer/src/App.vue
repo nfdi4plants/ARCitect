@@ -216,6 +216,7 @@ const test = async ()=>{
 
           <q-item class="col-grow"></q-item>
           <ToolbarButton text='Toggle Help' icon='help' @clicked='AppProperties.showHelp=!AppProperties.showHelp;'></ToolbarButton>
+          <ToolbarButton text='Toggle Tooltips' icon='sym_r_tooltip' @clicked='AppProperties.showTooltips=!AppProperties.showTooltips;'></ToolbarButton>
           <ToolbarButton :text="iProps.toolbarMinimized ? '' : 'Toggle Sidebar'" :icon="iProps.toolbarMinimized ? 'chevron_right' : 'chevron_left'" @clicked='iProps.toolbarMinimized=!iProps.toolbarMinimized;'></ToolbarButton>
           <q-separator />
 
