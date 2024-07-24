@@ -93,62 +93,63 @@ export default {
         Overview
       </q-card-section>
       <q-card-section>
-      The ARCitect is divided into multiple panels (left to right):
-      <q-list class='bg-grey-3' dense style="border-radius:0.3em; margin:0.2em;">
-      <q-item>Sidebar</q-item>
-      <q-item>File Tree</q-item>
-      <q-item>Main panel</q-item>
-      <q-item>This help menu (if activated)</q-item>
-    </q-list>
-    </q-card-section>
+        The ARCitect is divided into multiple panels (left to right):
+        <q-list class='bg-grey-3' dense style="border-radius:0.3em; margin:0.2em;">
+          <q-item>Sidebar</q-item>
+          <q-item>File Tree</q-item>
+          <q-item>Main panel</q-item>
+          <q-item>This help menu (if activated)</q-item>
+        </q-list>
+      </q-card-section>
 
-    <q-separator inset style="height:0.2em"/>
+      <q-separator inset style="height:0.2em" />
 
 
-    <q-list>
-      <q-item>
-        This help menu provides explanations, additional context, and helpful links related to the selected menu.
-      </q-item>
-      <q-item>
-        <q-icon color="grey-7" name="help" />Toggle Help in the sidebar to show or hide the help menu.
-      </q-item> 
-    </q-list>
-    
-      <q-separator inset style="height:0.2em"/>
-    <q-list>
-      <q-item>
-      Short explanations are provided as tooltips. Simply hover-over a button or function to get more info. 
-      </q-item>
-      <q-item>
-      <q-icon color="grey-7" name="sym_r_mark_chat_read"/> / <q-icon color="grey-7" name="sym_r_chat_bubble"/> Toggle Tooltips in the sidebar to show or hide tooltips.
-      </q-item> 
-    </q-list>
+      <q-list>
+        <q-item>
+          This help menu provides explanations, additional context, and helpful links related to the selected menu.
+        </q-item>
+        <q-item>
+          <q-icon color="grey-7" name="help" />Toggle Help in the sidebar to show or hide the help menu.
+        </q-item>
+      </q-list>
+
+      <q-separator inset style="height:0.2em" />
+      <q-list>
+        <q-item>
+          Short explanations are provided as tooltips. Simply hover-over a button or function to get more info.
+        </q-item>
+        <q-item>
+          <q-icon color="grey-7" name="sym_r_mark_chat_read" /> / <q-icon color="grey-7" name="sym_r_chat_bubble" />
+          Toggle Tooltips in the sidebar to show or hide tooltips.
+        </q-item>
+      </q-list>
     </q-card>
 
-    <q-separator inset style="height:0.2em"/>
+    <q-separator inset style="height:0.2em" />
 
     <q-card>
       <q-card-section style="font-size: 1.2em;font-weight: bold;">
         File Tree
       </q-card-section>
       <q-card-section>
-      In the file tree panel you can access and edit the files in your ARC.
-    </q-card-section>
-    <q-card-section>
-      <q-list class='bg-grey-3' dense style="border-radius:0.3em; margin:0.2em;">
-        Many functions to work on files are provided via a <b>context menu (right-click)</b>:
-        <q-item>Adding or importing files or directories</q-item>
-        <q-item>Deleting files or folders</q-item>        
-        <q-item>Adding, deleting, renaming studies or assays</q-item>
-        <q-item>This help menu (if activated)</q-item>
-      </q-list>
-    </q-card-section>
-    <q-card-section>
+        In the file tree panel you can access and edit the files in your ARC.
+      </q-card-section>
+      <q-card-section>
+        <q-list class='bg-grey-3' dense style="border-radius:0.3em; margin:0.2em;">
+          Many functions to work on files are provided via a <b>context menu (right-click)</b>:
+          <q-item>Adding or importing files or directories</q-item>
+          <q-item>Deleting files or folders</q-item>
+          <q-item>Adding, deleting, renaming studies or assays</q-item>
+          <q-item>This help menu (if activated)</q-item>
+        </q-list>
+      </q-card-section>
+      <q-card-section>
         <q-list class="q-pa-md q-gutter-sm">
 
-            <q-item-section>
-              The root of your ARC by default contains the folders: studies - assays - workflows - runs
-            </q-item-section>
+          <q-item-section>
+            The root of your ARC by default contains the folders: studies - assays - workflows - runs
+          </q-item-section>
 
           <q-tree :nodes="ARCtreeInv" node-key="label" dense default-expand-all />
 
@@ -242,9 +243,9 @@ export default {
 
         </q-list>
       </q-card-section>
-      </q-card>
-    
-    
-    </div>
+    </q-card>
+
+
+  </div>
 
 </template>

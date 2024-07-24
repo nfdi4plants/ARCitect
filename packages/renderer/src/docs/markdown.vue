@@ -45,6 +45,15 @@
         </code>
       </q-card-section>
     </q-card>
+    <q-card>
+      <q-item>
+        <div>
+          For more information on markdown, check out the tutorial in the <a
+            href="https://nfdi4plants.org/nfdi4plants.knowledgebase/docs/guides/tutorial_IntroductionToMarkdown.html" target="_blank">DataPLANT Knowledge Base</a>.
+        </div>
+      </q-item>      
+
+    </q-card>
     
     
   </div>
