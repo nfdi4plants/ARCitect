@@ -195,28 +195,50 @@ const test = async ()=>{
 
           <q-separator />
 
-          <ToolbarButton text='New ARC' icon='note_add' @clicked='newLocalArc()'></ToolbarButton>
-          <ToolbarButton text='Open ARC' icon='file_open' @clicked='openLocalArc()'></ToolbarButton>
-          <ToolbarButton text='Download ARC' icon='cloud_download' @clicked='AppProperties.state=AppProperties.STATES.OPEN_DATAHUB'></ToolbarButton>
+          <ToolbarButton text='New ARC' icon='note_add' @clicked='newLocalArc()'>
+            <a_tooltip>
+              Create a new ARC on your computer
+            </a_tooltip>
+          </ToolbarButton>
+          <ToolbarButton text='Open ARC' icon='file_open' @clicked='openLocalArc()'>
+            <a_tooltip>
+              Open an existing ARC from your computer
+            </a_tooltip>
+          </ToolbarButton>
+          <ToolbarButton text='Download ARC' icon='cloud_download' @clicked='AppProperties.state=AppProperties.STATES.OPEN_DATAHUB'>
+            <a_tooltip> Download an ARC from the DataHUB</a_tooltip>
+          </ToolbarButton>
 
           <q-separator />
 
           <!--<ToolbarButton text='Refresh ARC' icon='refresh' requiresARC @clicked='refreshLocalArc()'></ToolbarButton>-->
-          <ToolbarButton text='Save ARC' icon='save' requiresARC @clicked='saveLocalArc()'></ToolbarButton>
-          <ToolbarButton text='Explorer' icon='folder_open' requiresARC @clicked='ArcControlService.openArcInExplorer()'></ToolbarButton>
+          <ToolbarButton text='Save ARC' icon='save' requiresARC @clicked='saveLocalArc()'>
+            <a_tooltip> Save the ARC locally</a_tooltip>
+          </ToolbarButton>
+          <ToolbarButton text='Explorer' icon='folder_open' requiresARC @clicked='ArcControlService.openArcInExplorer()'>
+            <a_tooltip>Open the ARC in your Explorer or Finder</a_tooltip>
+          </ToolbarButton>
           <q-separator />
 
-          <ToolbarButton text='Commit' icon='rule' requiresARC requiresUser requiresGit @clicked='AppProperties.state=AppProperties.STATES.GIT_COMMIT'></ToolbarButton>
-          <ToolbarButton text='DataHUB Sync' icon='published_with_changes' requiresARC requiresUser requiresGit @clicked='AppProperties.state=AppProperties.STATES.GIT_SYNC'></ToolbarButton>
-          <ToolbarButton text='History' icon='history' requiresARC requiresUser requiresGit @clicked='AppProperties.state=AppProperties.STATES.GIT_HISTORY'></ToolbarButton>
+          <ToolbarButton text='Commit' icon='rule' requiresARC requiresUser requiresGit @clicked='AppProperties.state=AppProperties.STATES.GIT_COMMIT'>
+            <a_tooltip>Track changes of the ARC with git</a_tooltip>
+          </ToolbarButton>
+          <ToolbarButton text='DataHUB Sync' icon='published_with_changes' requiresARC requiresUser requiresGit @clicked='AppProperties.state=AppProperties.STATES.GIT_SYNC'>
+            <a_tooltip>Synchronize the ARC with a DataHUB</a_tooltip>
+          </ToolbarButton>
+          <ToolbarButton text='History' icon='history' requiresARC requiresUser requiresGit @clicked='AppProperties.state=AppProperties.STATES.GIT_HISTORY'>
+            <a_tooltip>Inspect ARC history</a_tooltip>
+          </ToolbarButton>
           <q-separator />
 
-          <ToolbarButton text='Validation' icon='verified' requiresARC @clicked='AppProperties.state=AppProperties.STATES.VALIDATION'></ToolbarButton>
+          <ToolbarButton text='Validation' icon='verified' requiresARC @clicked='AppProperties.state=AppProperties.STATES.VALIDATION'>
+            <a_tooltip>Validate ARC against specifications</a_tooltip>
+          </ToolbarButton>
           <q-separator />
 
           <q-item class="col-grow"></q-item>
           <ToolbarButton text='Toggle Help' icon='help' @clicked='AppProperties.showHelp=!AppProperties.showHelp;'></ToolbarButton>
-          <ToolbarButton text='Toggle Tooltips' icon='sym_r_tooltip' @clicked='AppProperties.showTooltips=!AppProperties.showTooltips;'></ToolbarButton>
+          <ToolbarButton text='Toggle Tooltips' :icon='AppProperties.showTooltips? "sym_r_mark_chat_read":"sym_r_chat_bubble" ' @clicked='AppProperties.showTooltips=!AppProperties.showTooltips;'></ToolbarButton>
           <ToolbarButton :text="iProps.toolbarMinimized ? '' : 'Toggle Sidebar'" :icon="iProps.toolbarMinimized ? 'chevron_right' : 'chevron_left'" @clicked='iProps.toolbarMinimized=!iProps.toolbarMinimized;'></ToolbarButton>
           <q-separator />
 
