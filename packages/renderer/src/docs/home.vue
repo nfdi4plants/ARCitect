@@ -130,6 +130,18 @@ export default {
 
     <q-card>
       <q-card-section style="font-size: 1.2em;font-weight: bold;">
+        Seeking help
+      </q-card-section>
+      <q-card-section>   
+        Please contact DataPLANT with questions via the <a href="https://helpdesk.nfdi4plants.org/" target="_blank">helpdesk</a> or by raising issues, questions or feature requests directly on <a href="https://github.com/nfdi4plants/ARCitect/issues" target="_blank">GitHub</a>.
+        If you want to report a bug, please share error logs: Click "Toggle Developer Tools" from the main menu. In the developer tools, open on the tab "Console" to see the error logs. 
+      </q-card-section>
+    </q-card>
+      
+      <q-separator inset style="height:0.2em" />
+
+    <q-card>
+      <q-card-section style="font-size: 1.2em;font-weight: bold;">
         File Tree
       </q-card-section>
       <q-card-section>
