@@ -33,5 +33,6 @@ const enabled = ()=>{
       <q-icon color='grey-7' :name="props.icon"></q-icon>
     </q-item-section>
     <q-item-section style="margin-left:-1.2em;">{{props.text}}</q-item-section>
+    <slot></slot>
   </q-item>
 </template>

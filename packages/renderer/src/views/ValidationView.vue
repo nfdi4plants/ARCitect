@@ -5,6 +5,7 @@ import { reactive, watch, onMounted, onUnmounted} from 'vue';
 import ViewItem from '../components/ViewItem.vue';
 import a_select from '../components/a_select.vue';
 import a_btn from '../components/a_btn.vue';
+import a_tooltip from '../components/a_tooltip.vue';
 import a_checkbox from '../components/a_checkbox.vue';
 import AppProperties from '../AppProperties.ts';
 import ArcControlService from '../ArcControlService.ts';
@@ -182,7 +183,7 @@ onMounted(init);
     <ViewItem
       icon="verified"
       label="Validation"
-      caption="Validate ARC against Specifications"
+      caption="Validate ARC against specifications"
       group='mgroup'
       defaultOpened
     >
@@ -218,12 +219,19 @@ onMounted(init);
                   @input-value="v=>pair[1]=v"
                 />
               </td>
+              <a_tooltip>
+                By default every ARC is validated against the ARC specification to guarantee ARC intactness.
+              </a_tooltip>
             </tr>
             <tr>
               <td colspan="3" style="padding-top:2em">&nbsp;</td>
             </tr>
             <tr>
               <td class='thh' colspan="3">Custom Validation Packages</td>
+              <a_tooltip>
+                Here you can add or remove additional validation packages. <br>
+                For instance, if you want to publish your ARC and receive a DOI via the DataHUB, select and add the "invenio" validation.
+              </a_tooltip>
             </tr>
             <tr>
               <td style="width:3em;">&nbsp;</td>
@@ -269,7 +277,12 @@ onMounted(init);
             <tr>
               <th></th>
               <th colspan="2">
-                <a_btn label="Save" icon='verified' @click='save' />
+                <a_btn label="Save" icon='verified' @click='save'>
+                  <a_tooltip>
+                  Save the the validation information to your ARC.<br>
+                  They are stored in a file called ".arc/validation_packages.yml".
+                </a_tooltip>
+                </a_btn>
               </th>
             </tr>
           </table>

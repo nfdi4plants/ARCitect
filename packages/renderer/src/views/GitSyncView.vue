@@ -5,6 +5,7 @@ import { onMounted, reactive, watch } from 'vue';
 import ViewItem from '../components/ViewItem.vue';
 import a_checkbox from '../components/a_checkbox.vue';
 import a_btn from '../components/a_btn.vue';
+import a_tooltip from '../components/a_tooltip.vue';
 import ArcControlService from '../ArcControlService.ts';
 
 import AppProperties from '../AppProperties.ts';
@@ -308,7 +309,6 @@ const inspectArc = url =>{
             <div class='col'>
               <q-list class='bg-grey-3' dense style="border-radius:0.3em; margin:0.4em;">
                 <q-item-label style="padding:0.5em 1em;">Remote</q-item-label>
-
                 <q-item tag="label" v-ripple v-for='id of Object.keys(iProps.remotes)'>
                   <q-item-section side>
                     <q-radio v-model='iProps.remote' :val='id' color='secondary' dense/>
@@ -355,6 +355,17 @@ const inspectArc = url =>{
                     <q-btn icon='add_circle' color='secondary' flat dense @click='addRemote' />
                   </q-item-section>
                 </q-item>
+
+                <a_tooltip>                 
+                  Managing remotes
+                  <ul>
+                    <li><q-icon name="add_circle" color="secondary" />: Add additional remote connections</li>
+                    <li><q-icon name="running_with_errors" color="black" />: Your ARC is out of sync with the ARC stored in the DataHUB</li>
+                    <li><q-icon name="sym_r_captive_portal" color="black" />: Open your ARC in the DataHUB</li>
+                    <li><q-icon name="delete" color="black" />: Delete a remote connection</li>
+                  </ul>
+                </a_tooltip>
+
               </q-list>
             </div>
           </div>
@@ -364,17 +375,25 @@ const inspectArc = url =>{
           <a_btn v-if='iProps.error' color="red-10" icon='warning' :label="iProps.error" no-caps style="margin-right:auto"/>
           <div>
             <a_checkbox v-model='iProps.use_lfs' label="Use Large File Storage"/>
-            <q-tooltip>
-              <div style="float:left; padding:0.5em 1em 0 0">
-                <q-icon name="warning" color="grey-3" size="3em"/>
-              </div>
-              <div style="float:right;font-size:1.4em;max-width:20em;">
-                Data up- and downloads taking more than one hour require a personal access token.
-              </div>
-            </q-tooltip>
+            <a_tooltip>
+              <div>
+                Check this box to synchronize large files
+              </div>            
+              <q-icon name="warning" color="grey-3" size="1.5em"/>
+              Data up- and downloads taking more than one hour require a personal access token.<br>
+              Click <q-icon name="add_circle" color="secondary" /> to add a remote with a personal access token.
+            </a_tooltip>
           </div>
-          <a_btn label="Push" @click="push" icon='cloud_upload' :disabled='!iProps.remote || !AppProperties.user'/>
-          <a_btn label="Pull" @click="pull" icon='cloud_download' :disabled='!iProps.remote'/>
+          <a_btn label="Push" @click="push" icon='cloud_upload' :disabled='!iProps.remote || !AppProperties.user'>
+            <a_tooltip>
+              Upload the current status of your ARC to the DataHUB
+            </a_tooltip>
+          </a_btn>
+          <a_btn label="Pull" @click="pull" icon='cloud_download' :disabled='!iProps.remote'>
+            <a_tooltip>
+              Download the latest stage of your ARC from the DataHUB
+            </a_tooltip>
+          </a_btn>
         </q-card-actions>
 
       </q-card>

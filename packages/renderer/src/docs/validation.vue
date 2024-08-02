@@ -47,18 +47,5 @@ import d_checkbox from '../components/d_checkbox.vue';
     </q-card>
 
 
-    <q-separator inset />
-
-    <q-card>
-      <q-card-section>
-        <q-item><div>
-        By clicking
-        <d_btn label="Save" icon='verified' color="secondary" /> the file ".arc/validation_packages.yml" is edited
-        or added to your ARC.
-      </div>
-    </q-item>
-      </q-card-section>
-    </q-card>
-
   </div>
 </template>

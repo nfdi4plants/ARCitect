@@ -2,6 +2,7 @@
 
 import ToolbarButton from './components/ToolbarButton.vue';
 import ArcTreeView from './views/ArcTreeView.vue';
+import a_tooltip from './components/a_tooltip.vue';
 
 import HomeView from './views/HomeView.vue';
 
@@ -185,42 +186,75 @@ const test = async ()=>{
             <q-item-section style="margin:0.6em 0 0 -1.2em">
               <q-item-label><b style="font-size:2em">ARC</b><span style="font-size:1.2em">itect</span></q-item-label>
             </q-item-section>
+            <a_tooltip>
+            Return to home view
+            </a_tooltip>
           </q-item>
 
           <LoginView />
 
           <q-separator />
 
-          <ToolbarButton text='New ARC' icon='note_add' @clicked='newLocalArc()'></ToolbarButton>
-          <ToolbarButton text='Open ARC' icon='file_open' @clicked='openLocalArc()'></ToolbarButton>
-          <ToolbarButton text='Download ARC' icon='cloud_download' @clicked='AppProperties.state=AppProperties.STATES.OPEN_DATAHUB'></ToolbarButton>
+          <ToolbarButton text='New ARC' icon='note_add' @clicked='newLocalArc()'>
+            <a_tooltip>
+              Create a new ARC on your computer
+            </a_tooltip>
+          </ToolbarButton>
+          <ToolbarButton text='Open ARC' icon='file_open' @clicked='openLocalArc()'>
+            <a_tooltip>
+              Open an existing ARC from your computer
+            </a_tooltip>
+          </ToolbarButton>
+          <ToolbarButton text='Download ARC' icon='cloud_download' @clicked='AppProperties.state=AppProperties.STATES.OPEN_DATAHUB'>
+            <a_tooltip> Download an ARC from the DataHUB</a_tooltip>
+          </ToolbarButton>
 
           <q-separator />
 
           <!--<ToolbarButton text='Refresh ARC' icon='refresh' requiresARC @clicked='refreshLocalArc()'></ToolbarButton>-->
-          <ToolbarButton text='Save ARC' icon='save' requiresARC @clicked='saveLocalArc()'></ToolbarButton>
-          <ToolbarButton text='Explorer' icon='folder_open' requiresARC @clicked='ArcControlService.openArcInExplorer()'></ToolbarButton>
+          <ToolbarButton text='Save ARC' icon='save' requiresARC @clicked='saveLocalArc()'>
+            <a_tooltip> Save the ARC locally</a_tooltip>
+          </ToolbarButton>
+          <ToolbarButton text='Explorer' icon='folder_open' requiresARC @clicked='ArcControlService.openArcInExplorer()'>
+            <a_tooltip>Open the ARC in your Explorer or Finder</a_tooltip>
+          </ToolbarButton>
+          <q-separator />
+          <a_tooltip>
+            The menus "Save ARC", "Explorer" and "Validation" are available on open ARCs.<br>
+            The menus "Commit", "DataHUB Sync" and "History" are available after login
+          </a_tooltip>
+          <ToolbarButton text='Commit' icon='rule' requiresARC requiresUser requiresGit @clicked='AppProperties.state=AppProperties.STATES.GIT_COMMIT'>
+            <a_tooltip>Track changes of the ARC with git</a_tooltip>            
+          </ToolbarButton>
+          <ToolbarButton text='DataHUB Sync' icon='published_with_changes' requiresARC requiresUser requiresGit @clicked='AppProperties.state=AppProperties.STATES.GIT_SYNC'>
+            <a_tooltip>Synchronize the ARC with a DataHUB</a_tooltip>
+          </ToolbarButton>
+          <ToolbarButton text='History' icon='history' requiresARC requiresUser requiresGit @clicked='AppProperties.state=AppProperties.STATES.GIT_HISTORY'>
+            <a_tooltip>Inspect ARC history</a_tooltip>
+          </ToolbarButton>
           <q-separator />
 
-          <ToolbarButton text='Commit' icon='rule' requiresARC requiresUser requiresGit @clicked='AppProperties.state=AppProperties.STATES.GIT_COMMIT'></ToolbarButton>
-          <ToolbarButton text='DataHUB Sync' icon='published_with_changes' requiresARC requiresUser requiresGit @clicked='AppProperties.state=AppProperties.STATES.GIT_SYNC'></ToolbarButton>
-          <ToolbarButton text='History' icon='history' requiresARC requiresUser requiresGit @clicked='AppProperties.state=AppProperties.STATES.GIT_HISTORY'></ToolbarButton>
-          <q-separator />
-
-          <ToolbarButton text='Validation' icon='verified' requiresARC @clicked='AppProperties.state=AppProperties.STATES.VALIDATION'></ToolbarButton>
+          <ToolbarButton text='Validation' icon='verified' requiresARC @clicked='AppProperties.state=AppProperties.STATES.VALIDATION'>
+            <a_tooltip>Validate ARC against specifications</a_tooltip>
+          </ToolbarButton>
           <q-separator />
 
           <q-item class="col-grow"></q-item>
-          <ToolbarButton text='Toggle Help' icon='help' @clicked='AppProperties.showHelp=!AppProperties.showHelp;'></ToolbarButton>
+          <ToolbarButton text='Toggle Help' icon='help' @clicked='AppProperties.showHelp=!AppProperties.showHelp;'>
+            <a_tooltip>Show or hide the help menu.</a_tooltip>
+          </ToolbarButton>
+          <ToolbarButton text='Toggle Tooltips' :icon='AppProperties.showTooltips? "sym_r_mark_chat_read":"sym_r_chat_bubble" ' @clicked='AppProperties.showTooltips=!AppProperties.showTooltips;'>
+            <a_tooltip>Show or hide tooltips.</a_tooltip>
+          </ToolbarButton>
           <ToolbarButton :text="iProps.toolbarMinimized ? '' : 'Toggle Sidebar'" :icon="iProps.toolbarMinimized ? 'chevron_right' : 'chevron_left'" @clicked='iProps.toolbarMinimized=!iProps.toolbarMinimized;'></ToolbarButton>
           <q-separator />
 
           <q-item v-ripple clickable dense @click='downloadArcitect'>
             <q-item-section avatar>
               <q-icon color='red-9' name="error" v-if='iProps.new_version'>
-                <q-tooltip>
+                <a_tooltip>
                   New Version Available!
-                </q-tooltip>
+                </a_tooltip>
               </q-icon>
             </q-item-section>
             <q-item-section style="margin-left:-1.2em;">{{iProps.version}}</q-item-section>

@@ -6,6 +6,7 @@ import ViewItem from '../components/ViewItem.vue';
 import a_input from '../components/a_input.vue';
 import a_btn from '../components/a_btn.vue';
 import a_select from '../components/a_select.vue';
+import a_tooltip from '../components/a_tooltip.vue';
 import a_select_git_branch from '../components/a_select_git_branch.vue';
 import ArcControlService from '../ArcControlService.ts';
 
@@ -230,23 +231,35 @@ onUnmounted(()=>{
             <div class='col'>
               <a_input v-model='iProps.commit.email' label="eMail" readonly/>
             </div>
+            <a_tooltip>
+              Once logged in to the DataHUB your Name and eMail address are automatically filled out
+            </a_tooltip>
           </div>
 
           <div class='row' >
             <div class='col'>
               <a_select_git_branch />
+              <a_tooltip>
+                You can add (<q-icon name="add_circle" color="secondary" />), delete (<q-icon name="delete" color="grey-9" />), or switch between branches of your ARC
+              </a_tooltip>
             </div>
           </div>
 
           <div class='row' >
             <div class='col'>
               <a_input v-model='iProps.commit.msg' label='Commit Message' type="textarea" autogrow/>
+              <a_tooltip>
+                Add a commit message to document and communicate your changes
+              </a_tooltip>
             </div>
           </div>
 
           <div class='row' >
             <div class='col'>
               <a_input type="number" v-model='iProps.lfs_limit' label="Large File Storage Limit in MB"/>
+              <a_tooltip>
+                You can adapt the large file storage (LFS) Limit as needed
+              </a_tooltip>
             </div>
           </div>
 
@@ -259,11 +272,20 @@ onUnmounted(()=>{
         <q-card-section style="padding-top:0">
           <q-list dense>
             <q-item>
+                <a_tooltip>
+                  Here the changes to all files in your ARC are displayed together with the file size:<br>                 
+                  <ul>
+                    <li><q-icon color='secondary' name='inventory'/>: No changes</li>
+                    <li><q-icon name="edit_square" color="secondary" />: The file was edited</li>
+                    <li><q-icon name="add_box" color="secondary" />: The file was added</li>
+                    <li><q-icon name="indeterminate_check_box" color="red-10" />: The file was deleted</li>
+                  </ul>
+                </a_tooltip>
               <q-item-section>
                 <q-item-label style="font-weight:bold;font-size:1em;">Changes</q-item-label>
-              </q-item-section>
+              </q-item-section>             
             </q-item>
-
+            
             <q-item v-if='iProps.git_status.length<1'>
               <q-item-section avatar>
                 <q-icon color='secondary' name='inventory'></q-icon>
@@ -286,8 +308,18 @@ onUnmounted(()=>{
 
         <q-card-actions align='right' style="padding:0 2.1em 1em 2.1em;">
           <a_btn v-if='iProps.error' color="red-10" icon='warning' :label="iProps.error" no-caps style="margin-right:auto"/>
-          <a_btn label="Reset" @click="reset" icon='change_circle'/>
+          <a_btn label="Reset" @click="reset" icon='change_circle'>
+            <a_tooltip>
+              Click RESET to undo your latest changes and convert the ARC to the last saved commit
+            </a_tooltip>
+          </a_btn>
           <a_btn label="Commit" @click="commit" icon='check_circle' :disabled='iProps.git_status.length<1'/>
+
+          <!-- <a_btn label="Commit" @click="commit" icon='check_circle' :disabled='iProps.git_status.length'>
+            <a_tooltip>
+              Once ready, click COMMIT to store your changes locally
+            </a_tooltip>
+          </a_btn> -->
         </q-card-actions>
 
       </q-card>

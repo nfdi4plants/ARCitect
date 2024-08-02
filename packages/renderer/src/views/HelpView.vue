@@ -7,6 +7,7 @@ import GitSyncHelp from '../docs/git-sync.vue';
 import GitHistoryHelp from '../docs/git-history.vue';
 import DataHubHelp from '../docs/datahub.vue';
 import ValidationHelp from '../docs/validation.vue';
+import MarkdownHelp from '../docs/markdown.vue';
 import HomeHelp from '../docs/home.vue';
 import SwateHelp from '../docs/swate.vue';
 
@@ -20,6 +21,7 @@ import SwateHelp from '../docs/swate.vue';
     <SwateHelp v-else-if='appProperties.state===appProperties.STATES.EDIT_SWATE'></SwateHelp>
     <DataHubHelp v-else-if='appProperties.state===appProperties.STATES.OPEN_DATAHUB'></DataHubHelp>
     <ValidationHelp v-else-if='appProperties.state===appProperties.STATES.VALIDATION'></ValidationHelp>
+    <MarkdownHelp v-else-if='appProperties.state===appProperties.STATES.EDIT_MARKDOWN'></MarkdownHelp>
     <HomeHelp v-else></HomeHelp>
   </div>
 </template>
