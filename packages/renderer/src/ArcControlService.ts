@@ -202,6 +202,14 @@ const ArcControlService = {
       args: ['init','-b','main'],
       cwd: path
     });
+    await window.ipc.invoke('GitService.run', {
+      args: ['add','isa.investigation.xlsx','assays/','studies/','runs/','workflows/'],
+      cwd: path
+    });
+    await window.ipc.invoke('GitService.run', {
+      args: ['commit','-m','init','--author','"ARCitect <info@nfdi4plants.org>"'],
+      cwd: path
+    });
   },
 
   openArcInExplorer: async (arc_root: string | null | void) => {

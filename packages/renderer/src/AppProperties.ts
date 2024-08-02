@@ -34,7 +34,7 @@ const AppProperties: {
   force_lfs_update: 0,
 
   showHelp: false,
-  showTooltips: true
+  showTooltips: false
 });
 
 for(let k in AppProperties.STATES){
