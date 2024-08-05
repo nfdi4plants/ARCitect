@@ -192,12 +192,17 @@ const readDir_ = async (path: string) => {
     });
   }
 
+  const enforced_order = ['studies','assays','workflows','runs'];
+
   nodes.sort((a,b)=>{
-    if(a.isDirectory && !b.isDirectory){
+    const a_idx = enforced_order.indexOf(a.label);
+    const b_idx = enforced_order.indexOf(b.label);
+    if((a.isDirectory && !b.isDirectory) || (a_idx>=0 && b_idx<0)){
       return -1;
-    } else if (!a.isDirectory && b.isDirectory){
+    } else if ((!a.isDirectory && b.isDirectory) || (b_idx>=0 && a_idx<0)){
       return 1;
-    }
+    } else if (a_idx>=0 && b_idx>=0)
+      return a_idx-b_idx;
 
     return a.label.localeCompare(b.label);
   });
