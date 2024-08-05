@@ -34,18 +34,19 @@ interface ArcTreeViewNode {
 let init: {
   nodes: ArcTreeViewNode [];
   root: string,
-  lfs_file_paths: string []
+  lfs_file_paths: string [],
+  selection: string,
 } = {
   nodes: [],
   root: '',
-  lfs_file_paths: []
+  lfs_file_paths: [],
+  selection: ''
 };
 
 const emit = defineEmits(['openArc']);
 
 const props = reactive(init);
 const arcTree = ref(null);
-const selected = ref(null);
 
 function formatNodeEditString(contentType: string) {
   return NodeEdit_PreFix + contentType;
@@ -139,7 +140,7 @@ const readDir_ = async (path: string) => {
     n.label = n.id.split('/').pop();
     n.id_rel = n.id.replace(ArcControlService.props.arc_root+'/', '');
     n.lazy = n.isDirectory;
-    n.selectable = true;
+    n.selectable = false;
     if(isEditable(n,parent)){
       n.type = formatNodeEditString(parent);
       n.icon = 'edit_square';
@@ -202,17 +203,22 @@ const triggerNode = (e,node) => {
   switch (type) {
     case formatNodeEditString(Investigation):
       skip(e);
+      props.selection = node.id;
       return SwateControlService.LoadSwateState(0);
     case formatNodeEditString(Studies):
       skip(e);
+      props.selection = node.id;
       return SwateControlService.LoadSwateState(1,node.label);
     case formatNodeEditString(Assays):
       skip(e);
+      props.selection = node.id;
       return SwateControlService.LoadSwateState(2,node.label);
     case formatNodeEditString(Markdown):
+      props.selection = node.id;
       AppProperties.active_markdown = node.id;
       return AppProperties.state=AppProperties.STATES.EDIT_MARKDOWN;
     case formatNodeEditString(Image):
+      props.selection = node.id;
       AppProperties.active_image = node.id;
       return AppProperties.state=AppProperties.STATES.EDIT_IMAGE;
     // default:
@@ -559,7 +565,6 @@ watch(()=>ArcControlService.props.arc_root, async (newValue, oldValue) => {
 
   window.ipc.invoke('LocalFileSystemService.registerChangeListener', newValue);
 
-
   props.root = newValue;
   props.nodes = [{
     header: 'root',
@@ -580,9 +585,12 @@ watch(()=>AppProperties.state, async (newValue, oldValue) => {
   if([
     AppProperties.STATES.HOME,
     AppProperties.STATES.OPEN_DATAHUB,
-    AppProperties.STATES.GIT,
+    AppProperties.STATES.GIT_COMMIT,
+    AppProperties.STATES.GIT_SYNC,
+    AppProperties.STATES.GIT_HISTORY,
+    AppProperties.STATES.VALIDATION
   ].includes(newValue)){
-    selected.value = null
+    props.selection = '';
   }
 });
 
@@ -607,16 +615,15 @@ watch(()=>AppProperties.state, async (newValue, oldValue) => {
     >
       <template v-slot:default-header="prop">
         <div
-          v-ripple
-          class='text-grey-6'
           style="flex:1;cursor:pointer;white-space: nowrap;"
+          :class="props.selection===prop.node.id ? 'a_selected' : ''"
           @contextmenu="e=>onCellContextMenu(e,prop.node)"
           @click='e=>triggerNode(e,prop.node)'
         >
           <table class='tree_node'><tr>
             <td>
               <q-icon v-if='prop.node.icon' :name='prop.node.icon' style="padding:0 0.2em 0 0;"></q-icon>
-              <span class='text-black'>{{ prop.node.label }}</span>
+              <span>{{ prop.node.label }}</span>
             </td>
             <td style="text-align:right">
               <q-icon v-if='prop.node.type==="assays"' name='add' class='tree_button' @click='e=>addAssay(e,prop.node)'></q-icon>
@@ -624,8 +631,6 @@ watch(()=>AppProperties.state, async (newValue, oldValue) => {
               <q-badge v-if='props.lfs_file_paths.includes(prop.node.id_rel)' color="secondary" text-color="white" label="LFS" class='tree_button'/>
             </td>
           </tr></table>
-          <!--<q-icon v-if='prop.node.icon' :name='prop.node.icon' style="padding:0 0.2em 0 0;"></q-icon>-->
-          <!--<span class='text-black'>{{ prop.node.id_rel }}</span>-->
         </div>
       </template>
     </q-tree>
@@ -647,14 +652,11 @@ watch(()=>AppProperties.state, async (newValue, oldValue) => {
   color:#777;
 }
 
-.q-tree__node-header:hover{
-  background-color: #eee;
-}
-
 .tree_node {
   width: 100%;
   padding: 0;
   margin: 0;
+  color:#000;
 }
 .tree_node td {
   padding: 0;
@@ -670,6 +672,17 @@ watch(()=>AppProperties.state, async (newValue, oldValue) => {
 
 .tree_button:hover{
   background:#ccc;
+}
+
+.a_selected {
+  background-color: #26a69a;
+  border-radius: 0.3em;
+}
+.a_selected .q-icon {
+  color: #fff;
+}
+.a_selected .tree_node {
+  color: #fff;
 }
 
 </style>

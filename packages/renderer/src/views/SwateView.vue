@@ -1,3 +1,4 @@
+
 <script lang="ts" setup>
 import { onMounted, onUnmounted, ref, watch, reactive } from 'vue';
 import ArcControlService from '../ArcControlService.ts';
@@ -88,7 +89,7 @@ const SwateAPI: SwateAPI = {
     let options: Electron.OpenDialogOptions = {}
     options.defaultPath = ArcControlService.props.arc_root!;
     if (selectDirectories) {
-      selection = await window.ipc.invoke("LocalFileSystemService.selectAnyFolders") 
+      selection = await window.ipc.invoke("LocalFileSystemService.selectAnyFolders")
     } else {
       selection = await window.ipc.invoke("LocalFileSystemService.selectAnyFiles")
     }
@@ -118,7 +119,6 @@ const SwateAPI: SwateAPI = {
 }
 
 const init = async ()=>{
-  console.log('init');
   iProps.loading = true;
   iframe.value.setAttribute("src", "https://swate-alpha.nfdi4plants.org?is_swatehost=1&random="+SwateControlService.props.cacheNumber);
   // iframe.value.setAttribute("src", "https://localhost:3000?is_swatehost=1&random="+SwateControlService.props.cacheNumber);
@@ -131,7 +131,8 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
-  window.removeEventListener("message", SwateAPI.handleEvent)
+  window.removeEventListener("message", SwateAPI.handleEvent);
+  SwateControlService.props.object = null;
 });
 
 </script>
