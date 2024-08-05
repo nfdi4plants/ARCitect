@@ -224,7 +224,7 @@ const test = async ()=>{
             The menus "Commit", "DataHUB Sync" and "History" are available after login
           </a_tooltip>
           <ToolbarButton text='Commit' icon='rule' requiresARC requiresUser requiresGit @clicked='AppProperties.state=AppProperties.STATES.GIT_COMMIT'>
-            <a_tooltip>Track changes of the ARC with git</a_tooltip>            
+            <a_tooltip>Track changes of the ARC with git</a_tooltip>
           </ToolbarButton>
           <ToolbarButton text='DataHUB Sync' icon='published_with_changes' requiresARC requiresUser requiresGit @clicked='AppProperties.state=AppProperties.STATES.GIT_SYNC'>
             <a_tooltip>Synchronize the ARC with a DataHUB</a_tooltip>
@@ -270,6 +270,7 @@ const test = async ()=>{
         class="bg-grey-3"
         :width="400"
       >
+        <q-btn style="position:absolute;right:0em; top:0.6em; z-index:9999" icon="chevron_right" flat round @click='AppProperties.showHelp=false' />
         <q-scroll-area class='fit' style="height: 100%;width:100%;">
           <HelpView></HelpView>
         </q-scroll-area>
