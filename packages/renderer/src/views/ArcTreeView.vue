@@ -12,6 +12,7 @@ import AddProtocolDialog from '../dialogs/AddProtocolDialog.vue';
 import GitDialog from '../dialogs/GitDialog.vue';
 import { useQuasar } from 'quasar'
 import {ArcStudy, ArcAssay} from '@nfdi4plants/arctrl';
+import { setAssayIdentifier, setStudyIdentifier } from "@nfdi4plants/arctrl/Core/IdentifierSetters";
 import IdentifierDialog from '../dialogs/IdentifierDialog.vue';
 
 const Image = 'image';
@@ -58,39 +59,53 @@ function formatNodeAddString(label: string) {
 
 let uniqueLabelCounter = 0;
 
-const addStudy = async (e,n) => {
-  if(n && arcTree.value.isExpanded(n.id)){
-    e.preventDefault();
-    e.stopPropagation();
+const addStudy = async (event,node,study) => {
+  if(node && arcTree.value.isExpanded(node.id)){
+    event.preventDefault();
+    event.stopPropagation();
   }
   $q.dialog({
     component: IdentifierDialog,
     componentProps: {
-      label: 'Add Study',
-      existing_identifiers: ArcControlService.props.arc.ISA.StudyIdentifiers
+      label: study ? 'Copy Study' : 'New Study',
+      existing_identifiers: ArcControlService.props.arc.ISA.StudyIdentifiers,
+      identifier: study ? study.Identifier : ''
     }
   }).onOk( async (identifier: string) => {
-    const study = new ArcStudy(identifier,identifier);
-    ArcControlService.props.arc.ISA.AddStudy(study);
+    let new_study = null;
+    if(study){
+      new_study = study.Copy();
+      setStudyIdentifier(identifier,new_study);
+    } else {
+      new_study = new ArcStudy(identifier);
+    }
+    ArcControlService.props.arc.ISA.AddStudy(new_study);
     await ArcControlService.saveARC();
     await ArcControlService.readARC();
   });
 };
 
-const addAssay = async (e,n) => {
-  if(n && arcTree.value.isExpanded(n.id)){
-    e.preventDefault();
-    e.stopPropagation();
+const addAssay = async (event,node,assay) => {
+  if(node && arcTree.value.isExpanded(node.id)){
+    event.preventDefault();
+    event.stopPropagation();
   }
   $q.dialog({
     component: IdentifierDialog,
     componentProps: {
-      label: 'Add Assay',
-      existing_identifiers: ArcControlService.props.arc.ISA.AssayIdentifiers
+      label: assay ? 'Copy Assay' : 'New Assay',
+      existing_identifiers: ArcControlService.props.arc.ISA.AssayIdentifiers,
+      identifier: assay ? assay.Identifier : ''
     }
   }).onOk( async (identifier: string) => {
-    const assay = new ArcAssay(identifier);
-    ArcControlService.props.arc.ISA.AddAssay(assay);
+    let new_assay = null;
+    if(assay){
+      new_assay = assay.Copy();
+      setAssayIdentifier(identifier,new_assay);
+    } else {
+      new_assay = new ArcAssay(identifier);
+    }
+    ArcControlService.props.arc.ISA.AddAssay(new_assay);
     await ArcControlService.saveARC();
     await ArcControlService.readARC();
   });
@@ -478,6 +493,11 @@ const onCellContextMenu = async (e,node) => {
       }
     });
     items.push({
+      label: "Copy",
+      icon: h( 'i', icon_style, ['content_copy'] ),
+      onClick: ()=>addAssay(null,null,ArcControlService.props.arc.ISA.GetAssay(node.label))
+    });
+    items.push({
       label: "Delete",
       icon: h( 'i', icon_style, ['delete'] ),
       onClick: ()=>confirm_delete(node,()=>ArcControlService.deleteAssay(node.label))
@@ -498,6 +518,11 @@ const onCellContextMenu = async (e,node) => {
           async new_identifier => ArcControlService.rename('RenameStudy',node.label,new_identifier)
         );
       }
+    });
+    items.push({
+      label: "Copy",
+      icon: h( 'i', icon_style, ['content_copy'] ),
+      onClick: ()=>addStudy(null,null,ArcControlService.props.arc.ISA.GetStudy(node.label))
     });
     items.push({
       label: "Delete",

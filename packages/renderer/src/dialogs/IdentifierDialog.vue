@@ -7,7 +7,8 @@ import {checkValidCharacters} from '@nfdi4plants/arctrl/Core/Helper/Identifier.j
 
 export interface Props {
   label: string,
-  existing_identifiers: string []
+  existing_identifiers: string [],
+  identifier?: string
 };
 const props = defineProps<Props>();
 
@@ -29,7 +30,7 @@ const onSubmit = async () => {
 };
 
 const init = async ()=>{
-  iProps.identifier = '';
+  iProps.identifier = props.identifier || '';
 };
 
 onMounted(init);
