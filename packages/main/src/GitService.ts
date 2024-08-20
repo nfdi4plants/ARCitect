@@ -3,6 +3,8 @@ import {
   BrowserWindow
 } from 'electron';
 import { spawn } from 'child_process';
+import FS from 'fs';
+import {LocalFileSystemService} from './LocalFileSystemService.ts';
 
 const PATH = require('path');
 
@@ -28,22 +30,30 @@ export const GitService = {
 
       let error = false;
       let output = '';
-      const handleOutput = data => {
-        if(!data) return;
-        let dataAsString = data.toString();
-        dataAsString = dataAsString.replace(/\n|\r/g, '\n');
+      if(o.pipe) {
+        console.log(o.pipe)
+        LocalFileSystemService.enforcePath(null,o.pipe.split('/').slice(0,-1).join('/'));
+        const write_stream = FS.createWriteStream(o.pipe, {flags: 'w'});
+        p.stdout.pipe(write_stream);
+        p.stderr.pipe(write_stream);
+      } else {
+        const handleOutput = data => {
+          if(!data) return;
+          let dataAsString = data.toString();
+          dataAsString = dataAsString.replace(/\n|\r/g, '\n');
 
-        output += dataAsString;
-        if(dataAsString.toLowerCase().includes('error'))
-          error = true;
+          output += dataAsString;
+          if(dataAsString.toLowerCase().includes('error'))
+            error = true;
 
-        for(let row of dataAsString.split('\n')){
-          if(row==='') continue;
-          window.webContents.send('GitService.MSG', row);
-        }
-      };
-      p.stdout.on('data', handleOutput);
-      p.stderr.on('data', handleOutput);
+          for(let row of dataAsString.split('\n')){
+            if(row==='' || o.silent) continue;
+            window.webContents.send('GitService.MSG', row);
+          }
+        };
+        p.stdout.on('data', handleOutput);
+        p.stderr.on('data', handleOutput);
+      }
 
       // This hits when the child process cannot be spawned
       p.on('error', err => {

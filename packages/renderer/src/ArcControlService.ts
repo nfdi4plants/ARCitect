@@ -23,12 +23,14 @@ let init: {
     arc_root: undefined | string ,
     busy: boolean,
     arc: null | ARC,
-    git_initialized: boolean
+    git_initialized: boolean,
+    skip_fs_updates: boolean,
 } = {
     arc_root: undefined ,
     busy: false,
     arc: null,
-    git_initialized: false
+    git_initialized: false,
+    skip_fs_updates: false
 }
 
 function relative_to_absolute_path(relativePath: string) {
@@ -221,6 +223,7 @@ const ArcControlService = {
   },
 
   updateARCfromFS: async ([path,type]) => {
+    if(ArcControlService.props.skip_fs_updates) return;
     // track add/rm assays/studies through file explorer
     const requires_update = path.includes('isa.assay.xlsx') || path.includes('isa.study.xlsx');
     if(!requires_update) return;

@@ -5,7 +5,9 @@ import { ref, reactive, onMounted, onUnmounted } from 'vue';
 export interface Props {
   title: String,
   ok_title: String,
+  ok_icon?: String,
   cancel_title: String,
+  cancel_icon?: String,
   state: Number,
 };
 const props = defineProps<Props>();
@@ -78,8 +80,8 @@ const { dialogRef, onDialogHide, onDialogOK, onDialogCancel } = useDialogPluginC
       <q-linear-progress :value='100' :indeterminate='props.state===0' color="secondary" class="q-mt-sm" track-color="grey-3" />
 
       <q-card-actions align="right" style="margin:0 1.5em 1.5em;">
-        <q-btn color="secondary" :loading='props.state===0' :disabled='props.state===0 || (props.state===2 && props.cancel_title)' :label="props.ok_title" @click="onDialogOK" type='submit' class='text-weight-bold'/>
-        <q-btn v-if='props.cancel_title' color="secondary" :disabled='props.state===0' :label="props.cancel_title" @click="onDialogCancel" type='submit' class='text-weight-bold'/>
+        <q-btn color="secondary" :loading='props.state===0' :disabled='props.state===0 || (props.state===2 && props.cancel_title)' :label="props.ok_title" @click="onDialogOK" type='submit' class='text-weight-bold' :icon='props.ok_icon || "check_circle"'/>
+        <q-btn v-if='props.cancel_title' color="secondary" :disabled='props.state===0' :label="props.cancel_title" @click="onDialogCancel" type='submit' class='text-weight-bold' :icon='props.cancel_icon || "cancel"'/>
       </q-card-actions>
     </q-card>
 

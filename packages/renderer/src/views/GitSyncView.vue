@@ -10,6 +10,9 @@ import ArcControlService from '../ArcControlService.ts';
 
 import AppProperties from '../AppProperties.ts';
 
+import { Xlsx } from '@fslab/fsspreadsheet/Xlsx.js';
+import { Json } from '@fslab/fsspreadsheet/Json.js';
+
 import AddRemoteDialog from '../dialogs/AddRemoteDialog.vue';
 import GitDialog from '../dialogs/GitDialog.vue';
 import ConfirmationDialog from '../dialogs/ConfirmationDialog.vue';
@@ -145,6 +148,120 @@ const push = async()=>{
   dialogProps.state=1;
 };
 
+const merge_xlsx = async (rel_path,pointers) => {
+  for(const pointer of pointers){
+    const path = `/tmp/arc_merge/${pointer}/${rel_path}`;
+
+    // get xlsx file
+    await window.ipc.invoke('GitService.run', {
+      args: [`show`,`${pointer}:${rel_path}`],
+      cwd: ArcControlService.props.arc_root,
+      pipe: path
+    });
+
+    // write json representation
+    const buffer = await window.ipc.invoke('LocalFileSystemService.readFile', [path,{}]);
+    const wb = await Xlsx.fromBytes(buffer);
+    const json = Json.toRowsJsonString(wb,1,true);
+    await window.ipc.invoke('LocalFileSystemService.writeFile', [path+'.json',json]);
+
+  }
+
+  // merge json representations
+  const merged_json = await window.ipc.invoke('GitService.run', {
+    args: [`merge-file`,`-p`,
+      `/tmp/arc_merge/${pointers[0]}/${rel_path}.json`,
+      `/tmp/arc_merge/${pointers[1]}/${rel_path}.json`,
+      `/tmp/arc_merge/${pointers[2]}/${rel_path}.json`,
+    ],
+    cwd: ArcControlService.props.arc_root,
+    silent: true
+  });
+
+  // write merged workbooks
+  const merged_wb = Json.fromRowsJsonString(merged_json[1]);
+  const merged_buffer = await Xlsx.toBytes(merged_wb);
+  await window.ipc.invoke(
+    'LocalFileSystemService.writeFile',
+    [
+      `${ArcControlService.props.arc_root}/${rel_path}`,
+      merged_buffer,
+      {}
+    ]
+  );
+  await window.ipc.invoke('GitService.run', {
+    args: [`add`,rel_path],
+    cwd: ArcControlService.props.arc_root
+  });
+};
+
+const merge = async ()=>{
+  const dialogProps = reactive({
+    title: 'Merge Divergent Branches',
+    ok_title: 'Ok',
+    cancel_title: 'Cancel',
+    state: 0,
+  });
+
+  $q.dialog({
+    component: GitDialog,
+    componentProps: dialogProps
+  }).onOk(async ()=>{
+    await ArcControlService.readARC();
+    await checkRemotes();
+  }).onCancel(async ()=>{
+    const rebase = await window.ipc.invoke('GitService.run', {
+      args: [`reset`,`--hard`,`ORIG_HEAD`],
+      cwd: ArcControlService.props.arc_root
+    });
+  });
+
+  const branches = await getBranches();
+  if(!branches.current) return;
+
+  // clean helper function
+  const clean = x => x[1].split('\n')[0].trim();
+
+  // get latest commit hash
+  const local_commit = clean(await window.ipc.invoke('GitService.run', {
+    args: [`rev-parse`,`HEAD`],
+    cwd: ArcControlService.props.arc_root
+  }));
+
+  // get common ancestor
+  const common_ancestor = clean(await window.ipc.invoke('GitService.run', {
+    args: [`merge-base`,`HEAD`,iProps.remote+'/'+branches.current],
+    cwd: ArcControlService.props.arc_root
+  }));
+
+  // initiate rebase
+  const rebase = await window.ipc.invoke('GitService.run', {
+    args: [`rebase`,iProps.remote+'/'+branches.current],
+    cwd: ArcControlService.props.arc_root
+  });
+
+  // get conflicts
+  const conflicts = rebase[1].split('\n').filter(r=>r.startsWith('CONFLICT')).map(r=>r.split('Merge conflict in ').pop());
+
+  // attempt to resolve conflicts
+  ArcControlService.props.skip_fs_updates = true;
+  for(let file of conflicts.filter(f=>f.endsWith('.xlsx')))
+    await merge_xlsx(file,[local_commit,common_ancestor,iProps.remote+'/'+branches.current]);
+  ArcControlService.props.skip_fs_updates = false;
+
+  await window.ipc.invoke('GitService.run', {
+    args: [`commit`,'--ammend'],
+    cwd: ArcControlService.props.arc_root
+  });
+
+  await window.ipc.invoke('GitService.run', {
+    args: [`-c`,`core.editor=true`,`rebase`,'--continue'],
+    cwd: ArcControlService.props.arc_root
+  });
+
+  dialogProps.state=1;
+};
+
 const pull = async()=>{
   await getStatus();
   if(iProps.git_status.length>0)
@@ -155,12 +272,18 @@ const pull = async()=>{
     ok_title: 'Ok',
     cancel_title: null,
     state: 0,
+    needs_merge: false
   });
 
   $q.dialog({
     component: GitDialog,
     componentProps: dialogProps
   }).onOk(async ()=>{
+    if(dialogProps.needs_merge)
+      await merge();
+    else
+      await checkRemotes();
+  }).onCancel(async ()=>{
     await checkRemotes();
   });
 
@@ -187,6 +310,12 @@ const pull = async()=>{
       GIT_LFS_SKIP_SMUDGE: iProps.use_lfs?0:1
     }
   });
+  dialogProps.needs_merge = !response[0] && response[1].includes('You have divergent branches and need to specify how to reconcile them.');
+  if(dialogProps.needs_merge){
+    dialogProps.ok_title = 'Merge';
+    dialogProps.cancel_title = 'Cancel';
+    dialogProps.ok_icon = 'merge';
+  }
   if(iProps.use_lfs){
     response = await window.ipc.invoke('GitService.run', {
       args: [`lfs`,`pull`,iProps.remote,branches.current],
@@ -356,7 +485,7 @@ const inspectArc = url =>{
                   </q-item-section>
                 </q-item>
 
-                <a_tooltip>                 
+                <a_tooltip>
                   Managing remotes
                   <ul>
                     <li><q-icon name="add_circle" color="secondary" />: Add additional remote connections</li>
@@ -378,7 +507,7 @@ const inspectArc = url =>{
             <a_tooltip>
               <div>
                 Check this box to synchronize large files
-              </div>            
+              </div>
               <q-icon name="warning" color="grey-3" size="1.5em"/>
               Data up- and downloads taking more than one hour require a personal access token.<br>
               Click <q-icon name="add_circle" color="secondary" /> to add a remote with a personal access token.

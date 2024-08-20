@@ -56,6 +56,7 @@ const getStatus = async()=>{
   const sizes = await window.ipc.invoke('LocalFileSystemService.getFileSizes', status.map(x=> ArcControlService.props.arc_root +'/'+x[1]));
   for(let i in sizes)
     status[i].push(sizes[i]);
+    console.log(status)
   iProps.git_status = status;
 };
 
@@ -273,7 +274,7 @@ onUnmounted(()=>{
           <q-list dense>
             <q-item>
                 <a_tooltip>
-                  Here the changes to all files in your ARC are displayed together with the file size:<br>                 
+                  Here the changes to all files in your ARC are displayed together with the file size:<br>
                   <ul>
                     <li><q-icon color='secondary' name='inventory'/>: No changes</li>
                     <li><q-icon name="edit_square" color="secondary" />: The file was edited</li>
@@ -283,9 +284,9 @@ onUnmounted(()=>{
                 </a_tooltip>
               <q-item-section>
                 <q-item-label style="font-weight:bold;font-size:1em;">Changes</q-item-label>
-              </q-item-section>             
+              </q-item-section>
             </q-item>
-            
+
             <q-item v-if='iProps.git_status.length<1'>
               <q-item-section avatar>
                 <q-icon color='secondary' name='inventory'></q-icon>
@@ -313,13 +314,11 @@ onUnmounted(()=>{
               Click RESET to undo your latest changes and convert the ARC to the last saved commit
             </a_tooltip>
           </a_btn>
-          <a_btn label="Commit" @click="commit" icon='check_circle' :disabled='iProps.git_status.length<1'/>
-
-          <!-- <a_btn label="Commit" @click="commit" icon='check_circle' :disabled='iProps.git_status.length'>
+          <a_btn label="Commit" @click="commit" icon='check_circle' :disabled='iProps.git_status.length<1'>
             <a_tooltip>
               Once ready, click COMMIT to store your changes locally
             </a_tooltip>
-          </a_btn> -->
+          </a_btn>
         </q-card-actions>
 
       </q-card>
