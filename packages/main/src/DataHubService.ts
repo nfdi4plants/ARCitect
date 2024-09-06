@@ -16,9 +16,9 @@ const authPort = 7890;
 
 
 
-// credentials for different repositories 
+// credentials for different repositories
 // if secret is left out pkce will be used for authentification
-// that requires the confidential setting in the gitlab app to be turned off 
+// that requires the confidential setting in the gitlab app to be turned off
 const CREDENTIALS: Credentials = {
   'git.nfdi4plants.org': {
     id: 'af897fa1ef8474855feff07186adc6f26dee06971ee9ce4027f8f9c709a84c73',
@@ -50,7 +50,7 @@ function sha256Base64UrlsafeEncode(word: string){
 }
 
 /** generates a random string for a given set of strings of a given length */
-function randomString(alphabet: Array<string>, string_length: number): string { 
+function randomString(alphabet: Array<string>, string_length: number): string {
   return Array.from({length: string_length}, (_, i) => alphabet[randomInt(alphabet.length)]).join('');
 }
 
@@ -58,7 +58,7 @@ function randomString(alphabet: Array<string>, string_length: number): string {
 export const DataHubService = {
 
   auth_host: null,
-  code_verifier: '', 
+  code_verifier: '',
   code_challenge: '',
   pkce_state: '',
 
@@ -112,6 +112,28 @@ export const DataHubService = {
     );
   },
 
+  getPackages: async (e: IpcMainInvokeEvent, [host, token, project_id]:[string, string, string]) => {
+    return await InternetService.getWebPageAsJson(
+      null,
+      {
+        host: host,
+        path: `/api/v4/projects/${project_id}/packages`,
+        method: 'GET'
+      }
+    );
+  },
+
+  getPackageFiles: async (e: IpcMainInvokeEvent, [host, token, project_id, package_id, page]:[string, string, string, string, number]) => {
+    return await InternetService.getWebPageAsJson(
+      null,
+      {
+        host: host,
+        path: `/api/v4/projects/${project_id}/packages/${package_id}/package_files?per_page=100&page=${page}`,
+        method: 'GET'
+      }
+    );
+  },
+
   inspectArc: async (e: IpcMainInvokeEvent, url: string) => {
     shell.openExternal(url);
     return;
@@ -123,7 +145,7 @@ export const DataHubService = {
     DataHubService.auth_host = host;
     let auth_url = '';
 
-    if ('secret' in CREDENTIALS[host]) { 
+    if ('secret' in CREDENTIALS[host]) {
       const url_params = {
         response_type: 'code',
         redirect_uri: 'http://localhost:7890',
@@ -152,7 +174,7 @@ export const DataHubService = {
     if (!CREDENTIALS[host]) return null;
     let path = '';
 
-    if ('secret' in CREDENTIALS[host]) { 
+    if ('secret' in CREDENTIALS[host]) {
       const url_params = {
         code: code,
         client_id: CREDENTIALS[host].id,
@@ -213,6 +235,8 @@ export const DataHubService = {
 
   init: async () => {
     ipcMain.handle('DataHubService.getArcs', DataHubService.getArcs );
+    ipcMain.handle('DataHubService.getPackages', DataHubService.getPackages );
+    ipcMain.handle('DataHubService.getPackageFiles', DataHubService.getPackageFiles );
     ipcMain.handle('DataHubService.inspectArc', DataHubService.inspectArc );
     ipcMain.handle('DataHubService.authenticate', DataHubService.authenticate );
     ipcMain.handle('DataHubService.getGroups', DataHubService.getGroups );
@@ -229,21 +253,21 @@ export const DataHubService = {
       if(DataHubService.auth_host === null){
         return res.send('<h1>Authentification Failed.</h1>');
       }
-      
+
       const code = req.url.split('/?code=')[1].split('&')[0];
       const token = await DataHubService.getToken(null, code, DataHubService.auth_host);
-      
+
       if (token === null) {
         return res.send('<h1>Authentification Failed.</h1>');
       }
-      
+
       const user = await DataHubService.getUser(null, token.access_token, DataHubService.auth_host);
       user.token = token;
       user.host = DataHubService.auth_host;
 
       res.send('<h1>Login and Authorization Complete. You can now return to ARCitect.</h1><script>window.close()</script>');
       let window = BrowserWindow.getAllWindows().find(w => !w.isDestroyed());
-      
+
       if( window !== undefined){
         window.webContents.send('DataHubService.authentificationData', user);
         window.focus();

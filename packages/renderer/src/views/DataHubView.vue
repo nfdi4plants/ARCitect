@@ -137,6 +137,58 @@ onUnmounted(async () => {
   window.ipc.off('ArcCommanderService.MSG', processMsg);
 });
 
+const roc = async ()=>{
+  const arcs = await window.ipc.invoke(
+    'DataHubService.getArcs',
+    [
+      props.host,
+      AppProperties.user && AppProperties.user.host===props.host
+        ? AppProperties.user.token.access_token
+        : null
+    ]
+  );
+
+  const packages_map = new Map();
+  for(let a of arcs){
+    const packages = await window.ipc.invoke(
+      'DataHubService.getPackages',
+      [
+        props.host,
+        AppProperties.user && AppProperties.user.host===props.host
+          ? AppProperties.user.token.access_token
+          : null,
+        a.id
+      ]
+    );
+    if(!packages || packages.length<1) continue;
+    let files = [];
+    for(let p=1; p<10;p++){
+      const page_files = await window.ipc.invoke(
+        'DataHubService.getPackageFiles',
+        [
+          props.host,
+          AppProperties.user && AppProperties.user.host===props.host
+            ? AppProperties.user.token.access_token
+            : null,
+          a.id,
+          packages[0].id,
+          p
+        ]
+      );
+      if(!page_files || page_files.length<1) break;
+      files = files.concat(page_files);
+      if(page_files.length<100)
+        break;
+    }
+    files = files.filter(f=>f.file_name==='arc-ro-crate-metadata.json');
+    files.sort((a,b)=>a.created_at < b.created_at ? 1 : a.created_at > b.created_at ? -1 : 0);
+    if(files.length>0)
+      packages_map.set(a.id,a.web_url+`/-/package_files/${files[0].id}/download`);
+    console.log(a.id);
+  }
+  console.log(packages_map);
+}
+
 </script>
 
 <template>
@@ -172,6 +224,8 @@ onUnmounted(async () => {
         </q-select>
         <a_btn label="" icon='refresh' @click='init()' no-wrap>
           <a_tooltip>Refresh the list of available ARCs</a_tooltip>
+        </a_btn>
+        <a_btn label="" icon='bug_report' @click='roc()' no-wrap>
         </a_btn>
       </div>
       <br>
