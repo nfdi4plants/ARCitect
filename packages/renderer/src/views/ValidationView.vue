@@ -191,100 +191,102 @@ onMounted(init);
 
         <q-card-section>
           <table class='key_value_table'>
-            <tr v-for='(pair,i) in iProps.core_pairs'>
-              <td>
-                <a_checkbox v-model='pair[2]' />
-              </td>
-              <td>
-                <a_select
-                  v-model='pair[0]'
-                  :options='pair[3]'
-                  use-input
-                  hide-selected
-                  fill-input
-                  input-debounce="0"
-                  @filter="(val, update, abort)=>filter(iProps.core_names, pair, 3, val, update, abort)"
-                  @input-value="v=>setName(pair,iProps.core_versions,v)"
-                />
-              </td>
-              <td>
-                <a_select
-                  v-model='pair[1]'
-                  :options='pair[4]'
-                  use-input
-                  hide-selected
-                  fill-input
-                  input-debounce="0"
-                  @filter="(val, update, abort)=>filter(pair[0] in iProps.core_versions ? iProps.core_versions[pair[0]] : [], pair, 4, val, update, abort)"
-                  @input-value="v=>pair[1]=v"
-                />
-              </td>
-              <a_tooltip>
-                By default every ARC is validated against the ARC specification to guarantee ARC intactness.
-              </a_tooltip>
-            </tr>
-            <tr>
-              <td colspan="3" style="padding-top:2em">&nbsp;</td>
-            </tr>
-            <tr>
-              <td class='thh' colspan="3">Custom Validation Packages</td>
-              <a_tooltip>
-                Here you can add or remove additional validation packages. <br>
-                For instance, if you want to publish your ARC and receive a DOI via the DataHUB, select and add the "invenio" validation.
-              </a_tooltip>
-            </tr>
-            <tr>
-              <td style="width:3em;">&nbsp;</td>
-              <th>Name</th>
-              <th>Version</th>
-            </tr>
-            <tr v-for='(pair,i) in iProps.package_pairs'>
-              <td>
-                <q-btn icon='do_not_disturb_on' color='grey-6' flat dense @click='()=>removePair(i)' />
-              </td>
-              <td>
-                <a_select
-                  v-model='pair[0]'
-                  :options='pair[3]'
-                  use-input
-                  hide-selected
-                  fill-input
-                  input-debounce="0"
-                  @filter="(val, update, abort)=>filter(iProps.package_names, pair, 3, val, update, abort)"
-                  @input-value="v=>setName(pair,iProps.package_versions,v)"
-                />
-              </td>
-              <td>
-                <a_select
-                  v-model='pair[1]'
-                  :options='pair[4]'
-                  use-input
-                  hide-selected
-                  fill-input
-                  input-debounce="0"
-                  @filter="(val, update, abort)=>filter(pair[0] in iProps.package_versions ? iProps.package_versions[pair[0]] : [], pair, 4, val, update, abort)"
-                  @input-value="v=>pair[1]=v"
-                />
-              </td>
-            </tr>
-            <tr>
-              <td>
-                <q-btn icon='add_circle' color='grey-6' flat dense @click='()=>iProps.package_pairs.push(["","",true,iProps.package_names,[]])' />
-              </td>
-              <td></td>
-              <td></td>
-            </tr>
-            <tr>
-              <th></th>
-              <th colspan="2">
-                <a_btn label="Save" icon='verified' @click='save'>
-                  <a_tooltip>
-                  Save the the validation information to your ARC.<br>
-                  They are stored in a file called ".arc/validation_packages.yml".
+            <tbody>
+              <tr v-for='(pair,i) in iProps.core_pairs'>
+                <td>
+                  <a_checkbox v-model='pair[2]' />
+                </td>
+                <td>
+                  <a_select
+                    v-model='pair[0]'
+                    :options='pair[3]'
+                    use-input
+                    hide-selected
+                    fill-input
+                    input-debounce="0"
+                    @filter="(val, update, abort)=>filter(iProps.core_names, pair, 3, val, update, abort)"
+                    @input-value="v=>setName(pair,iProps.core_versions,v)"
+                  />
+                </td>
+                <td>
+                  <a_select
+                    v-model='pair[1]'
+                    :options='pair[4]'
+                    use-input
+                    hide-selected
+                    fill-input
+                    input-debounce="0"
+                    @filter="(val, update, abort)=>filter(pair[0] in iProps.core_versions ? iProps.core_versions[pair[0]] : [], pair, 4, val, update, abort)"
+                    @input-value="v=>pair[1]=v"
+                  />
+                </td>
+                <a_tooltip>
+                  By default every ARC is validated against the ARC specification to guarantee ARC intactness.
                 </a_tooltip>
-                </a_btn>
-              </th>
-            </tr>
+              </tr>
+              <tr>
+                <td colspan="3" style="padding-top:2em">&nbsp;</td>
+              </tr>
+              <tr>
+                <td class='thh' colspan="3">Custom Validation Packages</td>
+                <a_tooltip>
+                  Here you can add or remove additional validation packages. <br>
+                  For instance, if you want to publish your ARC and receive a DOI via the DataHUB, select and add the "invenio" validation.
+                </a_tooltip>
+              </tr>
+              <tr>
+                <td style="width:3em;">&nbsp;</td>
+                <th>Name</th>
+                <th>Version</th>
+              </tr>
+              <tr v-for='(pair,i) in iProps.package_pairs'>
+                <td>
+                  <q-btn icon='do_not_disturb_on' color='grey-6' flat dense @click='()=>removePair(i)' />
+                </td>
+                <td>
+                  <a_select
+                    v-model='pair[0]'
+                    :options='pair[3]'
+                    use-input
+                    hide-selected
+                    fill-input
+                    input-debounce="0"
+                    @filter="(val, update, abort)=>filter(iProps.package_names, pair, 3, val, update, abort)"
+                    @input-value="v=>setName(pair,iProps.package_versions,v)"
+                  />
+                </td>
+                <td>
+                  <a_select
+                    v-model='pair[1]'
+                    :options='pair[4]'
+                    use-input
+                    hide-selected
+                    fill-input
+                    input-debounce="0"
+                    @filter="(val, update, abort)=>filter(pair[0] in iProps.package_versions ? iProps.package_versions[pair[0]] : [], pair, 4, val, update, abort)"
+                    @input-value="v=>pair[1]=v"
+                  />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <q-btn icon='add_circle' color='grey-6' flat dense @click='()=>iProps.package_pairs.push(["","",true,iProps.package_names,[]])' />
+                </td>
+                <td></td>
+                <td></td>
+              </tr>
+              <tr>
+                <th></th>
+                <th colspan="2">
+                  <a_btn label="Save" icon='verified' @click='save'>
+                    <a_tooltip>
+                    Save the the validation information to your ARC.<br>
+                    They are stored in a file called ".arc/validation_packages.yml".
+                  </a_tooltip>
+                  </a_btn>
+                </th>
+              </tr>
+            </tbody>
           </table>
         </q-card-section>
 

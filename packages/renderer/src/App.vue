@@ -297,10 +297,12 @@ const test = async ()=>{
 
                   <q-card-section class="q-pt-none text-body1">
                     <table>
-                      <tr>
-                        <td style="padding-right:1em"><q-icon name='warning' size='2em' color='grey-7' /></td>
-                        <td v-html='iProps.error_text'></td>
-                      </tr>
+                      <tbody>
+                        <tr>
+                          <td style="padding-right:1em"><q-icon name='warning' size='2em' color='grey-7' /></td>
+                          <td v-html='iProps.error_text'></td>
+                        </tr>
+                      </tbody>
                     </table>
                   </q-card-section>
 

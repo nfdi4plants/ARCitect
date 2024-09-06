@@ -56,7 +56,7 @@ const initCore = async () => {
 }
 
 /**
- * Do this to allow swate hosting with https 
+ * Do this to allow swate hosting with https
  */
 if (!app.isPackaged)
   app.commandLine.appendSwitch('ignore-certificate-errors');

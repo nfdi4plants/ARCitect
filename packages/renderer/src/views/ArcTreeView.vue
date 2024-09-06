@@ -650,7 +650,7 @@ watch(()=>AppProperties.state, async (newValue, oldValue) => {
           @contextmenu="e=>onCellContextMenu(e,prop.node)"
           @click='e=>triggerNode(e,prop.node)'
         >
-          <table class='tree_node'><tr>
+          <table class='tree_node'><tbody><tr>
             <td>
               <q-icon v-if='prop.node.icon' :name='prop.node.icon' style="padding:0 0.2em 0 0;"></q-icon>
               <span>{{ prop.node.label }}</span>
@@ -660,7 +660,7 @@ watch(()=>AppProperties.state, async (newValue, oldValue) => {
               <q-icon v-if='prop.node.type==="studies"' name='add' class='tree_button' @click='e=>addStudy(e,prop.node)'></q-icon>
               <q-badge v-if='props.lfs_file_paths.includes(prop.node.id_rel)' color="secondary" text-color="white" label="LFS" class='tree_button'/>
             </td>
-          </tr></table>
+          </tr></tbody></table>
         </div>
       </template>
     </q-tree>
