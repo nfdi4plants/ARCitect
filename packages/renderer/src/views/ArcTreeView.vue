@@ -46,6 +46,8 @@ let init: {
 
 const emit = defineEmits(['openArc']);
 
+let update_path_listener=null;
+
 const props = reactive(init);
 const arcTree = ref(null);
 
@@ -583,8 +585,8 @@ const onCellContextMenu = async (e,node) => {
   // }
 };
 
-onMounted( ()=>{window.ipc.on('LocalFileSystemService.updatePath', updatePath);} );
-onUnmounted( ()=>{window.ipc.off('LocalFileSystemService.updatePath', updatePath);} );
+onMounted( ()=>{update_path_listener = window.ipc.on('LocalFileSystemService.updatePath', updatePath);} );
+onUnmounted( ()=>{update_path_listener();} );
 
 watch(()=>AppProperties.force_lfs_update, updateLFSFiles);
 

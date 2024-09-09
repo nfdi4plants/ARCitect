@@ -14,7 +14,8 @@ const props = defineProps<Props>();
 
 const iProps = reactive({
   height: 0,
-  rows: ['']
+  rows: [''],
+  git_listener: null
 });
 
 const scrollarea = ref(null);
@@ -53,9 +54,9 @@ const processGitStream = async row=>{
 
 onMounted( ()=>{
   iProps.rows = [''];
-  window.ipc.on('GitService.MSG', processGitStream);
+  iProps.git_listener = window.ipc.on('GitService.MSG', processGitStream);
 });
-onUnmounted( ()=>window.ipc.off('GitService.MSG', processGitStream) );
+onUnmounted( ()=>iProps.git_listener() );
 
 const { dialogRef, onDialogHide, onDialogOK, onDialogCancel } = useDialogPluginComponent();
 

@@ -53,6 +53,7 @@ const initCore = async () => {
       process.env['PATH'] += process_path_separator + [process.resourcesPath,'git-binaries','mac',architecture].join(PATH.sep);
   }
   ipcMain.handle('CORE.getVersion', ()=>app.getVersion());
+  ipcMain.handle('CORE.getTempPath', ()=>app.getPath('temp'));
 }
 
 /**

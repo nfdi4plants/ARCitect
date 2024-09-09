@@ -12,7 +12,7 @@ const iProps = reactive({
 const getHistory = async ()=>{
   // get log
   const response = await window.ipc.invoke('GitService.run', {
-    args: [`log`,`--pretty=format:%H_**_%aN_**_%aE_**_%cI_**_%s_***_`],
+    args: [`log`,`--all`,`--pretty=format:%H_**_%aN_**_%aE_**_%cI_**_%s_**_%D_***_`],
     cwd: ArcControlService.props.arc_root
   });
   if(response[1].startsWith('fatal'))
@@ -31,10 +31,19 @@ const getHistory = async ()=>{
       authorEmail: temp[2],
       ts: `${format(d.getDate())}.${format(d.getMonth()+1)}.${d.getFullYear()} ${format(d.getHours())}:${format(d.getMinutes())}`,
       title: temp[4],
+      pointer: temp[5],
     });
   }
   iProps.git_log = log;
-}
+};
+
+const checkout = async ref => {
+  await window.ipc.invoke('GitService.run', {
+    args: [`checkout`,ref],
+    cwd: ArcControlService.props.arc_root
+  });
+  getHistory();
+};
 
 onMounted( getHistory );
 
@@ -56,9 +65,13 @@ onMounted( getHistory );
           <q-timeline-entry
             v-for="(item,i) in iProps.git_log"
             :title="item.title"
-            :subtitle="item.ts + '&nbsp;-&nbsp;' + item.authorName + ' ('+item.authorEmail+')'"
             side="left"
+            :icon='item.pointer.includes("HEAD")?"circle":"none"'
           >
+            <template v-slot:subtitle>
+              <div class='log_btn' @click='()=>checkout(item.ref)'>{{item.ref}}</div>
+              <div>{{item.ts + '&nbsp;-&nbsp;' + item.authorName + ' ('+item.authorEmail+')'}}</div>
+            </template>
           </q-timeline-entry>
         </q-timeline>
 
@@ -69,3 +82,13 @@ onMounted( getHistory );
   </q-list>
 </template>
 
+<style lang='scss'>
+  .q-timeline__entry .q-icon{
+    padding-top:1.5px;
+  }
+
+  .log_btn:hover {
+    cursor:pointer;
+    color:$secondary;
+  }
+</style>

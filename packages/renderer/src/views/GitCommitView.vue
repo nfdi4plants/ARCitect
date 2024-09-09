@@ -31,6 +31,7 @@ interface Props {
 };
 
 const iProps : Props = reactive({
+  status_listener: null,
   git_status: [],
   error: '',
   lfs_limit: 1,
@@ -203,11 +204,11 @@ const filteredGetStatus = ([path,type])=>{
 onMounted(()=>{
   watch(()=>AppProperties.user, init);
   watch(()=>AppProperties.force_commit_update, init);
-  window.ipc.on('LocalFileSystemService.updatePath', filteredGetStatus);
+  iProps.status_listener = window.ipc.on('LocalFileSystemService.updatePath', filteredGetStatus);
   init();
 });
 onUnmounted(()=>{
-  window.ipc.off('LocalFileSystemService.updatePath', filteredGetStatus);
+  iProps.status_listener();
 });
 
 </script>

@@ -12,10 +12,9 @@ exposeInMainWorld(
       // From main to render.
       // eslint-disable-next-line @typescript-eslint/ban-types
       on: (channel: string, listener: Function) => {
-        ipcRenderer.on(channel, (event, ...args) => listener(...args));
-      },
-      off: (channel: string, listener: Function) => {
-        ipcRenderer.removeListener(channel, (event, ...args) => listener(...args));
+        const listener_ = (event, ...args) => listener(...args);
+        ipcRenderer.on(channel, listener_);
+        return ()=>ipcRenderer.removeListener(channel, listener_);
       },
       // From render to main and back again.
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

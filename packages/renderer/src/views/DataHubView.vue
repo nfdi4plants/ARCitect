@@ -13,7 +13,6 @@ import ArcControlService from '../ArcControlService.ts';
 import { useQuasar } from 'quasar'
 const $q = useQuasar();
 
-const log = ref(null);
 const props = reactive({
   list: [],
   showDialog: false,
@@ -28,17 +27,6 @@ const props = reactive({
 
 const inspectArc = url =>{
   window.ipc.invoke('InternetService.openExternalURL', url);
-};
-
-const processMsg = async msgs=>{
-  for(let msg of msgs.split('\n')){
-    msg = msg.trim();
-    if(msg)
-      props.msgs.push(msg);
-  }
-  await nextTick();
-  if(log && log._value)
-    log._value.setScrollPosition('vertical',90000,0);
 };
 
 const importArc = async url =>{
@@ -97,7 +85,6 @@ const init = async () => {
   props.error = '';
   props.list = [];
 
-  window.ipc.on('ArcCommanderService.MSG', processMsg);
   const list = await window.ipc.invoke(
     'DataHubService.getArcs',
     [
@@ -132,10 +119,6 @@ const init = async () => {
 onMounted(init);
 watch(()=>AppProperties.user, init);
 watch(()=>props.host, init);
-
-onUnmounted(async () => {
-  window.ipc.off('ArcCommanderService.MSG', processMsg);
-});
 
 </script>
 

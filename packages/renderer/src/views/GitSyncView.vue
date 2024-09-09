@@ -149,8 +149,13 @@ const push = async()=>{
 };
 
 const merge_xlsx = async (rel_path,pointers) => {
+  const tempPath = await window.ipc.invoke('CORE.getTempPath');
+
+  console.log('merging',rel_path);
+
   for(const pointer of pointers){
-    const path = `/tmp/arc_merge/${pointer}/${rel_path}`;
+    const path = `${tempPath}/arc_merge/${pointer}/${rel_path}`;
+    console.log('  retrieving',path+'.json');
 
     // get xlsx file
     await window.ipc.invoke('GitService.run', {
@@ -168,17 +173,20 @@ const merge_xlsx = async (rel_path,pointers) => {
   }
 
   // merge json representations
+  console.log('  merging jsons');
   const merged_json = await window.ipc.invoke('GitService.run', {
     args: [`merge-file`,`-p`,
-      `/tmp/arc_merge/${pointers[0]}/${rel_path}.json`,
-      `/tmp/arc_merge/${pointers[1]}/${rel_path}.json`,
-      `/tmp/arc_merge/${pointers[2]}/${rel_path}.json`,
+      `${tempPath}/arc_merge/${pointers[0]}/${rel_path}.json`,
+      `${tempPath}/arc_merge/${pointers[1]}/${rel_path}.json`,
+      `${tempPath}/arc_merge/${pointers[2]}/${rel_path}.json`,
     ],
     cwd: ArcControlService.props.arc_root,
     silent: true
   });
 
   // write merged workbooks
+  console.log('  adding merged xlsx');
+  console.log(merged_json[1]);
   const merged_wb = Json.fromRowsJsonString(merged_json[1]);
   const merged_buffer = await Xlsx.toBytes(merged_wb);
   await window.ipc.invoke(
@@ -248,11 +256,6 @@ const merge = async ()=>{
   for(let file of conflicts.filter(f=>f.endsWith('.xlsx')))
     await merge_xlsx(file,[local_commit,common_ancestor,iProps.remote+'/'+branches.current]);
   ArcControlService.props.skip_fs_updates = false;
-
-  await window.ipc.invoke('GitService.run', {
-    args: [`commit`,'--ammend'],
-    cwd: ArcControlService.props.arc_root
-  });
 
   await window.ipc.invoke('GitService.run', {
     args: [`-c`,`core.editor=true`,`rebase`,'--continue'],
