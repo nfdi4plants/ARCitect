@@ -33,7 +33,13 @@ const getAccounts = async (val, update, abort) => {
   if(!props.user)
     return update();
 
-  const groups = await window.ipc.invoke('DataHubService.getGroups', [props.user.host,props.user.token.access_token]);
+  let groups = [];
+  for(let p=1; p<10; p++){
+    const page_groups = await window.ipc.invoke('DataHubService.getGroups', [props.user.host,props.user.token.access_token,p]);
+    groups= groups.concat(page_groups);
+    if(page_groups.length<100) break;
+  }
+  groups.sort((a,b)=>a.full_name.localeCompare(b.full_name))
 
   update(()=>{
     for(let group of groups)
@@ -109,13 +115,13 @@ const openAccessTokenEditor = ()=>{
               <a_input v-model='iProps.name' label="Remote Name">
                 <a_tooltip>
                   The DataHUB is selected based on your decision during login.
-                </a_tooltip>              
+                </a_tooltip>
               </a_input>
             </div>
             <div class='col'>
               <a_select v-model='iProps.account' :options='Object.keys(iProps.accounts)' label="DataHub Account" :readonly='!props.user' @filter="getAccounts" @update:model-value='setDataHubURL()'>
                 <a_tooltip>
-                  Choose a DataHUB personal account or group namespace to which you want to sync your ARC. 
+                  Choose a DataHUB personal account or group namespace to which you want to sync your ARC.
                 </a_tooltip>
               </a_select>
             </div>

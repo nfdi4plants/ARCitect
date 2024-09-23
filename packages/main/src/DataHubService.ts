@@ -16,9 +16,9 @@ const authPort = 7890;
 
 
 
-// credentials for different repositories 
+// credentials for different repositories
 // if secret is left out pkce will be used for authentification
-// that requires the confidential setting in the gitlab app to be turned off 
+// that requires the confidential setting in the gitlab app to be turned off
 const CREDENTIALS: Credentials = {
   'git.nfdi4plants.org': {
     id: 'af897fa1ef8474855feff07186adc6f26dee06971ee9ce4027f8f9c709a84c73',
@@ -31,6 +31,10 @@ const CREDENTIALS: Credentials = {
   'gitlab.plantmicrobe.de': {
     id: '36ccd7924db8cf3548ee422b084dfdb28e0353cb99bbe7c0f236ae2b5f6c1bcb',
     secret: 'bbdd7493a1beb223d6345101d839b8aebfd81f889fd8e851d6674a9994cdab0c',
+  },
+  'datahub.rz.rptu.de': {
+    id: 'ba159fb4a6e49a399ca5c2b56b53f6c81e6d79304747fbd5e7187b77154784c3',
+    secret: 'gloas-3e79746d2531abf5cc33efd7736cc4202b613120dc6c1db9cc5d7f4051e0b1da',
   },
 };
 
@@ -50,7 +54,7 @@ function sha256Base64UrlsafeEncode(word: string){
 }
 
 /** generates a random string for a given set of strings of a given length */
-function randomString(alphabet: Array<string>, string_length: number): string { 
+function randomString(alphabet: Array<string>, string_length: number): string {
   return Array.from({length: string_length}, (_, i) => alphabet[randomInt(alphabet.length)]).join('');
 }
 
@@ -58,7 +62,7 @@ function randomString(alphabet: Array<string>, string_length: number): string {
 export const DataHubService = {
 
   auth_host: null,
-  code_verifier: '', 
+  code_verifier: '',
   code_challenge: '',
   pkce_state: '',
 
@@ -123,7 +127,7 @@ export const DataHubService = {
     DataHubService.auth_host = host;
     let auth_url = '';
 
-    if ('secret' in CREDENTIALS[host]) { 
+    if ('secret' in CREDENTIALS[host]) {
       const url_params = {
         response_type: 'code',
         redirect_uri: 'http://localhost:7890',
@@ -152,7 +156,7 @@ export const DataHubService = {
     if (!CREDENTIALS[host]) return null;
     let path = '';
 
-    if ('secret' in CREDENTIALS[host]) { 
+    if ('secret' in CREDENTIALS[host]) {
       const url_params = {
         code: code,
         client_id: CREDENTIALS[host].id,
@@ -184,14 +188,16 @@ export const DataHubService = {
     return returnvalue
   },
 
-  getGroups: async ( e: IpcMainInvokeEvent, [host, token]: [string, string] ) => {
+  getGroups: async ( e: IpcMainInvokeEvent, [host, token, page]: [string, string, number] ) => {
     return await InternetService.getWebPageAsJson(
         null,
         {
           host: host,
           path: `/api/v4/groups/?${querystring.stringify({
             access_token: token,
-            all_available: true
+            all_available: true,
+            per_page: 100,
+            page: page
           })}`,
           port: 443,
           method: 'GET'
@@ -229,21 +235,21 @@ export const DataHubService = {
       if(DataHubService.auth_host === null){
         return res.send('<h1>Authentification Failed.</h1>');
       }
-      
+
       const code = req.url.split('/?code=')[1].split('&')[0];
       const token = await DataHubService.getToken(null, code, DataHubService.auth_host);
-      
+
       if (token === null) {
         return res.send('<h1>Authentification Failed.</h1>');
       }
-      
+
       const user = await DataHubService.getUser(null, token.access_token, DataHubService.auth_host);
       user.token = token;
       user.host = DataHubService.auth_host;
 
       res.send('<h1>Login and Authorization Complete. You can now return to ARCitect.</h1><script>window.close()</script>');
       let window = BrowserWindow.getAllWindows().find(w => !w.isDestroyed());
-      
+
       if( window !== undefined){
         window.webContents.send('DataHubService.authentificationData', user);
         window.focus();
