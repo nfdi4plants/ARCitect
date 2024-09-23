@@ -153,7 +153,7 @@ const openStatusPage = ()=>{
 
   <Transition>
     <div v-show='iProps.loading' style='position:absolute;top:0;left:0;right:0;bottom:0;'>
-      <q-linear-progress size="45px" indeterminate value='100' color="primary" class='justify-start'/>
+      <q-linear-progress size="45px" indeterminate color="primary" class='justify-start'/>
       <div class="q-pa-md q-gutter-sm" v-if='iProps.showTimeout'>
         <q-banner class="bg-grey-3 text-black" rounded inline-actions>
           SWATE Service might be down

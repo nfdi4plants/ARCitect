@@ -492,7 +492,8 @@ const onCellContextMenu = async (e,node) => {
           componentProps: {
             title: 'Rename',
             property: 'Name',
-            icon: 'edit_note'
+            icon: 'edit_note',
+            initial_value: node.label,
           }
         }).onOk(
           async new_identifier => ArcControlService.rename('RenameAssay',node.label,new_identifier)
@@ -519,7 +520,8 @@ const onCellContextMenu = async (e,node) => {
           componentProps: {
             title: 'Rename',
             property: 'Name',
-            icon: 'edit_note'
+            icon: 'edit_note',
+            initial_value: node.label,
           }
         }).onOk(
           async new_identifier => ArcControlService.rename('RenameStudy',node.label,new_identifier)

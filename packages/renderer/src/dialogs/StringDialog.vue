@@ -5,7 +5,8 @@ import { reactive, onMounted } from 'vue';
 export interface Props {
   title: String,
   property: String,
-  icon: String
+  icon: String,
+  initial_value?: String
 };
 const props = defineProps<Props>();
 
@@ -22,6 +23,11 @@ const { dialogRef, onDialogHide, onDialogOK, onDialogCancel } = useDialogPluginC
 const onSubmit = async () => {
   onDialogOK(iProps.value);
 };
+
+onMounted(()=>{
+  console.log(props);
+  iProps.value = props.initial_value || '';
+});
 
 </script>
 
