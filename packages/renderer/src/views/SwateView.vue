@@ -6,10 +6,13 @@ import AppProperties from '../AppProperties.ts';
 import SwateControlService from '../SwateControlService.ts';
 import { ArcInvestigation, ArcAssay, ArcStudy, JsonController } from '@nfdi4plants/arctrl';
 
+import a_btn from '../components/a_btn.vue';
+
 let iframe: any | HTMLElement = ref({})
 
 const iProps = reactive({
-  loading: false
+  loading: false,
+  showTimeout: false,
 });
 
 enum Msg {
@@ -120,6 +123,8 @@ const SwateAPI: SwateAPI = {
 
 const init = async ()=>{
   iProps.loading = true;
+  iProps.showTimeout = false;
+  setTimeout(()=>iProps.showTimeout=true,4000);
   iframe.value.setAttribute("src", "https://swate-alpha.nfdi4plants.org?is_swatehost=1&random="+SwateControlService.props.cacheNumber);
   // iframe.value.setAttribute("src", "https://localhost:3000?is_swatehost=1&random="+SwateControlService.props.cacheNumber);
 };
@@ -135,13 +140,31 @@ onUnmounted(() => {
   SwateControlService.props.object = null;
 });
 
+const openStatusPage = ()=>{
+  window.ipc.invoke(
+    "InternetService.openExternalURL",
+    "https://status.nfdi4plants.org/status/dataplant"
+  );
+}
+
 </script>
 
 <template>
 
   <Transition>
-    <div>
-      <q-linear-progress size="45px" indeterminate color="primary" class='justify-start' v-show='iProps.loading'/>
+    <div v-show='iProps.loading' style='position:absolute;top:0;left:0;right:0;bottom:0;'>
+      <q-linear-progress size="45px" indeterminate value='100' color="primary" class='justify-start'/>
+      <div class="q-pa-md q-gutter-sm" v-if='iProps.showTimeout'>
+        <q-banner class="bg-grey-3 text-black" rounded inline-actions>
+          SWATE Service might be down
+          <template v-slot:avatar>
+            <q-icon name="sym_r_cloud_off" color="primary" />
+          </template>
+          <template v-slot:action>
+            <a_btn label='Check' @click='openStatusPage'/>
+          </template>
+        </q-banner>
+      </div>
     </div>
   </Transition>
   <iframe
