@@ -4,8 +4,7 @@ import FS from 'fs';
 import FSE from 'fs-extra'
 import chokidar from 'chokidar';
 import util from 'util';
-import os from 'os'
-import image_type from 'image-type';
+import os from 'os';
 
 const changeListeners = new Map<string,chokidar.FSWatcher> ;
 
@@ -102,10 +101,13 @@ export const LocalFileSystemService = {
   },
 
   readImage: async (e,path)=>{
-    const contents = FS.readFileSync(path_to_system(path));
-    const b64 = contents.toString('base64');
-    const type = image_type(contents);
-    return `data:${type.mime};base64,${b64}`;
+    try {
+      const contents = FS.readFileSync(path_to_system(path));
+      const b64 = contents.toString('base64');
+      return `data:image/png;base64,${b64}`;
+    } catch (err) {
+      return  null;
+    }
   },
 
   copy: async (e,[src,dst])=>{
