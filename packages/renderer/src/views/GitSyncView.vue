@@ -8,6 +8,8 @@ import a_btn from '../components/a_btn.vue';
 import a_tooltip from '../components/a_tooltip.vue';
 import ArcControlService from '../ArcControlService.ts';
 
+import {abortMerge} from './GitCommitView.vue';
+
 import AppProperties from '../AppProperties.ts';
 
 import { Xlsx } from '@fslab/fsspreadsheet/Xlsx.js';
@@ -16,6 +18,7 @@ import { Json } from '@fslab/fsspreadsheet/Json.js';
 import AddRemoteDialog from '../dialogs/AddRemoteDialog.vue';
 import GitDialog from '../dialogs/GitDialog.vue';
 import ConfirmationDialog from '../dialogs/ConfirmationDialog.vue';
+import GitMergeTextDialog from '../dialogs/GitMergeTextDialog.vue';
 import { useQuasar } from 'quasar'
 const $q = useQuasar();
 
@@ -27,10 +30,41 @@ const iProps = reactive({
   remote: null,
   remotes: {},
 
+  rebase_in_progress: false,
+
   userListener: ()=>{}
 });
 
+const abortMerge = async()=>{
+  const dialogProps = reactive({
+    title: 'Aborting Interactive Merge',
+    ok_title: 'Ok',
+    cancel_title: null,
+    state: 0,
+  });
+
+  $q.dialog({
+    component: GitDialog,
+    componentProps: dialogProps
+  }).onOk( async () => {
+    ArcControlService.readARC();
+    init();
+  });
+
+  const response = await window.ipc.invoke('GitService.run', {
+    args: [`rebase`,`--abort`],
+    cwd: ArcControlService.props.arc_root
+  });
+  dialogProps.state = response[0] ? 1 : 2;
+};
+
 const getStatus = async()=>{
+  const status_raw = await window.ipc.invoke('GitService.run', {
+    args: [`status`],
+    cwd: ArcControlService.props.arc_root
+  });
+  iProps.rebase_in_progress = status_raw[1].startsWith('interactive rebase in progress');
+
   const response = await window.ipc.invoke('GitService.run', {
     args: [`status`,`-z`,`-u`],
     cwd: ArcControlService.props.arc_root
@@ -111,6 +145,10 @@ const push = async()=>{
   // get current branch
   const branches = await getBranches();
   if(!branches.current) return dialogProps.state=2;
+  if(branches.startsWith('(HEAD detached at ')){
+    dialogProps.state=2;
+    return showError('No Branch Selected (Detached HEAD). Fix in Commit View.');
+  }
 
   // patch remote
   const remote = iProps.remotes[iProps.remote].url;
@@ -148,6 +186,24 @@ const push = async()=>{
   dialogProps.state=1;
 };
 
+const process_merged_json = (name,json) => {
+  return new Promise((resolve,reject)=>{
+    if(!json.includes('<<<<<<<'))
+      return resolve(json);
+
+    $q.dialog({
+      component: GitMergeTextDialog,
+      componentProps: {
+        title: 'Merging '+name,
+        content: json
+      }
+    })
+      .onOk( final_json => resolve(final_json))
+      .onCancel( ()=>resolve(null) )
+    ;
+  });
+};
+
 const merge_xlsx = async (rel_path,pointers) => {
   const tempPath = await window.ipc.invoke('CORE.getTempPath');
 
@@ -183,11 +239,17 @@ const merge_xlsx = async (rel_path,pointers) => {
     cwd: ArcControlService.props.arc_root,
     silent: true
   });
+  console.log('    ->',merged_json);
+
+  const final_json = await process_merged_json(rel_path,merged_json[1]);
+  if(!final_json)
+    return 0;
+
+  console.log('  final json:', final_json);
 
   // write merged workbooks
   console.log('  adding merged xlsx');
-  console.log(merged_json[1]);
-  const merged_wb = Json.fromRowsJsonString(merged_json[1]);
+  const merged_wb = Json.fromRowsJsonString(final_json);
   const merged_buffer = await Xlsx.toBytes(merged_wb);
   await window.ipc.invoke(
     'LocalFileSystemService.writeFile',
@@ -201,6 +263,8 @@ const merge_xlsx = async (rel_path,pointers) => {
     args: [`add`,rel_path],
     cwd: ArcControlService.props.arc_root
   });
+
+  return 1;
 };
 
 const merge = async ()=>{
@@ -218,10 +282,7 @@ const merge = async ()=>{
     await ArcControlService.readARC();
     await checkRemotes();
   }).onCancel(async ()=>{
-    const rebase = await window.ipc.invoke('GitService.run', {
-      args: [`reset`,`--hard`,`ORIG_HEAD`],
-      cwd: ArcControlService.props.arc_root
-    });
+    getStatus();
   });
 
   const branches = await getBranches();
@@ -253,8 +314,14 @@ const merge = async ()=>{
 
   // attempt to resolve conflicts
   ArcControlService.props.skip_fs_updates = true;
-  for(let file of conflicts.filter(f=>f.endsWith('.xlsx')))
-    await merge_xlsx(file,[local_commit,common_ancestor,iProps.remote+'/'+branches.current]);
+  for(let file of conflicts.filter(f=>f.endsWith('.xlsx'))){
+    const merge_status = await merge_xlsx(file,[local_commit,common_ancestor,iProps.remote+'/'+branches.current]);
+    console.log(merge_status);
+    if(!merge_status){
+      dialogProps.state=2;
+      return;
+    }
+  }
   ArcControlService.props.skip_fs_updates = false;
 
   await window.ipc.invoke('GitService.run', {
@@ -381,6 +448,7 @@ const getRemotes = async()=>{
 };
 
 const init = async()=>{
+  await getStatus();
   await getRemotes();
   await checkRemotes();
 };
@@ -505,6 +573,11 @@ const inspectArc = url =>{
 
         <q-card-actions align='right' style="padding:0 2.1em 1em 2.1em;">
           <a_btn v-if='iProps.error' color="red-10" icon='warning' :label="iProps.error" no-caps style="margin-right:auto"/>
+          <a_btn v-if='iProps.rebase_in_progress' label="Abort Merge" @click="abortMerge" icon='dangerous' color='red-10'>
+            <a_tooltip>
+              There is an interactive git rebase in progress.<br>By aborting the merge process you revert back to the last commit.
+            </a_tooltip>
+          </a_btn>
           <div>
             <a_checkbox v-model='iProps.use_lfs' label="Use Large File Storage"/>
             <a_tooltip>

@@ -35,6 +35,7 @@ const iProps : Props = reactive({
   git_status: [],
   error: '',
   lfs_limit: 1,
+  rebase_in_progress: true,
 
   commit: {
     name: '',
@@ -49,6 +50,12 @@ const raiseError = err => {
 };
 
 const getStatus = async()=>{
+  const status_raw = await window.ipc.invoke('GitService.run', {
+    args: [`status`],
+    cwd: ArcControlService.props.arc_root
+  });
+  iProps.rebase_in_progress = status_raw[1].startsWith('interactive rebase in progress');
+
   const response = await window.ipc.invoke('GitService.run', {
     args: [`status`,`-z`,`-u`],
     cwd: ArcControlService.props.arc_root
@@ -57,7 +64,6 @@ const getStatus = async()=>{
   const sizes = await window.ipc.invoke('LocalFileSystemService.getFileSizes', status.map(x=> ArcControlService.props.arc_root +'/'+x[1]));
   for(let i in sizes)
     status[i].push(sizes[i]);
-    console.log(status)
   iProps.git_status = status;
 };
 
@@ -157,6 +163,29 @@ const commit = async()=>{
 
 const isTrackedWithLFS = item=>{
   return item[2]>=parseFloat(iProps.lfs_limit);
+};
+
+const abortMerge = async()=>{
+  const dialogProps = reactive({
+    title: 'Aborting Interactive Merge',
+    ok_title: 'Ok',
+    cancel_title: null,
+    state: 0,
+  });
+
+  $q.dialog({
+    component: GitDialog,
+    componentProps: dialogProps
+  }).onOk( async () => {
+    ArcControlService.readARC();
+    init();
+  });
+
+  const response = await window.ipc.invoke('GitService.run', {
+    args: [`rebase`,`--abort`],
+    cwd: ArcControlService.props.arc_root
+  });
+  dialogProps.state = response[0] ? 1 : 2;
 };
 
 const reset = async()=>{
@@ -310,6 +339,11 @@ onUnmounted(()=>{
 
         <q-card-actions align='right' style="padding:0 2.1em 1em 2.1em;">
           <a_btn v-if='iProps.error' color="red-10" icon='warning' :label="iProps.error" no-caps style="margin-right:auto"/>
+          <a_btn v-if='iProps.rebase_in_progress' label="Abort Merge" @click="abortMerge" icon='dangerous' color='red-10'>
+            <a_tooltip>
+              There is an interactive git rebase in progress. You can abort the merge process by reverting back to the last commit.
+            </a_tooltip>
+          </a_btn>
           <a_btn label="Reset" @click="reset" icon='change_circle'>
             <a_tooltip>
               Click RESET to undo your latest changes and convert the ARC to the last saved commit
