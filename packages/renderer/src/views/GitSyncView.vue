@@ -145,7 +145,7 @@ const push = async()=>{
   // get current branch
   const branches = await getBranches();
   if(!branches.current) return dialogProps.state=2;
-  if(branches.startsWith('(HEAD detached at ')){
+  if(branches.current.startsWith('(HEAD detached at ')){
     dialogProps.state=2;
     return showError('No Branch Selected (Detached HEAD). Fix in Commit View.');
   }
