@@ -1,6 +1,6 @@
 {
   "name": "ARCitect",
-  "version": "v0.0.43",
+  "version": "v0.0.44",
   "author": "nfdi4plants.org",
   "description": "Tool to edit Annotated Research Contexts (ARCs).",
   "private": true,
