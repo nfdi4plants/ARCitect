@@ -324,11 +324,6 @@ const merge = async ()=>{
   }
   ArcControlService.props.skip_fs_updates = false;
 
-  await window.ipc.invoke('GitService.run', {
-    args: [`-c`,`core.editor=true`,`rebase`,'--continue'],
-    cwd: ArcControlService.props.arc_root
-  });
-
   dialogProps.state=1;
 };
 

@@ -18,7 +18,7 @@ defineEmits([
   ...useDialogPluginComponent.emits
 ]);
 
-function parseMergeConflicts(content) {
+const parseMergeConflicts = content => {
   const conflictPairs = [];  // This will store the pairs of conflicts
   const lines = content.split('\n');  // Split document into lines
 
@@ -44,7 +44,7 @@ function parseMergeConflicts(content) {
       readingOtherVersion = false;
       inConflict = false;
       // Add the conflict pair to the list
-      conflictPairs.push([myVersion.join('\n'), otherVersion.join('\n')]);
+      conflictPairs.push([myVersion.join('<br>').replaceAll(' ','&nbsp;'), otherVersion.join('<br>').replaceAll(' ','&nbsp;')]);
     } else if (inConflict && readingMyVersion) {
       // Add lines to my version while in conflict
       myVersion.push(line);
@@ -61,10 +61,18 @@ const finalize = keep_local => {
   const line_indices = [];
   const lines = props.content.split('\n');
   for(let i=0; i<lines.length; i++)
-    if(lines[i].startsWith('<<<<<<<') || lines[i].startsWith('>>>>>>>')) line_indices.push(i);
+    if(lines[i].startsWith('<<<<<<<') || lines[i].startsWith('=======') || lines[i].startsWith('>>>>>>>')) line_indices.push(i);
 
-  for(let i=line_indices.length-2; i>=0; i-=2)
-    lines.splice(line_indices[i],line_indices[i+1]-line_indices[i]+1, iProps.conflicts[i/2][keep_local ? 0 : 1]);
+  for(let i=line_indices.length-3; i>=0; i-=3)
+    lines.splice(
+      line_indices[i],
+      line_indices[i+2]-line_indices[i]+1,
+      (
+        keep_local
+          ? lines.slice(line_indices[i]+1,line_indices[i+1])
+          : lines.slice(line_indices[i+1]+1,line_indices[i+2])
+      ).join('\n')
+    );
 
   onDialogOK(lines.join('\n'));
 };
@@ -105,36 +113,24 @@ const { dialogRef, onDialogHide, onDialogOK, onDialogCancel } = useDialogPluginC
           </tbody>
         </table>
 
-        <q-scroll-area style="max-height: 400px;min-height: 100px;" class='rounded-borders text-body1'>
+        <q-scroll-area style="height: 300px;" class='rounded-borders text-body1'>
           <div v-for="c in iProps.conflicts">
-            <q-banner class="bg-grey-3 text-black q-ma-md q-pa-none" rounded>
+            <q-banner class="bg-grey-3 text-black q-ma-xs q-pa-none" rounded>
               <q-card-section horizontal style="width:100%">
-                <q-card-section style="width:100%">
-                  {{ c[0] }}
+                <q-card-section style="width:100%" class='q-pa-xs'>
+                  <div v-html='c[0]'></div>
                 </q-card-section>
 
                 <q-separator vertical />
 
-                <q-card-section style="width:100%">
-                  {{ c[1] }}
+                <q-card-section style="width:100%" class='q-pa-xs'>
+                  <div v-html='c[1]'></div>
                 </q-card-section>
               </q-card-section>
             </q-banner>
           </div>
         </q-scroll-area>
       </q-card-section>
-
-      <!--<q-card-section horizontal style="width:100%">-->
-      <!--  <q-card-section>-->
-      <!--    {{ iProps.conflicts[iProps.conflict_idx][0] }}-->
-      <!--  </q-card-section>-->
-
-      <!--  <q-separator vertical />-->
-
-      <!--  <q-card-section>-->
-      <!--    {{ iProps.conflicts[iProps.conflict_idx][1] }}-->
-      <!--  </q-card-section>-->
-      <!--</q-card-section>-->
 
       <q-card-actions align="right" style="margin:0 1.5em 1.5em;">
         <a_btn label='Keep Local' @click='()=>finalize(true)'/>
