@@ -106,14 +106,25 @@ export const DataHubService = {
   },
 
   getArcs: async (e: IpcMainInvokeEvent, [host, token]:[string, string]) => {
-    return await InternetService.getWebPageAsJson(
-      null,
-      {
-        host: host,
-        path: '/api/v4/projects/?per_page=1000'+ (token ? `&access_token=${token}` : ''),
-        method: 'GET'
-      }
-    );
+    let arcs = [];
+    const page_limit = 100;
+    let n = page_limit;
+    let p = 1;
+    while(n==page_limit){
+      const arcs_page = await InternetService.getWebPageAsJson(
+        null,
+        {
+          host: host,
+          path: `/api/v4/projects?page=${p}&per_page=${page_limit}${token ? `&access_token=${token}` : ''}`,
+          method: 'GET'
+        }
+      );
+      n = arcs_page.length;
+      p++;
+      arcs = arcs.concat(arcs_page);
+    }
+    console.log(arcs.length)
+    return arcs;
   },
 
   inspectArc: async (e: IpcMainInvokeEvent, url: string) => {
