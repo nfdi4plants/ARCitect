@@ -249,9 +249,6 @@ onUnmounted(()=>{
       label="Commit Changes"
       caption="Track changes of the ARC with git"
       group="git"
-      defaultOpened
-      hide-expand-icon
-      expand-icon-toggle
     >
       <q-card flat>
         <q-card-section style="padding-bottom:0;margin-bottom:-1.2em;">

@@ -25,8 +25,6 @@ watch( ()=>AppProperties.active_image, init );
       icon="photo_library"
       label="Image Preview"
       :caption="AppProperties.active_image"
-      group='mgroup'
-      defaultOpened
     >
       <img v-if='AppProperties.active_image' :src='iProps.image' style="width:100%;"/>
     </ViewItem>

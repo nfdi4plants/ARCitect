@@ -76,8 +76,6 @@ watch( ()=>iProps.tab, processText );
       icon="edit_note"
       label="Markdown Editor"
       :caption="iProps.path"
-      group='mgroup'
-      defaultOpened
     >
       <q-card flat>
         <q-tabs

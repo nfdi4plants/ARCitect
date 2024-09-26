@@ -15,6 +15,7 @@ import GitSyncView from './views/GitSyncView.vue';
 import GitHistoryView from './views/GitHistoryView.vue';
 import SwateView from './views/SwateView.vue';
 import ValidationView from './views/ValidationView.vue';
+import StatusView from './views/StatusView.vue';
 
 import ConfirmationDialog from './dialogs/ConfirmationDialog.vue';
 import GitDialog from './dialogs/GitDialog.vue';
@@ -238,11 +239,14 @@ const test = async ()=>{
           <q-separator />
 
           <q-item class="col-grow"></q-item>
+          <ToolbarButton text='Services' :icon='Object.values(AppProperties.datahub_hosts_msgs).some(x=>x.level===1)?"warning":"dns"' @clicked='AppProperties.state=AppProperties.STATES.STATUS;'>
+            <a_tooltip>Check on the status of <b>nfdi4plants</b> services</a_tooltip>
+          </ToolbarButton>
           <ToolbarButton text='Toggle Help' icon='help' @clicked='AppProperties.showHelp=!AppProperties.showHelp;'>
-            <a_tooltip>Show or hide the help menu.</a_tooltip>
+            <a_tooltip>Show or hide the help menu</a_tooltip>
           </ToolbarButton>
           <ToolbarButton text='Toggle Tooltips' :icon='AppProperties.showTooltips? "sym_r_mark_chat_read":"sym_r_chat_bubble" ' @clicked='AppProperties.showTooltips=!AppProperties.showTooltips;'>
-            <a_tooltip>Show or hide tooltips.</a_tooltip>
+            <a_tooltip>Show or hide tooltips</a_tooltip>
           </ToolbarButton>
           <ToolbarButton :text="iProps.toolbarMinimized ? '' : 'Toggle Sidebar'" :icon="iProps.toolbarMinimized ? 'chevron_right' : 'chevron_left'" @clicked='iProps.toolbarMinimized=!iProps.toolbarMinimized;'></ToolbarButton>
           <q-separator />
@@ -250,12 +254,12 @@ const test = async ()=>{
           <q-item v-ripple clickable dense @click='downloadArcitect'>
             <q-item-section avatar>
               <q-icon color='red-9' name="error" v-if='iProps.new_version'>
-                <a_tooltip>
-                  New Version Available!
-                </a_tooltip>
               </q-icon>
             </q-item-section>
             <q-item-section style="margin-left:-1.2em;">{{iProps.version}}</q-item-section>
+            <a_tooltip v-if='iProps.new_version'>
+              New Version Available!
+            </a_tooltip>
           </q-item>
         </q-list>
       </q-drawer>
@@ -319,6 +323,7 @@ const test = async ()=>{
               <GitHistoryView v-else-if='AppProperties.state===AppProperties.STATES.GIT_HISTORY' />
               <SwateView v-else-if='AppProperties.state===AppProperties.STATES.EDIT_SWATE'></SwateView>
               <ValidationView v-else-if='AppProperties.state===AppProperties.STATES.VALIDATION'></ValidationView>
+              <StatusView v-else-if='AppProperties.state===AppProperties.STATES.STATUS'></StatusView>
               <HomeView v-else></HomeView>
             </template>
           </q-splitter>

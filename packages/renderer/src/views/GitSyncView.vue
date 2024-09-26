@@ -493,10 +493,6 @@ const inspectArc = url =>{
       icon="published_with_changes"
       label="DataHUB Sync"
       caption="Synchronize the ARC with a DataHub"
-      group="git"
-      defaultOpened
-      hide-expand-icon
-      expand-icon-toggle
     >
       <q-card flat>
         <q-card-section>

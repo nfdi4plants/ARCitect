@@ -128,8 +128,6 @@ watch(()=>props.host, init);
       icon="cloud_download"
       label="Download ARC"
       caption="Download ARCs from the nfdi4plants DataHUB"
-      group="datahub"
-      defaultOpened
       :fullWidth="false"
     >
       <br>

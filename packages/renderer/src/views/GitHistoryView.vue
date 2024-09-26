@@ -55,10 +55,6 @@ onMounted( getHistory );
       icon="history"
       label="History"
       caption="Inspect ARC history"
-      group="git"
-      defaultOpened
-      hide-expand-icon
-      expand-icon-toggle
     >
       <q-card flat style="padding: 1em 5em;">
         <q-timeline color="secondary">

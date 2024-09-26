@@ -184,8 +184,6 @@ onMounted(init);
       icon="verified"
       label="Validation"
       caption="Validate ARC against specifications"
-      group='mgroup'
-      defaultOpened
     >
       <q-card flat>
 
