@@ -29,7 +29,8 @@ const AppProperties: {
   : [
     'git.nfdi4plants.org',
     'gitlab.nfdi4plants.de',
-    'gitlab.plantmicrobe.de'
+    'gitlab.plantmicrobe.de',
+    'datahub.rz.rptu.de',
   ],
   datahub_hosts_msgs: {},
 

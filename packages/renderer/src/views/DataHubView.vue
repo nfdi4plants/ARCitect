@@ -22,6 +22,7 @@ const props = reactive({
   search_text: '',
   download_lfs: false,
   host: 'git.nfdi4plants.org',
+  host_manually_set: false,
   error: ''
 });
 
@@ -83,7 +84,10 @@ const importArc = async url =>{
 const init = async () => {
 
   props.error = '';
-  props.list = [];
+  props.list = null;
+
+  if(!props.host_manually_set && AppProperties.user)
+    props.host = AppProperties.user.host;
 
   const list = await window.ipc.invoke(
     'DataHubService.getArcs',
@@ -120,6 +124,9 @@ onMounted(init);
 watch(()=>AppProperties.user, init);
 watch(()=>props.host, init);
 
+const host_manually_set = ()=>{
+  props.host_manually_set=true;
+};
 </script>
 
 <template>
@@ -132,7 +139,7 @@ watch(()=>props.host, init);
     >
       <br>
       <div class="q-gutter-md row q-px-md">
-        <q-input class='col-grow' v-model="props.search_text" label="ARC Identifier" dense outlined :disable='props.list.length<1'>
+        <q-input class='col-grow' v-model="props.search_text" label="ARC Identifier" dense outlined :disable='!props.list || props.list.length<1'>
           <template v-slot:append>
             <q-icon v-if="props.search_text!==''" name="close" @click="props.search_text=''" class="cursor-pointer" />
             <q-icon name="search" />
@@ -142,16 +149,16 @@ watch(()=>props.host, init);
           </a_tooltip>
         </q-input>
 
-        <q-checkbox class='' v-model="props.download_lfs" label="LFS" dense color='secondary' style="min-width:50px;">
+        <q-checkbox v-model="props.download_lfs" label="LFS" dense color='secondary' style="min-width:50px;">
           <a_tooltip>
             (Un)check the LFS box to (not) download large file storage (LFS) objects
           </a_tooltip>
         </q-checkbox>
 
-        <q-select class='' v-model="props.host" :options="AppProperties.datahub_hosts" label="Host" dense>
+        <q-select v-model="props.host" :options="AppProperties.datahub_hosts" label="Host" dense @update:model-value='host_manually_set'>
           <a_tooltip>Select a DataHUB host from the dropdown menu</a_tooltip>
         </q-select>
-        <a_btn label="" icon='refresh' @click='init()' no-wrap>
+        <a_btn label="" icon='refresh' @click='init' no-wrap>
           <a_tooltip>Refresh the list of available ARCs</a_tooltip>
         </a_btn>
       </div>
@@ -165,7 +172,7 @@ watch(()=>props.host, init);
         <div v-html='props.error'></div>
       </q-banner>
 
-      <div style="display:block;text-align:center;" v-else-if="props.list.length<1">
+      <div style="display:block;text-align:center;" v-else-if="props.list===null">
           <q-circular-progress
             indeterminate
             size="20em"
@@ -177,6 +184,16 @@ watch(()=>props.host, init);
       </div>
 
       <q-list style="padding:1em;" separator v-else>
+        <q-item
+          v-if="props.list && props.list.length<1"
+        >
+          <q-item-section avatar>
+            <q-avatar icon='sym_r_orders' text-color='white' color='secondary' />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>No ARCs Found</q-item-label>
+          </q-item-section>
+        </q-item>
         <q-item
           v-for="(item,i) in props.list.filter(x=> x.name.toLowerCase().includes(props.search_text.toLowerCase()) || x.namespace.name.toLowerCase().includes(props.search_text.toLowerCase()))"
           :style="i%2===1?'background-color:#fafafa;' : ''"
