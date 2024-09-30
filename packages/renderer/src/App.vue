@@ -128,10 +128,25 @@ const newLocalArc = async ()=>{
 
 const showHomeView = ()=>{
   AppProperties.state=AppProperties.STATES.HOME;
-}
+};
+
+const messagePrompt = msg => {
+  console.log(msg);
+  $q.dialog({
+    component: ConfirmationDialog,
+    componentProps: {
+      title: `Error`,
+      msg: msg,
+      ok_text: 'Ok',
+      ok_color: 'secondary',
+    }
+  });
+};
 
 onMounted(async () => {
   window.ipc.on('CORE.MSG', console.log);
+  window.ipc.on('CORE.messagePrompt', messagePrompt);
+
   iProps.version = await window.ipc.invoke('CORE.getVersion');
   const git_running = await window.ipc.invoke('GitService.run','--version');
   if(!git_running[0]){

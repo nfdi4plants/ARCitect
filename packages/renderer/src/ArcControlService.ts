@@ -266,5 +266,6 @@ const ArcControlService = {
 const debouncedReadARC = pDebounce(ArcControlService.readARC, 300);
 
 window.ipc.on('LocalFileSystemService.updatePath', ArcControlService.updateARCfromFS);
+window.ipc.on('CORE.getArcRoot', callback=>window.ipc.invoke(callback, ArcControlService.props.arc_root));
 
 export default ArcControlService;

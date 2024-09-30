@@ -1,7 +1,9 @@
-import { BrowserWindow,Menu,shell } from 'electron';
+import { BrowserWindow,Menu,shell,ipcMain } from 'electron';
 import path from 'path';
 import { join } from 'path';
 import { URL } from 'url';
+
+import {exec,execSync,spawn} from 'child_process';
 
 const contextMenu = require('electron-context-menu');
 contextMenu({
@@ -50,6 +52,15 @@ async function createWindow() {
   return mainWindow;
 }
 
+const isCommandAvailable = command=>{
+  try {
+    execSync(`which ${command}`, { stdio: 'ignore' });
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
 // -------------------------------------------------------------------------
 
 /**
@@ -66,6 +77,23 @@ export async function restoreOrCreateWindow() {
         { role: 'forceReload' },
         { type: 'separator' },
         { role: 'toggleDevTools' },
+      ]
+    },
+    {
+      label: 'Tools',
+      submenu: [
+        {
+          label: 'Command Window',
+          click: () => {
+            window.webContents.send('CORE.getArcRoot', 'CORE.openTerminal');
+          }
+        },
+        {
+          label: 'Visual Studio Code',
+          click: () => {
+            window.webContents.send('CORE.getArcRoot', 'CORE.openVSCode');
+          }
+        },
       ]
     },
     {
@@ -110,6 +138,69 @@ export async function restoreOrCreateWindow() {
       }
     );
   }
+
+  ipcMain.handle('CORE.openVSCode', (e,path)=>{
+    if(!path) return window.webContents.send('CORE.messagePrompt', 'No ARC Open');
+
+    const command = `code ${path}`;
+    exec(command, (error, stdout, stderr) => {
+      if (error) {
+        const msg = `Error opening VS Code: ${error.message}`;
+        console.error(msg);
+        window.webContents.send('CORE.messagePrompt', msg);
+      }
+    });
+  });
+
+  ipcMain.handle('CORE.openTerminal', (e,path)=>{
+    if(!path) return window.webContents.send('CORE.messagePrompt', 'No ARC Open');
+
+    let command;
+    // Detect platform and assign the correct terminal command
+    if (process.platform === 'win32') {
+      command = `start cmd.exe /k "cd /d ${path}"`;
+    } else if (process.platform === 'darwin') {
+      // macOS: Use 'open' to open Terminal app in the specified directory
+      command = `open -a Terminal "${path}"`;
+    } else if (process.platform === 'linux') {
+
+      let terminal;
+
+      if (isCommandAvailable('gnome-terminal')) {
+        terminal = 'gnome-terminal';
+      } else if (isCommandAvailable('xterm')) {
+        terminal = 'xterm';
+      } else if (isCommandAvailable('konsole')) {
+        terminal = 'konsole';
+      } else {
+        const msg = 'No supported terminal emulator found.';
+        console.error(msg);
+        return window.webContents.send('CORE.messagePrompt', msg);
+      }
+
+      // Linux: Set up terminal command depending on the emulator found
+      if (terminal === 'gnome-terminal') {
+        command = `gnome-terminal -- bash -c "cd '${path}' && exec bash"`;
+      } else if (terminal === 'xterm') {
+        command = `xterm -ls -e "cd '${path}' && exec bash"`;
+      } else if (terminal === 'konsole') {
+        command = `konsole --workdir '${path}' -e bash -c "exec bash"`;
+      }
+    } else {
+      const msg = 'Platform not supported.';
+      console.error(msg);
+      return window.webContents.send('CORE.messagePrompt', msg);
+    }
+
+    // Execute the terminal opening command
+    exec(command, { env: Object.create(process.env) }, (error, stdout, stderr) => {
+      if (error) {
+        const msg = `Error: ${error.message}`;
+        console.error(msg);
+        return window.webContents.send('CORE.messagePrompt', msg);
+      }
+    });
+  });
 
   const menu = Menu.buildFromTemplate(template);
   Menu.setApplicationMenu(menu);
