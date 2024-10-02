@@ -55,10 +55,19 @@ const get_datahub_hosts_msgs = async ()=>{
     let contains_critical = false;
     for(let msg of AppProperties.datahub_hosts_msgs[host]){
       const t = msg.message.toLowerCase();
-      msg.level = t.includes('downtime')||t.includes('maintenance') ? 1 : 0;
-      contains_critical = contains_critical || msg.level;
+      let contains_critical = false
+      let contains_active = false
+      msg.level = 2;
+      if (msg.active) {
+        contains_active = true;
+      }
+      msg.active 
+        ? msg.level = (t.includes('maintenance') || t.includes('downtime')) ? 0 : 1
+        : msg.level = 2;
+      contains_critical = contains_critical || msg.level < 2;
+      AppProperties.datahub_hosts_msgs[host].level = AppProperties.datahub_hosts_msgs[host].length<1 ? 2 : contains_critical ? 0 : 2;
+      AppProperties.datahub_hosts_msgs[host].active = contains_active;
     }
-    AppProperties.datahub_hosts_msgs[host].level = AppProperties.datahub_hosts_msgs[host].length<1 ? 2 : contains_critical ? 1 : 0;
   }
 };
 
