@@ -6,6 +6,7 @@ import {DataHubService} from '/@/DataHubService';
 import {InternetService} from '/@/InternetService';
 import {GitService} from '/@/GitService';
 import os from 'os';
+import fs from 'fs';
 
 /**
  * Prevent multiple instances
@@ -54,6 +55,17 @@ const initCore = async () => {
   }
   ipcMain.handle('CORE.getVersion', ()=>app.getVersion());
   ipcMain.handle('CORE.getTempPath', ()=>app.getPath('temp'));
+
+  const userDataPath = app.getPath('userData');
+  if(!fs.existsSync(userDataPath))
+    fs.mkdirSync(userDataPath);
+
+  for(let file of ['ARCitect.json','DataHubs.json']){
+    const sourceFile = 'resources/'+file;
+    const destinationFile = userDataPath+'/'+file;
+    if (!fs.existsSync(destinationFile))
+      fs.copyFileSync(sourceFile, destinationFile);
+  }
 }
 
 /**

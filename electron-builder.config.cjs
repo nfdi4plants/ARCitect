@@ -12,15 +12,16 @@ const config = {
     'packages/**/dist/**',
   ],
   win: {
-    "extraResources": ['git-binaries/win'],
+    "extraResources": [{"from": "resources/","to": "."},'git-binaries/win'],
     "target": ["zip"]
   },
   mac: {
-    "extraResources": ['git-binaries/mac'],
+    "extraResources": [{"from": "resources/","to": "."},'git-binaries/mac'],
     "target": ["dmg"],
     "x64ArchFiles": "*"
   },
   linux: {
+    "extraResources": [{"from": "resources/","to": "."}],
     "target": ["AppImage"]
   }
 };

@@ -25,13 +25,7 @@ const AppProperties: {
 
   user: null,
 
-  datahub_hosts
-  : [
-    'git.nfdi4plants.org',
-    'gitlab.nfdi4plants.de',
-    'gitlab.plantmicrobe.de',
-    'datahub.rz.rptu.de',
-  ],
+  datahub_hosts : [],
   datahub_hosts_msgs: {},
 
   force_commit_update: 0,
@@ -45,7 +39,9 @@ for(let k in AppProperties.STATES){
   AppProperties.STATES_I[AppProperties.STATES[k]] = k;
 }
 
-const get_datahub_hosts_msgs = async ()=>{
+const get_datahubs = async ()=>{
+  AppProperties.datahub_hosts = await window.ipc.invoke('DataHubService.getHosts');
+
   for(let host of AppProperties.datahub_hosts){
     AppProperties.datahub_hosts_msgs[host] = await window.ipc.invoke('InternetService.getWebPageAsJson', {
       host: host,
@@ -55,13 +51,13 @@ const get_datahub_hosts_msgs = async ()=>{
     let contains_critical = false;
     for(let msg of AppProperties.datahub_hosts_msgs[host]){
       const t = msg.message.toLowerCase();
-      let contains_critical = false
-      let contains_active = false
+      let contains_critical = false;
+      let contains_active = false;
       msg.level = 2;
-      if (msg.active) {
+      if (msg.active)
         contains_active = true;
-      }
-      msg.active 
+
+      msg.active
         ? msg.level = (t.includes('maintenance') || t.includes('downtime')) ? 0 : 1
         : msg.level = 2;
       contains_critical = contains_critical || msg.level < 2;
@@ -71,6 +67,6 @@ const get_datahub_hosts_msgs = async ()=>{
   }
 };
 
-get_datahub_hosts_msgs();
+get_datahubs();
 
 export default AppProperties;
