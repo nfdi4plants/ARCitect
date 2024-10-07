@@ -576,8 +576,8 @@ const inspectArc = url =>{
                 Check this box to synchronize large files
               </div>
               <q-icon name="warning" color="grey-3" size="1.5em"/>
-              Data up- and downloads taking more than one hour require a personal access token.<br>
-              Click <q-icon name="add_circle" color="secondary" /> to add a remote with a personal access token.
+              Data up- and downloads taking more than one hour require an access token.<br>
+              Click <q-icon name="add_circle" color="secondary" /> to add a remote with an access token.
             </a_tooltip>
           </div>
           <a_btn label="Push" @click="push" icon='cloud_upload' :disabled='!iProps.remote || !AppProperties.user'>

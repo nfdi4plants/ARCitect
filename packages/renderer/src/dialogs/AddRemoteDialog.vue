@@ -19,7 +19,7 @@ const iProps = reactive({
   account: '',
   accounts: {},
   url: '',
-  personal_access_token: '',
+  access_token: '',
   error: ''
 });
 
@@ -76,8 +76,8 @@ const onSubmit = async () => {
   else if (!iProps.url)
     return iProps.error = 'Remote requires URL';
 
-  if(iProps.personal_access_token){
-    iProps.url = `https://${iProps.account}:${iProps.personal_access_token}@${iProps.url.slice(8)}`
+  if(iProps.access_token){
+    iProps.url = `https://${iProps.account}:${iProps.access_token}@${iProps.url.slice(8)}`
   }
 
   onDialogOK(iProps);
@@ -133,14 +133,13 @@ const openAccessTokenEditor = ()=>{
                   The full DataHUB address your ARC is synced to
                 </a_tooltip>
               </a_input>
-
             </div>
           </div>
           <div class='row'>
             <div class='col'>
-              <a_input v-model='iProps.personal_access_token' label="Personal Access Token (Optional)">
+              <a_input v-model='iProps.access_token' label="Access Token (Optional)">
                 <a_tooltip>
-                  Please paste your PAT here
+                  Personal or project access token
                 </a_tooltip>
                 <template v-slot:append>
                   <q-icon class='cursor-pointer' name="key" color="grey-5" @click='()=>openAccessTokenEditor()'>
@@ -150,7 +149,7 @@ const openAccessTokenEditor = ()=>{
                   </q-icon>
                   <q-icon class='cursor-pointer' name="help" color="grey-5" @click='()=>openAccessTokenHelp()'>
                     <a_tooltip>
-                        Data up- and downloads taking more than one hour require a personal access token (PAT).
+                        Data up- and downloads taking more than one hour require an access token.
                     </a_tooltip>
                   </q-icon>
                 </template>
