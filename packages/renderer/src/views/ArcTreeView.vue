@@ -288,6 +288,8 @@ const createFile = async node=>{
       icon: 'note_add'
     }
   }).onOk( async name => {
+    if(!name.includes('.'))
+      name += '.txt';
     const path = node.id + '/' + name;
     await window.ipc.invoke('LocalFileSystemService.writeFile', [path,'']);
   });
