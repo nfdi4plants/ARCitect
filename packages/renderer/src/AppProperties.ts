@@ -51,19 +51,10 @@ const get_datahubs = async ()=>{
     let contains_critical = false;
     for(let msg of AppProperties.datahub_hosts_msgs[host]){
       const t = msg.message.toLowerCase();
-      let contains_critical = false;
-      let contains_active = false;
-      msg.level = 2;
-      if (msg.active)
-        contains_active = true;
-
-      msg.active
-        ? msg.level = (t.includes('maintenance') || t.includes('downtime')) ? 0 : 1
-        : msg.level = 2;
-      contains_critical = contains_critical || msg.level < 2;
-      AppProperties.datahub_hosts_msgs[host].level = AppProperties.datahub_hosts_msgs[host].length<1 ? 2 : contains_critical ? 0 : 2;
-      AppProperties.datahub_hosts_msgs[host].active = contains_active;
+      msg.critical = t.includes('maintenance') || t.includes('downtime');
+      contains_critical = contains_critical || (msg.critical && msg.active);
     }
+    AppProperties.datahub_hosts_msgs[host].critical = contains_critical;
   }
 };
 

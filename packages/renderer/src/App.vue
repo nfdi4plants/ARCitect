@@ -254,7 +254,7 @@ const test = async ()=>{
           <q-separator />
 
           <q-item class="col-grow"></q-item>
-          <ToolbarButton text='Services' :icon='Object.values(AppProperties.datahub_hosts_msgs).some(x=>x.level===1)?"warning":"dns"' @clicked='AppProperties.state=AppProperties.STATES.STATUS;'>
+          <ToolbarButton text='Services' :icon='Object.values(AppProperties.datahub_hosts_msgs).some(x=>x.critical)?"warning":"dns"' @clicked='AppProperties.state=AppProperties.STATES.STATUS;'>
             <a_tooltip>Check on the status of <b>nfdi4plants</b> services</a_tooltip>
           </ToolbarButton>
           <ToolbarButton text='Toggle Help' icon='help' @clicked='AppProperties.showHelp=!AppProperties.showHelp;'>
