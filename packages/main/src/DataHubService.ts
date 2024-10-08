@@ -102,7 +102,6 @@ export const DataHubService = {
       p++;
       arcs = arcs.concat(arcs_page);
     }
-    console.log(arcs.length)
     return arcs;
   },
 

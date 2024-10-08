@@ -1,4 +1,4 @@
-import { BrowserWindow, ipcMain, dialog, shell } from 'electron';
+import { app, BrowserWindow, ipcMain, dialog, shell } from 'electron';
 import PATH from 'path';
 import FS from 'fs';
 import FSE from 'fs-extra'
@@ -98,6 +98,18 @@ export const LocalFileSystemService = {
     } catch (err) {
       return null;
     }
+  },
+
+  readConfig: ()=>{
+    const config = LocalFileSystemService.readFile(null,app.getPath('userData')+'/ARCitect.json');
+    return JSON.parse(config) || {};
+  },
+
+  writeConfig: (e,config)=>{
+    LocalFileSystemService.writeFile(null,[
+      app.getPath('userData')+'/ARCitect.json',
+      config
+    ]);
   },
 
   readImage: async (e,path)=>{
@@ -220,7 +232,7 @@ export const LocalFileSystemService = {
     } catch {return false;}
   },
 
-  remove: async (e,path)=>{
+  remove: (e,path)=>{
     try {
       FS.rmSync(path_to_system(path), {recursive:true,force:true});
       return true;
@@ -246,6 +258,8 @@ export const LocalFileSystemService = {
     ipcMain.handle('LocalFileSystemService.readDir', LocalFileSystemService.readDir);
     ipcMain.handle('LocalFileSystemService.readFile', LocalFileSystemService.readFile);
     ipcMain.handle('LocalFileSystemService.readImage', LocalFileSystemService.readImage);
+    ipcMain.handle('LocalFileSystemService.readConfig', LocalFileSystemService.readConfig);
+    ipcMain.handle('LocalFileSystemService.writeConfig', LocalFileSystemService.writeConfig);
     ipcMain.handle('LocalFileSystemService.enforcePath', LocalFileSystemService.enforcePath);
     ipcMain.handle('LocalFileSystemService.writeFile', LocalFileSystemService.writeFile);
     ipcMain.handle('LocalFileSystemService.selectDir', LocalFileSystemService.selectDir);

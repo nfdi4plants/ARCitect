@@ -125,8 +125,7 @@ const init = async ()=>{
   iProps.loading = true;
   iProps.showTimeout = false;
   setTimeout(()=>iProps.showTimeout=true,4000);
-  iframe.value.setAttribute("src", "https://swate-alpha.nfdi4plants.org?is_swatehost=1&random="+SwateControlService.props.cacheNumber);
-  // iframe.value.setAttribute("src", "https://localhost:3000?is_swatehost=1&random="+SwateControlService.props.cacheNumber);
+  iframe.value.setAttribute("src", `${AppProperties.config.swate_url}?is_swatehost=1&random=${SwateControlService.props.cacheNumber}`);
 };
 
 onMounted(() => {

@@ -3,7 +3,7 @@ import AppProperties from '../AppProperties.ts';
 </script>
 
 <template>
-  <q-tooltip v-if='AppProperties.showTooltips' style="font-size:1.1em">
+  <q-tooltip v-if='AppProperties.config.showTooltips' style="font-size:1.1em">
     <slot></slot>
   </q-tooltip>
 </template>

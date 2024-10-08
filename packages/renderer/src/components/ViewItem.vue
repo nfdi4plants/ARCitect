@@ -3,8 +3,7 @@
 export interface Props {
   label: String,
   caption: String,
-  icon: String,
-  fullWidth?: Boolean,
+  icon: String
 };
 const props = defineProps<Props>();
 
@@ -27,10 +26,7 @@ const props = defineProps<Props>();
       </q-item-section>
     </template>
 
-    <div v-if='props.fullWidth' style="display:block;margin:0 auto;border-top:1px solid #ccc;">
-      <slot></slot>
-    </div>
-    <div v-else style="display:block;margin:0 auto;max-width:700px;border-top:1px solid #ccc;">
+    <div style="display:block;margin:0 auto;border-top:1px solid #ccc;">
       <slot></slot>
     </div>
   </q-expansion-item>

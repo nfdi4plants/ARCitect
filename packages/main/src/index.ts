@@ -43,6 +43,19 @@ app.on('window-all-closed', () => {
  */
 app.on('activate', restoreOrCreateWindow);
 
+const initConfig = async ()=>{
+  const userDataPath = app.getPath('userData');
+  if(!fs.existsSync(userDataPath))
+    fs.mkdirSync(userDataPath);
+
+  for(let file of ['ARCitect.json','DataHubs.json']){
+    const sourceFile = 'resources/'+file;
+    const destinationFile = userDataPath+'/'+file;
+    if (!fs.existsSync(destinationFile))
+      fs.copyFileSync(sourceFile, destinationFile);
+  }
+};
+
 const initCore = async () => {
   const PATH = require('path');
   if(process.platform === 'win32'){
@@ -55,17 +68,11 @@ const initCore = async () => {
   }
   ipcMain.handle('CORE.getVersion', ()=>app.getVersion());
   ipcMain.handle('CORE.getTempPath', ()=>app.getPath('temp'));
-
-  const userDataPath = app.getPath('userData');
-  if(!fs.existsSync(userDataPath))
-    fs.mkdirSync(userDataPath);
-
-  for(let file of ['ARCitect.json','DataHubs.json']){
-    const sourceFile = 'resources/'+file;
-    const destinationFile = userDataPath+'/'+file;
-    if (!fs.existsSync(destinationFile))
-      fs.copyFileSync(sourceFile, destinationFile);
-  }
+  ipcMain.handle('CORE.reset', ()=>{
+    LocalFileSystemService.remove( null, app.getPath('userData') );
+    initConfig();
+  });
+  initConfig();
 }
 
 /**

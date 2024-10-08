@@ -1,4 +1,4 @@
-import { reactive } from 'vue'
+import { reactive, watch } from 'vue'
 
 const AppProperties: {
   STATES: any,
@@ -19,11 +19,13 @@ const AppProperties: {
 
     VALIDATION: 700,
     STATUS: 800,
+    SETTINGS: 900,
   },
   STATES_I: {},
   state: 0,
 
   user: null,
+
 
   datahub_hosts : [],
   datahub_hosts_msgs: {},
@@ -31,8 +33,19 @@ const AppProperties: {
   force_commit_update: 0,
   force_lfs_update: 0,
 
-  showHelp: false,
-  showTooltips: false
+  config: {
+    toolbarMinimized: false,
+    showHelp: false,
+    showTooltips: false,
+    swate_url: ''
+  },
+
+  read_config: async ()=>{
+    const config = await window.ipc.invoke('LocalFileSystemService.readConfig');
+    for(let key of Object.keys(config)){
+      AppProperties.config[key] = config[key];
+    }
+  }
 });
 
 for(let k in AppProperties.STATES){
@@ -48,16 +61,39 @@ const get_datahubs = async ()=>{
       path: '/api/v4/broadcast_messages',
       method: 'GET'
     });
-    let contains_critical = false;
-    for(let msg of AppProperties.datahub_hosts_msgs[host]){
-      const t = msg.message.toLowerCase();
-      msg.critical = t.includes('maintenance') || t.includes('downtime');
-      contains_critical = contains_critical || (msg.critical && msg.active);
+
+    // if server is not reachable
+    if(AppProperties.datahub_hosts_msgs[host]===null){
+      const temp = [];
+      temp.critical = true;
+      temp.push({
+        message: 'Server Not Reachable',
+        critical: true,
+        active: true,
+        starts_at: new Date().toISOString()
+      })
+      console.log(new Date().toISOString())
+      AppProperties.datahub_hosts_msgs[host] = temp;
+    } else {
+      let contains_critical = false;
+      for(let msg of AppProperties.datahub_hosts_msgs[host]){
+        const t = msg.message.toLowerCase();
+        msg.critical = t.includes('maintenance') || t.includes('downtime');
+        contains_critical = contains_critical || (msg.critical && msg.active);
+      }
+      AppProperties.datahub_hosts_msgs[host].critical = contains_critical;
     }
-    AppProperties.datahub_hosts_msgs[host].critical = contains_critical;
   }
 };
 
-get_datahubs();
+const init = async ()=>{
+  await AppProperties.read_config();
+  watch(AppProperties.config, ()=>{
+    console.log('xxx')
+    window.ipc.invoke('LocalFileSystemService.writeConfig', JSON.stringify(AppProperties.config));
+  });
+  await get_datahubs();
+}
+init();
 
 export default AppProperties;

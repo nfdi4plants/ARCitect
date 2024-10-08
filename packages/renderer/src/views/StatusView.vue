@@ -12,7 +12,7 @@ const iProps = reactive({
 const format_date = utc => {
   const format = x => ('00' + x).slice(-2);
   const d = new Date(Date.parse(utc));
-  return `${format(d.getDate())}.${format(d.getMonth()+1)}.${d.getFullYear()} ${format(d.getHours())}:${format(d.getMinutes())}`;
+  return `${format(d.getDate())}.${format(d.getMonth()+1)}.${d.getFullYear()} - ${format(d.getHours())}:${format(d.getMinutes())}`;
 };
 
 </script>
@@ -23,7 +23,6 @@ const format_date = utc => {
       icon="dns"
       label="Services"
       caption="Status of nfdi4plants Services"
-      :fullWidth="true"
     >
       <q-banner>
         <q-toggle
@@ -52,8 +51,7 @@ const format_date = utc => {
               <q-card-section>
                 <q-list dense bordered class="rounded-borders bg-grey-2">
                   <q-item
-                    v-if='iProps.show_old_msgs || AppProperties.datahub_hosts_msgs[host].active'
-                    v-for='msg of AppProperties.datahub_hosts_msgs[host]' style="border-bottom:1px solid #ccc"
+                    v-for='msg of AppProperties.datahub_hosts_msgs[host].filter(x=>iProps.show_old_msgs || x.active)' style="border-bottom:1px solid #ccc"
                   >
                     <q-item-section avatar>
                       <q-icon :color="msg.critical?'red-9' : 'grey-5'" name="warning" />
@@ -66,7 +64,7 @@ const format_date = utc => {
                     </q-item-section>
                   </q-item>
                   <q-item
-                    v-if='AppProperties.datahub_hosts_msgs[host].filter(x=>iProps.show_old_msgs || AppProperties.datahub_hosts_msgs[host].active).length<1'
+                    v-if='AppProperties.datahub_hosts_msgs[host].filter(x=>iProps.show_old_msgs || x.active).length<1'
                   >
                     <q-item-section>
                       <q-item-label>No Messages</q-item-label>

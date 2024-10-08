@@ -16,7 +16,15 @@ const default_header = {
 
 export const InternetService = {
 
-  getWebPageAsJson: (e,options): Promise<any> => {
+  getWebPageAsJson: async (e,options): Promise<any> => {
+    // check if server is available
+    try {
+      await net.resolveHost(options.host);
+    } catch(err) {
+      return new Promise((resolve,reject)=>resolve(null));
+    }
+
+    // get json data
     return new Promise(
       (resolve, reject) => {
         try {
@@ -25,7 +33,7 @@ export const InternetService = {
           for(let h in header)
             request.setHeader(h,header[h]);
 
-          request.on('response', (response) => {
+          request.on('response', response => {
             if(response.statusCode===200){
               let output = '';
               response.on('data', chunk => {
@@ -35,13 +43,11 @@ export const InternetService = {
                 resolve(JSON.parse(output));
               });
             } else {
-              // console.error('response',response);
               resolve(null);
             }
           })
           request.end()
-        } catch(err){
-          console.error('catch',err);
+        }catch(err){
           resolve(null);
         }
       }

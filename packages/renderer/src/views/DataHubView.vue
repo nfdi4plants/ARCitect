@@ -135,7 +135,6 @@ const host_manually_set = ()=>{
       icon="cloud_download"
       label="Download ARC"
       caption="Download ARCs from the nfdi4plants DataHUB"
-      :fullWidth="false"
     >
       <br>
       <div class="q-gutter-md row q-px-md">

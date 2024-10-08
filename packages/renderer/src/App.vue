@@ -16,6 +16,7 @@ import GitHistoryView from './views/GitHistoryView.vue';
 import SwateView from './views/SwateView.vue';
 import ValidationView from './views/ValidationView.vue';
 import StatusView from './views/StatusView.vue';
+import SettingsView from './views/SettingsView.vue';
 
 import ConfirmationDialog from './dialogs/ConfirmationDialog.vue';
 import GitDialog from './dialogs/GitDialog.vue';
@@ -43,7 +44,6 @@ const $q = useQuasar();
 
 const iProps = reactive({
   showToolbar: true,
-  toolbarMinimized: false,
   splitterModel: 300,
   error: false,
   error_text: '',
@@ -131,7 +131,6 @@ const showHomeView = ()=>{
 };
 
 const messagePrompt = msg => {
-  console.log(msg);
   $q.dialog({
     component: ConfirmationDialog,
     componentProps: {
@@ -184,7 +183,7 @@ const test = async ()=>{
         v-model='iProps.showToolbar'
         show-if-above
 
-        :mini="iProps.toolbarMinimized"
+        :mini="AppProperties.config.toolbarMinimized"
 
         :width="190"
         :breakpoint="500"
@@ -257,13 +256,10 @@ const test = async ()=>{
           <ToolbarButton text='Services' :icon='Object.values(AppProperties.datahub_hosts_msgs).some(x=>x.critical)?"warning":"dns"' @clicked='AppProperties.state=AppProperties.STATES.STATUS;'>
             <a_tooltip>Check on the status of <b>nfdi4plants</b> services</a_tooltip>
           </ToolbarButton>
-          <ToolbarButton text='Toggle Help' icon='help' @clicked='AppProperties.showHelp=!AppProperties.showHelp;'>
-            <a_tooltip>Show or hide the help menu</a_tooltip>
+          <ToolbarButton text='Settings' icon='settings' @clicked='AppProperties.state=AppProperties.STATES.SETTINGS;'>
+            <a_tooltip>Modify ARCitect settings</a_tooltip>
           </ToolbarButton>
-          <ToolbarButton text='Toggle Tooltips' :icon='AppProperties.showTooltips? "sym_r_mark_chat_read":"sym_r_chat_bubble" ' @clicked='AppProperties.showTooltips=!AppProperties.showTooltips;'>
-            <a_tooltip>Show or hide tooltips</a_tooltip>
-          </ToolbarButton>
-          <ToolbarButton :text="iProps.toolbarMinimized ? '' : 'Toggle Sidebar'" :icon="iProps.toolbarMinimized ? 'chevron_right' : 'chevron_left'" @clicked='iProps.toolbarMinimized=!iProps.toolbarMinimized;'></ToolbarButton>
+          <ToolbarButton :text="AppProperties.config.toolbarMinimized ? '' : 'Toggle Sidebar'" :icon="AppProperties.config.toolbarMinimized ? 'chevron_right' : 'chevron_left'" @clicked='AppProperties.config.toolbarMinimized=!AppProperties.config.toolbarMinimized;'></ToolbarButton>
           <q-separator />
 
           <q-item v-ripple clickable dense @click='downloadArcitect'>
@@ -280,14 +276,14 @@ const test = async ()=>{
       </q-drawer>
 
       <q-drawer
-        v-model="AppProperties.showHelp"
+        v-model="AppProperties.config.showHelp"
         side="right"
         bordered
         :breakpoint='0'
         class="bg-grey-3"
         :width="400"
       >
-        <q-btn style="position:absolute;right:0em; top:0.6em; z-index:9999" icon="chevron_right" flat round @click='AppProperties.showHelp=false' />
+        <q-btn style="position:absolute;right:0em; top:0.6em; z-index:9999" icon="chevron_right" flat round @click='AppProperties.config.showHelp=false' />
         <q-scroll-area class='fit' style="height: 100%;width:100%;">
           <HelpView></HelpView>
         </q-scroll-area>
@@ -306,6 +302,7 @@ const test = async ()=>{
                     <ArcTreeView @openArc='openLocalArc'></ArcTreeView>
                 </q-scroll-area>
             </template>
+
 
             <template v-slot:after>
               <q-dialog v-model="iProps.error">
@@ -339,6 +336,7 @@ const test = async ()=>{
               <SwateView v-else-if='AppProperties.state===AppProperties.STATES.EDIT_SWATE'></SwateView>
               <ValidationView v-else-if='AppProperties.state===AppProperties.STATES.VALIDATION'></ValidationView>
               <StatusView v-else-if='AppProperties.state===AppProperties.STATES.STATUS'></StatusView>
+              <SettingsView v-else-if='AppProperties.state===AppProperties.STATES.SETTINGS'></SettingsView>
               <HomeView v-else></HomeView>
             </template>
           </q-splitter>
