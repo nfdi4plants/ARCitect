@@ -146,6 +146,7 @@ onMounted(async () => {
   window.ipc.on('CORE.MSG', console.log);
   window.ipc.on('CORE.messagePrompt', messagePrompt);
 
+  // check git versions
   iProps.version = await window.ipc.invoke('CORE.getVersion');
   const git_running = await window.ipc.invoke('GitService.run','--version');
   if(!git_running[0]){
@@ -160,6 +161,31 @@ onMounted(async () => {
   }
   console.log(git_lfs_running[1]);
 
+  // check if lfs installed
+  {
+    const git_config = await window.ipc.invoke('GitService.run', {
+      args: [`config`,`--list`]
+    });
+
+    const lfs_checks = [
+      'filter.lfs.process=git-lfs filter-process',
+      'filter.lfs.required=true',
+      'filter.lfs.clean=git-lfs clean -- %f',
+      'filter.lfs.smudge=git-lfs smudge -- %f'
+    ];
+    const lines = git_config[1].split('\n');
+    let lfs_installed = true;
+    for(let check of lfs_checks)
+      if(!lines.includes(check)) lfs_installed = false;
+    if(!lfs_installed){
+      console.log('installing git lfs');
+      await window.ipc.invoke('GitService.run', {
+        args: [`lfs`,`install`]
+      });
+    }
+  }
+
+  // check ARCitect version
   const version_ = iProps.version.slice(1).split('.').map(x=>parseFloat(x));
   const versions = await window.ipc.invoke('InternetService.getArcitectVersions');
   const latest_version = versions[0].tag_name;
