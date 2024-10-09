@@ -102,7 +102,7 @@ const ArcControlService = {
           );
           break;
         case 'UPDATE': case 'CREATE':
-          if(['ISA_Investigation','ISA_Study','ISA_Assay'].includes(contract.DTOType)){
+          if(['ISA_Investigation','ISA_Study','ISA_Assay', 'ISA_Datamap'].includes(contract.DTOType)){
             const buffer = await Xlsx.toBytes(contract.DTO);
             const absolutePath = arc_root + '/' +contract.Path;
             await window.ipc.invoke(
