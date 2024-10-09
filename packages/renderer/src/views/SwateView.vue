@@ -92,7 +92,7 @@ const SwateAPI: SwateAPI = {
     let options: Electron.OpenDialogOptions = {}
     options.defaultPath = ArcControlService.props.arc_root!;
     if (selectDirectories) {
-      selection = await window.ipc.invoke("LocalFileSystemService.selectAnyFolders")
+      selection = await window.ipc.invoke("LocalFileSystemService.selectAnyDirectories")
     } else {
       selection = await window.ipc.invoke("LocalFileSystemService.selectAnyFiles")
     }
