@@ -34,6 +34,7 @@ const AppProperties: {
   force_lfs_update: 0,
 
   config: {
+    gitDebug: false,
     toolbarMinimized: false,
     showHelp: false,
     showTooltips: false,
@@ -72,7 +73,6 @@ const get_datahubs = async ()=>{
         active: true,
         starts_at: new Date().toISOString()
       })
-      console.log(new Date().toISOString())
       AppProperties.datahub_hosts_msgs[host] = temp;
     } else {
       let contains_critical = false;
@@ -89,7 +89,6 @@ const get_datahubs = async ()=>{
 const init = async ()=>{
   await AppProperties.read_config();
   watch(AppProperties.config, ()=>{
-    console.log('xxx')
     window.ipc.invoke('LocalFileSystemService.writeConfig', JSON.stringify(AppProperties.config));
   });
   await get_datahubs();

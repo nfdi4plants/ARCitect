@@ -32,6 +32,16 @@ const resetARCitect = async ()=>{
           <q-list dense>
             <q-item tag="label" v-ripple="{color:'grey'}">
               <q-item-section avatar>
+                <q-checkbox v-model="AppProperties.config.gitDebug" color='secondary'/>
+              </q-item-section>
+              <q-item-section>
+                <q-item-label>Git Debugging</q-item-label>
+                <q-item-label caption>Enables verbose git messages during push and pull requests</q-item-label>
+              </q-item-section>
+            </q-item>
+
+            <q-item tag="label" v-ripple="{color:'grey'}">
+              <q-item-section avatar>
                 <q-checkbox v-model="AppProperties.config.showTooltips" color='secondary'/>
               </q-item-section>
               <q-item-section>

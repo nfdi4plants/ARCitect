@@ -86,14 +86,10 @@ export const GitService = {
       o.detached=false;
       o.shell = true;
 
-      // verbose
-      // o.env['GIT_TRACE'] = 1;
-      // o.env['GIT_TRACE_PACKET'] = 1;
-      // o.env['GIT_TRACE_PERFORMANCE'] = 1;
-      // o.env['GIT_TRACE_SETUP'] = 1;
-      // o.env['GIT_CURL_VERBOSE'] = 1;
-      // o.env['GIT_TRANSFER_TRACE'] = 1;
-      // o.stdio = 'inherit';
+      if(o.debug){
+        o.env['GIT_TRACE'] = 1;
+        o.env['GIT_CURL_VERBOSE'] = 1;
+      }
 
       o.cwd = (o.cwd || '').split('/').join(PATH.sep);
 

@@ -173,7 +173,8 @@ const push = async()=>{
 
   response = await window.ipc.invoke('GitService.run', {
     args: args,
-    cwd: ArcControlService.props.arc_root
+    cwd: ArcControlService.props.arc_root,
+    debug: AppProperties.config.gitDebug
   });
 
   // unpatch
@@ -373,7 +374,8 @@ const pull = async()=>{
     cwd: ArcControlService.props.arc_root,
     env: {
       GIT_LFS_SKIP_SMUDGE: iProps.use_lfs?0:1
-    }
+    },
+    debug: AppProperties.config.gitDebug
   });
   dialogProps.needs_merge = !response[0] && response[1].includes('You have divergent branches and need to specify how to reconcile them.');
   if(dialogProps.needs_merge){
@@ -384,7 +386,8 @@ const pull = async()=>{
   if(iProps.use_lfs){
     response = await window.ipc.invoke('GitService.run', {
       args: [`lfs`,`pull`,iProps.remote,branches.current],
-      cwd: ArcControlService.props.arc_root
+      cwd: ArcControlService.props.arc_root,
+      debug: AppProperties.config.gitDebug
     });
   }
 
