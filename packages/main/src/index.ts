@@ -49,7 +49,7 @@ const initConfig = async ()=>{
     fs.mkdirSync(userDataPath);
 
   for(let file of ['ARCitect.json','DataHubs.json']){
-    const sourceFile = 'resources/'+file;
+    const sourceFile = (import.meta.env.DEV ? 'resources' : process.resourcesPath)+'/'+file;
     const destinationFile = userDataPath+'/'+file;
     if (!fs.existsSync(destinationFile))
       fs.copyFileSync(sourceFile, destinationFile);
