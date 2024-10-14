@@ -289,7 +289,7 @@ const createFile = async node=>{
     }
   }).onOk( async name => {
     if(!name.includes('.'))
-      name += '.txt';
+      name += '.md';
     const path = node.id + '/' + name;
     await window.ipc.invoke('LocalFileSystemService.writeFile', [path,'']);
   });
@@ -542,7 +542,27 @@ const onCellContextMenu = async (e,node) => {
     });
   } else {
     //verify that the file/directory is not a MUST keep file/directory
-    if (["assays", "studies", "runs", "workflows", "dataset", "protocols", "resources"].includes(node.label.toLowerCase()) === false) {
+    if (["assays", "studies", "runs", "workflows", "dataset", "protocols", "resources"].includes(node.label.toLowerCase()) === false && node.type!=='node_edit_investigation') {
+      items.push({
+        label: "Rename",
+        icon: h( 'i', icon_style, ['edit_note'] ),
+        onClick: ()=>{
+          $q.dialog({
+            component: StringDialog,
+            componentProps: {
+              title: 'Rename',
+              property: 'Name',
+              icon: 'edit_note',
+              initial_value: node.label,
+            }
+          }).onOk(
+            new_label => new_label && window.ipc.invoke('LocalFileSystemService.rename', [
+              node.id,
+              node.id.split('/').slice(0,-1).join('/')+'/'+new_label
+            ])
+          );
+        }
+      });
       items.push({
         label: "Delete",
         icon: h( 'i', icon_style, ['delete'] ),
