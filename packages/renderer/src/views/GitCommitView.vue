@@ -15,6 +15,7 @@ import AppProperties from '../AppProperties.ts';
 import pDebounce from 'p-debounce';
 
 import GitDialog from '../dialogs/GitDialog.vue';
+import GitResetDialog from '../dialogs/GitResetDialog.vue';
 import StringDialog from '../dialogs/StringDialog.vue';
 import { useQuasar } from 'quasar'
 const $q = useQuasar();
@@ -189,26 +190,43 @@ const abortMerge = async()=>{
 };
 
 const reset = async()=>{
-  const dialogProps = reactive({
-    title: 'Resetting ARC',
-    ok_title: 'Ok',
-    cancel_title: null,
-    state: 0,
-  });
-
   $q.dialog({
-    component: GitDialog,
-    componentProps: dialogProps
-  }).onOk( async () => {
-    ArcControlService.readARC();
-    init();
-  });
+    component: GitResetDialog
+  }).onOk( async hard => {
+    const dialogProps = reactive({
+      title: `Resetting ARC (${hard?'hard':'soft'})`,
+      ok_title: 'Ok',
+      cancel_title: null,
+      state: 0,
+    });
 
-  const response = await window.ipc.invoke('GitService.run', {
-    args: [`reset`,`--hard`],
-    cwd: ArcControlService.props.arc_root
+    $q.dialog({
+      component: GitDialog,
+      componentProps: dialogProps
+    }).onOk( async () => {
+      ArcControlService.readARC();
+      init();
+    });
+
+    // perform git reset
+    {
+      const response = await window.ipc.invoke('GitService.run', {
+        args: [`reset`,`--hard`],
+        cwd: ArcControlService.props.arc_root
+      });
+      if(!response[0]) return dialogProps.state = 2;
+    }
+
+    // optionally perform git clean
+    if(hard){
+      const response = await window.ipc.invoke('GitService.run', {
+        args: [`clean`,`-d`, `-f`],
+        cwd: ArcControlService.props.arc_root
+      });
+      if(!response[0]) return dialogProps.state = 2;
+    }
+    dialogProps.state = 1;
   });
-  dialogProps.state = response[0] ? 1 : 2;
 };
 
 const init = async()=>{
