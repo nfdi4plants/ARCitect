@@ -142,6 +142,18 @@ export default {
 
     <q-card>
       <q-card-section style="font-size: 1.2em;font-weight: bold;">
+        Functions depending on login
+      </q-card-section>
+      <q-card-section>   
+        In the sidebar menu, the functions related to ARC version control and communication with the DataHUB are deactivated until you <b>login</b>.
+        This prevents possible cross-talks with system wide Git configurations or credentials and provides a smooth interaction with the ARC and the DataHUB.
+      </q-card-section>
+    </q-card>
+      
+      <q-separator inset style="height:0.2em" />
+
+    <q-card>
+      <q-card-section style="font-size: 1.2em;font-weight: bold;">
         File Tree
       </q-card-section>
       <q-card-section>
