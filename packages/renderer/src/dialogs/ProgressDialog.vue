@@ -1,21 +1,20 @@
 <script lang="ts" setup>
 import { useDialogPluginComponent } from 'quasar';
-import { reactive, onMounted } from 'vue';
+import { reactive } from 'vue';
 
 import a_btn from '../components/a_btn.vue';
 
 export interface Props {
-  items: Array,
   title: String,
-  ok_title: String,
-  cancel_title: String,
+  progress: Number,
+  progress_text: Number,
   error: String,
-  succ: String
 };
 const props = defineProps<Props>();
 
 const iProps = reactive({
-  value: ''
+  value: '',
+  watcher: null,
 });
 
 defineEmits([
@@ -24,6 +23,13 @@ defineEmits([
 
 const { dialogRef, onDialogHide, onDialogOK, onDialogCancel } = useDialogPluginComponent();
 
+// onMounted(()=>{
+//   iProps.watcher = watch(()=>props.progress, ()=>onDialogOK());
+// });
+
+// onUnmounted(()=>{
+//   iProps.watcher();
+// });
 </script>
 
 <template>
@@ -34,34 +40,16 @@ const { dialogRef, onDialogHide, onDialogOK, onDialogCancel } = useDialogPluginC
       </q-card-section>
 
       <q-card-section>
-        <q-list dense>
-          <q-item v-for='item in props.items' class='progress_item'>
-            <q-item-section avatar style="min-width:2em;">
-              <q-circular-progress
-                :indeterminate='item[1]<1'
-                rounded
-                size="1.5em"
-                :thickness="0.7"
-                track-color="grey-3"
-                :color="item[1]===2 ? 'red-8' : item[1]===1 ? 'green' : 'primary'"
-                class="q-ma-md"
-                :value='100'
-                style='margin:0 0 0 0.5em;'
-              />
-            </q-item-section>
-            <q-item-section>
-              <q-item-label>{{item[0]}}</q-item-label>
-            </q-item-section>
-          </q-item>
-        </q-list>
-
+        <q-linear-progress stripe rounded size="20px" :value="props.progress" color="secondary" track-color="grey-9" class="q-mt-sm" animation-speed='200' :indeterminate='props.progress===0'>
+          <div class="absolute-full flex flex-center">
+            <q-badge class='text-bold' text-color="white" color='transparent' :label="props.progress_text" />
+          </div>
+        </q-linear-progress>
       </q-card-section>
 
       <q-card-actions align="right" style="margin:0 1.5em 1.5em;">
-        <a_btn v-if='props.error' color="red-10" icon='warning' :label="iProps.error" no-caps style="margin-right:auto"/>
-        <a_btn v-if='props.succ' icon='check_circle' :label="props.succ" no-caps style="margin-right:auto"/>
-        <a_btn :label="props.ok_title" :loading='props.items[props.items.length-1][1]!==1' @click="onDialogOK" type='submit' :disabled='!props.error && props.items[props.items.length-1][1]!==1'/>
-        <a_btn v-if='props.cancel_title' :label="props.cancel_title" @click="onDialogCancel" :disabled='props.items[props.items.length-1][1]<1'/>
+        <a_btn icon='check_circle' label="Ok" @click="onDialogOK" :disabled='props.progress<1 || props.error!==""'/>
+        <a_btn icon='cancel' label="Cancel" @click="onDialogCancel" :disabled='props.progress===1' />
       </q-card-actions>
     </q-card>
 

@@ -9,6 +9,7 @@ import {Investigation, Assays, Studies, Workflows, Runs, Dataset, Protocols} fro
 import ConfirmationDialog from '../dialogs/ConfirmationDialog.vue';
 import StringDialog from '../dialogs/StringDialog.vue';
 import AddProtocolDialog from '../dialogs/AddProtocolDialog.vue';
+import ProgressDialog from '../dialogs/ProgressDialog.vue';
 import GitDialog from '../dialogs/GitDialog.vue';
 import { useQuasar } from 'quasar'
 import {ArcStudy, ArcAssay} from '@nfdi4plants/arctrl';
@@ -131,9 +132,30 @@ const addProtocol = async n=>{
 const importFilesOrDirectories = async (n,method)=>{
   const path = n.id+'/';
   const paths = await window.ipc.invoke('LocalFileSystemService.'+method);
-  for(const path_ of paths){
-    await window.ipc.invoke('LocalFileSystemService.copy', [path_,path]);
+  if(paths.length<1) return;
+
+  const dialogProps = reactive({
+    title: 'Importing Files and Directories',
+    progress: 0,
+    progress_text: '',
+    error: '',
+    abort: false
+  });
+
+  $q.dialog({
+    component: ProgressDialog,
+    componentProps: dialogProps
+  }).onCancel(()=>{
+    dialogProps.abort = true;
+  });
+
+  for(let i=0; i<paths.length; i++){
+    dialogProps.progress_text = `Copying ${(i+1)}/${paths.length}: ${paths[i].split('/').pop()}`;
+    await window.ipc.invoke('LocalFileSystemService.copy', [paths[i],path]);
+    dialogProps.progress = (i+1)/paths.length;
+    if(dialogProps.abort) break;
   }
+  if(!dialogProps.abort) dialogProps.progress_text = `Done Copying ${paths.length}/${paths.length} Files`;
 };
 
 const readDir_ = async (path: string) => {
@@ -290,6 +312,7 @@ const createFile = async node=>{
   }).onOk( async name => {
     if(!name.includes('.'))
       name += '.md';
+
     const path = node.id + '/' + name;
     await window.ipc.invoke('LocalFileSystemService.writeFile', [path,'']);
   });
@@ -387,7 +410,7 @@ const downloadLFSFiles = async paths => {
 
   for(let path of paths)
     await window.ipc.invoke('GitService.run', {
-      args: ['lfs','pull','--include',path],
+      args: ['lfs','pull','--include',`"${path}"`],
       cwd: ArcControlService.props.arc_root
     });
 
