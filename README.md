@@ -39,7 +39,7 @@ To install ARCitect, navigate to the [releases page](https://github.com/nfdi4pla
     
     </details>
 
-:bulb: For more detailed instructions and ARCitect QuickStarts, please checkout the [DataPLANT Knowledge Base](https://nfdi4plants.org/nfdi4plants.knowledgebase/docs/ARCitect-Manual/index.html).
+:bulb: For more detailed instructions and ARCitect QuickStarts, please checkout the [DataPLANT Knowledge Base](https://nfdi4plants.org/nfdi4plants.knowledgebase/arcitect).
 
 ## Building from source
 

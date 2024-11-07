@@ -17,7 +17,7 @@ import d_checkbox from '../components/d_checkbox.vue';
         Here you can choose, how your ARC shall be validated.
         The actual validation occurs in the DataHUB once you synchronize your ARC for the next time.
         Please check out the <a
-          href="https://nfdi4plants.org/nfdi4plants.knowledgebase/docs/DataHUB-Manual/cqc-pipelines/cqc-pipelines.html"
+          href="https://nfdi4plants.github.io/nfdi4plants.knowledgebase/arc-validation/cqc-pipelines/"
           target="_blank">DataPLANT knowledge base</a> for more information.
         </div></q-item>
       </q-card-section>
@@ -39,7 +39,7 @@ import d_checkbox from '../components/d_checkbox.vue';
         Under "Custom Validation Packages" you can add or remove additional validation packages.
         For instance, if you want to publish your ARC and receive a DOI via the DataHUB, select and add the "invenio" validation. 
         Please check out the <a
-          href="https://nfdi4plants.org/nfdi4plants.knowledgebase/docs/DataHUB-Manual/datahub-data-publications.html"
+          href="https://nfdi4plants.github.io/nfdi4plants.knowledgebase/datahub/data-publications/"
           target="_blank">DataPLANT knowledge base</a> for more information about publishing your ARC.        
         </div>
       </q-item>    

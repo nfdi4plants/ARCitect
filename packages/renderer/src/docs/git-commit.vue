@@ -31,9 +31,9 @@
       <q-item>
         <div>
           Check out the DataPLANT knowledgebase to learn more about <a
-            href="https://nfdi4plants.org/nfdi4plants.knowledgebase/docs/guides/arc_WorkingWithLargeDataFiles.html"
+            href="https://nfdi4plants.github.io/nfdi4plants.knowledgebase/git/git-lfs/"
             target="_blank">large file storage (LFS)</a> and
-          <a href="https://nfdi4plants.org/nfdi4plants.knowledgebase/docs/guides/arc_SyncingRecommendation.html"
+          <a href="https://nfdi4plants.github.io/nfdi4plants.knowledgebase/git/git-syncing-recommendation/"
             target="_blank">commit messages</a>.
 
 

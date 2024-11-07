@@ -23,7 +23,7 @@ import a_btn from '../components/a_btn.vue';
         
         <q-item>
           <div>
-            Please check out the <a href="https://nfdi4plants.org/nfdi4plants.knowledgebase/docs/implementation/Swate.html" target="_blank">DataPLANT knowledge base</a> for more info.
+            Please check out the <a href="https://nfdi4plants.org/nfdi4plants.knowledgebase/swate" target="_blank">DataPLANT knowledge base</a> for more info.
           </div>
         </q-item>
 
