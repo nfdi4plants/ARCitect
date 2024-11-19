@@ -1,4 +1,4 @@
-import { reactive } from 'vue'
+import { reactive, nextTick } from 'vue'
 
 import AppProperties from './AppProperties.ts';
 import ArcControlService from './ArcControlService.ts';
@@ -24,7 +24,11 @@ const SwateControlService = {
    * @param type object type: 0 investigation, 1 study, 2 assay
    * @param identifier object identifier
    */
-  LoadSwateState: (type: number, identifier: string) => {
+  LoadSwateState: async (type: number, identifier: string) => {
+    SwateControlService.props.object = null;
+    AppProperties.state = AppProperties.STATES.EDIT_SWATE;
+    await nextTick();
+
     const methods = [null,'TryGetStudy','TryGetAssay'];
     SwateControlService.props.type = type;
     if(type===0){
@@ -32,7 +36,6 @@ const SwateControlService = {
     } else {
       SwateControlService.props.object = ArcControlService.props.arc.ISA[methods[type]](identifier);
     }
-    AppProperties.state = AppProperties.STATES.EDIT_SWATE;
   }
 }
 

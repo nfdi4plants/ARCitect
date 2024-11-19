@@ -45,13 +45,13 @@ const send = (msg: Msg, data: any = null): void => {
   switch (msg) {
     case Msg.InvestigationToSwate:
       if (data instanceof ArcInvestigation) {
-        const jsonString = JsonController.Investigation.toJsonString(data,0)
+        const jsonString = JsonController.Investigation.toJsonString(data,0);
         toSwate({ ArcInvestigationJsonString: jsonString });
       } else return console.error('Invalid data type for Msg.InvestigationToSwate');
       break;
     case Msg.AssayToSwate:
       if (data instanceof ArcAssay) {
-        const jsonString = JsonController.Assay.toJsonString(data,0)
+        const jsonString = JsonController.Assay.toJsonString(data,0);
         toSwate({ ArcAssayJsonString: jsonString });
       } else return console.error('Invalid data type for Msg.AssayToSwate');
       break;
@@ -125,6 +125,8 @@ const init = async ()=>{
   iProps.loading = true;
   iProps.showTimeout = false;
   setTimeout(()=>iProps.showTimeout=true,4000);
+
+  if(!SwateControlService.props.object) return;
   iframe.value.setAttribute("src", `${AppProperties.config.swate_url}?is_swatehost=1&random=${SwateControlService.props.cacheNumber}`);
 };
 
