@@ -56,9 +56,9 @@ import d_checkbox from '../components/d_checkbox.vue';
       <q-card-section>
         <div>
           Check out the DataPLANT knowledgebase to learn more about <a
-            href="https://nfdi4plants.org/nfdi4plants.knowledgebase/docs/guides/arc_WorkingWithLargeDataFiles.html"
+            href="https://nfdi4plants.github.io/nfdi4plants.knowledgebase/git/git-lfs/"
             target="_blank">large file storage (LFS)</a> or <a
-            href="https://nfdi4plants.org/nfdi4plants.knowledgebase/docs/guides/datahub-GeneratePAT.html"
+            href="https://nfdi4plants.github.io/nfdi4plants.knowledgebase/datahub/datahub-generate-pat/"
             target="_blank">generating personal access tokens</a>.
             <!-- TODO: add explanation about remotes  -->
         </div>

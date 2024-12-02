@@ -13,7 +13,7 @@
       <q-item>
           <div>
             With the LFS checkbox you can select whether or not download large files. Read more about <a
-              href="https://nfdi4plants.org/nfdi4plants.knowledgebase/docs/guides/arc_WorkingWithLargeDataFiles.html"
+              href="https://nfdi4plants.github.io/nfdi4plants.knowledgebase/git/git-lfs/"
               target="_blank">large file storage (LFS)</a> in the DataPLANT knowledgebase.
           </div>
       </q-item>
