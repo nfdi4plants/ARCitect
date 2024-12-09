@@ -73,12 +73,12 @@ const setGitUser = async(name,email)=>{
 
   // set git user and email
   response = await window.ipc.invoke('GitService.run', {
-    args: [`config`,`user.name`,'"'+name+'"'],
+    args: [`config`,`--replace-all`,`user.name`,'"'+name+'"'],
     cwd: ArcControlService.props.arc_root
   });
   if(!response[0]) return response;
   response = await window.ipc.invoke('GitService.run', {
-    args: [`config`,`user.email`,email],
+    args: [`config`,`--replace-all`,`user.email`,email],
     cwd: ArcControlService.props.arc_root
   });
   return response;
