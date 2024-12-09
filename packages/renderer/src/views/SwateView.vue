@@ -105,16 +105,19 @@ const SwateAPI: SwateAPI = {
   InvestigationToARCitect: (investigationJsonString: string) => {
     let investigation = JsonController.Investigation.fromJsonString(investigationJsonString);
     ArcControlService.props.arc.ISA = investigation;
+    ArcControlService.saveARC({force: true});
   },
   AssayToARCitect: (assayJsonString: string) => {
     let assay = JsonController.Assay.fromJsonString(assayJsonString);
     ArcControlService.props.arc.ISA.SetAssay(assay.Identifier, assay);
+    ArcControlService.saveARC({force: true});
   },
   StudyToARCitect: (studyJsonString: string) => {
     /// ignore assays, I am actually not sure why this must be create, but it will be empty. Must talk to Lukas Weil about this.
     /// ~Kevin F. 12.01.2024
     let study = JsonController.Study.fromJsonString(studyJsonString);
     ArcControlService.props.arc.ISA.SetStudy(study.Identifier, study);
+    ArcControlService.saveARC({force: true});
   },
   Error: (e) => {
     console.log('[Swate-Interop-Error]', e)

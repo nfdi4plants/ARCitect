@@ -185,6 +185,16 @@ onMounted(async () => {
     }
   }
 
+  // add common git flags
+  {
+    await window.ipc.invoke('GitService.run', {
+      args: [`config`,`--global`,`lfs.activitytimeout`, `0`]
+    });
+    await window.ipc.invoke('GitService.run', {
+      args: [`config`,`--global`,`core.longpaths`,`true`]
+    });
+  }
+
   // check ARCitect version
   const version_ = iProps.version.slice(1).split('.').map(x=>parseFloat(x));
   const versions = await window.ipc.invoke('InternetService.getArcitectVersions');
@@ -251,9 +261,9 @@ const test = async ()=>{
           <q-separator />
 
           <!--<ToolbarButton text='Refresh ARC' icon='refresh' requiresARC @clicked='refreshLocalArc()'></ToolbarButton>-->
-          <ToolbarButton text='Save ARC' icon='save' requiresARC @clicked='saveLocalArc()'>
-            <a_tooltip> Save the ARC locally</a_tooltip>
-          </ToolbarButton>
+          <!--<ToolbarButton text='Save ARC' icon='save' requiresARC @clicked='saveLocalArc()'>-->
+          <!--  <a_tooltip> Save the ARC locally</a_tooltip>-->
+          <!--</ToolbarButton>-->
           <ToolbarButton text='Explorer' icon='folder_open' requiresARC @clicked='ArcControlService.openArcInExplorer()'>
             <a_tooltip>Open the ARC in your Explorer or Finder</a_tooltip>
           </ToolbarButton>
