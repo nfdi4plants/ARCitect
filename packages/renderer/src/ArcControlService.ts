@@ -172,22 +172,19 @@ const ArcControlService = {
     ArcControlService.props.busy = false;
   },
 
-  deleteAssay: async (assay_identifier: string) => {
-    let contracts = ArcControlService.props.arc.RemoveAssay(assay_identifier)
-    await ArcControlService.handleARCContracts(contracts);
+  delete: async (method:string, identifier:string) => {
+    await ArcControlService.handleARCContracts(
+      ArcControlService.props.arc[method](identifier)
+    );
   },
 
   rename: async (method:string, old_identifier:string, new_identifier:string) => {
-    const contracts = ArcControlService.props.arc[method](
-      old_identifier,
-      new_identifier
+    await ArcControlService.handleARCContracts(
+      ArcControlService.props.arc[method](
+        old_identifier,
+        new_identifier
+      )
     );
-    ArcControlService.handleARCContracts(contracts);
-  },
-
-  deleteStudy: async (study_identifier: string) => {
-    let contracts = ArcControlService.props.arc.RemoveStudy(study_identifier)
-    await ArcControlService.handleARCContracts(contracts);
   },
 
   newARC: async (path: string) =>{

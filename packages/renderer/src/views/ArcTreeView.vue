@@ -278,7 +278,7 @@ const updatePath = async ([path,type]) => {
   if(type==='dir_rm'){
     const elements = path.replace(ArcControlService.props.arc_root+'/','').split('/');
     // if a study or assay was deleted/renamed that is currently opened in swate then close the view
-    if(elements.length===2 && ['assays','studies'].includes(elements[0]) && SwateControlService.props.object.Identifier===elements[1])
+    if(elements.length===2 && ['assays','studies'].includes(elements[0]) && SwateControlService.props.object && SwateControlService.props.object.Identifier===elements[1])
       AppProperties.state=AppProperties.STATES.HOME;
   }
 
@@ -496,6 +496,7 @@ const onCellContextMenu = async (e,node) => {
     $q.dialog({
       component: ConfirmationDialog,
       componentProps: {
+        title: `Delete`,
         msg: `Are you sure you want to delete:<br><b><i>${node.id}</i></b><br>`,
         ok_text: 'Delete',
         ok_icon: 'delete',
@@ -521,7 +522,7 @@ const onCellContextMenu = async (e,node) => {
             initial_value: node.label,
           }
         }).onOk(
-          async new_identifier => ArcControlService.rename('RenameAssay',node.label,new_identifier)
+          async new_identifier => ArcControlService.rename('GetAssayRenameContracts',node.label,new_identifier)
         );
       }
     });
@@ -533,7 +534,7 @@ const onCellContextMenu = async (e,node) => {
     items.push({
       label: "Delete",
       icon: h( 'i', icon_style, ['delete'] ),
-      onClick: ()=>confirm_delete(node,()=>ArcControlService.deleteAssay(node.label))
+      onClick: ()=>confirm_delete(node,()=>ArcControlService.delete('GetAssayRemoveContracts',node.label))
     });
   } else if (node.type===formatNodeEditString(Studies)){
     items.push({
@@ -549,7 +550,7 @@ const onCellContextMenu = async (e,node) => {
             initial_value: node.label,
           }
         }).onOk(
-          async new_identifier => ArcControlService.rename('RenameStudy',node.label,new_identifier)
+          async new_identifier => ArcControlService.rename('GetStudyRenameContracts',node.label,new_identifier)
         );
       }
     });
@@ -561,7 +562,7 @@ const onCellContextMenu = async (e,node) => {
     items.push({
       label: "Delete",
       icon: h( 'i', icon_style, ['delete'] ),
-      onClick: ()=>confirm_delete(node,()=>ArcControlService.deleteStudy(node.label))
+      onClick: ()=>confirm_delete(node,()=>ArcControlService.delete('GetStudyRemoveContracts',node.label))
     });
   } else {
     //verify that the file/directory is not a MUST keep file/directory
