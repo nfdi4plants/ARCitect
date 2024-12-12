@@ -68,6 +68,7 @@ const initCore = async () => {
   }
   ipcMain.handle('CORE.getVersion', ()=>app.getVersion());
   ipcMain.handle('CORE.getTempPath', ()=>app.getPath('temp'));
+  ipcMain.handle('CORE.getOS', ()=>os.platform());
   ipcMain.handle('CORE.reset', ()=>{
     LocalFileSystemService.remove( null, app.getPath('userData') );
     initConfig();
