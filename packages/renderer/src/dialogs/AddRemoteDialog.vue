@@ -93,7 +93,7 @@ const openAccessTokenEditor = ()=>{
   const host = props.user.host || 'git.nfdi4plants.org';
   window.ipc.invoke(
     'InternetService.openExternalURL',
-    `https://${host}/-/profile/personal_access_tokens`
+    `https://${host}/-/user_settings/personal_access_tokens`
   );
 }
 
