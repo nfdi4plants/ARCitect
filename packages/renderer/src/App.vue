@@ -161,22 +161,21 @@ onMounted(async () => {
   }
   console.log(git_lfs_running[1]);
 
+  const git_config = (await window.ipc.invoke('GitService.run', {
+    args: [`config`,`--list`]
+  }))[1].split('\n');
+
   // check if lfs installed
   {
-    const git_config = await window.ipc.invoke('GitService.run', {
-      args: [`config`,`--list`]
-    });
-
     const lfs_checks = [
       'filter.lfs.process=git-lfs filter-process',
       'filter.lfs.required=true',
       'filter.lfs.clean=git-lfs clean -- %f',
       'filter.lfs.smudge=git-lfs smudge -- %f'
     ];
-    const lines = git_config[1].split('\n');
     let lfs_installed = true;
     for(let check of lfs_checks)
-      if(!lines.includes(check)) lfs_installed = false;
+      if(!git_config.includes(check)) lfs_installed = false;
     if(!lfs_installed){
       console.log('installing git lfs');
       await window.ipc.invoke('GitService.run', {
@@ -187,9 +186,16 @@ onMounted(async () => {
 
   // add common git flags
   {
+    // enable network paths (possible git authentication credential leak but requested by community)
+    if(!git_config.includes(`safe.directory=*`))
+      await window.ipc.invoke('GitService.run', {
+        args: [`config`,`--global`,`--add`, `safe.directory`, `"*"`]
+      });
+    // prevent lfs timeouts
     await window.ipc.invoke('GitService.run', {
       args: [`config`,`--global`,`lfs.activitytimeout`, `0`]
     });
+    // enable long paths on windows
     await window.ipc.invoke('GitService.run', {
       args: [`config`,`--global`,`core.longpaths`,`true`]
     });
