@@ -1,8 +1,9 @@
 import { reactive, watch } from 'vue'
+import App from './App.vue';
 
 const AppProperties: {
   STATES: any,
-  state: number
+  state: number,
 } = reactive({
   STATES: {
     HOME: 0,
@@ -27,7 +28,8 @@ const AppProperties: {
   user: null,
 
 
-  datahub_hosts : [],
+  datahub_hosts : {},
+  datahub_hosts_by_provider: {},
   datahub_hosts_msgs: {},
 
   force_commit_update: 0,
@@ -54,17 +56,20 @@ for(let k in AppProperties.STATES){
 }
 
 const get_datahubs = async ()=>{
-  AppProperties.datahub_hosts = await window.ipc.invoke('DataHubService.getHosts');
-
+  AppProperties.datahub_hosts_by_provider = await window.ipc.invoke('DataHubService.getHosts');
+  AppProperties.datahub_hosts =  AppProperties.datahub_hosts_by_provider.dataplant.concat(AppProperties.datahub_hosts_by_provider.additional);
+  
   for(let host of AppProperties.datahub_hosts){
     AppProperties.datahub_hosts_msgs[host] = await window.ipc.invoke('InternetService.getWebPageAsJson', {
       host: host,
       path: '/api/v4/broadcast_messages',
       method: 'GET'
     });
+    console.log(AppProperties.datahub_hosts_msgs[host]);
 
     // if server is not reachable
     if(AppProperties.datahub_hosts_msgs[host]===null){
+      console.log(""+host+" is not reachable");
       const temp = [];
       temp.critical = true;
       temp.push({
@@ -91,7 +96,9 @@ const init = async ()=>{
   watch(AppProperties.config, ()=>{
     window.ipc.invoke('LocalFileSystemService.writeConfig', JSON.stringify(AppProperties.config));
   });
+  console.log('reading datahubs')
   await get_datahubs();
+  console.log('done reading datahubs')
 }
 init();
 

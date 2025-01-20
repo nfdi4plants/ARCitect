@@ -8,7 +8,8 @@ import {
 
 import fs from 'fs';
 import {InternetService} from '/@/InternetService';
-import {Credentials, User} from '/@/DataHubService.d';
+import {Credentials, User, CredentialStoreType, AuthIdOnly, AuthWithSecret, Hosts} from '/@/DataHubService.d';
+export type {Hosts}
 import {Request, Response} from 'express';
 import querystring from 'query-string';
 const express = require('express');
@@ -16,7 +17,7 @@ import { createHash, randomInt} from 'crypto';
 let authApp = null;
 const authPort = 7890;
 
-let CREDENTIALS: Credentials;
+//let CREDENTIALS: CredentialStore;
 
 // alphabets for random string generation
 const ALPHABET = 'abcdefghijklmnopqrstuvwxyz';
@@ -37,6 +38,56 @@ function sha256Base64UrlsafeEncode(word: string){
 function randomString(alphabet: Array<string>, string_length: number): string {
   return Array.from({length: string_length}, (_, i) => alphabet[randomInt(alphabet.length)]).join('');
 }
+
+export const CredentialStore: CredentialStoreType = {
+  credential_file_dataplant: app.getPath('userData')+'/DataHubs.json',
+  credential_file_additional: app.getPath('userData')+'/AdditionalDataHubs.json',  
+  credentials: {dataplant: {}, additional: {}},
+
+  init: ()=>{
+    // read credentials from files
+    // read dataplant credentials
+    CredentialStore.credentials.dataplant = JSON.parse(fs.readFileSync(CredentialStore.credential_file_dataplant, 'utf-8'));
+    
+    // read additional credentials if file does not exist create it and credentials are empty
+    if (fs.existsSync(CredentialStore.credential_file_additional)) {
+      CredentialStore.credentials.additional = JSON.parse(fs.readFileSync(CredentialStore.credential_file_additional, 'utf-8'));
+    } else {
+      fs.writeFileSync(CredentialStore.credential_file_additional, '{}', 'utf-8');
+      CredentialStore.credentials.additional = {};
+    }
+  },
+
+  // a function that enables CredentialStore[key] to get a credential from dataplant or additional
+  // datahubs
+  getCredentials: (key: string) => {
+    if (key in CredentialStore.credentials.dataplant) {
+      return CredentialStore.credentials.dataplant[key];
+    }
+    if (key in CredentialStore.credentials.additional) {
+      return CredentialStore.credentials.additional[key];
+    }
+    throw new Error('No credentials found for: ' + key);
+  },
+
+  credentialsExist: (key: string) => {
+    return key in CredentialStore.credentials.dataplant || key in CredentialStore.credentials.additional;
+  },
+
+  addCredentials: (key: string, credentials: AuthWithSecret | AuthIdOnly) => {
+    if (CredentialStore.credentialsExist(key)) {
+      throw new Error('Credentials already exist for: ' + key);
+    }else {
+      CredentialStore.credentials.additional[key] = credentials;
+      fs.writeFileSync(CredentialStore.credential_file_additional, JSON.stringify(CredentialStore.credentials.additional), 'utf-8');
+    }
+  },
+
+  getHosts: () => {
+    return {dataplant: Object.keys(CredentialStore.credentials.dataplant), additional: Object.keys(CredentialStore.credentials.additional)};
+  }
+
+  }
 
 export const DataHubService = {
 
@@ -207,11 +258,14 @@ export const DataHubService = {
   },
 
   getHosts: ()=>{
-    return Object.keys(CREDENTIALS);
+    return CredentialStore.getHosts();
   },
 
   init: async () => {
-    CREDENTIALS = JSON.parse(fs.readFileSync(app.getPath('userData')+'/DataHubs.json', 'utf-8'));
+    CredentialStore.init();
+    console.log(CredentialStore.getHosts());
+    //CREDENTIALS.init();
+    //JSON.parse(fs.readFileSync(app.getPath('userData')+'/DataHubs.json', 'utf-8'));
 
     ipcMain.handle('DataHubService.getArcs', DataHubService.getArcs );
     ipcMain.handle('DataHubService.inspectArc', DataHubService.inspectArc );
