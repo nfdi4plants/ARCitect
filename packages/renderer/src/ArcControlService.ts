@@ -25,12 +25,14 @@ let init: {
     arc: null | ARC,
     git_initialized: boolean,
     skip_fs_updates: boolean,
+    contract_stack: Object[],
 } = {
     arc_root: undefined ,
     busy: false,
     arc: null,
     git_initialized: false,
-    skip_fs_updates: false
+    skip_fs_updates: false,
+    contract_stack: []
 }
 
 function relative_to_absolute_path(relativePath: string) {
@@ -41,9 +43,21 @@ const ArcControlService = {
 
   props: reactive(init),
 
+  processContractStack: async(arc, arc_root)=>{
+    ArcControlService.props.busy = true;
+
+    if(ArcControlService.props.contract_stack.length<1){
+      ArcControlService.props.busy = false;
+      return;
+    }
+
+    const contract = ArcControlService.props.contract_stack.shift();
+    await ArcControlService.processContract(contract, arc, arc_root);
+    await ArcControlService.processContractStack(arc,arc_root);
+  },
+
   closeARC: async() => {
     ArcControlService.props.arc_root = undefined;
-    ArcControlService.props.busy = false;
     ArcControlService.props.arc = null;
     AppProperties.state = 0;
     return;
@@ -61,8 +75,6 @@ const ArcControlService = {
       return false;
     }
 
-    ArcControlService.props.busy = true;
-
     const xlsx_files = await window.ipc.invoke('LocalFileSystemService.getAllXLSX', arc_root);
     const arc = ARC.fromFilePaths(xlsx_files);
     const contracts = arc.GetReadContracts();
@@ -79,64 +91,59 @@ const ArcControlService = {
       cwd: arc_root
     });
     ArcControlService.props.git_initialized = git_initialized[0];
-
-    ArcControlService.props.busy = false;
     console.log(arc);
     return true;
   },
 
-  handleARCContracts: async (contracts: Contract [], arc: ARC, arc_root: string) => {
+  processContract: async (contract: Contract, arc: ARC, arc_root: string) => {
     arc = arc || ArcControlService.props.arc;
     arc_root = arc_root || ArcControlService.props.arc_root;
     if(!arc || !arc_root)
       return;
-    ArcControlService.props.busy = true;
     arc.UpdateFileSystem();
-    for(const contract of contracts) {
-      console.log('CONTRACT',contract);
-      switch (contract.Operation) {
-        case 'DELETE':
+    console.log('CONTRACT',contract);
+    switch (contract.Operation) {
+      case 'DELETE':
+        await window.ipc.invoke(
+          'LocalFileSystemService.remove',
+          arc_root + '/' +contract.Path
+        );
+        break;
+      case 'UPDATE': case 'CREATE':
+        if(['ISA_Investigation','ISA_Study','ISA_Assay', 'ISA_Datamap'].includes(contract.DTOType)){
+          const buffer = await Xlsx.toBytes(contract.DTO);
+          const absolutePath = arc_root + '/' +contract.Path;
           await window.ipc.invoke(
-            'LocalFileSystemService.remove',
-            arc_root + '/' +contract.Path
-          );
-          break;
-        case 'UPDATE': case 'CREATE':
-          if(['ISA_Investigation','ISA_Study','ISA_Assay', 'ISA_Datamap'].includes(contract.DTOType)){
-            const buffer = await Xlsx.toBytes(contract.DTO);
-            const absolutePath = arc_root + '/' +contract.Path;
-            await window.ipc.invoke(
-              'LocalFileSystemService.writeFile',
-              [
-                absolutePath,
-                buffer,
-                {}
-              ]
-            );
-            break;
-          } else if(contract.DTOType==='PlainText'){
-            await window.ipc.invoke('LocalFileSystemService.writeFile', [
-              arc_root+'/'+contract.Path,
-              contract.DTO || '',
-              {encoding:'UTF-8', flag: 'wx'}
-            ]);
-          } else {
-            return console.log('unable to resolve write contract', contract);
-          }
-          break;
-        case 'RENAME':
-          await window.ipc.invoke(
-            'LocalFileSystemService.rename',
+            'LocalFileSystemService.writeFile',
             [
-              arc_root + '/' + contract.Path,
-              arc_root + '/' + contract.DTO
+              absolutePath,
+              buffer,
+              {}
             ]
           );
           break;
-        default:
-          console.log(`Warning. 'handleARCContracts' hit unknown expression for contract type: ${contract.Operation} in ${contract}.`)
-          break;
-      }
+        } else if(contract.DTOType==='PlainText'){
+          await window.ipc.invoke('LocalFileSystemService.writeFile', [
+            arc_root+'/'+contract.Path,
+            contract.DTO || '',
+            {encoding:'UTF-8', flag: 'wx'}
+          ]);
+        } else {
+          return console.log('unable to resolve write contract', contract);
+        }
+        break;
+      case 'RENAME':
+        await window.ipc.invoke(
+          'LocalFileSystemService.rename',
+          [
+            arc_root + '/' + contract.Path,
+            arc_root + '/' + contract.DTO
+          ]
+        );
+        break;
+      default:
+        console.log(`Warning. 'processContract' hit unknown expression for contract type: ${contract.Operation} in ${contract}.`)
+        break;
     }
   },
 
@@ -153,8 +160,6 @@ const ArcControlService = {
     if(!arc_root)
       return;
 
-    ArcControlService.props.busy = true;
-
     arc.UpdateFileSystem();
     let contracts = options.force ? arc.GetWriteContracts() : arc.GetUpdateContracts();
 
@@ -167,24 +172,28 @@ const ArcControlService = {
       contracts.push(
         );
 
-    await ArcControlService.handleARCContracts(contracts, arc, arc_root);
+    for(let c of contracts)
+      ArcControlService.props.contract_stack.push(c);
 
-    ArcControlService.props.busy = false;
+    if(!ArcControlService.props.busy)
+      await ArcControlService.processContractStack(arc, arc_root);
   },
 
   delete: async (method:string, identifier:string) => {
-    await ArcControlService.handleARCContracts(
-      ArcControlService.props.arc[method](identifier)
-    );
+    ArcControlService.props.contract_stack.push(ArcControlService.props.arc[method](identifier));
+    if(!ArcControlService.props.busy)
+      ArcControlService.processContractStack();
   },
 
   rename: async (method:string, old_identifier:string, new_identifier:string) => {
-    await ArcControlService.handleARCContracts(
+    ArcControlService.props.contract_stack.push(
       ArcControlService.props.arc[method](
         old_identifier,
         new_identifier
       )
     );
+    if(!ArcControlService.props.busy)
+      ArcControlService.processContractStack();
   },
 
   newARC: async (path: string) =>{

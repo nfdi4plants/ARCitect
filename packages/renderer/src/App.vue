@@ -235,9 +235,30 @@ const test = async ()=>{
       >
         <q-list class="column sidebar-container" style="height:100%; flex-wrap: nowrap;">
           <q-item v-ripple clickable class='bg-primary text-white' @click="showHomeView" style="padding-top:1em;padding-bottom:1em;">
-            <q-item-section avatar>
-              <q-icon size="2.5rem" style="margin: 0 -0.20em;" :name="'img:'+logoURL" @click='showHomeView'></q-icon>
+            <q-item-section avatar style="height:2.5em">
+              <q-inner-loading
+                :showing="ArcControlService.props.busy"
+                style="width:4em;background-color:transparent"
+              >
+                <q-spinner
+                  color="white"
+                  size="2.5em"
+                  :thickness="10"
+                />
+              </q-inner-loading>
+              <q-inner-loading
+                :showing="!ArcControlService.props.busy"
+                style="width:4em;background-color:transparent"
+              >
+                <q-icon
+                  size="2.5rem"
+                  style="margin: 0 -0.20em;"
+                  :name="'img:'+logoURL"
+                  @click='showHomeView'>
+                </q-icon>
+              </q-inner-loading>
             </q-item-section>
+
             <q-item-section style="margin:0.6em 0 0 -1.2em">
               <q-item-label><b style="font-size:2em">ARC</b><span style="font-size:1.2em">itect</span></q-item-label>
             </q-item-section>
@@ -385,19 +406,6 @@ const test = async ()=>{
         </q-page>
       </q-page-container>
     </q-layout>
-
-    <div class='ModalLoading' v-if='ArcControlService.props.busy'>
-      <div>
-        <q-circular-progress
-          indeterminate
-          size="20em"
-          color="primary"
-          class="q-ma-md"
-          :thickness="0.6"
-        />
-      </div>
-    </div>
-
 </template>
 
 <style>
