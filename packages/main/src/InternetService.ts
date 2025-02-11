@@ -15,19 +15,14 @@ const default_header = {
 };
 
 export const InternetService = {
-
   getWebPageAsJson: async (e,options): Promise<any> => {
     // check if server is available
 
     try {
-      console.log(options)
-      console.log(options.host)
       await net.resolveHost(options.host);
     } catch(err) {
-      console.log(err)
       return new Promise((resolve,reject)=>resolve(null));
     }
-
     // get json data
     return new Promise(
       (resolve, reject) => {
