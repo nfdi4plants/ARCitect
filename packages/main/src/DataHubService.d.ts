@@ -1,11 +1,11 @@
 /** GitLab App authentication with Secret */
-type AuthWithSecret = {
+export type AuthWithSecret = {
     id: string;
     secret: string;
 };
 
 /** GitLab App authentication without Secret */
-type AuthIdOnly = {
+export type AuthIdOnly = {
     id: string;
     secret?: never;
 };
@@ -41,6 +41,8 @@ export interface CredentialStoreType {
     /** add credentials for a given key */
     addCredentials: (key: string, credentials: AuthWithSecret | AuthIdOnly) => void
     /** get host names by sorted in dataplant and additional */
+    removeCredentials: (key: string) => void
+    /** remove credentials for hostname */
     getHosts: () => Hosts
 }
   

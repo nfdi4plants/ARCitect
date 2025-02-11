@@ -17,8 +17,6 @@ import { createHash, randomInt} from 'crypto';
 let authApp = null;
 const authPort = 7890;
 
-//let CREDENTIALS: CredentialStore;
-
 // alphabets for random string generation
 const ALPHABET = 'abcdefghijklmnopqrstuvwxyz';
 const ALPHANUMERIC = (ALPHABET+ALPHABET.toUpperCase()+'0123456789').split('')
@@ -39,9 +37,13 @@ function randomString(alphabet: Array<string>, string_length: number): string {
   return Array.from({length: string_length}, (_, i) => alphabet[randomInt(alphabet.length)]).join('');
 }
 
+export const CREDENTIALS_DATAPLANT = app.getPath('userData')+'/DataHubs.json'
+export const CREDENTIALS_ADDITIONAL = app.getPath('userData')+'/AdditionalDataHubs.json' 
+
 export const CredentialStore: CredentialStoreType = {
-  credential_file_dataplant: app.getPath('userData')+'/DataHubs.json',
-  credential_file_additional: app.getPath('userData')+'/AdditionalDataHubs.json',  
+  /** manage credentials for different datahubs */
+  credential_file_dataplant: CREDENTIALS_DATAPLANT, 
+  credential_file_additional: CREDENTIALS_ADDITIONAL, 
   credentials: {dataplant: {}, additional: {}},
 
   init: ()=>{
@@ -58,8 +60,6 @@ export const CredentialStore: CredentialStoreType = {
     }
   },
 
-  // a function that enables CredentialStore[key] to get a credential from dataplant or additional
-  // datahubs
   getCredentials: (key: string) => {
     if (key in CredentialStore.credentials.dataplant) {
       return CredentialStore.credentials.dataplant[key];
@@ -82,6 +82,15 @@ export const CredentialStore: CredentialStoreType = {
       fs.writeFileSync(CredentialStore.credential_file_additional, JSON.stringify(CredentialStore.credentials.additional), 'utf-8');
     }
   },
+
+  removeCredentials: (key: string) => {
+    if ( key in CredentialStore.credentials.additional ) {
+      delete CredentialStore.credentials.additional[key];
+      fs.writeFileSync(CredentialStore.credential_file_additional, JSON.stringify(CredentialStore.credentials.additional), 'utf-8');
+    } else {
+      throw new Error('No credentials found for: ' + key);
+    }
+ },
 
   getHosts: () => {
     return {dataplant: Object.keys(CredentialStore.credentials.dataplant), additional: Object.keys(CredentialStore.credentials.additional)};
@@ -162,16 +171,17 @@ export const DataHubService = {
   },
 
   authenticate: async (e: IpcMainInvokeEvent, host: any) => {
-    if(!CREDENTIALS[host]) return false;
-
+    if (!CredentialStore.credentialsExist(host)) return false;
+    //if(!CREDENTIALS[host]) return false;
+    let credentials = CredentialStore.getCredentials(host);
     DataHubService.auth_host = host;
     let auth_url = '';
 
-    if ('secret' in CREDENTIALS[host]) {
+    if ('secret' in credentials) {
       const url_params = {
         response_type: 'code',
         redirect_uri: 'http://localhost:7890',
-        client_id: CREDENTIALS[host].id,
+        client_id: credentials.id,
         scope: `openid read_api email profile read_repository write_repository`
       };
       auth_url = `https://${host}/oauth/authorize?${querystring.stringify(url_params)}`;
@@ -180,7 +190,7 @@ export const DataHubService = {
       const url_params = {
         response_type: 'code',
         redirect_uri: 'http://localhost:7890',
-        client_id: CREDENTIALS[host].id,
+        client_id: credentials.id,
         scope: `openid read_api email profile read_repository write_repository`,
         state: DataHubService.pkce_state,
         code_challenge: DataHubService.code_challenge,
@@ -193,14 +203,15 @@ export const DataHubService = {
   },
 
   getToken: async ( e: IpcMainInvokeEvent | null, code: string, host: string ) => {
-    if (!CREDENTIALS[host]) return null;
+    if (!CredentialStore.credentialsExist(host)) return null;
+    let credentials = CredentialStore.getCredentials(host);
     let path = '';
 
-    if ('secret' in CREDENTIALS[host]) {
+    if ('secret' in credentials) {
       const url_params = {
         code: code,
-        client_id: CREDENTIALS[host].id,
-        client_secret: CREDENTIALS[host].secret,
+        client_id: credentials.id,
+        client_secret: credentials.secret,
         grant_type: 'authorization_code',
         redirect_uri: 'http://localhost:7890'
       };
@@ -208,7 +219,7 @@ export const DataHubService = {
     } else {
       const url_params = {
         code: code,
-        client_id: CREDENTIALS[host].id,
+        client_id: credentials.id,
         grant_type: 'authorization_code',
         redirect_uri: 'http://localhost:7890',
         code_verifier: DataHubService.code_verifier
@@ -261,11 +272,29 @@ export const DataHubService = {
     return CredentialStore.getHosts();
   },
 
+  addHost: ( e: IpcMainInvokeEvent, args: [string, AuthIdOnly | AuthWithSecret] ) => {
+    /** add host with url and AuthData and store in config dir */
+    try {
+        CredentialStore.addCredentials(args[0], args[1]);
+      }
+    catch(err){
+      throw err;
+    }
+  },
+
+  
+  deleteHost: ( e: IpcMainInvokeEvent, host: string ) => {
+    /** delete host  by URL*/
+    try {
+      CredentialStore.removeCredentials(host);
+    }
+    catch(err){
+      throw err;
+    }
+  },
+
   init: async () => {
     CredentialStore.init();
-    console.log(CredentialStore.getHosts());
-    //CREDENTIALS.init();
-    //JSON.parse(fs.readFileSync(app.getPath('userData')+'/DataHubs.json', 'utf-8'));
 
     ipcMain.handle('DataHubService.getArcs', DataHubService.getArcs );
     ipcMain.handle('DataHubService.inspectArc', DataHubService.inspectArc );
@@ -275,6 +304,8 @@ export const DataHubService = {
     ipcMain.handle('DataHubService.getPublicationByPubMedID', DataHubService.getPublicationByPubMedID );
     ipcMain.handle('DataHubService.getPersonByORCID', DataHubService.getPersonByORCID );
     ipcMain.handle('DataHubService.getHosts', DataHubService.getHosts );
+    ipcMain.handle('DataHubService.addHost', DataHubService.addHost );
+    ipcMain.handle('DataHubService.deleteHost', DataHubService.deleteHost );
 
     authApp = express()
     authApp.get('/', async (req: Request, res: Response) => {
