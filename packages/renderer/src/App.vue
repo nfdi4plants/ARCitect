@@ -15,7 +15,7 @@ import GitSyncView from './views/GitSyncView.vue';
 import GitHistoryView from './views/GitHistoryView.vue';
 import SwateView from './views/SwateView.vue';
 import ValidationView from './views/ValidationView.vue';
-import StatusView from './views/StatusView.vue';
+import StatusView from './views/StatusView/StatusView.vue';
 import SettingsView from './views/SettingsView.vue';
 
 import ConfirmationDialog from './dialogs/ConfirmationDialog.vue';
