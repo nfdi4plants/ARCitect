@@ -406,6 +406,18 @@ const test = async ()=>{
         </q-page>
       </q-page-container>
     </q-layout>
+
+    <div class='ModalLoading' v-if='ArcControlService.props.super_busy'>
+      <div>
+        <q-circular-progress
+          indeterminate
+          size="20em"
+          color="primary"
+          class="q-ma-md"
+          :thickness="0.6"
+        />
+      </div>
+    </div>
 </template>
 
 <style>

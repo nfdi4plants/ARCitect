@@ -1,3 +1,4 @@
+
 import { app, BrowserWindow, ipcMain, dialog, shell } from 'electron';
 import PATH from 'path';
 import FS from 'fs';
@@ -30,6 +31,10 @@ export const LocalFileSystemService = {
     let xlsx_files = [];
     LocalFileSystemService.getAllXLSX_(xlsx_files,root);
     return xlsx_files.map( p=>path_to_arcitect(p.replace(root+PATH.sep,'')) );
+  },
+
+  getAllFiles: async (e,root) => {
+    return FS.readdirSync(root, { recursive: true });
   },
 
   readDir: (e,path) => {
@@ -272,6 +277,7 @@ export const LocalFileSystemService = {
     ipcMain.handle('LocalFileSystemService.unregisterChangeListener', LocalFileSystemService.unregisterChangeListener);
     ipcMain.handle('LocalFileSystemService.getPathSeparator', LocalFileSystemService.getPathSeparator);
     ipcMain.handle('LocalFileSystemService.getAllXLSX', LocalFileSystemService.getAllXLSX);
+    ipcMain.handle('LocalFileSystemService.getAllFiles', LocalFileSystemService.getAllFiles);
     ipcMain.handle('LocalFileSystemService.getFileSizes', LocalFileSystemService.getFileSizes);
     ipcMain.handle('LocalFileSystemService.exists', LocalFileSystemService.exists);
     ipcMain.handle('LocalFileSystemService.openPath', LocalFileSystemService.openPath);
