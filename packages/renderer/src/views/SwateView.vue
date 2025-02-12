@@ -21,7 +21,7 @@ enum Msg {
   StudyToSwate,
   InvestigationToSwate,
   PathsToSwate,
-  MetadataToSwate
+  PersonsToSwate
 }
 
 interface Message {
@@ -63,11 +63,13 @@ const send = (msg: Msg, data: any = null): void => {
       } else return console.error('Invalid data type for Msg.AssayToSwate');
       break;
     case Msg.PathsToSwate:
-      let paths: [string] = data
-      toSwate({ paths: paths });
+      toSwate({ paths: data });
+      break;
+    case Msg.PersonsToSwate:
+      toSwate({ persons: ArcControlService.props.arc.ISA.GetAllPersons() });
       break;
     default:
-      toSwate(data)
+      toSwate(data);
       break;
     // Add more cases as needed
   }
@@ -103,6 +105,7 @@ const SwateAPI: SwateAPI = {
     }
     send(Msg.PathsToSwate, selection)
   },
+  RequestPersons: () => send(Msg.PersonsToSwate),
   InvestigationToARCitect: (investigationJsonString: string) => {
     let nextInvestigation = JsonController.Investigation.fromJsonString(investigationJsonString);
     let oldInvestigation = ArcControlService.props.arc.ISA
@@ -120,8 +123,6 @@ const SwateAPI: SwateAPI = {
     ArcControlService.saveARC({});
   },
   StudyToARCitect: (studyJsonString: string) => {
-    /// ignore assays, I am actually not sure why this must be create, but it will be empty. Must talk to Lukas Weil about this.
-    /// ~Kevin F. 12.01.2024
     let nextStudy = JsonController.Study.fromJsonString(studyJsonString);
     let oldStudy : ArcStudy | undefined = ArcControlService.props.arc.ISA.TryGetStudy(nextStudy.Identifier)
     if(oldStudy) {
