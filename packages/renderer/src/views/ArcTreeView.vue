@@ -84,7 +84,6 @@ const addStudy = async (event,node,study) => {
     }
     ArcControlService.props.arc.ISA.AddStudy(new_study);
     await ArcControlService.saveARC();
-    await ArcControlService.readARC();
   });
 };
 
@@ -110,7 +109,6 @@ const addAssay = async (event,node,assay) => {
     }
     ArcControlService.props.arc.ISA.AddAssay(new_assay);
     await ArcControlService.saveARC();
-    await ArcControlService.readARC();
   });
 };
 

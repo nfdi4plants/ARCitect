@@ -235,13 +235,13 @@ const ArcControlService = {
     await window.ipc.invoke('LocalFileSystemService.openPath', arc_root);
   },
 
-  updateARCfromFS: async ([path,type]) => {
-    if(ArcControlService.props.skip_fs_updates) return;
-    // track add/rm assays/studies through file explorer
-    const requires_update = path.includes('isa.assay.xlsx') || path.includes('isa.study.xlsx');
-    if(!requires_update) return;
-    debouncedReadARC();
-  },
+  // updateARCfromFS: async ([path,type]) => {
+    // if(ArcControlService.props.skip_fs_updates) return;
+    // // track add/rm assays/studies through file explorer
+    // const requires_update = path.includes('isa.assay.xlsx') || path.includes('isa.study.xlsx');
+    // if(!requires_update) return;
+    // debouncedReadARC();
+  // },
 
   updateGitIgnore: async (path:string) => {
     const entry = path.replace(ArcControlService.props.arc_root,'');
@@ -278,7 +278,7 @@ const ArcControlService = {
 
 const debouncedReadARC = pDebounce(ArcControlService.readARC, 300);
 
-window.ipc.on('LocalFileSystemService.updatePath', ArcControlService.updateARCfromFS);
+// window.ipc.on('LocalFileSystemService.updatePath', ArcControlService.updateARCfromFS);
 window.ipc.on('CORE.getArcRoot', callback=>window.ipc.invoke(callback, ArcControlService.props.arc_root));
 
 export default ArcControlService;
