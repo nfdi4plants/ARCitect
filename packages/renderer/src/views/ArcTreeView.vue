@@ -36,12 +36,12 @@ interface ArcTreeViewNode {
 let init: {
   nodes: ArcTreeViewNode [];
   root: string,
-  lfs_file_paths: string [],
+  lfs_files: Map<string,boolean>,
   selection: string,
 } = {
   nodes: [],
   root: '',
-  lfs_file_paths: [],
+  lfs_files: new Map(),
   selection: ''
 };
 
@@ -346,16 +346,32 @@ const patchRemote = url => {
 
 const updateLFSFiles = async ()=>{
   const lfs_files = await window.ipc.invoke('GitService.run', {
-    args: ['lfs','ls-files','-n'],
+    args: ['lfs','ls-files'],
     cwd: ArcControlService.props.arc_root
   });
   if(!lfs_files[0])
     return console.error('unable to fetch LFS file list');
 
-  props.lfs_file_paths = lfs_files[1].split('\n');
+  props.lfs_files = new Map();
+
+  lfs_files[1].split('\n').map(
+    r=>{
+      const e = r.split(' ');
+      props.lfs_files.set(e.slice(2).join(' '), e[1]==='*');
+    }
+  );
 };
 
 const downloadLFSFiles = async paths => {
+
+  if(!AppProperties.user)
+    return $q.dialog({
+      component: ConfirmationDialog,
+      componentProps: {
+        title: 'Authentication Error',
+        msg: 'You need to be logged in to download LFS files.'
+      }
+    });
 
   let response = null;
 
@@ -419,6 +435,7 @@ const downloadLFSFiles = async paths => {
   });
 
   dialogProps.state=1;
+  await updateLFSFiles();
 };
 
 const onCellContextMenu = async (e,node) => {
@@ -473,7 +490,7 @@ const onCellContextMenu = async (e,node) => {
       onClick: ()=>importFilesOrDirectories(node,'selectAnyDirectories')
     });
 
-    const lfs_files_in_directory = props.lfs_file_paths.filter(x=>x.includes(node.id_rel));
+    const lfs_files_in_directory = [ ...props.lfs_files.keys() ].filter(x=>x.startsWith(node.id_rel));
     if(lfs_files_in_directory.length)
       items.push({
         label: "Download LFS Files",
@@ -481,7 +498,7 @@ const onCellContextMenu = async (e,node) => {
         onClick: ()=>downloadLFSFiles(lfs_files_in_directory)
       });
   } else {
-    if(props.lfs_file_paths.includes(node.id_rel)){
+    if(props.lfs_files.has(node.id_rel)){
       items.push({
         label: "Download LFS File",
         icon: h( 'i', icon_style, ['cloud_download'] ),
@@ -706,7 +723,7 @@ watch(()=>AppProperties.state, async (newValue, oldValue) => {
             <td style="text-align:right">
               <q-icon v-if='prop.node.type==="assays"' name='add' class='tree_button' @click='e=>addAssay(e,prop.node)'></q-icon>
               <q-icon v-if='prop.node.type==="studies"' name='add' class='tree_button' @click='e=>addStudy(e,prop.node)'></q-icon>
-              <q-badge v-if='props.lfs_file_paths.includes(prop.node.id_rel)' color="secondary" text-color="white" label="LFS" class='tree_button'/>
+              <q-badge v-if='props.lfs_files.has(prop.node.id_rel)' :color="props.lfs_files.get(prop.node.id_rel) ? 'secondary' : 'grey-6'" text-color="white" label="LFS" class='tree_button'/>
             </td>
           </tr></tbody></table>
         </div>

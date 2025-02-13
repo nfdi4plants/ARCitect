@@ -167,6 +167,8 @@ const ArcControlService = {
     if(!arc_root)
       return;
 
+    ArcControlService.props.skip_fs_updates = true;
+
     arc.UpdateFileSystem();
     let contracts = options.force ? arc.GetWriteContracts() : arc.GetUpdateContracts();
 
@@ -184,6 +186,8 @@ const ArcControlService = {
 
     if(!ArcControlService.props.busy)
       await ArcControlService.processContractStack(arc, arc_root);
+
+    ArcControlService.props.skip_fs_updates = false;
   },
 
   delete: async (method:string, identifier:string) => {
@@ -235,13 +239,13 @@ const ArcControlService = {
     await window.ipc.invoke('LocalFileSystemService.openPath', arc_root);
   },
 
-  // updateARCfromFS: async ([path,type]) => {
-    // if(ArcControlService.props.skip_fs_updates) return;
-    // // track add/rm assays/studies through file explorer
-    // const requires_update = path.includes('isa.assay.xlsx') || path.includes('isa.study.xlsx');
-    // if(!requires_update) return;
-    // debouncedReadARC();
-  // },
+  updateARCfromFS: async ([path,type]) => {
+    if(ArcControlService.props.skip_fs_updates) return;
+    // track add/rm assays/studies through file explorer
+    const requires_update = path.includes('isa.assay.xlsx') || path.includes('isa.study.xlsx');
+    if(!requires_update) return;
+    debouncedReadARC();
+  },
 
   updateGitIgnore: async (path:string) => {
     const entry = path.replace(ArcControlService.props.arc_root,'');
