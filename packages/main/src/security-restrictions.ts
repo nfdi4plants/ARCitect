@@ -94,13 +94,13 @@ app.on('web-contents-created', (_, contents) => {
     const {origin} = new URL(url);
 
     // @ts-expect-error Type checking is performed in runtime
-    if (ALLOWED_EXTERNAL_ORIGINS.has(origin)) {
+    // if (ALLOWED_EXTERNAL_ORIGINS.has(origin)) {
       // Open default browser
       shell.openExternal(url).catch(console.error);
 
-    } else if (import.meta.env.DEV) {
-      console.warn('Blocked the opening of an unallowed origin:', origin);
-    }
+    // } else if (import.meta.env.DEV) {
+    //   console.warn('Blocked the opening of an unallowed origin:', origin);
+    // }
 
     // Prevent creating new window in application
     return {action: 'deny'};
