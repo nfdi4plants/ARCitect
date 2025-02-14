@@ -15,15 +15,14 @@ const default_header = {
 };
 
 export const InternetService = {
-
   getWebPageAsJson: async (e,options): Promise<any> => {
     // check if server is available
+
     try {
       await net.resolveHost(options.host);
     } catch(err) {
       return new Promise((resolve,reject)=>resolve(null));
     }
-
     // get json data
     return new Promise(
       (resolve, reject) => {
@@ -46,6 +45,12 @@ export const InternetService = {
               resolve(null);
             }
           })
+          /** net.request does not throw error on ERR_CONNECTION_TIMED_OUT and similar,
+           * there will me a rather interuptive, non helpful message to the user, that there is a connection error
+           * in a case like that the promise will not be resolved 
+           * as an intermediate we "catch" the error in .on('error') and resolve the promise with null
+           */
+          request.on('error', err => {resolve(null);});
           request.end()
         }catch(err){
           resolve(null);
