@@ -31,7 +31,6 @@ const AppProperties: {
   datahub_hosts_msgs: {},
 
   force_commit_update: 0,
-  force_lfs_update: 0,
 
   config: {
     gitDebug: false,

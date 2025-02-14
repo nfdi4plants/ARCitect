@@ -216,7 +216,7 @@ export const LocalFileSystemService = {
       file_path = path_to_system(file_path);
       let size = 0;
       try {
-        size = FS.statSync(file_path).size / (1024*1024);
+        size = FS.statSync(file_path).size;
       } catch {}
       sizes.push( size );
     }

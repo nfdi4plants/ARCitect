@@ -9,6 +9,7 @@ import a_select from '../components/a_select.vue';
 import a_tooltip from '../components/a_tooltip.vue';
 import a_select_git_branch from '../components/a_select_git_branch.vue';
 import ArcControlService from '../ArcControlService.ts';
+import GitService from '../GitService.ts';
 
 import AppProperties from '../AppProperties.ts';
 
@@ -21,9 +22,8 @@ import { useQuasar } from 'quasar'
 const $q = useQuasar();
 
 interface Props {
-  git_status: string[][],
+  status_listener: Function,
   error: string,
-  lfs_limit: number,
   commit: {
     name: string,
     email: string,
@@ -33,10 +33,7 @@ interface Props {
 
 const iProps : Props = reactive({
   status_listener: null,
-  git_status: [],
   error: '',
-  lfs_limit: 1,
-  rebase_in_progress: true,
 
   commit: {
     name: '',
@@ -50,54 +47,24 @@ const raiseError = err => {
   return false;
 };
 
-const getStatus = async()=>{
-  const status_raw = await window.ipc.invoke('GitService.run', {
-    args: [`status`],
-    cwd: ArcControlService.props.arc_root
-  });
-  iProps.rebase_in_progress = status_raw[1].startsWith('interactive rebase in progress');
-
-  const response = await window.ipc.invoke('GitService.run', {
-    args: [`status`,`-z`,`-u`],
-    cwd: ArcControlService.props.arc_root
-  });
-  const status = response[1].split('\u0000').map(x => [x.slice(0,2),x.slice(3)]).slice(0,-1);
-  const sizes = await window.ipc.invoke('LocalFileSystemService.getFileSizes', status.map(x=> ArcControlService.props.arc_root +'/'+x[1]));
-  for(let i in sizes)
-    status[i].push(sizes[i]);
-  iProps.git_status = status;
-};
-
-const setGitUser = async(name,email)=>{
-  let response = null;
-
-  // set git user and email
-  response = await window.ipc.invoke('GitService.run', {
-    args: [`config`,`--replace-all`,`user.name`,'"'+name+'"'],
-    cwd: ArcControlService.props.arc_root
-  });
-  if(!response[0]) return response;
-  response = await window.ipc.invoke('GitService.run', {
-    args: [`config`,`--replace-all`,`user.email`,email],
-    cwd: ArcControlService.props.arc_root
-  });
-  return response;
-};
-
 const trackChanges = async () => {
   let git_lfs = [];
   let git_add = [];
   let git_rm = [];
-  for(let item of iProps.git_status){
-    if(item[0].includes('D')){
-      git_rm.push(item[1]);
+
+  const leaf_nodes = [];
+  GitService.get_leaf_nodes(leaf_nodes);
+
+  for(let node of leaf_nodes){
+    if(node.type.includes('D')){
+      git_rm.push(node.id);
     } else {
-      git_add.push(item[1]);
-      if(isTrackedWithLFS(item)){
+      git_add.push(node.id);
+      if(GitService._.change_tree_selected.includes(node.id)){
         const gitattributes = '.gitattributes';
         if(!git_add.includes(gitattributes))
           git_add.push(gitattributes);
-        git_lfs.push(item[1]);
+        git_lfs.push(node.id);
       }
     }
   }
@@ -142,7 +109,7 @@ const commit = async()=>{
   });
 
   let response=null;
-  response = await setGitUser(name,email);
+  response = await GitService.set_git_user(name,email);
   if(!response[0])
     return dialogProps.state=2;
 
@@ -159,11 +126,7 @@ const commit = async()=>{
 
   dialogProps.state = 1;
 
-  AppProperties.force_lfs_update++;
-};
-
-const isTrackedWithLFS = item=>{
-  return item[2]>=parseFloat(iProps.lfs_limit);
+  GitService.update_lfs_files();
 };
 
 const abortMerge = async()=>{
@@ -235,28 +198,33 @@ const init = async()=>{
     AppProperties.state = AppProperties.STATES.HOME;
 
   iProps.error = '';
-  await getStatus();
+  await GitService.parse_status();
 
   iProps.commit.name = AppProperties.user.name;
   iProps.commit.email = AppProperties.user.email;
   iProps.commit.msg = '';
 };
 
-const debouncedGetStatus = pDebounce(getStatus,300);
-const filteredGetStatus = ([path,type])=>{
+const debouncedParseStatus = pDebounce(GitService.parse_status,300);
+const filteredParseStatus = ([path,type])=>{
   if(path.startsWith(ArcControlService.props.arc_root+'/.git/')) return;
-  debouncedGetStatus();
+  debouncedParseStatus();
 };
 
 onMounted(()=>{
   watch(()=>AppProperties.user, init);
   watch(()=>AppProperties.force_commit_update, init);
-  iProps.status_listener = window.ipc.on('LocalFileSystemService.updatePath', filteredGetStatus);
+  iProps.status_listener = window.ipc.on('LocalFileSystemService.updatePath', filteredParseStatus);
   init();
 });
 onUnmounted(()=>{
   iProps.status_listener();
 });
+
+const formatFileSize = (size) => {
+  var i = size == 0 ? 0 : Math.floor(Math.log(size) / Math.log(1024));
+  return +((size / Math.pow(1024, i)).toFixed(2)) * 1 + ' ' + ['B', 'KB', 'MB', 'GB', 'TB'][i];
+}
 
 </script>
 
@@ -302,13 +270,12 @@ onUnmounted(()=>{
 
           <div class='row' >
             <div class='col'>
-              <a_input type="number" v-model='iProps.lfs_limit' label="Large File Storage Limit in MB"/>
+              <a_input type="number" v-model='GitService._.lfs_size_limit' label="Large File Storage Limit in MB"/>
               <a_tooltip>
                 You can adapt the large file storage (LFS) Limit as needed
               </a_tooltip>
             </div>
           </div>
-
         </q-card-section>
 
         <br>
@@ -316,45 +283,58 @@ onUnmounted(()=>{
         <br>
 
         <q-card-section style="padding-top:0">
-          <q-list dense>
-            <q-item>
-                <a_tooltip>
-                  Here the changes to all files in your ARC are displayed together with the file size:<br>
-                  <ul>
-                    <li><q-icon color='secondary' name='inventory'/>: No changes</li>
-                    <li><q-icon name="edit_square" color="secondary" />: The file was edited</li>
-                    <li><q-icon name="add_box" color="secondary" />: The file was added</li>
-                    <li><q-icon name="indeterminate_check_box" color="red-10" />: The file was deleted</li>
-                  </ul>
-                </a_tooltip>
-              <q-item-section>
-                <q-item-label style="font-weight:bold;font-size:1em;">Changes</q-item-label>
-              </q-item-section>
-            </q-item>
+          <q-tree
+            v-if='GitService._.change_tree.length && GitService._.change_tree[0].children.length'
+            :nodes="GitService._.change_tree"
+            node-key="id"
+            label-key="name"
+            v-model:expanded="GitService._.change_tree_expanded"
+            v-model:selected="GitService._.change_tree_selected_"
+            dense
+            style="display:inline-block"
+          >
+            <template v-slot:header-root="prop">
+              <div class="row items-center">
+                <div class="text-weight-bold text-primary text-body1">{{ prop.node.name }}
+                  <q-icon name="help" color='grey-6'/>
+                  <q-tooltip style="font-size:1.1em">
+                    This tree lists all files that will be added <q-icon name="add_box" color='white'/>, removed <q-icon name="indeterminate_check_box" color='white'/>, and updated <q-icon name="edit_square" color='white'/>.<br>
+                    Their file sizes and if they are tracked by <q-badge color="white" text-color="grey-9" label="LFS" /> are shown on the right.<br>
+                    By clicking on nodes one can track or untrack individual files and directories with LFS.
+                  </q-tooltip>
+                </div>
+              </div>
+            </template>
 
-            <q-item v-if='iProps.git_status.length<1'>
-              <q-item-section avatar>
-                <q-icon color='secondary' name='inventory'></q-icon>
-              </q-item-section>
-              <q-item-section>
-                <q-item-label>No changes to commit</q-item-label>
-              </q-item-section>
-            </q-item>
-
-            <q-item v-for='(state,i) in iProps.git_status'>
-              <q-item-section avatar style="min-width:2em;">
-                <q-icon :color="state[0].includes('D') ? 'red-10' : 'secondary'" :name="state[0].includes('M') ? 'edit_square' : state[0].includes('D') ? 'indeterminate_check_box' : 'add_box'"></q-icon>
-              </q-item-section>
-              <q-item-section>
-                <q-item-label>{{state[1]}} <span :style="isTrackedWithLFS(state) ? 'font-weight:bold':''">{{!state[0].includes("D") ? `(${state[2].toFixed(2)} MB)` : ''}}</span></q-item-label>
-              </q-item-section>
-            </q-item>
-          </q-list>
+            <template v-slot:default-header="prop">
+              <div
+                style="display:flex;cursor:pointer;white-space: nowrap;width:100%"
+              >
+                <q-icon
+                  v-if='prop.node.icon' :name="prop.node.icon" style="margin-right:0.2em;flex-shrink:0;"
+                  :color='prop.node.icon==="indeterminate_check_box" ? "red" : "teal"'
+                />
+                <span class="text-black" style="margin-right:0.2em;flex-grow:1;">{{ prop.node.name }}</span>
+                <q-badge
+                  color="transparent"
+                  text-color="grey"
+                  :label="formatFileSize(prop.node.size)" style="margin-left:1em;flex-shrink:0"
+                />
+                <q-badge v-if='GitService._.change_tree_selected.includes(prop.node.id)' color="teal" text-color="white" label="LFS" style="margin-left:1em;flex-shrink:0"/>
+              </div>
+            </template>
+          </q-tree>
+          <q-banner v-else class="">
+            <template v-slot:avatar>
+              <q-icon name="warning" color="grey-6" />
+            </template>
+            No Changes to Commit
+          </q-banner>
         </q-card-section>
 
         <q-card-actions align='right' style="padding:0 2.1em 1em 2.1em;">
           <a_btn v-if='iProps.error' color="red-10" icon='warning' :label="iProps.error" no-caps style="margin-right:auto"/>
-          <a_btn v-if='iProps.rebase_in_progress' label="Abort Merge" @click="abortMerge" icon='dangerous' color='red-10'>
+          <a_btn v-if='GitService._.rebase_in_progress' label="Abort Merge" @click="abortMerge" icon='dangerous' color='red-10'>
             <a_tooltip>
               There is an interactive git rebase in progress. You can abort the merge process by reverting back to the last commit.
             </a_tooltip>
@@ -364,7 +344,7 @@ onUnmounted(()=>{
               Click RESET to undo your latest changes and convert the ARC to the last saved commit
             </a_tooltip>
           </a_btn>
-          <a_btn label="Commit" @click="commit" icon='check_circle' :disabled='iProps.git_status.length<1'>
+          <a_btn label="Commit" @click="commit" icon='check_circle' :disabled='GitService._.change_tree.length<1 || GitService._.change_tree[0].children.length<1'>
             <a_tooltip>
               Once ready, click COMMIT to store your changes locally
             </a_tooltip>
