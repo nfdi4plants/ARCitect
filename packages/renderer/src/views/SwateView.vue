@@ -133,7 +133,7 @@ type OutgoingMsg = {
 /// Update this to add more Swate initiated messages
 /// Incoming parameters are packed inside array
 const IncomingMsgHandlers: Record<string, (data: any) => Promise<any>> = {
-  TestHello: async ([data]: [string]) => {
+  TestHello: async (data: string) => {
     return `Hello, ${data}!`;
   },
   Save: async ([type, json]: [InteropTypes.ArcFiles, string]) => {
@@ -227,7 +227,7 @@ const IncomingMsgHandlers: Record<string, (data: any) => Promise<any>> = {
     }
     return data;
   },
-  RequestPaths: async ([{ target, dictionaries }]: [InteropTypes.RequestPathsPojo]) => {
+  RequestPaths: async ({ target, dictionaries }: InteropTypes.RequestPathsPojo) => {
     selectPathsAndSend(target, dictionaries); // don't await this, as we want to return `true` asap
     return true; 
   },
