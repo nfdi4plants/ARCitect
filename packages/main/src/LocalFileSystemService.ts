@@ -107,7 +107,7 @@ export const LocalFileSystemService = {
 
   readConfig: ()=>{
     const config = LocalFileSystemService.readFile(null,app.getPath('userData')+'/ARCitect.json');
-    return JSON.parse(config) || {};
+    return JSON.parse(config as string) || {};
   },
 
   writeConfig: (e,config)=>{
