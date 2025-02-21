@@ -87,11 +87,29 @@ async function handleRequest(api: string, requestId: string, data: any) {
     }
 }
 
-enum ArcFiles {
-  Assay = "assay",
-  Study = "study",
-  Investigation = "investigation",
-  Template = "template",
+namespace InteropTypes {
+
+  export enum ArcFiles {
+    Assay = "assay",
+    Study = "study",
+    Investigation = "investigation",
+    Template = "template",
+  }
+  
+  export enum SwatePathsTargets {
+    FilePicker = "filePicker",
+    DataAnnotator = "dataAnnotator"
+  }
+
+  export interface RequestPathsPojo { 
+    target: SwatePathsTargets, 
+    dictionaries: boolean
+  }
+
+  export interface ResponsePathsPojo { 
+    target: SwatePathsTargets, 
+    paths: string []
+  }
 }
 
 interface Props {
@@ -109,7 +127,7 @@ const iProps: Props = reactive({
 /// Update this to add more ARCitect initiated messages
 type OutgoingMsg = {
   TestHello: { request: string; response: string };
-  ResponsePaths: {request: string[]; response: boolean}
+  ResponsePaths: {request: InteropTypes.ResponsePathsPojo; response: boolean}
 };
 
 /// Update this to add more Swate initiated messages
@@ -118,9 +136,9 @@ const IncomingMsgHandlers: Record<string, (data: any) => Promise<any>> = {
   TestHello: async ([data]: [string]) => {
     return `Hello, ${data}!`;
   },
-  Save: async ([type, json]: [ArcFiles, string]) => {
+  Save: async ([type, json]: [InteropTypes.ArcFiles, string]) => {
     switch (type) {
-      case ArcFiles.Assay:
+      case InteropTypes.ArcFiles.Assay:
         let nextAssay = JsonController.Assay.fromJsonString(json);
         let oldAssay = ArcControlService.props.arc.ISA.TryGetAssay(nextAssay.Identifier);
         if(oldAssay) {
@@ -128,7 +146,7 @@ const IncomingMsgHandlers: Record<string, (data: any) => Promise<any>> = {
         }
         ArcControlService.props.arc.ISA.SetAssay(nextAssay.Identifier, nextAssay);
         break;
-      case ArcFiles.Study:
+      case InteropTypes.ArcFiles.Study:
         let nextStudy = JsonController.Study.fromJsonString(json);
         let oldStudy : ArcStudy | undefined = ArcControlService.props.arc.ISA.TryGetStudy(nextStudy.Identifier)
         if(oldStudy) {
@@ -136,7 +154,7 @@ const IncomingMsgHandlers: Record<string, (data: any) => Promise<any>> = {
         }
         ArcControlService.props.arc.ISA.SetStudy(nextStudy.Identifier, nextStudy);
         break;
-      case ArcFiles.Investigation:
+      case InteropTypes.ArcFiles.Investigation:
         let nextInvestigation = JsonController.Investigation.fromJsonString(json);
         let oldInvestigation = ArcControlService.props.arc.ISA
         nextInvestigation.StaticHash = oldInvestigation.StaticHash;
@@ -144,7 +162,7 @@ const IncomingMsgHandlers: Record<string, (data: any) => Promise<any>> = {
         nextInvestigation.Studies = oldInvestigation.Studies;
         ArcControlService.props.arc.ISA = nextInvestigation;
         break;
-      case ArcFiles.Template:
+      case InteropTypes.ArcFiles.Template:
         // Handle template
         new Error(`Template support not implemented: ${type}`);
         break;
@@ -155,7 +173,7 @@ const IncomingMsgHandlers: Record<string, (data: any) => Promise<any>> = {
     return;
   },
   Init: async ([]) => {
-    let data: [ArcFiles, string] | undefined;
+    let data: [InteropTypes.ArcFiles, string] | undefined;
     switch(SwateControlService.props.type){
       case 0: 
         let i = SwateControlService.props.object;
@@ -177,7 +195,7 @@ const IncomingMsgHandlers: Record<string, (data: any) => Promise<any>> = {
               i.Comments
           );
           const jsonString = JsonController.Investigation.toJsonString(iCopy,0);
-          data = [ArcFiles.Investigation, jsonString];
+          data = [InteropTypes.ArcFiles.Investigation, jsonString];
         } else {
           throw new Error('Invalid data type for SwateControlService');
         }
@@ -186,7 +204,7 @@ const IncomingMsgHandlers: Record<string, (data: any) => Promise<any>> = {
         let s = SwateControlService.props.object;
         if (s instanceof ArcStudy) {
           const jsonString = JsonController.Study.toJsonString(s,0);
-          data = [ArcFiles.Study, jsonString];
+          data = [InteropTypes.ArcFiles.Study, jsonString];
         } else {
           throw new Error('Invalid data type for SwateControlService');
         }
@@ -195,7 +213,7 @@ const IncomingMsgHandlers: Record<string, (data: any) => Promise<any>> = {
         let a = SwateControlService.props.object;
         if (a instanceof ArcAssay) {
           const jsonString = JsonController.Assay.toJsonString(a,0);
-          data = [ArcFiles.Assay, jsonString];
+          data = [InteropTypes.ArcFiles.Assay, jsonString];
         } else {
           throw new Error('Invalid data type for SwateControlService');
         }
@@ -209,8 +227,8 @@ const IncomingMsgHandlers: Record<string, (data: any) => Promise<any>> = {
     }
     return data;
   },
-  RequestPaths: async ([selectDirectories]: [boolean]) => {
-    selectPathsAndSend(selectDirectories); // don't await this, as we want to return `true` asap
+  RequestPaths: async ([{ target, dictionaries }]: [InteropTypes.RequestPathsPojo]) => {
+    selectPathsAndSend(target, dictionaries); // don't await this, as we want to return `true` asap
     return true; 
   },
   RequestPersons: async ([]) => {
@@ -228,11 +246,11 @@ const testClick = async () => {
   console.log("[ARCitect]", response);
 }
 
-const selectPathsAndSend = async (selectDirectories: boolean) => {
+const selectPathsAndSend = async (target: InteropTypes.SwatePathsTargets, dictionaries: boolean) => {
   let selection: null | string[] = null;
   let options: Electron.OpenDialogOptions = {}
   options.defaultPath = ArcControlService.props.arc_root!;
-  if (selectDirectories) {
+  if (dictionaries) {
     selection = await window.ipc.invoke("LocalFileSystemService.selectAnyDirectories")
   } else {
     selection = await window.ipc.invoke("LocalFileSystemService.selectAnyFiles")
@@ -241,8 +259,7 @@ const selectPathsAndSend = async (selectDirectories: boolean) => {
   if (ArcControlService.props.arc_root && selection[0].startsWith(ArcControlService.props.arc_root)) {
     selection = selection.map((p: string) => p.replaceAll(ArcControlService.props.arc_root!, "."))
   }
-  let response = await sendMessageWithResponse("ResponsePaths", selection);
-  console.log("[ARCitect]", response);
+  let response = await sendMessageWithResponse("ResponsePaths", {target, paths: selection});
 }
 
 const init = async () => {
