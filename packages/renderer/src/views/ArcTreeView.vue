@@ -4,6 +4,7 @@ import { reactive, ref, nextTick, watch, onMounted, onUnmounted, h } from 'vue';
 import ContextMenu from '@imengyu/vue3-context-menu'
 import AppProperties from '../AppProperties';
 import ArcControlService from '../ArcControlService';
+import GitService from '../GitService';
 import SwateControlService from '../SwateControlService';
 import {Investigation, Assays, Studies, Workflows, Runs, Dataset, Protocols} from '../ArcControlService';
 import ConfirmationDialog from '../dialogs/ConfirmationDialog.vue';
@@ -36,12 +37,10 @@ interface ArcTreeViewNode {
 let init: {
   nodes: ArcTreeViewNode [];
   root: string,
-  lfs_file_paths: string [],
   selection: string,
 } = {
   nodes: [],
   root: '',
-  lfs_file_paths: [],
   selection: ''
 };
 
@@ -84,7 +83,6 @@ const addStudy = async (event,node,study) => {
     }
     ArcControlService.props.arc.ISA.AddStudy(new_study);
     await ArcControlService.saveARC();
-    await ArcControlService.readARC();
   });
 };
 
@@ -110,7 +108,6 @@ const addAssay = async (event,node,assay) => {
     }
     ArcControlService.props.arc.ISA.AddAssay(new_assay);
     await ArcControlService.saveARC();
-    await ArcControlService.readARC();
   });
 };
 
@@ -332,32 +329,16 @@ const createDirectory = async node=>{
   });
 };
 
-const getUrlCredentials = url => {
-  // Regular expression to match URLs with embedded credentials
-  const regex = /^(https?|git|ssh):\/\/([^\/:@]+(:[^\/:@]+)?@)?([^\/:]+)(:[0-9]+)?(\/.*)?$/;
-  // Test the URL against the regular expression
-  const match = url.match(regex);
-  return match ? (match[2] || '') : '';
-};
-
-const patchRemote = url => {
-  return AppProperties.user && url.includes(AppProperties.user.host) && getUrlCredentials(url)===''
-    ? `https://oauth2:${AppProperties.user.token.access_token}@${AppProperties.user.host}` + url.split(AppProperties.user.host)[1]
-    : url;
-};
-
-const updateLFSFiles = async ()=>{
-  const lfs_files = await window.ipc.invoke('GitService.run', {
-    args: ['lfs','ls-files','-n'],
-    cwd: ArcControlService.props.arc_root
-  });
-  if(!lfs_files[0])
-    return console.error('unable to fetch LFS file list');
-
-  props.lfs_file_paths = lfs_files[1].split('\n');
-};
-
 const downloadLFSFiles = async paths => {
+
+  if(!AppProperties.user)
+    return $q.dialog({
+      component: ConfirmationDialog,
+      componentProps: {
+        title: 'Authentication Error',
+        msg: 'You need to be logged in to download LFS files.'
+      }
+    });
 
   let response = null;
 
@@ -388,7 +369,7 @@ const downloadLFSFiles = async paths => {
   const remote_url = response[1].split('\n')[0];
 
   // patch remote
-  const patched_remote_url = patchRemote(remote_url);
+  const patched_remote_url = GitService.patch_remote(remote_url);
 
   response = await window.ipc.invoke('GitService.run', {
     args: [`remote`,`set-url`,remote_name,patched_remote_url],
@@ -421,6 +402,7 @@ const downloadLFSFiles = async paths => {
   });
 
   dialogProps.state=1;
+  await GitService.update_lfs_files();
 };
 
 const onCellContextMenu = async (e,node) => {
@@ -475,7 +457,7 @@ const onCellContextMenu = async (e,node) => {
       onClick: ()=>importFilesOrDirectories(node,'selectAnyDirectories')
     });
 
-    const lfs_files_in_directory = props.lfs_file_paths.filter(x=>x.includes(node.id_rel));
+    const lfs_files_in_directory = [ ...GitService._.lfs_files.keys() ].filter(x=>x.startsWith(node.id_rel));
     if(lfs_files_in_directory.length)
       items.push({
         label: "Download LFS Files",
@@ -483,7 +465,7 @@ const onCellContextMenu = async (e,node) => {
         onClick: ()=>downloadLFSFiles(lfs_files_in_directory)
       });
   } else {
-    if(props.lfs_file_paths.includes(node.id_rel)){
+    if(GitService._.lfs_files.has(node.id_rel)){
       items.push({
         label: "Download LFS File",
         icon: h( 'i', icon_style, ['cloud_download'] ),
@@ -636,8 +618,6 @@ const onCellContextMenu = async (e,node) => {
 onMounted( ()=>{update_path_listener = window.ipc.on('LocalFileSystemService.updatePath', updatePath);} );
 onUnmounted( ()=>{update_path_listener();} );
 
-watch(()=>AppProperties.force_lfs_update, updateLFSFiles);
-
 watch(()=>ArcControlService.props.arc_root, async (newValue, oldValue) => {
   if(oldValue)
     window.ipc.invoke('LocalFileSystemService.unregisterChangeListener', oldValue);
@@ -658,7 +638,7 @@ watch(()=>ArcControlService.props.arc_root, async (newValue, oldValue) => {
   await nextTick();
   arcTree._value.setExpanded(props.root);
 
-  await updateLFSFiles();
+  await GitService.update_lfs_files();
 });
 
 watch(()=>AppProperties.state, async (newValue, oldValue) => {
@@ -708,7 +688,7 @@ watch(()=>AppProperties.state, async (newValue, oldValue) => {
             <td style="text-align:right">
               <q-icon v-if='prop.node.type==="assays"' name='add' class='tree_button' @click='e=>addAssay(e,prop.node)'></q-icon>
               <q-icon v-if='prop.node.type==="studies"' name='add' class='tree_button' @click='e=>addStudy(e,prop.node)'></q-icon>
-              <q-badge v-if='props.lfs_file_paths.includes(prop.node.id_rel)' color="secondary" text-color="white" label="LFS" class='tree_button'/>
+              <q-badge v-if='GitService._.lfs_files.has(prop.node.id_rel)' :color="GitService._.lfs_files.get(prop.node.id_rel) ? 'secondary' : 'grey-6'" text-color="white" label="LFS" class='tree_button'/>
             </td>
           </tr></tbody></table>
         </div>

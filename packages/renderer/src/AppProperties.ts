@@ -1,9 +1,19 @@
 import { reactive, watch } from 'vue'
 import App from './App.vue';
 
+interface Config {
+  gitDebug: boolean,
+  toolbarMinimized: boolean,
+  showHelp: boolean,
+  showTooltips: boolean,
+  swate_url: string
+}
+
 const AppProperties: {
   STATES: any,
   state: number,
+  config: Config,
+  read_config: () => Promise<void>
 } = reactive({
   STATES: {
     HOME: 0,
@@ -33,7 +43,6 @@ const AppProperties: {
   datahub_hosts_msgs: {},
 
   force_commit_update: 0,
-  force_lfs_update: 0,
 
   config: {
     gitDebug: false,
@@ -44,10 +53,8 @@ const AppProperties: {
   },
 
   read_config: async ()=>{
-    const config = await window.ipc.invoke('LocalFileSystemService.readConfig');
-    for(let key of Object.keys(config)){
-      AppProperties.config[key] = config[key];
-    }
+    const config = await window.ipc.invoke('LocalFileSystemService.readConfig') as Partial<Config>;
+    Object.assign(AppProperties.config, config);
   }
 });
 

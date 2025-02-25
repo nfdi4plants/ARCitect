@@ -21,7 +21,8 @@ export const Workflows = 'workflows';
 
 let init: {
     arc_root: undefined | string ,
-    busy: boolean,
+    busy: boolean, // ui interactive
+    super_busy: boolean, // ui is blocking
     arc: null | ARC,
     git_initialized: boolean,
     skip_fs_updates: boolean,
@@ -29,6 +30,7 @@ let init: {
 } = {
     arc_root: undefined ,
     busy: false,
+    super_busy: false,
     arc: null,
     git_initialized: false,
     skip_fs_updates: false,
@@ -75,8 +77,10 @@ const ArcControlService = {
       return false;
     }
 
-    const xlsx_files = await window.ipc.invoke('LocalFileSystemService.getAllXLSX', arc_root);
-    const arc = ARC.fromFilePaths(xlsx_files);
+    ArcControlService.props.super_busy = true;
+
+    const files = await window.ipc.invoke('LocalFileSystemService.getAllFiles', arc_root);
+    const arc = ARC.fromFilePaths(files);
     const contracts = arc.GetReadContracts();
     for(const contract of contracts){
       const buffer = await window.ipc.invoke('LocalFileSystemService.readFile', [arc_root+'/'+contract.Path,{}]);
@@ -92,6 +96,9 @@ const ArcControlService = {
     });
     ArcControlService.props.git_initialized = git_initialized[0];
     console.log(arc);
+
+    ArcControlService.props.super_busy = false;
+
     return true;
   },
 
@@ -160,6 +167,8 @@ const ArcControlService = {
     if(!arc_root)
       return;
 
+    ArcControlService.props.skip_fs_updates = true;
+
     arc.UpdateFileSystem();
     let contracts = options.force ? arc.GetWriteContracts() : arc.GetUpdateContracts();
 
@@ -177,6 +186,8 @@ const ArcControlService = {
 
     if(!ArcControlService.props.busy)
       await ArcControlService.processContractStack(arc, arc_root);
+
+    ArcControlService.props.skip_fs_updates = false;
   },
 
   delete: async (method:string, identifier:string) => {
@@ -271,7 +282,7 @@ const ArcControlService = {
 
 const debouncedReadARC = pDebounce(ArcControlService.readARC, 300);
 
-window.ipc.on('LocalFileSystemService.updatePath', ArcControlService.updateARCfromFS);
+// window.ipc.on('LocalFileSystemService.updatePath', ArcControlService.updateARCfromFS);
 window.ipc.on('CORE.getArcRoot', callback=>window.ipc.invoke(callback, ArcControlService.props.arc_root));
 
 export default ArcControlService;
