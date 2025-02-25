@@ -95,21 +95,14 @@ namespace InteropTypes {
     Investigation = "investigation",
     Template = "template",
   }
+
+  export interface ARCitectFileInfo {
+    name: string,
+    size: number,
+    type: string,
+    content: string
+  }
   
-  export enum SwatePathsTargets {
-    FilePicker = "filePicker",
-    DataAnnotator = "dataAnnotator"
-  }
-
-  export interface RequestPathsPojo { 
-    target: SwatePathsTargets, 
-    dictionaries: boolean
-  }
-
-  export interface ResponsePathsPojo { 
-    target: SwatePathsTargets, 
-    paths: string []
-  }
 }
 
 interface Props {
@@ -127,7 +120,8 @@ const iProps: Props = reactive({
 /// Update this to add more ARCitect initiated messages
 type OutgoingMsg = {
   TestHello: { request: string; response: string };
-  ResponsePaths: {request: InteropTypes.ResponsePathsPojo; response: boolean}
+  ResponsePaths: {request: string[]; response: boolean}
+  ResponseFile: {request: InteropTypes.ARCitectFileInfo; response: boolean}
 };
 
 /// Update this to add more Swate initiated messages
@@ -227,9 +221,13 @@ const IncomingMsgHandlers: Record<string, (data: any) => Promise<any>> = {
     }
     return data;
   },
-  RequestPaths: async ({ target, dictionaries }: InteropTypes.RequestPathsPojo) => {
-    selectPathsAndSend(target, dictionaries); // don't await this, as we want to return `true` asap
+  RequestPaths: async (selectDictionaries: boolean) => {
+    selectPathsAndSend(selectDictionaries); // don't await this, as we want to return `true` asap
     return true; 
+  },
+  RequestFile: async () => {
+    selectFileAndSend(); // don't await this, as we want to return `true` asap
+    return true
   },
   RequestPersons: async ([]) => {
     const persons: Person[] = ArcControlService.props.arc.ISA.GetAllPersons();
@@ -241,16 +239,24 @@ const IncomingMsgHandlers: Record<string, (data: any) => Promise<any>> = {
   }
 } as const;
 
-const testClick = async () => {
-  let response = await sendMessageWithResponse("TestHello", "Kevin");
-  console.log("[ARCitect]", response);
+const selectFileAndSend = async () => {
+  let selection: undefined | InteropTypes.ARCitectFileInfo;
+  let options: Electron.OpenDialogOptions = {}
+  options.defaultPath = ArcControlService.props.arc_root!;
+  selection = await window.ipc.invoke("LocalFileSystemService.selectFile")
+  if (selection === undefined) return;
+  if (ArcControlService.props.arc_root && selection.name.startsWith(ArcControlService.props.arc_root)) {
+    selection.name = selection.name.replaceAll(ArcControlService.props.arc_root!, ".")
+  }
+  let response = await sendMessageWithResponse("ResponseFile", selection);
+  // console.log("[ARCitect]", response);
 }
 
-const selectPathsAndSend = async (target: InteropTypes.SwatePathsTargets, dictionaries: boolean) => {
+const selectPathsAndSend = async (selectDictionaries: boolean) => {
   let selection: null | string[] = null;
   let options: Electron.OpenDialogOptions = {}
   options.defaultPath = ArcControlService.props.arc_root!;
-  if (dictionaries) {
+  if (selectDictionaries) {
     selection = await window.ipc.invoke("LocalFileSystemService.selectAnyDirectories")
   } else {
     selection = await window.ipc.invoke("LocalFileSystemService.selectAnyFiles")
@@ -259,7 +265,7 @@ const selectPathsAndSend = async (target: InteropTypes.SwatePathsTargets, dictio
   if (ArcControlService.props.arc_root && selection[0].startsWith(ArcControlService.props.arc_root)) {
     selection = selection.map((p: string) => p.replaceAll(ArcControlService.props.arc_root!, "."))
   }
-  let response = await sendMessageWithResponse("ResponsePaths", {target, paths: selection});
+  let response = await sendMessageWithResponse("ResponsePaths", selection);
 }
 
 const init = async () => {
