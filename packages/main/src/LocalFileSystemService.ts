@@ -6,6 +6,8 @@ import FSE from 'fs-extra'
 import chokidar from 'chokidar';
 import util from 'util';
 import os from 'os';
+// @ts-ignore
+import mime from 'mime-types';
 
 const changeListeners = new Map<string,chokidar.FSWatcher> ;
 
@@ -104,6 +106,27 @@ export const LocalFileSystemService = {
       return null;
     }
   },
+
+  selectAndReadFile: async (_event: any) => {
+    const window = BrowserWindow.getAllWindows().find(w => !w.isDestroyed());
+    const dialogResult = await dialog.showOpenDialog(window!, {properties: ['openFile']});
+
+    if (dialogResult.canceled) return;
+
+    const path = dialogResult.filePaths[0];
+    const stats = FS.statSync(path);
+    const content = FS.readFileSync(path, 'utf-8');
+    const mimeType = mime.lookup(path);
+
+    const fileInfo = {
+      name: path,
+      size: stats.size,
+      content: content,
+      mimetype: mimeType
+    };
+
+    return fileInfo;
+  },  
 
   readConfig: ()=>{
     const config = LocalFileSystemService.readFile(null,app.getPath('userData')+'/ARCitect.json');
@@ -262,6 +285,7 @@ export const LocalFileSystemService = {
     ipcMain.handle('LocalFileSystemService.remove', LocalFileSystemService.remove);
     ipcMain.handle('LocalFileSystemService.readDir', LocalFileSystemService.readDir);
     ipcMain.handle('LocalFileSystemService.readFile', LocalFileSystemService.readFile);
+    ipcMain.handle('LocalFileSystemService.selectAndReadFile', LocalFileSystemService.selectAndReadFile);
     ipcMain.handle('LocalFileSystemService.readImage', LocalFileSystemService.readImage);
     ipcMain.handle('LocalFileSystemService.readConfig', LocalFileSystemService.readConfig);
     ipcMain.handle('LocalFileSystemService.writeConfig', LocalFileSystemService.writeConfig);

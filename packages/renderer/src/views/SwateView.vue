@@ -99,10 +99,9 @@ namespace InteropTypes {
   export interface ARCitectFileInfo {
     name: string,
     size: number,
-    type: string,
+    mimetype: string,
     content: string
   }
-  
 }
 
 interface Props {
@@ -240,15 +239,13 @@ const IncomingMsgHandlers: Record<string, (data: any) => Promise<any>> = {
 } as const;
 
 const selectFileAndSend = async () => {
-  let selection: undefined | InteropTypes.ARCitectFileInfo;
-  let options: Electron.OpenDialogOptions = {}
-  options.defaultPath = ArcControlService.props.arc_root!;
-  selection = await window.ipc.invoke("LocalFileSystemService.selectFile")
-  if (selection === undefined) return;
-  if (ArcControlService.props.arc_root && selection.name.startsWith(ArcControlService.props.arc_root)) {
-    selection.name = selection.name.replaceAll(ArcControlService.props.arc_root!, ".")
+  let file: undefined | InteropTypes.ARCitectFileInfo;
+  file = await window.ipc.invoke("LocalFileSystemService.selectAndReadFile")
+  if (!file) return;
+  if (ArcControlService.props.arc_root && file.name.startsWith(ArcControlService.props.arc_root)) {
+    file.name = file.name.replaceAll(ArcControlService.props.arc_root!, ".")
   }
-  let response = await sendMessageWithResponse("ResponseFile", selection);
+  let response = await sendMessageWithResponse("ResponseFile", file);
   // console.log("[ARCitect]", response);
 }
 
