@@ -1,5 +1,7 @@
 import {app, shell} from 'electron';
 import {URL} from 'url';
+import { CREDENTIALS_DATAPLANT, CREDENTIALS_ADDITIONAL } from './DataHubService';
+import fs from 'fs';
 
 /**
  * List of origins that you allow open INSIDE the application and permissions for each of them.
@@ -12,6 +14,8 @@ const ALLOWED_ORIGINS_AND_PERMISSIONS = new Map<string, Set<'clipboard-read' | '
     : [],
 );
 
+
+
 /**
  * List of origins that you allow open IN BROWSER.
  * Navigation to origins below is possible only if the link opens in a new window
@@ -22,7 +26,7 @@ const ALLOWED_ORIGINS_AND_PERMISSIONS = new Map<string, Set<'clipboard-read' | '
  *   href="https://github.com/"
  * >
  */
-const ALLOWED_EXTERNAL_ORIGINS = new Set<`https://${string}`>([
+let allowed_external_origins_list = new Array<`https://${string}`>(
   'https://github.com',
   'https://www.w3schools.com',
   'https://www.google.com',
@@ -34,7 +38,22 @@ const ALLOWED_EXTERNAL_ORIGINS = new Set<`https://${string}`>([
   'https://support.nfdi4plants.org',
   'https://gitlab.plantmicrobe.de',
   'https://isa-specs.readthedocs.io'
-]);
+)
+
+/**
+ * Read additional external origins from the credential files
+ * not sure if this is necessary? added this, such that additional services
+ * get also added to the allowed external origins
+*/
+for (const service of [CREDENTIALS_DATAPLANT, CREDENTIALS_ADDITIONAL]){
+  if (fs.existsSync(service)) {
+  allowed_external_origins_list = allowed_external_origins_list.concat(
+    Object.keys(JSON.parse(fs.readFileSync(service, 'utf-8')))
+      .map((key: string) => `https://${key}`) as Array<`https://${string}>`>)
+  }
+}
+
+const ALLOWED_EXTERNAL_ORIGINS = new Set<`https://${string}`>(allowed_external_origins_list);
 
 
 app.on('web-contents-created', (_, contents) => {
@@ -92,7 +111,6 @@ app.on('web-contents-created', (_, contents) => {
    */
   contents.setWindowOpenHandler(({url}) => {
     const {origin} = new URL(url);
-
     // @ts-expect-error Type checking is performed in runtime
     // if (ALLOWED_EXTERNAL_ORIGINS.has(origin)) {
       // Open default browser
