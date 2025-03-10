@@ -1,6 +1,6 @@
 {
   "name": "ARCitect",
-  "version": "v0.0.54",
+  "version": "v0.0.55",
   "author": "nfdi4plants.org",
   "description": "Tool to edit Annotated Research Contexts (ARCs).",
   "private": true,
@@ -31,7 +31,7 @@
   "dependencies": {
     "@fslab/fsspreadsheet": "^6.2.0",
     "@imengyu/vue3-context-menu": "^1.3.5",
-    "@nfdi4plants/arctrl": "^2.2.4",
+    "@nfdi4plants/arctrl": "^2.4.0",
     "@nfdi4plants/exceljs": "0.2.0",
     "@quasar/extras": "^1.16.9",
     "chokidar": "^3.5.3",
