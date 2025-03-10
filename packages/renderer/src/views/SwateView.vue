@@ -10,6 +10,10 @@ import { ArcInvestigation, ArcAssay, ArcStudy, JsonController, type Person } fro
 import { ARCtrl_Person__Person_toJsonString_71136F3F as personToJson } from '@nfdi4plants/arctrl/JsonIO/Person.js'
 
 import a_btn from '../components/a_btn.vue';
+import ConfirmationDialog from '../dialogs/ConfirmationDialog.vue';
+
+import { useQuasar } from 'quasar'
+const $q = useQuasar();
 
 let iframe: any | HTMLElement = ref({})
 
@@ -75,7 +79,7 @@ async function handleRequest(api: string, requestId: string, data: any) {
       // Call the correct handler dynamically
       console.log(`[ARCitect] Handling request: ${api}`);
       let handler = IncomingMsgHandlers[api];
-      response = { data: await handler(data) } 
+      response = { data: await handler(data) }
 
     } catch (error: any) {
       response = { error: error.message };
@@ -168,23 +172,23 @@ const IncomingMsgHandlers: Record<string, (data: any) => Promise<any>> = {
   Init: async ([]) => {
     let data: [InteropTypes.ArcFiles, string] | undefined;
     switch(SwateControlService.props.type){
-      case 0: 
+      case 0:
         let i = SwateControlService.props.object;
         if (i instanceof ArcInvestigation) {
           // rmv assays and studies. Not displayed in Swate.
-          const iCopy: ArcInvestigation = 
+          const iCopy: ArcInvestigation =
             new ArcInvestigation(
-              i.Identifier, 
-              i.Title, 
-              i.Description, 
-              i.SubmissionDate, 
-              i.PublicReleaseDate, 
-              i.OntologySourceReferences, 
-              i.Publications, 
-              i.Contacts, 
-              null, 
-              null, 
-              null, 
+              i.Identifier,
+              i.Title,
+              i.Description,
+              i.SubmissionDate,
+              i.PublicReleaseDate,
+              i.OntologySourceReferences,
+              i.Publications,
+              i.Contacts,
+              null,
+              null,
+              null,
               i.Comments
           );
           const jsonString = JsonController.Investigation.toJsonString(iCopy,0);
@@ -222,7 +226,7 @@ const IncomingMsgHandlers: Record<string, (data: any) => Promise<any>> = {
   },
   RequestPaths: async (selectDictionaries: boolean) => {
     selectPathsAndSend(selectDictionaries); // don't await this, as we want to return `true` asap
-    return true; 
+    return true;
   },
   RequestFile: async () => {
     selectFileAndSend(); // don't await this, as we want to return `true` asap
@@ -231,7 +235,7 @@ const IncomingMsgHandlers: Record<string, (data: any) => Promise<any>> = {
   RequestPersons: async ([]) => {
     const persons: Person[] = ArcControlService.props.arc.ISA.GetAllPersons();
     const personStrings: string[] =
-      persons.map((p: Person) => 
+      persons.map((p: Person) =>
         personToJson(p,0)
       );
     return personStrings;
@@ -242,11 +246,18 @@ const selectFileAndSend = async () => {
   let file: undefined | InteropTypes.ARCitectFileInfo;
   file = await window.ipc.invoke("LocalFileSystemService.selectAndReadFile")
   if (!file) return;
-  if (ArcControlService.props.arc_root && file.name.startsWith(ArcControlService.props.arc_root)) {
-    file.name = file.name.replaceAll(ArcControlService.props.arc_root!, ".")
+  if(!file.name.startsWith(ArcControlService.props.arc_root)) {
+    $q.dialog({
+      component: ConfirmationDialog,
+      componentProps: {
+        title: 'Error',
+        msg: 'Selected files must be located inside opened ARC.'
+      }
+    });
+    return;
   }
+  file.name = file.name.replaceAll(ArcControlService.props.arc_root!, ".")
   let response = await sendMessageWithResponse("ResponseFile", file);
-  // console.log("[ARCitect]", response);
 }
 
 const selectPathsAndSend = async (selectDictionaries: boolean) => {
