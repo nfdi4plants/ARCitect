@@ -191,18 +191,15 @@ const ArcControlService = {
   },
 
   delete: async (method:string, identifier:string) => {
-    ArcControlService.props.contract_stack.push(ArcControlService.props.arc[method](identifier));
+    for(let c of ArcControlService.props.arc[method](identifier))
+      ArcControlService.props.contract_stack.push(c);
     if(!ArcControlService.props.busy)
       ArcControlService.processContractStack();
   },
 
   rename: async (method:string, old_identifier:string, new_identifier:string) => {
-    ArcControlService.props.contract_stack.push(
-      ArcControlService.props.arc[method](
-        old_identifier,
-        new_identifier
-      )
-    );
+    for(let c of ArcControlService.props.arc[method](old_identifier,new_identifier))
+      ArcControlService.props.contract_stack.push(c);
     if(!ArcControlService.props.busy)
       ArcControlService.processContractStack();
   },
