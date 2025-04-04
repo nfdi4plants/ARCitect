@@ -283,10 +283,11 @@ const ArcControlService = {
       ArcControlService.props.arc.ISA.GetAssay('AssayX');
 
       await window.ipc.invoke('CORE.log', '==========TESTS SUCCESSFUL==========');
+      await window.ipc.invoke('CORE.exit',0);
     } catch(e){
       await window.ipc.invoke('CORE.log', e);
+      await window.ipc.invoke('CORE.exit',1);
     }
-    await window.ipc.invoke('CORE.close');
   }
 };
 

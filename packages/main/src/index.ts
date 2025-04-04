@@ -66,8 +66,8 @@ const initCore = async () => {
       const architecture = process.arch === 'arm64' ? 'arm64' : 'amd64' ;
       process.env['PATH'] += process_path_separator + [process.resourcesPath,'git-binaries','mac',architecture].join(PATH.sep);
   }
-  ipcMain.handle('CORE.close', ()=>{
-    app.quit();
+  ipcMain.handle('CORE.exit', (e,code)=>{
+    app.exit(code);
   });
   ipcMain.handle('CORE.log', (e,msg)=>console.log(msg));
   ipcMain.handle('CORE.getVersion', ()=>app.getVersion());

@@ -1,0 +1,42 @@
+name: Tests
+on:
+  push:
+
+jobs:
+  tests-lnx:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v4
+        with:
+          submodules: 'true'
+
+      - name: Install Node.js, NPM and Yarn
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Xvfb
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb
+
+      - name: Start Xvfb (virtual display)
+        run: |
+          Xvfb :99 -screen 0 1280x1024x24 &
+          export DISPLAY=:99
+          ps aux | grep Xvfb
+
+      - name: Install Dependencies
+        run: 'npm install'
+
+      - name: Set correct permissions for chrome-sandbox
+        run: |
+          sudo chown root:root ./node_modules/electron/dist/chrome-sandbox
+          sudo chmod 4755 ./node_modules/electron/dist/chrome-sandbox
+
+      - name: Run Tests
+        run: |
+          export DISPLAY=:99
+          npm run test
