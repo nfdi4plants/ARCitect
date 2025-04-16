@@ -119,14 +119,14 @@ export const LocalFileSystemService = {
     const mimeType = mime.lookup(path);
 
     const fileInfo = {
-      name: path,
+      name: path_to_arcitect(path),
       size: stats.size,
       content: content,
       mimetype: mimeType
     };
 
     return fileInfo;
-  },  
+  },
 
   readConfig: ()=>{
     const config = LocalFileSystemService.readFile(null,app.getPath('userData')+'/ARCitect.json');

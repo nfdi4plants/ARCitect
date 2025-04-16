@@ -1,4 +1,4 @@
-import {app,ipcMain} from 'electron';
+import {app,ipcMain,BrowserWindow} from 'electron';
 import './security-restrictions';
 import {restoreOrCreateWindow} from '/@/mainWindow';
 import {LocalFileSystemService} from '/@/LocalFileSystemService';
@@ -66,6 +66,10 @@ const initCore = async () => {
       const architecture = process.arch === 'arm64' ? 'arm64' : 'amd64' ;
       process.env['PATH'] += process_path_separator + [process.resourcesPath,'git-binaries','mac',architecture].join(PATH.sep);
   }
+  ipcMain.handle('CORE.exit', (e,code)=>{
+    app.exit(code);
+  });
+  ipcMain.handle('CORE.log', (e,msg)=>console.log(msg));
   ipcMain.handle('CORE.getVersion', ()=>app.getVersion());
   ipcMain.handle('CORE.getTempPath', ()=>app.getPath('temp'));
   ipcMain.handle('CORE.getOS', ()=>os.platform());
@@ -75,6 +79,13 @@ const initCore = async () => {
   });
   initConfig();
 }
+
+const runTests = async ()=>{
+  if(import.meta.env.MODE==='test')
+    BrowserWindow.getAllWindows().filter(w => !w.isDestroyed()).forEach(
+      w=>w.webContents.send('CORE.runTests')
+    );
+};
 
 /**
  * Do this to allow swate hosting with https
@@ -92,6 +103,7 @@ app.whenReady()
   .then(InternetService.init)
   .then(GitService.init)
   .then(restoreOrCreateWindow)
+  .then(runTests)
   .catch((e) => console.error('Failed create window:', e));
 
 /**

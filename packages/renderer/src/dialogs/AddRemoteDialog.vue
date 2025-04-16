@@ -86,7 +86,7 @@ const onSubmit = async () => {
 const openAccessTokenHelp = ()=>{
   window.ipc.invoke(
     'InternetService.openExternalURL',
-    `https://nfdi4plants.github.io/nfdi4plants.knowledgebase/datahub/datahub-generate-pat/`
+    `https://nfdi4plants.github.io/nfdi4plants.knowledgebase/datahub/navigation-settings/datahub-generate-pat/`
   );
 }
 const openAccessTokenEditor = ()=>{

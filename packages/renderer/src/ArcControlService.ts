@@ -4,7 +4,7 @@ import { reactive } from 'vue'
 import AppProperties from './AppProperties.ts';
 import SwateControlService from './SwateControlService.ts';
 
-import { ARC, ArcInvestigation } from "@nfdi4plants/arctrl";
+import { ARC, ArcInvestigation, ArcStudy, ArcAssay} from '@nfdi4plants/arctrl';
 import { gitignoreContract } from "@nfdi4plants/arctrl/Contract/Git";
 import { Xlsx } from '@fslab/fsspreadsheet/Xlsx.js';
 import {Contract} from '@nfdi4plants/arctrl/Contract/Contract.js'
@@ -25,16 +25,14 @@ let init: {
     super_busy: boolean, // ui is blocking
     arc: null | ARC,
     git_initialized: boolean,
-    skip_fs_updates: boolean,
-    contract_stack: Object[],
+    skip_fs_updates: boolean
 } = {
     arc_root: undefined ,
     busy: false,
     super_busy: false,
     arc: null,
     git_initialized: false,
-    skip_fs_updates: false,
-    contract_stack: []
+    skip_fs_updates: false
 }
 
 function relative_to_absolute_path(relativePath: string) {
@@ -44,19 +42,6 @@ function relative_to_absolute_path(relativePath: string) {
 const ArcControlService = {
 
   props: reactive(init),
-
-  processContractStack: async(arc, arc_root)=>{
-    ArcControlService.props.busy = true;
-
-    if(ArcControlService.props.contract_stack.length<1){
-      ArcControlService.props.busy = false;
-      return;
-    }
-
-    const contract = ArcControlService.props.contract_stack.shift();
-    await ArcControlService.processContract(contract, arc, arc_root);
-    await ArcControlService.processContractStack(arc,arc_root);
-  },
 
   closeARC: async() => {
     ArcControlService.props.arc_root = undefined;
@@ -182,29 +167,19 @@ const ArcControlService = {
         );
 
     for(let c of contracts)
-      ArcControlService.props.contract_stack.push(c);
-
-    if(!ArcControlService.props.busy)
-      await ArcControlService.processContractStack(arc, arc_root);
+      await ArcControlService.processContract(c,arc,arc_root);
 
     ArcControlService.props.skip_fs_updates = false;
   },
 
   delete: async (method:string, identifier:string) => {
-    ArcControlService.props.contract_stack.push(ArcControlService.props.arc[method](identifier));
-    if(!ArcControlService.props.busy)
-      ArcControlService.processContractStack();
+    for(let c of ArcControlService.props.arc[method](identifier))
+      await ArcControlService.processContract(c);
   },
 
   rename: async (method:string, old_identifier:string, new_identifier:string) => {
-    ArcControlService.props.contract_stack.push(
-      ArcControlService.props.arc[method](
-        old_identifier,
-        new_identifier
-      )
-    );
-    if(!ArcControlService.props.busy)
-      ArcControlService.processContractStack();
+    for(let c of ArcControlService.props.arc[method](old_identifier,new_identifier))
+      await ArcControlService.processContract(c);
   },
 
   newARC: async (path: string) =>{
@@ -277,6 +252,42 @@ const ArcControlService = {
     }
     await window.ipc.invoke('LocalFileSystemService.writeFile', [ArcControlService.props.arc_root+'/.gitignore', ignore_entries.join(line_delimiter)]);
     AppProperties.force_commit_update++;
+  },
+
+  test: async ()=>{
+    const testArcPath = '/tmp/testARC';
+    try {
+      await window.ipc.invoke('LocalFileSystemService.remove', testArcPath);
+      await ArcControlService.newARC(testArcPath);
+
+      for(let i=0; i<3; i++)
+        ArcControlService.props.arc.ISA.AddAssay(
+          new ArcAssay(`Assay${i}`)
+        );
+      for(let i=0; i<3; i++)
+        ArcControlService.props.arc.ISA.AddStudy(
+          new ArcStudy(`Study${i}`)
+        );
+
+      await ArcControlService.delete('GetAssayRemoveContracts','Assay1');
+      await ArcControlService.rename('GetAssayRenameContracts','Assay2','AssayX');
+      await ArcControlService.delete('GetStudyRemoveContracts','Study1');
+      await ArcControlService.rename('GetStudyRenameContracts','Study2','StudyX');
+
+      await ArcControlService.saveARC();
+      await ArcControlService.readARC();
+
+      ArcControlService.props.arc.ISA.GetStudy('Study0');
+      ArcControlService.props.arc.ISA.GetStudy('StudyX');
+      ArcControlService.props.arc.ISA.GetAssay('Assay0');
+      ArcControlService.props.arc.ISA.GetAssay('AssayX');
+
+      await window.ipc.invoke('CORE.log', '==========TESTS SUCCESSFUL==========');
+      await window.ipc.invoke('CORE.exit',0);
+    } catch(e){
+      await window.ipc.invoke('CORE.log', e);
+      await window.ipc.invoke('CORE.exit',1);
+    }
   }
 };
 
@@ -284,5 +295,6 @@ const debouncedReadARC = pDebounce(ArcControlService.readARC, 300);
 
 // window.ipc.on('LocalFileSystemService.updatePath', ArcControlService.updateARCfromFS);
 window.ipc.on('CORE.getArcRoot', callback=>window.ipc.invoke(callback, ArcControlService.props.arc_root));
+window.ipc.on('CORE.runTests', ()=>ArcControlService.test());
 
 export default ArcControlService;

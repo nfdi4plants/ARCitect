@@ -30,10 +30,6 @@ async function createWindow() {
   */
   mainWindow.on('ready-to-show', () => {
     mainWindow?.show();
-
-    // if (import.meta.env.DEV) {
-    //   mainWindow?.webContents.openDevTools();
-    // }
   });
 
   /**

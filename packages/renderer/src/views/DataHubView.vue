@@ -127,6 +127,29 @@ watch(()=>props.host, init);
 const host_manually_set = ()=>{
   props.host_manually_set=true;
 };
+
+const timeDifference = utcDateStr => {
+  const utcDate = new Date(utcDateStr);
+  const now = new Date();
+  const diff = now - utcDate;
+  const years = now.getUTCFullYear() - utcDate.getUTCFullYear();
+  const months = now.getUTCMonth() - utcDate.getUTCMonth() + years * 12;
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const weeks = Math.floor(days / 7);
+
+  return years ? `${years} year${years > 1 ? 's' : ''}` :
+         months ? `${months} month${months > 1 ? 's' : ''}` :
+         weeks ? `${weeks} week${weeks > 1 ? 's' : ''}` :
+         days ? `${days} day${days > 1 ? 's' : ''}` :
+         "today";
+};
+
+const format_date = utcDateStr=>{
+  const utcDate = new Date(utcDateStr);
+  const to2Digits = i => ('0'+i).slice(-2);
+  return `${to2Digits(utcDate.getDate())}.${to2Digits(utcDate.getMonth()+1)}.${utcDate.getFullYear()} (${to2Digits(utcDate.getHours())}:${to2Digits(utcDate.getMinutes())})`
+};
+
 </script>
 
 <template>
@@ -204,9 +227,29 @@ const host_manually_set = ()=>{
             <q-avatar :color="item.isOwner ? 'primary' : 'secondary'" text-color="white" v-else>{{item.namespace.name[0]}}</q-avatar>
           </q-item-section>
           <q-item-section>
-            <q-item-label style="font-weight:bold;">{{item.name}}</q-item-label>
-            <q-item-label style="color:#666">[{{item.created_at}}]</q-item-label>
+            <q-item-label style="font-weight:bold;">
+              {{item.name}}
+            </q-item-label>
+            <q-item-label style="color:#666">
+              <q-icon style="margin-right:0.2em;" name='update'/>{{timeDifference(item.last_activity_at)}} ago
+              <a_tooltip anchor='top left' self='top left' :offset='[0,-20]' :force='true'>
+                <table class='arc_info'>
+                  <tbody>
+                    <tr>
+                      <th>Created:</th>
+                      <td>{{format_date(item.created_at)}}</td>
+                    </tr>
+                    <tr>
+                      <th>Updated:</th>
+                      <td>{{format_date(item.last_activity_at)}}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </a_tooltip>
+
+            </q-item-label>
             <q-item-label :style="'color:#666;' + (item.isOwner ? 'font-weight:bold;' :'')">{{item.namespace.name}}</q-item-label>
+
           </q-item-section>
           <q-item-section avatar>
             <a_btn color="secondary" v-on:click="inspectArc(item.http_url_to_repo)" icon='sym_r_captive_portal'>
@@ -230,3 +273,11 @@ const host_manually_set = ()=>{
   </q-list>
 </template>
 
+
+<style>
+  .arc_info th {
+    text-align: right;
+    font-weight: normal;
+    font-style: italic;
+  }
+</style>
