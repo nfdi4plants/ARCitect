@@ -150,6 +150,14 @@ const format_date = utcDateStr=>{
   return `${to2Digits(utcDate.getDate())}.${to2Digits(utcDate.getMonth()+1)}.${utcDate.getFullYear()} (${to2Digits(utcDate.getHours())}:${to2Digits(utcDate.getMinutes())})`
 };
 
+const filter_ = (list,pattern)=>{
+  console.log(list)
+  return list.filter(x=>
+    x.name.toLowerCase().includes(pattern.toLowerCase())
+    || x.name_with_namespace.toLowerCase().includes(pattern.toLowerCase())
+  )
+};
+
 </script>
 
 <template>
@@ -217,7 +225,7 @@ const format_date = utcDateStr=>{
           </q-item-section>
         </q-item>
         <q-item
-          v-for="(item,i) in props.list.filter(x=> x.name.toLowerCase().includes(props.search_text.toLowerCase()) || x.namespace.name.toLowerCase().includes(props.search_text.toLowerCase()))"
+          v-for="(item,i) in filter_(props.list,props.search_text)"
           :style="i%2===1?'background-color:#fafafa;' : ''"
         >
           <q-item-section avatar>
@@ -248,7 +256,7 @@ const format_date = utcDateStr=>{
               </a_tooltip>
 
             </q-item-label>
-            <q-item-label :style="'color:#666;' + (item.isOwner ? 'font-weight:bold;' :'')">{{item.namespace.name}}</q-item-label>
+            <q-item-label :style="'color:#666;' + (item.isOwner ? 'font-weight:bold;' :'')">{{item.name_with_namespace.split('/').slice(0,-1).join('/')}}</q-item-label>
 
           </q-item-section>
           <q-item-section avatar>
