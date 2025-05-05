@@ -163,8 +163,7 @@ const ArcControlService = {
       arc_root + '/.gitignore'
     );
     if(!ignore_exists)
-      contracts.push(
-        );
+      contracts.push( gitignoreContract );
 
     for(let c of contracts)
       await ArcControlService.processContract(c,arc,arc_root);

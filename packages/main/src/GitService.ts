@@ -101,7 +101,25 @@ export const GitService = {
     });
   },
 
+  toggleGitIgnore: (e,[root,value])=>{
+
+    let gitignore = FS.readFileSync(root+'/.gitignore','UTF8');
+    if(!gitignore)
+      gitignore = '';
+    const gitignore_lines = gitignore.split('\n');
+    const value_ = value.replace(root,'');
+    const indexOfValue = gitignore_lines.indexOf(value_);
+    if(indexOfValue<0)
+      gitignore_lines.push(value_);
+    else
+      gitignore_lines.splice(indexOfValue,1);
+
+    FS.writeFileSync(root+'/.gitignore', gitignore_lines.join('\n'));
+    return;
+  },
+
   init: async () => {
     ipcMain.handle('GitService.run', GitService.run );
+    ipcMain.handle('GitService.toggleGitIgnore', GitService.toggleGitIgnore );
   }
 };

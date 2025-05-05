@@ -570,6 +570,11 @@ const onCellContextMenu = async (e,node) => {
         }
       });
       items.push({
+        label: "Toggle Git Ignore",
+        icon: h( 'i', icon_style, ['visibility'] ),
+        onClick: ()=>window.ipc.invoke('GitService.toggleGitIgnore', [ArcControlService.props.arc_root,node.id])
+      });
+      items.push({
         label: "Delete",
         icon: h( 'i', icon_style, ['delete'] ),
         onClick: ()=>confirm_delete(node,()=>window.ipc.invoke('LocalFileSystemService.remove', node.id))
