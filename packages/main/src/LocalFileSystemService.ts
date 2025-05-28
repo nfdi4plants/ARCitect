@@ -9,10 +9,10 @@ import os from 'os';
 // @ts-ignore
 import mime from 'mime-types';
 
-const changeListeners = new Map<string,chokidar.FSWatcher> ;
+const changeListeners = new Map<string,chokidar.FSWatcher>;
 
-const path_to_arcitect = (path: string) => path.split(PATH.sep).join('/')
-const path_to_system = (path: string) => path.split('/').join(PATH.sep)
+const path_to_arcitect = (path: string) => path.split(PATH.sep).join('/');
+const path_to_system = (path: string) => path.split('/').join(PATH.sep);
 
 export const LocalFileSystemService = {
 
@@ -63,30 +63,32 @@ export const LocalFileSystemService = {
     const result = await dialog.showOpenDialog(window, {
       title: title,
       message: message,
-      properties: ['openDirectory']
+      properties: ['openDirectory'],
+      defaultPath: LocalFileSystemService.arc_root,
     });
     const path = result.filePaths[0];
     return path ? path_to_arcitect(path) : null;
   },
 
   selectAnyFiles: async (options: Electron.OpenDialogOptions = {}) => {
-    // Do not add 'openDirectory' option below. This will replace 'openFile' in windows and linux.
-    options.properties = options.properties || ['openFile','multiSelections'] // if given from outside don't set, otherwise set default.
-    const window = BrowserWindow.getAllWindows().find(w => !w.isDestroyed())
+    options.properties = options.properties || ['openFile','multiSelections'];
+    options.defaultPath = options.defaultPath || LocalFileSystemService.arc_root;
+    const window = BrowserWindow.getAllWindows().find(w => !w.isDestroyed());
     const result = await dialog.showOpenDialog(window, options);
     return result ? result.filePaths.map(path_to_arcitect) : null;
   },
 
   selectAnyDirectories: async (options: Electron.OpenDialogOptions = {})=> {
-    options.properties = options.properties || ['openDirectory','multiSelections'] // if given from outside don't set, otherwise set default.
-    const window = BrowserWindow.getAllWindows().find(w => !w.isDestroyed())
+    options.properties = options.properties || ['openDirectory','multiSelections'];
+    options.defaultPath = options.defaultPath || LocalFileSystemService.arc_root;
+    const window = BrowserWindow.getAllWindows().find(w => !w.isDestroyed());
     const result = await dialog.showOpenDialog(window, options);
     return result ? result.filePaths.map(path_to_arcitect) : null;
   },
 
   saveFile: async ()=>{
-    const window = BrowserWindow.getAllWindows().find(w => !w.isDestroyed())
-    const result = await dialog.showSaveDialog(window);
+    const window = BrowserWindow.getAllWindows().find(w => !w.isDestroyed());
+    const result = await dialog.showSaveDialog(window,{defaultPath:LocalFileSystemService.arc_root});
     return path_to_arcitect(result.filePath);
   },
 
@@ -109,7 +111,10 @@ export const LocalFileSystemService = {
 
   selectAndReadFile: async (_event: any) => {
     const window = BrowserWindow.getAllWindows().find(w => !w.isDestroyed());
-    const dialogResult = await dialog.showOpenDialog(window!, {properties: ['openFile']});
+    const dialogResult = await dialog.showOpenDialog(window!, {
+      properties: ['openFile'],
+      defaultPath: LocalFileSystemService.arc_root,
+    });
 
     if (dialogResult.canceled) return;
 
@@ -154,7 +159,7 @@ export const LocalFileSystemService = {
     src = path_to_system(src)
     dst = path_to_system(dst)
     try {
-      FSE.copySync(src, PATH.join(dst,PATH.basename(src)), { overwrite: true })
+      FSE.copySync(src, PATH.join(dst,PATH.basename(src)), { overwrite: true });
       return 1;
     } catch (err) {
       console.error(err);
@@ -163,7 +168,7 @@ export const LocalFileSystemService = {
   },
 
   registerChangeListener: async (e,path)=>{
-    path = path_to_system(path)
+    path = path_to_system(path);
 
     if(changeListeners.has(path))
       await LocalFileSystemService.unregisterChangeListener(null,path);
@@ -255,7 +260,7 @@ export const LocalFileSystemService = {
 
   exists: async (e,path)=>{
     try {
-      FS.statSync(path_to_system(path))
+      FS.statSync(path_to_system(path));
       return true;
     } catch {return false;}
   },
@@ -268,13 +273,15 @@ export const LocalFileSystemService = {
   },
 
   openPath: async (e, path:string)=>{
-    path = path_to_system(path)
+    path = path_to_system(path);
     try {
         shell.openPath(path);
-        return true
-    } catch {
-        return false
-    }
+        return true;
+    } catch {return false;}
+  },
+
+  setArcRoot: async (e, path:string)=>{
+    LocalFileSystemService.arc_root = path_to_system(path);
   },
 
   init: async () => {
@@ -306,5 +313,6 @@ export const LocalFileSystemService = {
     ipcMain.handle('LocalFileSystemService.exists', LocalFileSystemService.exists);
     ipcMain.handle('LocalFileSystemService.openPath', LocalFileSystemService.openPath);
     ipcMain.handle('LocalFileSystemService.rename', LocalFileSystemService.rename);
+    ipcMain.handle('LocalFileSystemService.setArcRoot', LocalFileSystemService.setArcRoot);
   }
 }

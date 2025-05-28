@@ -74,6 +74,7 @@ const ArcControlService = {
     arc.SetISAFromContracts(contracts);
     ArcControlService.props.arc = arc;
     ArcControlService.props.arc_root = arc_root;
+    await window.ipc.invoke('LocalFileSystemService.setArcRoot', arc_root);
 
     const git_initialized = await window.ipc.invoke('GitService.run',{
       args: [`status`],
