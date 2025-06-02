@@ -22,7 +22,7 @@ const config = {
   },
   linux: {
     "extraResources": [{"from": "resources/","to": "."}],
-    "target": ["AppImage"]
+    "target": ["deb"]
   }
 };
 
