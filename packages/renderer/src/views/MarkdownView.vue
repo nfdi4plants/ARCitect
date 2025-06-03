@@ -8,13 +8,15 @@ import a_input from '../components/a_input.vue';
 import AppProperties from '../AppProperties.ts';
 import ArcControlService from '../ArcControlService.ts';
 
+import { VMarkdownEditor } from 'vue3-markdown'
+import 'vue3-markdown/dist/vue3-markdown.css'
+
 const iProps = reactive({
   path: '',
   text: '',
   original: '',
   processed: '',
   base64Images: new Map(),
-  tab: 'editor'
 });
 
 const extractFilePaths = markdown => {
@@ -27,8 +29,6 @@ const extractFilePaths = markdown => {
 };
 
 const processText = async ()=>{
-  console.log('edit');
-
   let text = iProps.text;
   for(let path of extractFilePaths(text)){
     let value = null;
@@ -47,6 +47,11 @@ const processText = async ()=>{
     text = text.replaceAll(path,path_);
   iProps.processed = text;
 };
+
+const handleUpload = async file => {
+  const imageAs64 = await window.ipc.invoke('LocalFileSystemService.readImage', file.path);
+  return imageAs64;
+}
 
 const init = async ()=>{
   iProps.path = AppProperties.active_markdown;
@@ -71,78 +76,40 @@ watch( ()=>iProps.tab, processText );
 </script>
 
 <template>
-  <q-list>
-    <ViewItem
-      icon="edit_note"
-      label="Markdown Editor"
-      :caption="iProps.path"
-    >
-      <q-card flat>
-        <q-tabs
-          v-if='iProps.path.endsWith(".md")'
-          v-model="iProps.tab"
-          dense
-          class="text-grey"
-          active-color="primary"
-          indicator-color="primary"
-          align="justify"
-          narrow-indicator
-        >
-          <q-tab name="editor" label="Editor" />
-          <q-tab name="preview" label="Preview" />
-        </q-tabs>
+  <div class='fit markdown_container'>
+    <div>
+      <ViewItem
+        icon="edit_note"
+        label="Markdown Editor"
+        :caption="iProps.path"
+      >
+      </ViewItem>
+    </div>
 
-        <q-separator />
+    <div class='markdown_container_div'>
+      <VMarkdownEditor
+        v-model="iProps.text"
+        locale="en"
+        :upload-action="handleUpload"
+      />
+    </div>
 
-        <q-tab-panels v-model="iProps.tab" class='q-pa-none'>
-          <q-tab-panel name="editor" class='q-pl-none q-pr-none'>
-
-            <a_input v-model='iProps.text' type='textarea' autogrow :bg-color='iProps.text!==iProps.original ? "teal-1":""' />
-            <q-card-actions align='right' style="padding:0.5em 1em;">
-              <q-btn label="Save" type="submit" icon='check_circle' color="secondary" @click='save'/>
-              <q-btn label="Reset" type="submit" icon='refresh' color="secondary" @click='init'/>
-            </q-card-actions>
-          </q-tab-panel>
-
-          <q-tab-panel name="preview">
-            <Markdown class='markdown' :source="iProps.processed" />
-          </q-tab-panel>
-        </q-tab-panels>
-      </q-card>
-    </ViewItem>
-  </q-list>
+    <div style="padding:0.5em 1em;text-align:right;">
+      <q-btn label="Save" type="submit" icon='check_circle' color="secondary" @click='save'/>
+      &nbsp;
+      <q-btn label="Reset" type="submit" icon='refresh' color="secondary" @click='init'/>
+    </div>
+  </div>
 </template>
 
 <style>
-
-  .toppad .q-field__control-container {
-    padding-top:0.6em !important;
+  .markdown_container {
+    display: block;
+    display:flex;
+    flex-direction: column;
   }
 
-  .markdown * {
-    margin: 0.2em 0em;
-    line-height: 1.2;
+  .markdown_container_div {
+    flex-grow:1;
   }
-  .markdown h1 {
-    font-size:3em;
-    margin-top: 1em;
-  }
-  .markdown h2 {
-    font-size:2em;
-    margin-top: 1em;
-  }
-  .markdown h3 {
-    font-size:2em;
-    margin-top: 1em;
-  }
-  /*.markdown h4 {*/
-  /*  font-size:1.4em;*/
-  /*}*/
-  /*.markdown h5 {*/
-  /*  font-size:1.2em;*/
-  /*}*/
-  /*.markdown h6 {*/
-  /*  font-size:1em;*/
-  /*}*/
-
 </style>
