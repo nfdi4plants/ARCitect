@@ -1,6 +1,6 @@
 {
   "name": "ARCitect",
-  "version": "v0.0.59",
+  "version": "v0.0.60",
   "author": {
     "name": "nfdi4plants.org",
     "email": "info@nfdi4plants.org",
@@ -49,8 +49,7 @@
     "quasar": "^2.14.2",
     "query-string": "^8.1.0",
     "vue": "^v3.4.5",
-    "vue3-markdown": "^1.2.12",
-    "vue3-markdown-it": "^1.0.10"
+    "vue3-markdown": "^1.2.12"
   },
   "devDependencies": {
     "@quasar/vite-plugin": "^1.6.0",
