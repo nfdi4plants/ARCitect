@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 
-import { reactive, watch, onMounted, onUnmounted, ref} from 'vue';
+import { reactive, watch, onMounted, onUnmounted, ref, onErrorCaptured} from 'vue';
 
 import Markdown from 'vue3-markdown-it';
 import ViewItem from '../components/ViewItem.vue';
@@ -22,6 +22,7 @@ const iProps = reactive({
   text: '',
   initialized: false,
   base64Images: new Map(),
+  container: null
 });
 
 const insertText = text=>{
@@ -149,9 +150,9 @@ const init = async ()=>{
   menu.prepend(createButton('save',save));
 
   // add image listener
-  const container = editor.value.box.getElementsByClassName('vmd-view')[0];
+  iProps.container = editor.value.box.getElementsByClassName('vmd-view')[0];
   observer = new MutationObserver(handleNewImages);
-  observer.observe(container, {
+  observer.observe(iProps.container, {
     childList: true,
     subtree: true,
   });
@@ -163,6 +164,11 @@ const save = async ()=>{
   await window.ipc.invoke('LocalFileSystemService.writeFile', [iProps.path,iProps.text]);
   init();
 };
+
+onErrorCaptured(err=>{
+  iProps.container.innerHTML = err;
+  return false;
+})
 
 onMounted(init);
 onUnmounted(()=>{
@@ -205,4 +211,13 @@ watch( ()=>AppProperties.active_markdown, init );
     flex-grow:1;
     overflow: hidden;
   }
+
+  .vmd-view {
+    border-left: 1px solid #ccc;
+  }
+
+  .vmd-view span[aria-hidden="true"] {
+    display:none;
+  }
+
 </style>
