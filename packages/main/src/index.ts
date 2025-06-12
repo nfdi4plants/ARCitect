@@ -3,6 +3,7 @@ import './security-restrictions';
 import {restoreOrCreateWindow} from '/@/mainWindow';
 import {LocalFileSystemService} from '/@/LocalFileSystemService';
 import {DataHubService} from '/@/DataHubService';
+import {SwateService} from '/@/SwateService';
 import {InternetService} from '/@/InternetService';
 import {GitService} from '/@/GitService';
 import os from 'os';
@@ -99,6 +100,7 @@ if (!app.isPackaged)
 app.whenReady()
   .then(initCore)
   .then(DataHubService.init)
+  .then(SwateService.init)
   .then(LocalFileSystemService.init)
   .then(InternetService.init)
   .then(GitService.init)

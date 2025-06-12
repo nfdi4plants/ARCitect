@@ -24,6 +24,19 @@ jobs:
       - name: Install Dependencies
         run: 'npm install'
 
+      - name: Download Swate
+        run: |
+          if test.exe -f C:/Program\ Files/WindowsApps/Microsoft.WindowsSubsystem.Linux_*; then
+            echo "WSL is installed, using it to run the script"
+            wsl bash -c "cd $(wsl-path -u ${{ github.workspace }}) && ./scripts/downloadSwate.sh"
+          else
+            echo "WSL not found, trying Git Bash"
+            choco install git --params "/GitAndUnixToolsOnWindows" -y
+            .\scripts\install-git-for-windows.ps1
+            $Env:Path += ";C:\Program Files\Git\bin;"
+            bash ./scripts/downloadSwate.sh
+          fi
+
       - name: Build
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -45,6 +58,9 @@ jobs:
 
       - name: Install Dependencies
         run: 'npm install'
+
+      - name: Download Swate
+        run: 'bash ./scripts/downloadSwate.sh'
 
       - name: Build
         env:
@@ -68,7 +84,11 @@ jobs:
       - name: Install Dependencies
         run: 'npm install'
 
+      - name: Download Swate
+        run: 'bash ./scripts/downloadSwate.sh'
+
       - name: Build
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: 'npm run publish:lnx'
+

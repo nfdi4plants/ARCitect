@@ -3,5 +3,5 @@
   "toolbarMinimized": false,
   "showHelp": false,
   "showTooltips": false,
-  "swate_url": "https://swate-alpha.nfdi4plants.org"
+  "swate_url": "http://localhost:7891/"
 }

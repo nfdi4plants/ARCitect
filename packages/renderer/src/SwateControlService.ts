@@ -25,10 +25,8 @@ const SwateControlService = {
    * @param identifier object identifier
    */
   LoadSwateState: async (type: number, identifier: string) => {
-    SwateControlService.props.object = null;
     AppProperties.state = AppProperties.STATES.EDIT_SWATE;
     await nextTick();
-
     const methods = [null,'TryGetStudy','TryGetAssay'];
     SwateControlService.props.type = type;
     if(type===0){

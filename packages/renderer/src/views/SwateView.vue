@@ -1,4 +1,3 @@
-
 <script lang="ts" setup>
 import { onMounted, onUnmounted, ref, watch, reactive } from 'vue';
 import ArcControlService from '../ArcControlService.ts';
@@ -39,7 +38,7 @@ function sendMessageWithResponse<T extends keyof OutgoingMsg>(
           reject(new Error("Response timed out"));
       }, 5000); // Timeout after 5s
 
-      iProps.pendingRequests.set(requestId, { resolve, reject });
+      iProps.pendingRequests.set(requestId, { timeout, resolve, reject });
       const content: MessagePayload = { swate: true, api: msg, data, requestId };
       iframe.value.contentWindow?.postMessage(content, '*');
     });
@@ -56,8 +55,9 @@ function messageListener(event: MessageEvent) {
 
     // Handle response to a previous request
     if (requestId && iProps.pendingRequests.has(requestId) && !api) {
-        const { resolve } = iProps.pendingRequests.get(requestId)!;
+        const { timeout, resolve } = iProps.pendingRequests.get(requestId)!;
         iProps.pendingRequests.delete(requestId);
+        clearTimeout(timeout);
         resolve(data);
         return;
     }
@@ -109,22 +109,21 @@ namespace InteropTypes {
 }
 
 interface Props {
-  loading: boolean;
-  showTimeout: boolean;
   pendingRequests: PendingRequests;
+  swateReady: Boolean;
 }
 
 const iProps: Props = reactive({
-  loading: false,
-  showTimeout: false,
-  pendingRequests: new Map()
+  pendingRequests: new Map(),
+  swateReady: false
 });
 
 /// Update this to add more ARCitect initiated messages
 type OutgoingMsg = {
-  TestHello: { request: string; response: string };
-  ResponsePaths: {request: string[]; response: boolean}
-  ResponseFile: {request: InteropTypes.ARCitectFileInfo; response: boolean}
+  TestHello: { request: string; response: string },
+  ResponsePaths: {request: string[]; response: boolean},
+  ResponseFile: {request: InteropTypes.ARCitectFileInfo; response: boolean},
+  ArcFile: {request: InteropTypes.ArcFiles; response: boolean}
 };
 
 /// Update this to add more Swate initiated messages
@@ -170,55 +169,8 @@ const IncomingMsgHandlers: Record<string, (data: any) => Promise<any>> = {
     return;
   },
   Init: async ([]) => {
-    let data: [InteropTypes.ArcFiles, string] | undefined;
-    switch(SwateControlService.props.type){
-      case 0:
-        let i = SwateControlService.props.object;
-        if (i instanceof ArcInvestigation) {
-          // rmv assays and studies. Not displayed in Swate.
-          const iCopy: ArcInvestigation =
-            new ArcInvestigation(
-              i.Identifier,
-              i.Title,
-              i.Description,
-              i.SubmissionDate,
-              i.PublicReleaseDate,
-              i.OntologySourceReferences,
-              i.Publications,
-              i.Contacts,
-              null,
-              null,
-              null,
-              i.Comments
-          );
-          const jsonString = JsonController.Investigation.toJsonString(iCopy,0);
-          data = [InteropTypes.ArcFiles.Investigation, jsonString];
-        } else {
-          throw new Error('Invalid data type for SwateControlService');
-        }
-        break;
-      case 1:
-        let s = SwateControlService.props.object;
-        if (s instanceof ArcStudy) {
-          const jsonString = JsonController.Study.toJsonString(s,0);
-          data = [InteropTypes.ArcFiles.Study, jsonString];
-        } else {
-          throw new Error('Invalid data type for SwateControlService');
-        }
-        break;
-      case 2:
-        let a = SwateControlService.props.object;
-        if (a instanceof ArcAssay) {
-          const jsonString = JsonController.Assay.toJsonString(a,0);
-          data = [InteropTypes.ArcFiles.Assay, jsonString];
-        } else {
-          throw new Error('Invalid data type for SwateControlService');
-        }
-        break;
-      default:
-        throw new Error(`Unknown SwateControlService type: ${SwateControlService.props.type}`);
-    }
-    iProps.loading = false;
+    iProps.swateReady = true;
+    const data = serializeArcFile();
     if (!data) {
       throw new Error('Invalid data type for SwateControlService');
     }
@@ -276,19 +228,59 @@ const selectPathsAndSend = async (selectDictionaries: boolean) => {
   let response = await sendMessageWithResponse("ResponsePaths", selection);
 }
 
-const init = async () => {
-  // iProps.loading = true;
-  iProps.showTimeout = false;
-  setTimeout(()=>iProps.showTimeout=true,4000);
+const serializeArcFile = ()=>{
+  let data: [InteropTypes.ArcFiles, string] | undefined;
+  switch(SwateControlService.props.type){
+    case 0:
+      let i = SwateControlService.props.object;
+      if (i instanceof ArcInvestigation) {
+        // rmv assays and studies. Not displayed in Swate.
+        const iCopy: ArcInvestigation =
+          new ArcInvestigation(
+            i.Identifier,
+            i.Title,
+            i.Description,
+            i.SubmissionDate,
+            i.PublicReleaseDate,
+            i.OntologySourceReferences,
+            i.Publications,
+            i.Contacts,
+            null,
+            null,
+            null,
+            i.Comments
+        );
+        const jsonString = JsonController.Investigation.toJsonString(iCopy,0);
+        data = [InteropTypes.ArcFiles.Investigation, jsonString];
+      }
+      break;
+    case 1:
+      let s = SwateControlService.props.object;
+      if (s instanceof ArcStudy) {
+        const jsonString = JsonController.Study.toJsonString(s,0);
+        data = [InteropTypes.ArcFiles.Study, jsonString];
+      }
+      break;
+    case 2:
+      let a = SwateControlService.props.object;
+      if (a instanceof ArcAssay) {
+        const jsonString = JsonController.Assay.toJsonString(a,0);
+        data = [InteropTypes.ArcFiles.Assay, jsonString];
+      }
+  }
+  return data;
+};
 
-  if(!SwateControlService.props.object) return;
-  iframe.value.setAttribute("src", `${AppProperties.config.swate_url}?is_swatehost=1&random=${SwateControlService.props.cacheNumber}`);
+const sendArcFile = async () => {
+  if(!iProps.swateReady) return;
+  let response = await sendMessageWithResponse("SetARCFile", serializeArcFile());
+  console.log(response);
 };
 
 onMounted(() => {
   window.addEventListener("message", messageListener);
-  watch(()=>SwateControlService.props.object, init);
-  init();
+  watch(()=>SwateControlService.props.object, sendArcFile);
+  iframe.value.setAttribute("src", `${AppProperties.config.swate_url}/?is_swatehost=1&random=${SwateControlService.props.cacheNumber}`);
 });
 
 onUnmounted(() => {
@@ -306,29 +298,11 @@ const openStatusPage = ()=>{
 </script>
 
 <template>
-
-  <Transition>
-    <div v-show='iProps.loading' style='position:absolute;top:0;left:0;right:0;bottom:0;'>
-      <q-linear-progress size="45px" indeterminate color="primary" class='justify-start'/>
-      <div class="q-pa-md q-gutter-sm" v-if='iProps.showTimeout'>
-        <q-banner class="bg-grey-3 text-black" rounded inline-actions>
-          SWATE Service might be down
-          <template v-slot:avatar>
-            <q-icon name="sym_r_cloud_off" color="primary" />
-          </template>
-          <template v-slot:action>
-            <a_btn label='Check' @click='openStatusPage'/>
-          </template>
-        </q-banner>
-      </div>
-    </div>
-  </Transition>
   <!-- <button @click="testClick">Test Click</button> -->
   <iframe
     class='fit'
     style="border: 0; overflow: hidden; margin-bottom: -1em"
     ref="iframe"
-    v-show='!iProps.loading'
     allow='clipboard-read;clipboard-write;'
   >
   </iframe>
