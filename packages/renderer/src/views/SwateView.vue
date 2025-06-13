@@ -288,13 +288,6 @@ onUnmounted(() => {
   SwateControlService.props.object = null;
 });
 
-const openStatusPage = ()=>{
-  window.ipc.invoke(
-    "InternetService.openExternalURL",
-    "https://status.nfdi4plants.org/status/dataplant"
-  );
-}
-
 </script>
 
 <template>

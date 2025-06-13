@@ -22,7 +22,8 @@ const iProps = reactive({
   text: '',
   initialized: false,
   base64Images: new Map(),
-  container: null
+  container: null,
+  link_listener: null
 });
 
 const insertText = text=>{
@@ -170,9 +171,18 @@ onErrorCaptured(err=>{
   return false;
 })
 
-onMounted(init);
+onMounted(async ()=>{
+  await init();
+  iProps.link_listener = e=>{
+    if(e.target.tagName.toLowerCase()!=='a') return;
+    e.preventDefault();
+    window.ipc.invoke('InternetService.openExternalURL', e.target.href);
+  };
+  iProps.container.addEventListener("click", iProps.link_listener);
+});
 onUnmounted(()=>{
   observer.disconnect();
+  iProps.container.removeEventListener("click", iProps.link_listener);
 });
 watch( ()=>AppProperties.active_markdown, init );
 

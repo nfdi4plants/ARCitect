@@ -2,10 +2,6 @@
 
 import logoURL from '../../assets/nfdi-hero.svg';
 
-const openArcCommanderWebpage = async ()=>{
-  window.ipc.invoke('InternetService.openExternalURL', 'https://github.com/nfdi4plants/arcCommander/releases');
-}
-
 </script>
 
 <template>
