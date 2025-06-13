@@ -8,7 +8,7 @@ DOWNLOAD_URL="https://github.com/${OWNER}/${REPO}/releases/download/${TAG_NAME}/
 DEST_DIR="./resources/swate"
 
 mkdir -p "${DEST_DIR}"
-curl -L ${DOWNLOAD_URL} -o "${DEST_DIR}/${ASSET_NAME}"
-unzip "${DEST_DIR}/${ASSET_NAME}" -d "${DEST_DIR}"
+curl -L -o "${DEST_DIR}/${ASSET_NAME}" ${DOWNLOAD_URL}
+unzip -o "${DEST_DIR}/${ASSET_NAME}" -d "${DEST_DIR}"
 
 echo "Downloaded ${ASSET_NAME} successfully!"
