@@ -2,7 +2,6 @@
 
 import { reactive, watch, onMounted, onUnmounted, ref, onErrorCaptured} from 'vue';
 
-import Markdown from 'vue3-markdown-it';
 import ViewItem from '../components/ViewItem.vue';
 import a_input from '../components/a_input.vue';
 import ConfirmationDialog from '../dialogs/ConfirmationDialog.vue';
