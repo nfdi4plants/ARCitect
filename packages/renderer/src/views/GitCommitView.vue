@@ -32,6 +32,7 @@ interface Props {
 };
 
 const iProps : Props = reactive({
+  attach_file_listener: true,
   status_listener: null,
   error: '',
 
@@ -88,6 +89,9 @@ const trackChanges = async () => {
 };
 
 const commit = async()=>{
+
+  iProps.attach_file_listener = false;
+
   const name = iProps.commit.name;
   const email = iProps.commit.email;
   const msg = iProps.commit.msg;
@@ -127,6 +131,8 @@ const commit = async()=>{
   dialogProps.state = 1;
 
   GitService.update_lfs_files();
+
+  iProps.attach_file_listener = true;
 };
 
 const abortMerge = async()=>{
@@ -207,6 +213,7 @@ const init = async()=>{
 
 const debouncedParseStatus = pDebounce(GitService.parse_status,300);
 const filteredParseStatus = ([path,type])=>{
+  if(!iProps.attach_file_listener) return;
   if(path.startsWith(ArcControlService.props.arc_root+'/.git/')) return;
   debouncedParseStatus();
 };
