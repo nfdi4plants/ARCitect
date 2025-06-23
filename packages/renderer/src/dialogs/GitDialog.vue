@@ -31,7 +31,7 @@ defineEmits([
 ]);
 
 const processGitStream = async row=>{
-  if(props.state===1) return;
+  if(props.state!==0) return;
 
   const last_row = iProps.rows[iProps.rows.length-1];
   let replace = false;
