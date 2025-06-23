@@ -9,6 +9,7 @@ export interface Props {
   cancel_title: String,
   cancel_icon?: String,
   state: Number,
+  attach: Boolean
 };
 const props = defineProps<Props>();
 
@@ -30,6 +31,8 @@ defineEmits([
 ]);
 
 const processGitStream = async row=>{
+  if(props.state===1) return;
+
   const last_row = iProps.rows[iProps.rows.length-1];
   let replace = false;
   for(let p of [

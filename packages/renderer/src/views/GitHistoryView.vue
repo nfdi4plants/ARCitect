@@ -80,7 +80,7 @@ onMounted( getHistory );
 
 <style lang='scss'>
   .q-timeline__entry .q-icon{
-    padding-top:1.5px;
+    padding-top:0.5px;
   }
 
   .log_btn:hover {

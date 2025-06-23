@@ -161,7 +161,7 @@ const readDir_ = async (path: string) => {
   const parent = path.split('/').pop().toLowerCase();
 
   const isMarkdown = l => {
-    return ['md','txt','py','xml','cwl','fsx','json','yml','html','csv','css','js','log','gitignore'].some( i=>new RegExp(`\\.${i}$`,'g').test(l.toLowerCase()))
+    return ['md','txt','py','xml','cwl','fsx','json','yml','html','csv','css','js','log','gitignore','gitattributes'].some( i=>new RegExp(`\\.${i}$`,'g').test(l.toLowerCase()))
   };
 
   const isImage = l => {
