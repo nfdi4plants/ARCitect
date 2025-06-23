@@ -8,8 +8,7 @@ export interface Props {
   ok_icon?: String,
   cancel_title: String,
   cancel_icon?: String,
-  state: Number,
-  attach: Boolean
+  state: Number
 };
 const props = defineProps<Props>();
 
@@ -37,6 +36,7 @@ const processGitStream = async row=>{
   let replace = false;
   for(let p of [
     'POST ',
+    'Filtering content',
     'Receiving objects:',
     'Resolving deltas:',
     'Enumerating objects:',
