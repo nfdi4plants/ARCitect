@@ -64,7 +64,11 @@ const ArcControlService = {
 
     ArcControlService.props.super_busy = true;
 
-    const files = await window.ipc.invoke('LocalFileSystemService.getAllFiles', arc_root);
+    let files = await window.ipc.invoke('LocalFileSystemService.getAllFiles', arc_root);
+
+    // prefilter files for arctrl
+    files = files.filter(f=>f.endsWith('.xlsx')||f.endsWith('.cwl'));
+
     const arc = ARC.fromFilePaths(files);
     const contracts = arc.GetReadContracts();
     for(const contract of contracts){
@@ -77,7 +81,7 @@ const ArcControlService = {
     await window.ipc.invoke('LocalFileSystemService.setArcRoot', arc_root);
 
     const git_initialized = await window.ipc.invoke('GitService.run',{
-      args: [`status`],
+      args: [`remote`],
       cwd: arc_root
     });
     ArcControlService.props.git_initialized = git_initialized[0];
@@ -165,6 +169,16 @@ const ArcControlService = {
     );
     if(!ignore_exists)
       contracts.push( gitignoreContract );
+
+    const attributes_exists = await window.ipc.invoke(
+      'LocalFileSystemService.exists',
+      arc_root + '/.gitattributes'
+    );
+    if(!attributes_exists)
+      await window.ipc.invoke(
+        'LocalFileSystemService.writeFile',
+        [arc_root + '/.gitattributes','**/dataset/** filter=lfs diff=lfs merge=lfs -text\n']
+      );
 
     for(let c of contracts)
       await ArcControlService.processContract(c,arc,arc_root);

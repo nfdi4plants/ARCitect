@@ -1,6 +1,6 @@
 {
   "name": "ARCitect",
-  "version": "v0.0.63",
+  "version": "v1.0.0",
   "author": {
     "name": "nfdi4plants.org",
     "email": "info@nfdi4plants.org",
@@ -39,6 +39,7 @@
     "@nfdi4plants/arctrl": "^2.4.0",
     "@nfdi4plants/exceljs": "0.2.0",
     "@quasar/extras": "^1.16.9",
+    "canvas-confetti": "^1.9.3",
     "chokidar": "^3.5.3",
     "electron-context-menu": "^3.6.1",
     "express": "^4.18.2",

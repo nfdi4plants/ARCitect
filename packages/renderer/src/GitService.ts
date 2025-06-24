@@ -16,14 +16,14 @@ const GitService = {
     change_tree: [],
     change_tree_expanded: [],
     change_tree_selected: [],
-    change_tree_selected_: '',
+    change_tree_selected_: [],
   }),
 
   get_leaf_nodes: (nodes,node) => {
     node = node || GitService._.change_tree[0];
-    if(node.children.length<1)
+    if(node.children_.length<1)
       return nodes.push(node);
-    node.children.map(c=>GitService.get_leaf_nodes(nodes,c));
+    node.children_.map(c=>GitService.get_leaf_nodes(nodes,c));
   },
 
   build_change_tree: status => {
@@ -31,6 +31,7 @@ const GitService = {
       id: '.',
       name: 'Changes',
       children: [],
+      children_: [],
       header: 'root'
     }];
 
@@ -45,7 +46,7 @@ const GitService = {
         const idx = GitService._.change_tree_selected.indexOf(n.id);
         idx<0 && GitService._.change_tree_selected.push(n.id);
       }
-      GitService._.change_tree_selected = GitService._.change_tree_selected.filter(id=>!id.endsWith('.xlsx'));
+      GitService._.change_tree_selected = GitService._.change_tree_selected.filter(id=>!id.startsWith('isa.')&&!id.endsWith('.cwl')&&!id.endsWith('.yml'));
     };
 
     const handler = node => {
@@ -61,7 +62,7 @@ const GitService = {
 
     status.forEach(([type,path,size]) => {
       const segments = path.split('/');
-      let current = root[0].children;
+      let current = root[0].children_;
       for(let s=0; s<segments.length; s++){
         const segment = segments[s];
         const subpath = segments.slice(0,s+1).join('/');
@@ -70,13 +71,15 @@ const GitService = {
           node = {
             id: subpath,
             name: segment,
-            children: [],
-            handler: handler,
-            size: 0
+            children: [], // rendered children
+            children_: [], // true children
+            size: 0,
+            lazy: s!==segments.length-1,
+            handler: handler
           };
           current.push(node);
         }
-        current = node.children;
+        current = node.children_;
         node.size += size;
         if(s===segments.length-1){
           node.type = type;
@@ -85,25 +88,42 @@ const GitService = {
       }
     });
 
-    const add_parent_pointers = node => {
-      node.children.map(c=>{c.parent=node;add_parent_pointers(c)});
-    };
-    add_parent_pointers(root[0]);
+    // sort children
+    {
+      const sortChildren = node => {
+        node.children_.sort((a,b)=>
+          a.children_.length>0 && b.children_.length===0
+            ? -1
+            : b.children_.length>0 && a.children_.length===0
+              ? 1
+              : a.id.localeCompare(b.id)
+        )
+        node.children_.map(n=>sortChildren(n));
+      }
+      root[0].children_.map(n=>sortChildren(n));
+    }
 
     GitService._.change_tree = root;
+
     return root;
   },
 
   select_lfs_nodes: async ()=>{
-
     await GitService.update_lfs_files();
     GitService._.change_tree_selected = [];
     const init_select_nodes = node => {
-      if(node.children.length<1 && !node.id.endsWith('.xlsx') && (node.id.toLowerCase().includes('/dataset/') || node.size>=parseFloat(GitService._.lfs_size_limit)*1024*1024 || GitService._.lfs_files.has(node.id)))
+      if(
+        node.children_.length<1 && !node.id.endsWith('.xlsx')
+        && (
+          node.id.toLowerCase().includes('/dataset/')
+          || node.size>=parseFloat(GitService._.lfs_size_limit)*1024*1024
+          || GitService._.lfs_files.has(node.id)
+        )
+      )
         GitService._.change_tree_selected.push(node.id)
-      node.children.map(init_select_nodes);
+      node.children_.map(init_select_nodes);
     };
-    GitService._.change_tree[0].children.map(init_select_nodes);
+    GitService._.change_tree[0].children_.map(init_select_nodes);
   },
 
   parse_status: async ()=>{
@@ -127,32 +147,49 @@ const GitService = {
     GitService._.change_tree_expanded = ['.'];
     {
       const expand_children = node => {
-        if(node.children.length>5) return;
-        GitService._.change_tree_expanded.push(node.id);
-        for(let child of node.children)
-          expand_children(child);
+        if(node.children_.length>5){
+          node.lazy = true;
+        } else {
+          node.children = node.children_;
+          for(let child of node.children)
+            expand_children(child);
+        };
       }
+      GitService._.change_tree[0].children = GitService._.change_tree[0].children_;
       for(let child of GitService._.change_tree[0].children)
         expand_children(child);
     }
   },
 
+  load: async ({node, key, done, fail}) => {
+    done(node.children_);
+  },
+
   update_lfs_files: async () => {
-    const lfs_files = await window.ipc.invoke('GitService.run', {
-      args: ['lfs','ls-files'],
-      cwd: ArcControlService.props.arc_root
-    });
-    if(!lfs_files[0])
-      return console.error('unable to fetch LFS file list');
+    if(false){
+      const lfs_files = await window.ipc.invoke('GitService.run', {
+        args: ['lfs','ls-files'],
+        cwd: ArcControlService.props.arc_root
+      });
+      if(!lfs_files[0])
+        return console.error('unable to fetch LFS file list');
 
-    GitService._.lfs_files = new Map();
+      GitService._.lfs_files = new Map();
 
-    lfs_files[1].split('\n').map(
-      r=>{
-        const e = r.split(' ');
-        GitService._.lfs_files.set(e.slice(2).join(' '), e[1]==='*');
-      }
-    );
+      lfs_files[1].split('\n').map(
+        r=>{
+          const e = r.split(' ');
+          GitService._.lfs_files.set(e.slice(2).join(' '), e[1]==='*');
+        }
+      );
+    } else {
+      // read git attributes
+      const gitattributesRaw = await window.ipc.invoke('LocalFileSystemService.readFile', ArcControlService.props.arc_root+'/.gitattributes');
+      GitService._.lfs_files = new Map();
+      gitattributesRaw.split('\n').map(r=>{
+        GitService._.lfs_files.set(r.split(' filter=lfs ')[0],false)
+      });
+    }
   },
 
   get_url_credentials: url => {

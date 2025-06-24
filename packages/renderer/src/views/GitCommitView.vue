@@ -61,30 +61,45 @@ const trackChanges = async () => {
       git_rm.push(node.id);
     } else {
       git_add.push(node.id);
-      if(GitService._.change_tree_selected.includes(node.id)){
-        const gitattributes = '.gitattributes';
-        if(!git_add.includes(gitattributes))
-          git_add.push(gitattributes);
+      if(GitService._.change_tree_selected.includes(node.id))
         git_lfs.push(node.id);
-      }
     }
   }
 
-  for(let [a,b,c] of [
-    [['rm'],git_rm,1],
-    [['lfs','untrack'],git_rm,1],
-    [['lfs','track'],git_lfs,2],
-    [['add'],git_add,3]
-  ]){
-    for(let i=0; i<b.length; i++){
-      const args = a.concat(['"'+b[i]+'"']);
-      const response = await window.ipc.invoke('GitService.run', {
-        args: args,
-        cwd: ArcControlService.props.arc_root
-      });
-      if(!response[0]) return response;
-    }
+  // read git attributes
+  const gitattributesRaw = await window.ipc.invoke('LocalFileSystemService.readFile', ArcControlService.props.arc_root+'/.gitattributes');
+  const gitattributesRows = gitattributesRaw.split('\n');
+  const gitattributes = {};
+  for(let row of gitattributesRows){
+    const s = row.split(' filter=lfs ');
+    if(s.length>1)
+      gitattributes[s[0]] = row;
+    else
+      gitattributes[row] = row;
   }
+
+  // delete entries
+  for(let file of git_rm)
+    delete gitattributes[file];
+
+  // add entries
+  for(let file of git_lfs)
+    if(!gitattributes.hasOwnProperty(file))
+      gitattributes[file] = `${file} filter=lfs diff=lfs merge=lfs -text`;
+
+  await window.ipc.invoke(
+    'LocalFileSystemService.writeFile',
+    [
+      ArcControlService.props.arc_root+'/.gitattributes',
+      Object.values(gitattributes).join(`\n`)
+    ]
+  );
+
+  const response = await window.ipc.invoke('GitService.run', {
+    args: ['add','--all',AppProperties.config.gitDebug ? '--verbose' : ''],
+    cwd: ArcControlService.props.arc_root
+  });
+  if(!response[0]) return response;
   return [1];
 };
 
@@ -110,6 +125,8 @@ const commit = async()=>{
     componentProps: dialogProps
   }).onOk( async () => {
     await init();
+    await GitService.update_lfs_files();
+    iProps.attach_file_listener = true;
   });
 
   let response=null;
@@ -123,16 +140,12 @@ const commit = async()=>{
 
   response = await window.ipc.invoke('GitService.run', {
     args: ['commit','-m','"'+msg+'"'],
-    cwd: ArcControlService.props.arc_root
+    cwd: ArcControlService.props.arc_root,
+    silent:false
   });
   if(!response[0])
     return dialogProps.state=2;
-
   dialogProps.state = 1;
-
-  GitService.update_lfs_files();
-
-  iProps.attach_file_listener = true;
 };
 
 const abortMerge = async()=>{
@@ -295,10 +308,11 @@ const formatFileSize = (size) => {
             :nodes="GitService._.change_tree"
             node-key="id"
             label-key="name"
-            v-model:expanded="GitService._.change_tree_expanded"
-            v-model:selected="GitService._.change_tree_selected_"
             dense
+            default-expand-all
             style="display:inline-block"
+            @lazy-load="GitService.load"
+            v-model:selected="GitService._.change_tree_selected_"
           >
             <template v-slot:header-root="prop">
               <div class="row items-center">

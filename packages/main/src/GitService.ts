@@ -8,7 +8,6 @@ import {LocalFileSystemService} from './LocalFileSystemService.ts';
 
 const PATH = require('path');
 
-
 export const GitService = {
   queue: [],
   processing: false,
@@ -46,10 +45,8 @@ export const GitService = {
           if(dataAsString.toLowerCase().includes('error'))
             error = true;
 
-          for(let row of dataAsString.split('\n')){
-            if(row==='' || o.silent) continue;
-            window.webContents.send('GitService.MSG', row);
-          }
+          if(o.silent) return;
+          window.webContents.send('GitService.MSG', dataAsString);
         };
         p.stdout.on('data', handleOutput);
         p.stderr.on('data', handleOutput);

@@ -161,7 +161,7 @@ const init = async ()=>{
 };
 
 const save = async ()=>{
-  await window.ipc.invoke('LocalFileSystemService.writeFile', [iProps.path,iProps.text]);
+  await window.ipc.invoke('LocalFileSystemService.writeFile', [iProps.path,iProps.text || ' ']);
   init();
 };
 

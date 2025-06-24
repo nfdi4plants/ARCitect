@@ -1,4 +1,3 @@
-
 <script lang="ts" setup>
 import { reactive, ref, nextTick, watch, onMounted, onUnmounted, h } from 'vue';
 import ContextMenu from '@imengyu/vue3-context-menu'
@@ -165,7 +164,7 @@ const readDir_ = async (path: string) => {
   };
 
   const isImage = l => {
-    return ['png','jpeg','jpg'].some( i=>new RegExp(`\\.${i}$`,'g').test(l.toLowerCase()))
+    return ["jpg", "jpeg", "png", "gif", "bmp", "tiff", "tif", "webp", "svg", "ico", "heic", "heif", "avif", "raw", "psd", "ai", "eps"].some( i=>new RegExp(`\\.${i}$`,'g').test(l.toLowerCase()))
   };
 
   const isEditable = (n,p)=>{
