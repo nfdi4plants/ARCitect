@@ -377,7 +377,7 @@ const downloadLFSFiles = async paths => {
   if(!response[0]) return;
 
   const dialogProps = reactive({
-    title: 'Pulling Individual LFS File',
+    title: 'Pulling Individual LFS Files',
     ok_title: 'Ok',
     cancel_title: null,
     state: 0,
@@ -401,7 +401,6 @@ const downloadLFSFiles = async paths => {
   });
 
   dialogProps.state=1;
-  await GitService.update_lfs_files();
 };
 
 const onCellContextMenu = async (e,node) => {
@@ -455,16 +454,13 @@ const onCellContextMenu = async (e,node) => {
       icon: h( 'i', icon_style, ['drive_folder_upload'] ),
       onClick: ()=>importFilesOrDirectories(node,'selectAnyDirectories')
     });
-
-    const lfs_files_in_directory = [ ...GitService._.lfs_files.keys() ].filter(x=>x.startsWith(node.id_rel));
-    if(lfs_files_in_directory.length)
-      items.push({
-        label: "Download LFS Files",
-        icon: h( 'i', icon_style, ['cloud_download'] ),
-        onClick: ()=>downloadLFSFiles(lfs_files_in_directory)
-      });
+    items.push({
+      label: "Download LFS Files",
+      icon: h( 'i', icon_style, ['cloud_download'] ),
+      onClick: ()=>downloadLFSFiles([node.id_rel+'/**'])
+    });
   } else {
-    if(GitService._.lfs_files.has(node.id_rel)){
+    if(node.isLFSPointer){
       items.push({
         label: "Download LFS File",
         icon: h( 'i', icon_style, ['cloud_download'] ),
@@ -641,8 +637,6 @@ watch(()=>ArcControlService.props.arc_root, async (newValue, oldValue) => {
   }];
   await nextTick();
   arcTree._value.setExpanded(props.root);
-
-  await GitService.update_lfs_files();
 });
 
 watch(()=>AppProperties.state, async (newValue, oldValue) => {
@@ -692,7 +686,7 @@ watch(()=>AppProperties.state, async (newValue, oldValue) => {
             <td style="text-align:right">
               <q-icon v-if='prop.node.type==="assays"' name='add' class='tree_button' @click='e=>addAssay(e,prop.node)'></q-icon>
               <q-icon v-if='prop.node.type==="studies"' name='add' class='tree_button' @click='e=>addStudy(e,prop.node)'></q-icon>
-              <q-badge v-if='GitService._.lfs_files.has(prop.node.id_rel)' :color="GitService._.lfs_files.get(prop.node.id_rel) ? 'secondary' : 'grey-6'" text-color="white" label="LFS" class='tree_button'/>
+              <q-badge v-if='prop.node.isLFSPointer' color="secondary" text-color="white" label="LFS" class='tree_button'/>
             </td>
           </tr></tbody></table>
         </div>

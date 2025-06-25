@@ -2,6 +2,7 @@
 import { app, BrowserWindow, ipcMain, dialog, shell } from 'electron';
 import PATH from 'path';
 import FS from 'fs';
+import FSP from 'fs/promises';
 import FSE from 'fs-extra'
 import chokidar from 'chokidar';
 import util from 'util';
@@ -15,6 +16,8 @@ const path_to_arcitect = (path: string) => path.split(PATH.sep).join('/');
 const path_to_system = (path: string) => path.split('/').join(PATH.sep);
 
 export const LocalFileSystemService = {
+
+  LFS_POINTER_HEADER: 'version https://git-lfs.github.com/spec/',
 
   getAllXLSX_: (files,directory) => {
     const filesInDirectory = FS.readdirSync(directory);
@@ -39,7 +42,22 @@ export const LocalFileSystemService = {
     return FS.readdirSync(root, { recursive: true });
   },
 
-  readDir: (e,path) => {
+  isLFSPointer: async path => {
+    const buffer = Buffer.alloc(LocalFileSystemService.LFS_POINTER_HEADER.length + 4);
+    let fileHandle;
+    try {
+      fileHandle = await FSP.open(path, 'r');
+      const { bytesRead } = await fileHandle.read(buffer, 0, buffer.length, 0);
+      const content = buffer.toString('utf8', 0, bytesRead);
+      return content.startsWith(LocalFileSystemService.LFS_POINTER_HEADER);
+    } catch (err) {
+      return false;
+    } finally {
+      if (fileHandle) await fileHandle.close();
+    }
+  },
+
+  readDir: async (e,path) => {
     path = path_to_system(path)
     const children = [];
 
@@ -52,6 +70,10 @@ export const LocalFileSystemService = {
 
       stat.id = path_to_arcitect(path_);
       stat.isDirectory = stat.isDirectory();
+      stat.isLFSPointer = false;
+      if(!stat.isDirectory)
+        stat.isLFSPointer = await LocalFileSystemService.isLFSPointer(path_);
+
       children.push(stat);
     }
 
