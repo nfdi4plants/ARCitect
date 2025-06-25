@@ -147,11 +147,17 @@ export const LocalFileSystemService = {
 
   readImage: async (e,path)=>{
     try {
-      const contents = FS.readFileSync(path_to_system(path));
-      const b64 = contents.toString('base64');
-      return `data:image/png;base64,${b64}`;
+      path = path_to_system(path);
+      const mimeType = mime.lookup(path);
+      if (!mimeType || !mimeType.startsWith('image/'))
+        return null;
+
+      const imageData = fs.readFileSync(PATH.resolve(path));
+      const base64 = imageData.toString('base64');
+      return `data:${mimeType};base64,${base64}`;
     } catch (err) {
-      return  null;
+      console.error('Error:', err.message);
+      return null;
     }
   },
 

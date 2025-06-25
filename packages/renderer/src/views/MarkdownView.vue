@@ -177,6 +177,7 @@ onMounted(async ()=>{
     e.preventDefault();
     window.ipc.invoke('InternetService.openExternalURL', e.target.href);
   };
+
   iProps.container.addEventListener("click", iProps.link_listener);
 });
 onUnmounted(()=>{
