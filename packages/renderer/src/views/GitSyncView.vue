@@ -24,7 +24,6 @@ import { useQuasar } from 'quasar'
 const $q = useQuasar();
 
 const iProps = reactive({
-  git_status: [],
   use_lfs: true,
   remote: '',
   userListener: ()=>{}
@@ -64,9 +63,8 @@ const showError = async msg=>{
 };
 
 const push = async()=>{
-  await GitService.parse_status();
-  if(iProps.git_status.length>0)
-    return showError('Commit changes before pulling.');
+  if(GitService._.change_tree[0].children_.length>0)
+    return showError('Commit changes before pushing.');
 
   const dialogProps = reactive({
     title: 'Pushing ARC',
@@ -224,8 +222,6 @@ const merge = async ()=>{
   }).onOk(async ()=>{
     await ArcControlService.readARC();
     await GitService.check_remotes();
-  }).onCancel(async ()=>{
-    getStatus();
   });
 
   const branches = await GitService.get_branches();
@@ -271,8 +267,7 @@ const merge = async ()=>{
 };
 
 const pull = async()=>{
-  await GitService.parse_status();
-  if(GitService._.change_tree.length>0 && GitService._.change_tree[0].children.length)
+  if(GitService._.change_tree[0].children_.length>0)
     return showError('Commit changes before pulling.');
 
   const dialogProps = reactive({

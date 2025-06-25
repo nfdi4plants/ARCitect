@@ -14,10 +14,22 @@ const GitService = {
     rebase_in_progress: false,
 
     change_tree: [],
+    change_tree_map: new Map(),
     change_tree_expanded: [],
     change_tree_selected: [],
     change_tree_selected_: [],
+
+    lfs_blacklist: {
+      starts:['isa.','.git'],
+      ends: ['.cwl','.yml','.yaml']
+    }
   }),
+
+  is_not_lfs_blacklisted: id=>
+       !GitService._.lfs_blacklist.starts.some(i=>id.startsWith(i))
+    && !GitService._.lfs_blacklist.ends.some(i=>id.endsWith(i))
+    && !GitService._.change_tree_map.get(id).types.includes('D')
+  ,
 
   get_leaf_nodes: (nodes,node) => {
     node = node || GitService._.change_tree[0];
@@ -32,6 +44,7 @@ const GitService = {
       name: 'Changes',
       children: [],
       children_: [],
+      types: '',
       header: 'root'
     }];
 
@@ -46,7 +59,7 @@ const GitService = {
         const idx = GitService._.change_tree_selected.indexOf(n.id);
         idx<0 && GitService._.change_tree_selected.push(n.id);
       }
-      GitService._.change_tree_selected = GitService._.change_tree_selected.filter(id=>!id.startsWith('isa.')&&!id.endsWith('.cwl')&&!id.endsWith('.yml'));
+      GitService._.change_tree_selected = GitService._.change_tree_selected.filter(GitService.is_not_lfs_blacklisted);
     };
 
     const handler = node => {
@@ -54,19 +67,22 @@ const GitService = {
       GitService.get_leaf_nodes(leaf_nodes,node);
 
       const n_selected = leaf_nodes.filter(n=>GitService._.change_tree_selected.includes(n.id)).length;
-      if(n_selected===leaf_nodes.length)
-        unselect(leaf_nodes)
+      if(n_selected===0)
+        select(leaf_nodes);
       else
-        select(leaf_nodes)
+        unselect(leaf_nodes);
+
+      GitService.mark_lfs_nodes();
     };
 
     status.forEach(([type,path,size]) => {
       const segments = path.split('/');
-      let current = root[0].children_;
+      let parent = root[0];
+      let children_ = parent.children_;
       for(let s=0; s<segments.length; s++){
         const segment = segments[s];
         const subpath = segments.slice(0,s+1).join('/');
-        let node = current.filter(n=>n.id===subpath)[0];
+        let node = children_.filter(n=>n.id===subpath)[0];
         if(!node){
           node = {
             id: subpath,
@@ -75,18 +91,34 @@ const GitService = {
             children_: [], // true children
             size: 0,
             lazy: s!==segments.length-1,
-            handler: handler
+            parent: parent,
+            handler: handler,
+            types: ''
           };
-          current.push(node);
+          children_.push(node);
+          GitService._.change_tree_map.set(node.id,node);
         }
-        current = node.children_;
         node.size += size;
-        if(s===segments.length-1){
+        if(s===segments.length-1)
           node.type = type;
-          node.icon = type.includes(' D') ? 'indeterminate_check_box' : type.includes(' M') ? 'edit_square' : 'add_box';
-        }
+        parent = node;
+        children_ = parent.children_;
       }
     });
+
+    // propagate types
+    {
+      const leaf_nodes = [];
+      GitService.get_leaf_nodes(leaf_nodes,root[0]);
+      for(let node of leaf_nodes){
+        let type = node.type;
+        let temp = node;
+        while(temp && !temp.types.includes(type)){
+          temp.types += type;
+          temp = temp.parent;
+        }
+      }
+    }
 
     // sort children
     {
@@ -108,12 +140,24 @@ const GitService = {
     return root;
   },
 
+  mark_lfs_nodes: ()=>{
+    GitService._.change_tree_map.forEach(n=>n.containsLFS=false);
+    for(let id of GitService._.change_tree_selected){
+      let temp = GitService._.change_tree_map.get(id);
+      while(temp && !temp.containsLFS){
+        temp.containsLFS = true;
+        temp = temp.parent;
+      }
+    }
+  },
+
   select_lfs_nodes: async ()=>{
     await GitService.update_lfs_files();
     GitService._.change_tree_selected = [];
     const init_select_nodes = node => {
       if(
-        node.children_.length<1 && !node.id.endsWith('.xlsx')
+           node.children_.length<1
+        && GitService.is_not_lfs_blacklisted(node.id)
         && (
           node.id.toLowerCase().includes('/dataset/')
           || node.size>=parseFloat(GitService._.lfs_size_limit)*1024*1024
@@ -124,6 +168,8 @@ const GitService = {
       node.children_.map(init_select_nodes);
     };
     GitService._.change_tree[0].children_.map(init_select_nodes);
+
+    GitService.mark_lfs_nodes();
   },
 
   parse_status: async ()=>{

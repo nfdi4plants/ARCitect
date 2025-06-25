@@ -321,6 +321,7 @@ const formatFileSize = (size) => {
             style="display:inline-block"
             @lazy-load="GitService.load"
             v-model:selected="GitService._.change_tree_selected_"
+            v-model:expanded="GitService._.change_tree_expanded"
           >
             <template v-slot:header-root="prop">
               <div class="row items-center">
@@ -339,17 +340,18 @@ const formatFileSize = (size) => {
               <div
                 style="display:flex;cursor:pointer;white-space: nowrap;width:100%"
               >
-                <q-icon
-                  v-if='prop.node.icon' :name="prop.node.icon" style="margin-right:0.2em;flex-shrink:0;"
-                  :color='prop.node.icon==="indeterminate_check_box" ? "red" : "teal"'
-                />
+                <div v-if='!GitService._.change_tree_expanded.includes(prop.node.id)' style="margin-right:0.2em;flex-shrink:0;">
+                  <q-icon v-if='prop.node.types.includes("D")' name='indeterminate_check_box' color='red' />
+                  <q-icon v-if='["M","C","R"].some(i=>prop.node.types.includes(i))' name='edit_square' color='teal' />
+                  <q-icon v-if='["?","A"].some(i=>prop.node.types.includes(i))' name='add_box' color='teal' />
+                </div>
                 <span class="text-black" style="margin-right:0.2em;flex-grow:1;">{{ prop.node.name }}</span>
                 <q-badge
                   color="transparent"
                   text-color="grey"
                   :label="formatFileSize(prop.node.size)" style="margin-left:1em;flex-shrink:0"
                 />
-                <q-badge v-if='GitService._.change_tree_selected.includes(prop.node.id)' color="teal" text-color="white" label="LFS" style="margin-left:1em;flex-shrink:0"/>
+                <q-badge v-if='prop.node.containsLFS && !GitService._.change_tree_expanded.includes(prop.node.id)' color="teal" text-color="white" label="LFS" style="margin-left:1em;flex-shrink:0"/>
               </div>
             </template>
           </q-tree>
