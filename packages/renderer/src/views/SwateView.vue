@@ -115,7 +115,8 @@ interface Props {
 
 const iProps: Props = reactive({
   pendingRequests: new Map(),
-  swateReady: false
+  swateReady: false,
+  swateObjectListener: ()=>{}
 });
 
 /// Update this to add more ARCitect initiated messages
@@ -170,11 +171,7 @@ const IncomingMsgHandlers: Record<string, (data: any) => Promise<any>> = {
   },
   Init: async ([]) => {
     iProps.swateReady = true;
-    const data = serializeArcFile();
-    if (!data) {
-      throw new Error('Invalid data type for SwateControlService');
-    }
-    return data;
+    return null;
   },
   RequestPaths: async (selectDictionaries: boolean) => {
     selectPathsAndSend(selectDictionaries); // don't await this, as we want to return `true` asap
@@ -273,17 +270,17 @@ const serializeArcFile = ()=>{
 
 const sendArcFile = async () => {
   if(!iProps.swateReady) return;
-  let response = await sendMessageWithResponse("SetARCFile", serializeArcFile());
-  console.log(response);
+  await sendMessageWithResponse("SetARCFile", serializeArcFile());
 };
 
 onMounted(() => {
   window.addEventListener("message", messageListener);
-  watch(()=>SwateControlService.props.object, sendArcFile);
+  iProps.swateObjectListener = watch(()=>SwateControlService.props.object, sendArcFile);
   iframe.value.setAttribute("src", `${AppProperties.config.swate_url}/?is_swatehost=1&random=${SwateControlService.props.cacheNumber}`);
 });
 
 onUnmounted(() => {
+  iProps.swateObjectListener();
   window.removeEventListener("message", messageListener);
   SwateControlService.props.object = null;
 });
@@ -302,13 +299,4 @@ onUnmounted(() => {
 </template>
 
 <style>
-.v-enter-active,
-.v-leave-active {
-  transition: opacity 0.2s ease;
-}
-
-.v-enter-from,
-.v-leave-to {
-  opacity: 0;
-}
 </style>

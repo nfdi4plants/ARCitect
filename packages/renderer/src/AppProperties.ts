@@ -41,6 +41,8 @@ const AppProperties: {
   datahub_hosts_by_provider: {},
   datahub_hosts_msgs: {},
 
+  load_swate: false,
+
   force_commit_update: 0,
 
   config: {
@@ -166,6 +168,7 @@ const init = async ()=>{
     window.ipc.invoke('LocalFileSystemService.writeConfig', JSON.stringify(AppProperties.config));
   });
   await get_datahubs();
+  AppProperties.load_swate = true;
 }
 init();
 

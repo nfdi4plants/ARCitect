@@ -305,7 +305,7 @@ const test = async ()=>{
           <ToolbarButton text='DataHUB Sync' icon='published_with_changes' requiresARC requiresUser requiresGit @clicked='AppProperties.state=AppProperties.STATES.GIT_SYNC'>
             <a_tooltip>Synchronize the ARC with a DataHUB</a_tooltip>
           </ToolbarButton>
-          <ToolbarButton text='History' icon='history' requiresARC requiresUser requiresGit @clicked='AppProperties.state=AppProperties.STATES.GIT_HISTORY'>
+          <ToolbarButton text='History' icon='history' requiresARC requiresGit @clicked='AppProperties.state=AppProperties.STATES.GIT_HISTORY'>
             <a_tooltip>Inspect ARC history</a_tooltip>
           </ToolbarButton>
           <q-separator />
@@ -396,11 +396,12 @@ const test = async ()=>{
               <GitCommitView v-else-if='AppProperties.state===AppProperties.STATES.GIT_COMMIT' />
               <GitSyncView v-else-if='AppProperties.state===AppProperties.STATES.GIT_SYNC' />
               <GitHistoryView v-else-if='AppProperties.state===AppProperties.STATES.GIT_HISTORY' />
-              <SwateView v-else-if='AppProperties.state===AppProperties.STATES.EDIT_SWATE'></SwateView>
               <ValidationView v-else-if='AppProperties.state===AppProperties.STATES.VALIDATION'></ValidationView>
               <StatusView v-else-if='AppProperties.state===AppProperties.STATES.STATUS'></StatusView>
               <SettingsView v-else-if='AppProperties.state===AppProperties.STATES.SETTINGS'></SettingsView>
-              <HomeView v-else></HomeView>
+              <HomeView v-else-if='AppProperties.state===AppProperties.STATES.HOME'></HomeView>
+
+              <SwateView v-if='AppProperties.load_swate' v-show='AppProperties.state===AppProperties.STATES.EDIT_SWATE'></SwateView>
             </template>
           </q-splitter>
         </q-page>
