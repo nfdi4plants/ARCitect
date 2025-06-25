@@ -15,6 +15,7 @@ import AppProperties from '../AppProperties.ts';
 
 import pDebounce from 'p-debounce';
 
+import ConfirmationDialog from '../dialogs/ConfirmationDialog.vue';
 import GitDialog from '../dialogs/GitDialog.vue';
 import GitResetDialog from '../dialogs/GitResetDialog.vue';
 import StringDialog from '../dialogs/StringDialog.vue';
@@ -22,8 +23,8 @@ import { useQuasar } from 'quasar'
 const $q = useQuasar();
 
 interface Props {
+  attach_file_listener: Boolean,
   status_listener: Function,
-  error: string,
   commit: {
     name: string,
     email: string,
@@ -34,7 +35,6 @@ interface Props {
 const iProps : Props = reactive({
   attach_file_listener: true,
   status_listener: null,
-  error: '',
 
   commit: {
     name: '',
@@ -44,7 +44,13 @@ const iProps : Props = reactive({
 });
 
 const raiseError = err => {
-  iProps.error = err;
+  $q.dialog({
+    component: ConfirmationDialog,
+    componentProps: {
+      title: 'Error',
+      msg: err
+    }
+  });
   return false;
 };
 
@@ -104,14 +110,17 @@ const trackChanges = async () => {
 };
 
 const commit = async()=>{
-
-  iProps.attach_file_listener = false;
-
   const name = iProps.commit.name;
   const email = iProps.commit.email;
   const msg = iProps.commit.msg;
   if(!name || !email || !msg)
     return raiseError('Name, eMail, and commit message required');
+
+  const branches = await GitService.get_branches();
+  if(branches.current.includes('HEAD detached'))
+    return raiseError('Unable to commit in detached head state.<br>It seems you have checked out a pervious commit in the git history.<br>Either switch back to the latest commit, or create a new branch.');
+
+  iProps.attach_file_listener = false;
 
   const dialogProps = reactive({
     title: 'Committing Changes',
@@ -139,7 +148,7 @@ const commit = async()=>{
     return dialogProps.state=2;
 
   response = await window.ipc.invoke('GitService.run', {
-    args: ['commit','-m','"'+msg+'"'],
+    args: ['commit','-m','"'+msg+'"',AppProperties.config.gitDebug ? '--verbose' : '--quiet'],
     cwd: ArcControlService.props.arc_root,
     silent:false
   });
@@ -216,7 +225,6 @@ const init = async()=>{
   if(!AppProperties.user)
     AppProperties.state = AppProperties.STATES.HOME;
 
-  iProps.error = '';
   await GitService.parse_status();
 
   iProps.commit.name = AppProperties.user.name;
@@ -354,7 +362,6 @@ const formatFileSize = (size) => {
         </q-card-section>
 
         <q-card-actions align='right' style="padding:0 2.1em 1em 2.1em;">
-          <a_btn v-if='iProps.error' color="red-10" icon='warning' :label="iProps.error" no-caps style="margin-right:auto"/>
           <a_btn v-if='GitService._.rebase_in_progress' label="Abort Merge" @click="abortMerge" icon='dangerous' color='red-10'>
             <a_tooltip>
               There is an interactive git rebase in progress. You can abort the merge process by reverting back to the last commit.

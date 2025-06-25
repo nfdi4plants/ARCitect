@@ -108,7 +108,7 @@ const push = async()=>{
     `--atomic`,
     `--progress`,
     iProps.remote,
-    branches.current
+    '"'+branches.current+'"'
   ];
   if(!iProps.use_lfs)
     args.push('--no-verify');

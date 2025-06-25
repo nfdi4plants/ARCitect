@@ -38,11 +38,31 @@ const getHistory = async ()=>{
 };
 
 const checkout = async ref => {
-  await window.ipc.invoke('GitService.run', {
-    args: [`checkout`,ref],
-    cwd: ArcControlService.props.arc_root
-  });
+  if(iProps.git_log[0].ref===ref){
+    const branches = (await window.ipc.invoke('GitService.run', {
+      args: ['branch','--contains',ref],
+      cwd: ArcControlService.props.arc_root
+    }))[1].split('\n').map(r=>r.slice(2)).filter(b=>b!=='');
+    const branch = branches.includes('main')?'main':branches[0];
+    if(branch){
+      await window.ipc.invoke('GitService.run', {
+        args: [`checkout`,branch],
+        cwd: ArcControlService.props.arc_root
+      });
+    } else {
+      await window.ipc.invoke('GitService.run', {
+        args: [`checkout`,ref],
+        cwd: ArcControlService.props.arc_root
+      });
+    }
+  } else {
+    await window.ipc.invoke('GitService.run', {
+      args: [`checkout`,ref],
+      cwd: ArcControlService.props.arc_root
+    });
+  }
   getHistory();
+  await ArcControlService.readARC();
 };
 
 onMounted( getHistory );
