@@ -137,10 +137,10 @@ const timeDifference = utcDateStr => {
   const days = Math.floor(diff / (1000 * 60 * 60 * 24));
   const weeks = Math.floor(days / 7);
 
-  return years ? `${years} year${years > 1 ? 's' : ''}` :
-         months ? `${months} month${months > 1 ? 's' : ''}` :
-         weeks ? `${weeks} week${weeks > 1 ? 's' : ''}` :
-         days ? `${days} day${days > 1 ? 's' : ''}` :
+  return years ? `${years} year${years > 1 ? 's' : ''} ago` :
+         months ? `${months} month${months > 1 ? 's' : ''} ago` :
+         weeks ? `${weeks} week${weeks > 1 ? 's' : ''} ago` :
+         days ? `${days} day${days > 1 ? 's' : ''} ago` :
          "today";
 };
 
@@ -239,7 +239,7 @@ const filter_ = (list,pattern)=>{
               {{item.name}}
             </q-item-label>
             <q-item-label style="color:#666">
-              <q-icon style="margin-right:0.2em;" name='update'/>{{timeDifference(item.last_activity_at)}} ago
+              <q-icon style="margin-right:0.2em;" name='update'/>{{timeDifference(item.last_activity_at)}}
               <a_tooltip anchor='top left' self='top left' :offset='[0,-20]' :force='true'>
                 <table class='arc_info'>
                   <tbody>
