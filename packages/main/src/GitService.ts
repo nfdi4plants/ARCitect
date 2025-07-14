@@ -27,10 +27,8 @@ export const GitService = {
     try {
       const p = spawn('git', args, o);
 
-      let error = false;
       let output = '';
       if(o.pipe) {
-        console.log(o.pipe)
         LocalFileSystemService.enforcePath(null,o.pipe.split('/').slice(0,-1).join('/'));
         const write_stream = FS.createWriteStream(o.pipe, {flags: 'w'});
         p.stdout.pipe(write_stream);
@@ -42,8 +40,6 @@ export const GitService = {
           dataAsString = dataAsString.replace(/\n|\r/g, '\n');
 
           output += dataAsString;
-          if(dataAsString.toLowerCase().includes('error'))
-            error = true;
 
           if(o.silent) return;
           window.webContents.send('GitService.MSG', dataAsString);
@@ -54,13 +50,13 @@ export const GitService = {
 
       // This hits when the child process cannot be spawned
       p.on('error', err => {
-          console.error("[Git spawn error]", err.toString());
-          resolve([false, err.toString()]);
-          GitService.process();
+        console.error("[Git spawn error]", err.toString());
+        resolve([false, err.toString()]);
+        GitService.process();
       });
       // This hits whenever process can be spawned, can still fail or resolve.
       p.on('exit', code => {
-        resolve([code===0 && !error,output]);
+        resolve([code===0,output]);
         GitService.process();
       });
     } catch (e){

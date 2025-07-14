@@ -19,7 +19,7 @@ const iProps = reactive({
   text: ''
 });
 
-const scrollarea = ref(null);
+const msg_container = ref(null);
 
 defineEmits([
   ...useDialogPluginComponent.emits
@@ -53,6 +53,9 @@ const processGitStream = async data=>{
       iProps.rows.push(row);
   }
   iProps.text = iProps.rows.join('<br>');
+  setTimeout(()=>{
+    msg_container.value.scrollTop = msg_container.value.scrollHeight;
+  },100);
 };
 
 const copyGitOutput = () => {
@@ -77,7 +80,7 @@ const { dialogRef, onDialogHide, onDialogOK, onDialogCancel } = useDialogPluginC
       </q-card-section>
 
       <q-card-section>
-        <div class='bg-grey-3 rounded-borders q-pa-md text-body1 scroll_bottom' v-html='iProps.text'>
+        <div ref='msg_container' class='bg-grey-3 rounded-borders q-pa-md text-body1 msg_container' v-html='iProps.text'>
         </div>
       </q-card-section>
 
@@ -99,9 +102,7 @@ const { dialogRef, onDialogHide, onDialogOK, onDialogCancel } = useDialogPluginC
     padding: 0 !important;
   }
 
-  .scroll_bottom {
-    display:flex;
-    flex-direction:column-reverse;
+  .msg_container {
     overflow-y:scroll;
     height:250px;
   }
