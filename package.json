@@ -1,6 +1,6 @@
 {
   "name": "ARCitect",
-  "version": "v1.0.0",
+  "version": "v1.0.1",
   "author": {
     "name": "nfdi4plants.org",
     "email": "info@nfdi4plants.org",
@@ -39,7 +39,6 @@
     "@nfdi4plants/arctrl": "^2.4.0",
     "@nfdi4plants/exceljs": "0.2.0",
     "@quasar/extras": "^1.16.9",
-    "canvas-confetti": "^1.9.3",
     "chokidar": "^3.5.3",
     "electron-context-menu": "^3.6.1",
     "express": "^4.18.2",
@@ -54,10 +53,10 @@
     "vue3-markdown": "^1.2.12"
   },
   "devDependencies": {
-    "@quasar/vite-plugin": "^1.6.0",
+    "@quasar/vite-plugin": "^1.10.0",
     "@types/express": "^4.17.21",
     "@typescript-eslint/eslint-plugin": "^6.18.0",
-    "@vitejs/plugin-vue": "^5.0.2",
+    "@vitejs/plugin-vue": "^6.0.1",
     "@vue/test-utils": "^2.4.3",
     "cross-env": "^7.0.3",
     "electron": "^28.1.1",
