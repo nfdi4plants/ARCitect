@@ -84,6 +84,7 @@ ARCitect builds on [ARCtrl](https://github.com/nfdi4plants/ARCtrl) and integrate
 #### Release
 
 1. Increase `package.json` semver.
+2. (OPTIONAL) Update `TAG_NAME` in `scripts/downloadSwate.sh` to the latest Swate release tag.
 2. Commit and push any changes!
 2. Any commit with release tag `git tag <Placeholder>`, where `<Placeholder>` must be equal to `package.json` version, will trigger release pipeline in GitHub actions.
 3. Push tag with `git push origin <Placeholder>`.
