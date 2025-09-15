@@ -8,7 +8,7 @@ To install ARCitect, navigate to the [releases page](https://github.com/nfdi4pla
 
 - **Windows**:  ARCitect-x.x.xx-win.zip
 - **MacOS** ARCitect-x.x.xx-universal.dmg
-- **Linux**: ARCitect-x.x.xx.AppImage
+- **Debian-based Linux systems**: ARCitect-x.x.xx.AppImage
     <details>
     <summary>Installation on <b>Linux</b> might require additional steps</summary>
 
@@ -38,6 +38,8 @@ To install ARCitect, navigate to the [releases page](https://github.com/nfdi4pla
     - now double-clicking the AppImage should start the ARCitect
     
     </details>
+    
+- **Non-Debian-based Linux systems**: You will need to build ARCitect from source as outlined below.
 
 :bulb: For more detailed instructions and ARCitect QuickStarts, please checkout the [DataPLANT Knowledge Base](https://nfdi4plants.org/nfdi4plants.knowledgebase/arcitect).
 
