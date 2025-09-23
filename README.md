@@ -9,7 +9,8 @@ The **ARCitect** is a cross-platform app to create and manage your **ARCs** and 
 
     - **Windows**:  ARCitect-x.x.xx-win.zip
     - **macOS**: ARCitect-x.x.xx-universal.dmg
-    - **Linux**: ARCitect-x.x.xx_amd64.deb
+    - **Debian-based Linux systems**: ARCitect-x.x.xx_amd64.deb
+    - **Non-Debian-based Linux systems**: You will need to build ARCitect from source as outlined below.
 
 3. Follow the installation instructions in the [Knowledge Base](https://nfdi4plants.org/nfdi4plants.knowledgebase/arcitect).
 
