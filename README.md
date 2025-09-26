@@ -31,7 +31,13 @@ npm install
 npm start
 ```
 
-3. (optional) Compile the app for your operating system
+
+1. (optional) Compile the app for your operating system
+   
+(optional) Install sub modules, this must be done once for each setup otherwise the files will be missing in compiled ARCitect
+
+   1. Download Swate: Run `./scripts/downloadSwate.ps1` (windows) or `./scripts/downloadSwate.sh` (linux). Without this you must fallback to production version of Swate
+   2. Download Git binaries. Tracked via submodule can be pulled via: `git submodule update --init --recursive`
 
 ```bash
 npm run compile # for linux
@@ -54,14 +60,6 @@ Feel free to [raise an issue](https://github.com/nfdi4plants/ARCitect/issues/new
 Please feel free to propose changes and fixes via pull requests.
 ARCitect builds on [ARCtrl](https://github.com/nfdi4plants/ARCtrl) and integrates [Swate](https://github.com/nfdi4plants/Swate). So please check out these repositories as well.
 
-#### Release
-
-1. Increase `package.json` semver.
-2. (OPTIONAL) Update `TAG_NAME` in `scripts/downloadSwate.sh` to the latest Swate release tag.
-2. Commit and push any changes!
-2. Any commit with release tag `git tag <Placeholder>`, where `<Placeholder>` must be equal to `package.json` version, will trigger release pipeline in GitHub actions.
-3. Push tag with `git push origin <Placeholder>`.
-
 #### Help texts
 
 Changes to the help texts can be adjusted in the corresponding document located in the following folder: 
@@ -75,3 +73,15 @@ Relevant images can be placed in the following folder:
 [packages/renderer/assets](packages/renderer/assets)
 
 :bulb: Images currently occupy 100% of the width of the help text window.
+
+### Release
+
+1. Increase `package.json` semver.
+2. (OPTIONAL) Update `TAG_NAME` in `/scripts/downloadSwate.sh` to the latest Swate release tag.
+2. Commit and push any changes!
+2. Any commit with release tag `git tag <Placeholder>`, where `<Placeholder>` must be equal to `package.json` version, will trigger release pipeline in GitHub actions.
+3. Push tag with `git push origin <Placeholder>`.
+
+### Debugging on environment without git
+
+I added a config file for a windows sandbox in `/scripts/startWindowsSandbox.wsb`. Will start virtual machine with windows and WITHOUT git, that has access to `/dist` folder to test compiled ARCitect versions.

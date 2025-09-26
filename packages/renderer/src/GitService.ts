@@ -2,11 +2,16 @@ import {reactive,watch} from 'vue';
 import ArcControlService from './ArcControlService.ts';
 import AppProperties from './AppProperties.ts';
 
+interface Branches {
+  list: string[],
+  current: string|null
+}
+
 const GitService = {
 
   _: reactive({
     remotes: {},
-    branches: [],
+    branches: null as Branches|null,
 
     lfs_files: new Map(),
     lfs_size_limit: 1,
@@ -172,6 +177,31 @@ const GitService = {
     GitService.mark_lfs_nodes();
   },
 
+  get_status: async () => {
+    let tryBranch : string | null = null;
+    const status_raw: [boolean, any] = await window.ipc.invoke('GitService.run', {
+      args: [`status`],
+      cwd: ArcControlService.props.arc_root
+    });
+
+    if (!status_raw[0])
+      return Error('Unable to access git status');
+
+    const statusLines = status_raw[1].split(/\r?\n/);
+
+    for (const line of statusLines) {
+      const match = line.match(/^On branch (\S+)/);
+      if (match) {
+        tryBranch = match[1]; // return branch name
+      }
+    }
+
+    return {
+      raw: status_raw,
+      currentBranch: tryBranch
+    }
+  },
+
   parse_status: async ()=>{
     const status_raw = await window.ipc.invoke('GitService.run', {
       args: [`status`],
@@ -273,7 +303,7 @@ const GitService = {
       cwd: ArcControlService.props.arc_root
     });
     const branches_raw = response[1].split('\n').slice(0,-1);
-    const branches = {
+    const branches: Branches = {
       list: [],
       current: null
     };

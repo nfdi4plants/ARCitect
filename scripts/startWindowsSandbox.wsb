@@ -1,0 +1,8 @@
+<Configuration>
+    <vGPU>disable</vGPU>
+    <MappedFolders>
+        <MappedFolder>
+            <HostFolder>../dist/</HostFolder>
+        </MappedFolder>
+    </MappedFolders>
+</Configuration>

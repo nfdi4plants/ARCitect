@@ -9,9 +9,15 @@ import a_select from '../components/a_select.vue';
 import ArcControlService from '../ArcControlService.ts';
 
 import { useQuasar } from 'quasar'
+import GitService from '../GitService.ts';
 const $q = useQuasar();
 
-const iProps = reactive({
+interface Props {
+  branches: string[];
+  branch: string | null;
+}
+
+const iProps: Props = reactive({
   branches: [],
   branch: null
 });
@@ -89,33 +95,20 @@ const deleteBranch = async name => {
   dialogProps.state = response[0] ? 1 : 2;
 };
 
-const getBranches = async () => {
-  const response = await window.ipc.invoke('GitService.run', {
-    args: [`branch`],
-    cwd: ArcControlService.props.arc_root
-  });
-  const branches_raw = response[1].split('\n').slice(0,-1);
-  const branches = {
-    list: [],
-    current: null
-  };
-  if(branches_raw.length<1)
-    branches_raw.push('* main')
-
-  for(let branch of branches_raw){
-    const branch_name = branch.slice(2);
-    branches.list.push(branch_name);
-    if(branch[0]==='*')
-      branches.current = branch_name;
-  }
-
-  return branches;
-};
 
 const init = async ()=>{
-  const branches = await getBranches();
+  const branches = await GitService.get_branches();
   iProps.branches=branches.list;
   iProps.branch=branches.current;
+
+  if (!branches.current) {
+    const status = await GitService.get_status()
+    // check if status returned error
+    if (status instanceof Error)
+      console.error('Unable to access git status');
+    else
+      iProps.branch = status.currentBranch;
+  } 
 };
 
 onMounted( init );
@@ -129,6 +122,9 @@ onMounted( init );
     :options='iProps.branches'
     @update:model-value='switchBranch'
   >
+    <template v-slot:no-option="scope">
+      <a_btn v-close-popup class='fit' label="Add Branch" @click="addBranch" icon='add_circle' flat no-caps size='12px'/>
+    </template>
     <template v-slot:after-options="scope">
       <a_btn v-close-popup class='fit' label="Add Branch" @click="addBranch" icon='add_circle' flat no-caps size='12px'/>
     </template>
@@ -143,6 +139,7 @@ onMounted( init );
               Delete Branch
             </q-tooltip>
           </q-btn>
+          
         </q-item-section>
       </q-item>
     </template>
