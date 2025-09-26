@@ -100,15 +100,6 @@ const init = async ()=>{
   const branches = await GitService.get_branches();
   iProps.branches=branches.list;
   iProps.branch=branches.current;
-
-  if (!branches.current) {
-    const status = await GitService.get_status()
-    // check if status returned error
-    if (status instanceof Error)
-      console.error('Unable to access git status');
-    else
-      iProps.branch = status.currentBranch;
-  } 
 };
 
 onMounted( init );

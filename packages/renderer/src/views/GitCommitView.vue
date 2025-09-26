@@ -118,17 +118,8 @@ const commit = async()=>{
 
   const branches = await GitService.get_branches();
 
-  let currentBranch = branches.current;
-
-  if(!currentBranch) {
-    // git branches does not show branches without commits, so check status
-    let statusBranch = await GitService.get_status()
-    if (statusBranch instanceof Error)
-      return raiseError('Unable to access git status');
-    if (!statusBranch.currentBranch)
-      return raiseError('No current branch selected');
-    currentBranch = statusBranch.currentBranch;
-  }
+  if (!branches.current)
+    return raiseError('No current branch selected');
 
   if(branches.current && branches.current.includes('HEAD detached'))
     return raiseError('Unable to commit in detached head state.<br>It seems you have checked out a pervious commit in the git history.<br>Either switch back to the latest commit, or create a new branch.');

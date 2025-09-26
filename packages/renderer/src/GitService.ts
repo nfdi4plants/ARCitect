@@ -298,6 +298,7 @@ const GitService = {
   },
 
   get_branches: async () => {
+    // does not show branches without commits. So after git init, this will return no branches
     const response = await window.ipc.invoke('GitService.run', {
       args: [`branch`],
       cwd: ArcControlService.props.arc_root
@@ -312,6 +313,16 @@ const GitService = {
       branches.list.push(branch_name);
       if(branch[0]==='*')
         branches.current = branch_name;
+    }
+    if (!branches.current) { //if there is no branch, we try `git branch --show-current` which works even without commits
+      const [success, branchName]: [boolean, string] = await window.ipc.invoke('GitService.run', {
+        args: [`branch`, "--show-current"],
+        cwd: ArcControlService.props.arc_root
+      });
+      const trimmedName = branchName.trim();
+      if (success && trimmedName !== '') {
+        branches.current = trimmedName;
+      }
     }
 
     GitService._.branches = branches;
