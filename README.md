@@ -79,8 +79,9 @@ Relevant images can be placed in the following folder:
 1. Increase `package.json` semver.
 2. (OPTIONAL) Update `TAG_NAME` in `/scripts/downloadSwate.sh` to the latest Swate release tag.
 2. Commit and push any changes!
-2. Any commit with release tag `git tag <Placeholder>`, where `<Placeholder>` must be equal to `package.json` version, will trigger release pipeline in GitHub actions.
-3. Push tag with `git push origin <Placeholder>`.
+3. Create tag `git tag <Placeholder>`, where `<Placeholder>` must be equal to `package.json` version.
+4. Push tag with `git push origin <Placeholder>`.
+5. This should trigger gh-action 🎉
 
 ### Debugging on environment without git
 
