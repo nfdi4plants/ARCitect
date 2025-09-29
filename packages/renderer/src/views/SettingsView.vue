@@ -5,14 +5,38 @@ import a_input from '../components/a_input.vue';
 import AppProperties from '../AppProperties.ts';
 
 import {reactive} from 'vue';
+import { SHIPPED_SWATE_URL } from '../AppProperties.ts';
+
+const SWATE_DEFAULT_OPTIONS = [
+  {
+    value: 'https://swate-alpha.nfdi4plants.org/',
+    label: 'Swate Nightly'
+  },
+  { 
+    value: SHIPPED_SWATE_URL,
+    label: 'Default'
+  }
+];
 
 const iProps = reactive({
+  SwateEndpoints: SWATE_DEFAULT_OPTIONS
 });
 
 const resetARCitect = async ()=>{
   await window.ipc.invoke('CORE.reset');
   AppProperties.read_config();
 };
+
+function createNewEndpoint(val: string, done: (inputValue?: any, doneFn?: "toggle" | "add" | "add-unique") => void) {
+  if (val.length > 0) {
+    if (iProps.SwateEndpoints.findIndex((e) => e.value === val) === -1) {
+      iProps.SwateEndpoints.push({ label: val, value: val });
+      done(val, "toggle");
+      return;
+    }
+    done();
+  }
+}
 
 </script>
 
@@ -73,7 +97,8 @@ const resetARCitect = async ()=>{
                 <q-icon name='dns' color='secondary' style="margin:0 auto"/>
               </q-item-section>
               <q-item-section>
-                <q-item-label><a_input label='SWATE URL' v-model='AppProperties.config.swate_url'/></q-item-label>
+                  <!-- <a_input label='SWATE URL' v-model='AppProperties.config.swate_url'/> -->
+                  <q-select label='SWATE URL' clearable v-model='AppProperties.config.swate_url' use-input :options="SWATE_DEFAULT_OPTIONS" @new-value="createNewEndpoint"/>
               </q-item-section>
             </q-item>
 

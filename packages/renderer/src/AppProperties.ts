@@ -5,11 +5,27 @@ interface Config {
   toolbarMinimized: boolean,
   showHelp: boolean,
   showTooltips: boolean,
-  swate_url: string
+  swate_url: string | null
 }
 
+const SHIPPED_SWATE_URL = 'http://localhost:7890'
+
 const AppProperties: {
-  STATES: any,
+  STATES: {
+    HOME: number,
+    OPEN_DATAHUB: number,
+    EDIT_SWATE: number,
+    GIT_COMMIT: number,
+    GIT_SYNC: number,
+    GIT_HISTORY: number,
+    EDIT_MARKDOWN: number,
+    EDIT_IMAGE: number,
+    VALIDATION: number,
+    STATUS: number,
+    SETTINGS: number,
+  },
+  STATES_I: {[key: number]: string},
+  user: null | {name: string, email: string},
   state: number,
   config: Config,
   read_config: () => Promise<void>
@@ -173,4 +189,4 @@ const init = async ()=>{
 init();
 
 export default AppProperties;
-export { addDataHub, deleteDataHub, DATAHUB_STATUS };
+export { addDataHub, deleteDataHub, DATAHUB_STATUS, SHIPPED_SWATE_URL };
