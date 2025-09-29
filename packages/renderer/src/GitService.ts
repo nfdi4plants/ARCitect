@@ -316,9 +316,19 @@ const GitService = {
       args: [`lfs`, `ls-files`, `-j`],
       cwd: ArcControlService.props.arc_root
     });
-    
-    const json: LFSJsonResponse = JSON.parse(response[1]);
-    return json; 
+
+    if (!response[0]) {
+      console.error('Unable to fetch LFS file list');
+      return { files: [] };
+    }
+
+    let json: {files: LFSJsonFile[] | null} = JSON.parse(response[1]);
+
+    if (!json.files) {
+      json = { files: [] };
+    } 
+
+    return json as LFSJsonResponse; 
   },
 
   get_branches: async () => {
