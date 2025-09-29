@@ -15,12 +15,16 @@ import { useQuasar } from 'quasar'
 import {ArcStudy, ArcAssay} from '@nfdi4plants/arctrl';
 import { setAssayIdentifier, setStudyIdentifier } from "@nfdi4plants/arctrl/Core/IdentifierSetters";
 import IdentifierDialog from '../dialogs/IdentifierDialog.vue';
+import {type LFSJsonFile} from '../GitService';
 
 const Image = 'image';
 const Markdown = 'markdown';
 const NodeEdit_PreFix = "node_edit_"
 
 const $q = useQuasar();
+
+type LFSJsonFileMap = Record<string, LFSJsonFile>
+
 
 interface ArcTreeViewNode {
     header: string;
@@ -31,21 +35,31 @@ interface ArcTreeViewNode {
     icon: string;
     selectable: boolean;
     isDirectory: boolean;
+    children?: ArcTreeViewNode[];
+    id_rel?: string;
+    isLFS?: boolean;
+    isLFSPointer?: boolean;
+    checkout?: string;
+    downloaded?: boolean;
+    size?: number;
+    size_formatted?: string;
 }
 
 let init: {
   nodes: ArcTreeViewNode [];
   root: string,
   selection: string,
+  lfsInfo: null | LFSJsonFileMap
 } = {
   nodes: [],
   root: '',
-  selection: ''
+  selection: '',
+  lfsInfo: null
 };
 
 const emit = defineEmits(['openArc']);
 
-let update_path_listener=null;
+let update_path_listener: null | (() => Promise<void>) = null;
 
 const props = reactive(init);
 const arcTree = ref(null);
@@ -56,6 +70,13 @@ function formatNodeEditString(contentType: string) {
 
 function formatNodeAddString(label: string) {
   return NodeAdd_PreFix + label.replace(" ","");
+}
+function recUpdateNodes(fn: (n: ArcTreeViewNode)=>void, nodes: ArcTreeViewNode[]) {
+  for(const n of nodes) {
+    fn(n);
+    if(n.children)
+      recUpdateNodes(fn,n.children);
+  }
 }
 
 let uniqueLabelCounter = 0;
@@ -176,6 +197,20 @@ const readDir_ = async (path: string) => {
     n.id_rel = n.id.replace(ArcControlService.props.arc_root+'/', '');
     n.lazy = n.isDirectory;
     n.selectable = false;
+
+    let isLFS = props.lfsInfo && props.lfsInfo[n.id_rel]
+
+    if (isLFS) {
+      n.isLFS = true;
+      n.checkout = isLFS.checkout
+      n.downloaded = isLFS.downloaded
+      n.size = isLFS.size
+      n.size_formatted = formatSize(n.size)
+      if (!isLFS.downloaded) { // This is for legacy reasons. Trying not to crash anything.
+        n.isLFSPointer = true;
+      }
+    }
+
     if(isEditable(n,parent)){
       n.type = formatNodeEditString(parent);
       n.icon = 'edit_square';
@@ -294,7 +329,7 @@ const formatSize = size => {
   log = Math.max(0,Math.min(4,log));
   const suffix = ['B','KB','MB','GB','TB'][log];
 
-  return (size / Math.pow(1024,log)).toFixed(2) + ' ' + suffix;
+  return (size / Math.pow(1024,log)).toFixed(0) + ' ' + suffix;
 };
 
 const createFile = async node=>{
@@ -393,6 +428,13 @@ const downloadLFSFiles = async paths => {
       args: ['lfs','pull','--include',`"${path}"`],
       cwd: ArcControlService.props.arc_root
     });
+    
+  recUpdateNodes(n=>{
+    if(n.isLFS && paths.includes(n.id_rel)){
+      n.downloaded = true;
+      n.isLFSPointer = false;
+    }
+  },props.nodes);
 
   // unpatch
   response = await window.ipc.invoke('GitService.run', {
@@ -615,8 +657,10 @@ const onCellContextMenu = async (e,node) => {
   // }
 };
 
-onMounted( ()=>{update_path_listener = window.ipc.on('LocalFileSystemService.updatePath', updatePath);} );
-onUnmounted( ()=>{update_path_listener();} );
+onMounted( async ()=> {
+  update_path_listener = window.ipc.on('LocalFileSystemService.updatePath', updatePath);
+} );
+onUnmounted( ()=>{update_path_listener && update_path_listener();} );
 
 watch(()=>ArcControlService.props.arc_root, async (newValue, oldValue) => {
   if(oldValue)
@@ -624,6 +668,13 @@ watch(()=>ArcControlService.props.arc_root, async (newValue, oldValue) => {
   if(!newValue) return
 
   window.ipc.invoke('LocalFileSystemService.registerChangeListener', newValue);
+
+  const lfs = await GitService.get_all_lfs_info();
+  const map: LFSJsonFileMap = {};
+  for(const f of lfs.files) {
+    map[f.name] = f;
+  }
+  props.lfsInfo = map;
 
   props.root = newValue;
   props.nodes = [{
@@ -683,10 +734,13 @@ watch(()=>AppProperties.state, async (newValue, oldValue) => {
               <q-icon v-if='prop.node.icon' :name='prop.node.icon' style="padding:0 0.2em 0 0;"></q-icon>
               <span>{{ prop.node.label }}</span>
             </td>
-            <td style="text-align:right">
+            <td style="text-align:right;">
               <q-icon v-if='prop.node.type==="assays"' name='add' class='tree_button' @click='e=>addAssay(e,prop.node)'></q-icon>
               <q-icon v-if='prop.node.type==="studies"' name='add' class='tree_button' @click='e=>addStudy(e,prop.node)'></q-icon>
-              <q-badge v-if='prop.node.isLFSPointer' color="secondary" text-color="white" label="LFS" class='tree_button'/>
+              <div v-if='prop.node.isLFS' style="display: flex; gap: 0.2em; align-items: center; justify-content: end;">
+                <q-btn :unelevated="prop.node.downloaded" size="sm" padding="none xs" dense :disable="prop.node.downloaded" color='secondary' label="LFS" @click="downloadLFSFiles([prop.node.id_rel])" />
+                <q-badge color='dark' text-color="white" :label="prop.node.size_formatted"/>
+              </div>
             </td>
           </tr></tbody></table>
         </div>

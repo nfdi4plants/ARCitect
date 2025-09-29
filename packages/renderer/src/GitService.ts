@@ -7,6 +7,20 @@ interface Branches {
   current: string|null
 }
 
+export interface LFSJsonFile {
+  name: string,
+  size: number,
+  checkout: boolean,
+  downloaded: boolean
+  oid_type: string
+  oid: string
+  version: string
+}
+
+export interface LFSJsonResponse {
+  files: LFSJsonFile[]
+}
+
 const GitService = {
 
   _: reactive({
@@ -295,6 +309,16 @@ const GitService = {
       cwd: ArcControlService.props.arc_root
     });
     return response;
+  },
+
+  get_all_lfs_info: async () => {
+    const response: string = await window.ipc.invoke('GitService.run', {
+      args: [`lfs`, `ls-files`, `-j`],
+      cwd: ArcControlService.props.arc_root
+    });
+    
+    const json: LFSJsonResponse = JSON.parse(response[1]);
+    return json; 
   },
 
   get_branches: async () => {
