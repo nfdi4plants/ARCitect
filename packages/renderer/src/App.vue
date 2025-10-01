@@ -24,7 +24,7 @@ import GitDialog from './dialogs/GitDialog.vue';
 import DataHubView from './views/DataHubView.vue';
 
 import logoURL from '../assets/dpLogo2_w.png';
-import {KNOWLEDGEBASE_URLS} from "./constants";
+import {KNOWLEDGEBASE_URLS} from "./Constants";
 
 import { setCssVar } from 'quasar';
 
