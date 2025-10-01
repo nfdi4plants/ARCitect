@@ -24,6 +24,7 @@ import GitDialog from './dialogs/GitDialog.vue';
 import DataHubView from './views/DataHubView.vue';
 
 import logoURL from '../assets/dpLogo2_w.png';
+import {KNOWLEDGEBASE_URLS} from "./constants";
 
 import { setCssVar } from 'quasar';
 
@@ -150,13 +151,13 @@ onMounted(async () => {
   iProps.version = await window.ipc.invoke('CORE.getVersion');
   const git_running = await window.ipc.invoke('GitService.run','--version');
   if(!git_running[0]){
-    iProps.error_text = 'Unable to detect GIT.<br>Please verify that GIT is installed.';
+    iProps.error_text = `Unable to detect GIT.<br>You can install it following these <a href="${KNOWLEDGEBASE_URLS.git_install}" target="_blank">instructions</a>.` ;
     iProps.error = true;
   }
   console.log(git_running[1]);
   const git_lfs_running = await window.ipc.invoke('GitService.run',{args:['lfs','--version']});
   if(!git_lfs_running[0]){
-    iProps.error_text = 'Unable to detect GIT LFS.<br>Please verify that GIT LFS is installed.';
+    iProps.error_text = `Unable to detect GIT LFS.<br>You can install it following these <a href="${KNOWLEDGEBASE_URLS.git_install}" target="_blank">instructions</a>.`;
     iProps.error = true;
   }
   console.log(git_lfs_running[1]);
@@ -214,8 +215,6 @@ const downloadArcitect = async ()=>{
   await window.ipc.invoke('InternetService.openExternalURL','https://github.com/nfdi4plants/ARCitect/releases');
 };
 
-const test = async ()=>{
-};
 
 </script>
 

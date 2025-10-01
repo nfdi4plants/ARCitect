@@ -62,10 +62,6 @@ const initCore = async () => {
   if(process.platform === 'win32'){
       const process_path_separator = ';';
       process.env['PATH'] += process_path_separator + [process.resourcesPath,'git-binaries','win','cmd'].join(PATH.sep);
-  } else if(process.platform === 'darwin') {
-      const process_path_separator = ':';
-      const architecture = process.arch === 'arm64' ? 'arm64' : 'amd64' ;
-      process.env['PATH'] += process_path_separator + [process.resourcesPath,'git-binaries','mac',architecture].join(PATH.sep);
   }
   ipcMain.handle('CORE.exit', (e,code)=>{
     app.exit(code);
