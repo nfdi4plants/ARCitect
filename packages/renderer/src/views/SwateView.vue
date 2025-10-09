@@ -111,12 +111,15 @@ namespace InteropTypes {
 interface Props {
   pendingRequests: PendingRequests;
   swateReady: Boolean;
+  swateObjectListener: () => void;
+  swateUrlListener: () => void;
 }
 
 const iProps: Props = reactive({
   pendingRequests: new Map(),
   swateReady: false,
-  swateObjectListener: ()=>{}
+  swateObjectListener: ()=>{},
+  swateUrlListener: ()=>{}
 });
 
 /// Update this to add more ARCitect initiated messages
@@ -124,7 +127,7 @@ type OutgoingMsg = {
   TestHello: { request: string; response: string },
   ResponsePaths: {request: string[]; response: boolean},
   ResponseFile: {request: InteropTypes.ARCitectFileInfo; response: boolean},
-  ArcFile: {request: InteropTypes.ArcFiles; response: boolean}
+  SetARCFile: {request: InteropTypes.ArcFiles; response: boolean}
 };
 
 /// Update this to add more Swate initiated messages
@@ -276,11 +279,24 @@ const sendArcFile = async () => {
 onMounted(() => {
   window.addEventListener("message", messageListener);
   iProps.swateObjectListener = watch(()=>SwateControlService.props.object, sendArcFile);
+  iProps.swateUrlListener = watch(()=>AppProperties.config.swate_url, async (newUrl)=>{
+    if(!iframe.value) return;
+    console.log("Setting new url")
+    iProps.swateReady = false;
+    iframe.value.setAttribute("src", `${newUrl}/?is_swatehost=1&random=${SwateControlService.props.cacheNumber}`);
+    let swateRdyWatcher = watch(() => iProps.swateReady, (newVal)=> {
+      if(newVal) {
+        swateRdyWatcher(); // unwatch
+        sendArcFile();
+      }
+    });
+  });
   iframe.value.setAttribute("src", `${AppProperties.config.swate_url}/?is_swatehost=1&random=${SwateControlService.props.cacheNumber}`);
 });
 
 onUnmounted(() => {
   iProps.swateObjectListener();
+  iProps.swateUrlListener();
   window.removeEventListener("message", messageListener);
   SwateControlService.props.object = null;
 });

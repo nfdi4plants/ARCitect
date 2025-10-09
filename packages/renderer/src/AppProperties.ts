@@ -8,7 +8,7 @@ interface Config {
   swate_url: string | null
 }
 
-const SHIPPED_SWATE_URL = 'http://localhost:7890'
+const SHIPPED_SWATE_URL = 'http://localhost:7891'
 
 const AppProperties: {
   STATES: {

@@ -6,6 +6,7 @@ import AppProperties from '../AppProperties.ts';
 
 import {reactive} from 'vue';
 import { SHIPPED_SWATE_URL } from '../AppProperties.ts';
+import SwateControlService from '../SwateControlService.ts';
 
 const SWATE_DEFAULT_OPTIONS = [
   {
@@ -98,7 +99,7 @@ function createNewEndpoint(val: string, done: (inputValue?: any, doneFn?: "toggl
               </q-item-section>
               <q-item-section>
                   <!-- <a_input label='SWATE URL' v-model='AppProperties.config.swate_url'/> -->
-                  <q-select label='SWATE URL' clearable v-model='AppProperties.config.swate_url' use-input :options="SWATE_DEFAULT_OPTIONS" @new-value="createNewEndpoint"/>
+                  <q-select label='SWATE URL' clearable v-model='AppProperties.config.swate_url' emit-value use-input :options="SWATE_DEFAULT_OPTIONS" @new-value="createNewEndpoint" />
               </q-item-section>
             </q-item>
 
