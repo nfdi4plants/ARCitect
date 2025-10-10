@@ -16,6 +16,7 @@ import GitHistoryView from './views/GitHistoryView.vue';
 import SwateView from './views/SwateView.vue';
 import ValidationView from './views/ValidationView.vue';
 import StatusView from './views/StatusView/StatusView.vue';
+import BugReportView from './views/BugReportView.vue';
 import SettingsView from './views/SettingsView.vue';
 
 import ConfirmationDialog from './dialogs/ConfirmationDialog.vue';
@@ -315,6 +316,9 @@ const downloadArcitect = async ()=>{
           <q-separator />
 
           <q-item class="col-grow"></q-item>
+          <ToolbarButton text='Bugs & Support'  icon='support_agent' @clicked='AppProperties.state=AppProperties.STATES.BUG_REPORT;'>
+            <a_tooltip>Report a bug or ask for help.</a_tooltip>
+          </ToolbarButton>
           <ToolbarButton text='Services' :icon='Object.values(AppProperties.datahub_hosts_msgs).some(x=>x.critical)?"warning":"dns"' @clicked='AppProperties.state=AppProperties.STATES.STATUS;'>
             <a_tooltip>Check on the status of <b>nfdi4plants</b> services</a_tooltip>
           </ToolbarButton>
@@ -397,6 +401,7 @@ const downloadArcitect = async ()=>{
               <GitHistoryView v-else-if='AppProperties.state===AppProperties.STATES.GIT_HISTORY' />
               <ValidationView v-else-if='AppProperties.state===AppProperties.STATES.VALIDATION'></ValidationView>
               <StatusView v-else-if='AppProperties.state===AppProperties.STATES.STATUS'></StatusView>
+              <BugReportView v-else-if='AppProperties.state===AppProperties.STATES.BUG_REPORT'></BugReportView>
               <SettingsView v-else-if='AppProperties.state===AppProperties.STATES.SETTINGS'></SettingsView>
               <HomeView v-else-if='AppProperties.state===AppProperties.STATES.HOME'></HomeView>
 

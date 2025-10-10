@@ -22,6 +22,7 @@ const AppProperties: {
     EDIT_IMAGE: number,
     VALIDATION: number,
     STATUS: number,
+    BUG_REPORT: number,
     SETTINGS: number,
   },
   STATES_I: {[key: number]: string},
@@ -44,6 +45,7 @@ const AppProperties: {
     EDIT_IMAGE: 601,
 
     VALIDATION: 700,
+    BUG_REPORT: 750,
     STATUS: 800,
     SETTINGS: 900,
   },
