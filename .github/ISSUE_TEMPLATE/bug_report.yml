@@ -1,0 +1,43 @@
+name: Bug Report
+description: File a bug report to help us improve ARCitect
+title: "[Bug]: "
+labels: ["Type: Bug :bug:"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report!
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Give us a step by step what you did.
+      placeholder: Tell us what happened! If possible, please provide screenshots, including the console (ARCitect menu --> Toggle Developer Tools)
+    validations:
+      required: true
+  - type: textarea
+    id: what-expected
+    attributes:
+      label: What did you expect?
+      description: This field might be optional depending on the bug you encountered.
+      placeholder: Tell us what you wanted to see!
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system (OS)
+      description: What OS do you use?
+      options:
+        - Windows
+        - macOS
+        - Linux
+    validations:
+      required: true
+  - type: textarea
+    id: arcitect-version
+    attributes:
+      label: ARCitect version
+      description: Please tell us the ARCitect version you use (You can find it at the bottom of the left sidebar.)
+      placeholder: |
+          ARCitect v1.1.x
+    validations:
+      required: true

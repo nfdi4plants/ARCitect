@@ -1,0 +1,106 @@
+
+name: "🧪 Test Protocol Feedback"
+description: "Help us test ARCitect by following this structured test protocol."
+title: "[Test] Feedback from ARCitect test session"
+labels: ["testing", "datasteward-feedback"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 🧱 ARCitect Test Protocol
+
+        Thank you for testing **ARCitect**!  
+        Please follow the checklist and share your observations to help us improve.
+
+        ---
+        ⚙️ **Tip:** Labels like `os:windows` or `version:1.4.0` will be added automatically by our workflow bot based on your selections.
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: "🖥️ Operating System"
+      description: "Select the OS you used for testing ARCitect."
+      options:
+        - Windows 11
+        - Windows 10
+        - Windows other
+        - macOS Sequoia
+        - macOS Sonoma
+        - macOS Ventura
+        - macOS other
+        - Ubuntu 24.04 LTS
+        - Ubuntu 22.04 LTS
+        - Linux other
+    validations:
+      required: true
+
+  - type: textarea
+    id: arcitect-version
+    attributes:
+      label: ARCitect version
+      description: Please tell us the ARCitect version you use (You can find it at the bottom of the left sidebar.)
+      placeholder: |
+          ARCitect v1.x.x
+    validations:
+      required: true
+  
+  - type: markdown
+    attributes:
+      value: "### 🧭 Test Protocol Steps"
+
+  - type: checkboxes
+    id: test_steps
+    attributes:
+      label: "Core Test Tasks"
+      description: "Mark each step you’ve successfully completed. Add notes below if anything failed or behaved unexpectedly."
+      options:
+        - label: "Installation – ARCitect installation successful"
+        - label: "Launch – ARCitect launches without delay or crash"
+        - label: "Login – Authentication via DataHUB successful"
+        - label: "New ARC – Creating a new ARC successful"
+        - label: "Open ARC – opens existing ARC from folder"
+        - label: "ARC File tree – Adding text file successful"
+        - label: "ARC File tree – Import File / Folder successful"
+        - label: "ARC File tree – Add study and assay successful"
+        - label: "ARC File tree – Delete study and assay successful"
+        - label: "ARC File tree – Selecting investigation opens annotation panel (Swate)"
+        - label: "ARC File tree – Selecting a study / assay opens annotation panel (Swate)"
+        - label: "Download ARC – List of public (if logged in private) ARCs loads successfully"
+        - label: "Download ARC – Download ARC from list with / without LFS successful"        
+        - label: "Commit – shows DataHUB credentials"
+        - label: "Commit – commit successful"
+        - label: "DataHUB Sync – Add remote successful"
+        - label: "DataHUB Sync – Push ARC successful"
+        - label: "DataHUB Sync – Pull ARC successful"
+        - label: "History – Shows commit history"
+        - label: "Validation – Adding validation successful"
+
+  - type: textarea
+    id: observations
+    attributes:
+      label: "🧠 Observations & Notes"
+      description: "Write down what you noticed during testing (performance, UI, usability, etc.)."
+      placeholder: "Example: The app loads quickly; small delay when annotating a study."
+
+  - type: textarea
+    id: issues
+    attributes:
+      label: "🐞 Problems Encountered"
+      description: "List any bugs, crashes, or unexpected behavior. Include steps to reproduce if possible."
+      placeholder: "Example: I run into an error when trying to push the ARC to the DataHUB."
+
+  - type: textarea
+    id: suggestions
+    attributes:
+      label: "💡 Suggestions for Improvement"
+      description: "If you have any feature requests or usability feedback, describe them here."
+      placeholder: "Example: Add progress indicator when downloading large ARCs."
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        ✅ **Thank you for helping improve ARCitect!**  
+        Your detailed feedback is essential to making this tool better for everyone.
