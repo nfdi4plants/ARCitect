@@ -7,7 +7,7 @@ import SwateControlService from './SwateControlService.ts';
 import { ARC, ArcInvestigation, ArcStudy, ArcAssay} from '@nfdi4plants/arctrl';
 import { gitignoreContract } from "@nfdi4plants/arctrl/Contract/Git";
 import { Xlsx } from '@fslab/fsspreadsheet/Xlsx.js';
-import {Contract} from '@nfdi4plants/arctrl/Contract/Contract.js'
+import {Contract} from '@nfdi4plants/arctrl/Contract/Contract'
 
 import pDebounce from 'p-debounce';
 
@@ -18,6 +18,7 @@ export const Protocols = 'protocols';
 export const Dataset = 'dataset';
 export const Runs = 'runs';
 export const Workflows = 'workflows';
+export const Datamap = 'datamap';
 
 let init: {
     arc_root: undefined | string ,
@@ -65,9 +66,8 @@ const ArcControlService = {
     ArcControlService.props.super_busy = true;
 
     let files = await window.ipc.invoke('LocalFileSystemService.getAllFiles', arc_root);
-
     // prefilter files for arctrl
-    files = files.filter(f=>f.endsWith('.xlsx')||f.endsWith('.cwl'));
+    // files = files.filter(f=>f.endsWith('.xlsx')||f.endsWith('.cwl'));
 
     const arc = ARC.fromFilePaths(files);
     const contracts = arc.GetReadContracts();
@@ -107,7 +107,7 @@ const ArcControlService = {
         );
         break;
       case 'UPDATE': case 'CREATE':
-        if(['ISA_Investigation','ISA_Study','ISA_Assay', 'ISA_Datamap'].includes(contract.DTOType)){
+        if(['ISA_Investigation','ISA_Study','ISA_Assay', 'ISA_Datamap', 'ISA_Run', 'ISA_Workflow', 'ISA_Datamap'].includes(contract.DTOType)){
           const buffer = await Xlsx.toBytes(contract.DTO);
           const absolutePath = arc_root + '/' +contract.Path;
           await window.ipc.invoke(
@@ -196,10 +196,11 @@ const ArcControlService = {
       await ArcControlService.processContract(c);
   },
 
-  newARC: async (path: string) =>{
-    const arc = new ARC(
-      ArcInvestigation.init(path.split('/').pop())
-    );
+  newARC: async (path: string) => {
+    const arcName = path.split('/').pop();
+    if (!arcName)
+      throw new Error('Invalid ARC path provided');
+    const arc = new ARC(arcName);
     await ArcControlService.saveARC({
       arc_root:path,
       arc:arc,
@@ -231,7 +232,7 @@ const ArcControlService = {
   updateARCfromFS: async ([path,type]) => {
     if(ArcControlService.props.skip_fs_updates) return;
     // track add/rm assays/studies through file explorer
-    const requires_update = path.includes('isa.assay.xlsx') || path.includes('isa.study.xlsx');
+    const requires_update = path.includes('isa.assay.xlsx') || path.includes('isa.study.xlsx') || path.includes('isa.investigation.xlsx') || path.includes('isa.run.xlsx') || path.includes('isa.workflow.xlsx') || path.includes('isa.datamap.xlsx');
     if(!requires_update) return;
     debouncedReadARC();
   },
@@ -270,16 +271,18 @@ const ArcControlService = {
 
   test: async ()=>{
     const testArcPath = '/tmp/testARC';
+    if (!ArcControlService.props.arc) 
+        throw new Error('No ARC loaded for testing.');
     try {
       await window.ipc.invoke('LocalFileSystemService.remove', testArcPath);
       await ArcControlService.newARC(testArcPath);
 
       for(let i=0; i<3; i++)
-        ArcControlService.props.arc.ISA.AddAssay(
+        ArcControlService.props.arc.AddAssay(
           new ArcAssay(`Assay${i}`)
         );
       for(let i=0; i<3; i++)
-        ArcControlService.props.arc.ISA.AddStudy(
+        ArcControlService.props.arc.AddStudy(
           new ArcStudy(`Study${i}`)
         );
 
@@ -288,13 +291,13 @@ const ArcControlService = {
       await ArcControlService.delete('GetStudyRemoveContracts','Study1');
       await ArcControlService.rename('GetStudyRenameContracts','Study2','StudyX');
 
-      await ArcControlService.saveARC();
+      await ArcControlService.saveARC({});
       await ArcControlService.readARC();
 
-      ArcControlService.props.arc.ISA.GetStudy('Study0');
-      ArcControlService.props.arc.ISA.GetStudy('StudyX');
-      ArcControlService.props.arc.ISA.GetAssay('Assay0');
-      ArcControlService.props.arc.ISA.GetAssay('AssayX');
+      ArcControlService.props.arc.GetStudy('Study0');
+      ArcControlService.props.arc.GetStudy('StudyX');
+      ArcControlService.props.arc.GetAssay('Assay0');
+      ArcControlService.props.arc.GetAssay('AssayX');
 
       await window.ipc.invoke('CORE.log', '==========TESTS SUCCESSFUL==========');
       await window.ipc.invoke('CORE.exit',0);

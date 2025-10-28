@@ -66,7 +66,7 @@ export const LocalFileSystemService = {
     for(const l of labels){
       const path_ = PATH.join(path,l);
       const stat = FS.lstatSync(path_);
-      if(l.startsWith('isa.') || (l.startsWith('.git') && l!=='.gitignore' && l!=='.gitattributes') || l.startsWith('.arc') || l.startsWith('.DS_Store'))
+      if((l.startsWith('isa.') && !l.endsWith("datamap.xlsx")) || (l.startsWith('.git') && l!=='.gitignore' && l!=='.gitattributes') || l.startsWith('.arc') || l.startsWith('.DS_Store'))
         continue;
 
       stat.id = path_to_arcitect(path_);

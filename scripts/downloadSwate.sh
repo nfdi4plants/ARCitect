@@ -2,7 +2,7 @@
 
 OWNER="nfdi4plants"
 REPO="Swate"
-TAG_NAME="1.0.0-rc.8"
+TAG_NAME="1.0.0-rc.11"
 ASSET_NAME="SwateClient.zip"
 DOWNLOAD_URL="https://github.com/${OWNER}/${REPO}/releases/download/${TAG_NAME}/${ASSET_NAME}"
 DEST_DIR="./resources/swate"

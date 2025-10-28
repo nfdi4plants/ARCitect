@@ -3,15 +3,13 @@
     "module": "esnext",
     "target": "esnext",
     "sourceMap": false,
-    "moduleResolution": "Node",
+    "moduleResolution": "bundler",
     "skipLibCheck": true,
     "strict": true,
     "isolatedModules": true,
     "allowImportingTsExtensions": true,
     "noEmit": true,
-
     "types" : ["node"],
-    "baseUrl": ".",
     "paths": {
       "/@/*": [
         "./src/*"

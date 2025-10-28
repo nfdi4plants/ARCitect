@@ -5,15 +5,16 @@ import AppProperties from '../AppProperties';
 import ArcControlService from '../ArcControlService';
 import GitService from '../GitService';
 import SwateControlService from '../SwateControlService';
-import {Investigation, Assays, Studies, Workflows, Runs, Dataset, Protocols} from '../ArcControlService';
+import * as SCS from '../SwateControlService';
+import {Investigation, Assays, Studies, Workflows, Runs, Datamap, Dataset, Protocols} from '../ArcControlService';
 import ConfirmationDialog from '../dialogs/ConfirmationDialog.vue';
 import StringDialog from '../dialogs/StringDialog.vue';
 import AddProtocolDialog from '../dialogs/AddProtocolDialog.vue';
 import ProgressDialog from '../dialogs/ProgressDialog.vue';
 import GitDialog from '../dialogs/GitDialog.vue';
 import { useQuasar } from 'quasar'
-import {ArcStudy, ArcAssay} from '@nfdi4plants/arctrl';
-import { setAssayIdentifier, setStudyIdentifier } from "@nfdi4plants/arctrl/Core/IdentifierSetters";
+import {ArcStudy, ArcAssay, ArcRun, ArcWorkflow, DataMap as ArcDatamap, ArcInvestigation, ARC} from '@nfdi4plants/arctrl';
+import { setAssayIdentifier, setRunIdentifier, setStudyIdentifier, setWorkflowIdentifier } from "@nfdi4plants/arctrl/Core/IdentifierSetters";
 import IdentifierDialog from '../dialogs/IdentifierDialog.vue';
 import {type LFSJsonFile} from '../GitService';
 
@@ -21,10 +22,11 @@ const Image = 'image';
 const Markdown = 'markdown';
 const NodeEdit_PreFix = "node_edit_"
 
+const ArcDatamap_FileName = "isa.datamap.xlsx"
+
 const $q = useQuasar();
 
 type LFSJsonFileMap = Record<string, LFSJsonFile>
-
 
 interface ArcTreeViewNode {
     header: string;
@@ -68,9 +70,74 @@ function formatNodeEditString(contentType: string) {
   return NodeEdit_PreFix + contentType;
 }
 
-function formatNodeAddString(label: string) {
-  return NodeAdd_PreFix + label.replace(" ","");
+function relPathToDatamapParentInfo(s: string): SCS.DatamapParentInfo {
+  const parts = s.split('/');
+  let parentType: string | null = null;
+  let parentIdentifier: string | null = null;
+  if (parts.length === 3) {
+      const [pt, pi, datamapFileName] = parts;
+      if (datamapFileName !== ArcDatamap_FileName) 
+        throw new Error("Invalid datamap file name: " + datamapFileName);
+      parentType = pt;
+      parentIdentifier = pi;
+  } else if (parts.length === 2) {
+    const [pt, pi] = parts;
+    parentType = pt;
+    parentIdentifier = pi;
+  } else {
+    throw new Error("Invalid datamap path: " + s);
+  }
+  let parent: SCS.Parent | null = null;
+  if (!parentType || !parentIdentifier)
+    throw new Error("Invalid datamap path: " + s);
+  switch (parentType) {
+    case Studies:
+      parent = "Study";
+      break;
+    case Assays:
+      parent = "Assay";
+      break;
+    case Runs:
+      parent = "Run";
+      break;
+    case Workflows:
+      parent = "Workflow";
+      break;
+    default:
+      throw new Error("Invalid datamap parent type: " + parentType);
+  }
+  return {
+    Parent: parent,
+    ParentId: parentIdentifier
+  };
 }
+
+function datamapParentInfoToRelPath(info: SCS.DatamapParentInfo): string {
+  let parentType: string;
+  switch (info.Parent) {
+    case "Study":
+      parentType = Studies;
+      break;
+    case "Assay":
+      parentType = Assays;
+      break;
+    case "Run":
+      parentType = Runs;
+      break;
+    case "Workflow":
+      parentType = Workflows;
+      break;
+    default:
+      throw new Error("Invalid datamap parent type: " + info.Parent);
+  }
+  return `${parentType}/${info.ParentId}/${ArcDatamap_FileName}`;
+}
+
+function getDatamapParentByPath(arc: ARC, path: string): ArcAssay | ArcStudy | ArcRun | ArcWorkflow | null {
+  const info = relPathToDatamapParentInfo(path);
+  return SCS.getDatamapParentByInfo(arc, info);
+}
+
 function recUpdateNodes(fn: (n: ArcTreeViewNode)=>void, nodes: ArcTreeViewNode[]) {
   for(const n of nodes) {
     fn(n);
@@ -90,7 +157,7 @@ const addStudy = async (event,node,study) => {
     component: IdentifierDialog,
     componentProps: {
       label: study ? 'Copy Study' : 'New Study',
-      existing_identifiers: ArcControlService.props.arc.ISA.StudyIdentifiers,
+      existing_identifiers: ArcControlService.props.arc.StudyIdentifiers,
       identifier: study ? study.Identifier : ''
     }
   }).onOk( async (identifier: string) => {
@@ -101,10 +168,15 @@ const addStudy = async (event,node,study) => {
     } else {
       new_study = new ArcStudy(identifier);
     }
-    ArcControlService.props.arc.ISA.AddStudy(new_study);
-    await ArcControlService.saveARC();
+    ArcControlService.props.arc.AddStudy(new_study);
+    await ArcControlService.saveARC({});
   });
 };
+
+const addDatamap = async (node: ArcTreeViewNode, dm: ArcDatamap, parent: ArcStudy | ArcAssay | ArcRun | ArcWorkflow) => {
+  parent.DataMap = dm;
+  await ArcControlService.saveARC({});
+}
 
 const addAssay = async (event,node,assay) => {
   if(node && arcTree.value.isExpanded(node.id)){
@@ -115,7 +187,7 @@ const addAssay = async (event,node,assay) => {
     component: IdentifierDialog,
     componentProps: {
       label: assay ? 'Copy Assay' : 'New Assay',
-      existing_identifiers: ArcControlService.props.arc.ISA.AssayIdentifiers,
+      existing_identifiers: ArcControlService.props.arc.AssayIdentifiers,
       identifier: assay ? assay.Identifier : ''
     }
   }).onOk( async (identifier: string) => {
@@ -126,8 +198,62 @@ const addAssay = async (event,node,assay) => {
     } else {
       new_assay = new ArcAssay(identifier);
     }
-    ArcControlService.props.arc.ISA.AddAssay(new_assay);
+    ArcControlService.props.arc.AddAssay(new_assay);
     await ArcControlService.saveARC();
+  });
+};
+
+const addRun = async (event,node,run: ArcRun | undefined) => {
+  if (!ArcControlService.props.arc) return;
+  if(node && arcTree.value.isExpanded(node.id)){
+    event.preventDefault();
+    event.stopPropagation();
+  }
+  $q.dialog({
+    component: IdentifierDialog,
+    componentProps: {
+      label: run ? 'Copy Run' : 'New Run',
+      existing_identifiers: ArcControlService.props.arc.AssayIdentifiers,
+      identifier: run ? run.Identifier : ''
+    }
+  }).onOk( async (identifier: string) => {
+    if (!ArcControlService.props.arc) return;
+    let new_run = null;
+    if(run){
+      new_run = run.Copy();
+      setRunIdentifier(identifier,new_run);
+    } else {
+      new_run = new ArcRun(identifier);
+    }
+    ArcControlService.props.arc.AddRun(new_run);
+    await ArcControlService.saveARC({});
+  });
+};
+
+const addWorkflow = async (event,node,workflow: ArcWorkflow | undefined) => {
+  if (!ArcControlService.props.arc) return;
+  if(node && arcTree.value.isExpanded(node.id)){
+    event.preventDefault();
+    event.stopPropagation();
+  }
+  $q.dialog({
+    component: IdentifierDialog,
+    componentProps: {
+      label: workflow ? 'Copy Workflow' : 'New Workflow',
+      existing_identifiers: ArcControlService.props.arc.AssayIdentifiers,
+      identifier: workflow ? workflow.Identifier : ''
+    }
+  }).onOk( async (identifier: string) => {
+    if (!ArcControlService.props.arc) return;
+    let new_workflow = null;
+    if(workflow){
+      new_workflow = workflow.Copy();
+      setWorkflowIdentifier(identifier,new_workflow);
+    } else {
+      new_workflow = new ArcWorkflow(identifier);
+    }
+    ArcControlService.props.arc.AddWorkflow(new_workflow);
+    await ArcControlService.saveARC({});
   });
 };
 
@@ -177,19 +303,22 @@ const importFilesOrDirectories = async (n,method)=>{
 
 const readDir_ = async (path: string) => {
   const nodes = await window.ipc.invoke('LocalFileSystemService.readDir', path);
-
   const parent = path.split('/').pop().toLowerCase();
 
-  const isMarkdown = l => {
+  const isDatamap = (node: string) => {
+    return node === ArcDatamap_FileName;
+  };
+
+  const isMarkdown = (l: string) => {
     return ['md','txt','py','xml','cwl','fsx','json','yml','html','csv','css','js','log','gitignore','gitattributes'].some( i=>new RegExp(`\\.${i}$`,'g').test(l.toLowerCase()))
   };
 
-  const isImage = l => {
+  const isImage = (l: string) => {
     return ["jpg", "jpeg", "png", "gif", "bmp", "tiff", "tif", "webp", "svg", "ico", "heic", "heif", "avif", "raw", "psd", "ai", "eps"].some( i=>new RegExp(`\\.${i}$`,'g').test(l.toLowerCase()))
   };
 
   const isEditable = (n,p)=>{
-    return n.isDirectory && [Studies, Assays].includes(p);
+    return n.isDirectory && [Studies, Assays, Runs, Workflows].includes(p);
   };
 
   for(const n of nodes){
@@ -214,21 +343,26 @@ const readDir_ = async (path: string) => {
     if(isEditable(n,parent)){
       n.type = formatNodeEditString(parent);
       n.icon = 'edit_square';
+    } else if(isDatamap(n.label)) {
+      n.type = formatNodeEditString(Datamap);
+      n.icon = "grid_on";
     } else if(isMarkdown(n.label)){
       n.type = formatNodeEditString(Markdown);
       n.icon = 'edit_square';
     } else if(isImage(n.label)){
       n.type = formatNodeEditString(Image);
       n.icon = 'image';
-    } else if(n.label==='assays'){
-      n.type = 'assays';
+    } else if(n.label===Assays){
+      n.type = Assays;
       n.icon = 'storage';
-    } else if(n.label==='studies'){
-      n.type = 'studies';
+    } else if(n.label===Studies){
+      n.type = Studies;
       n.icon = 'science';
-    } else if(n.label==='workflows'){
+    } else if(n.label===Workflows){
+      n.type = Workflows;
       n.icon = 'settings';
-    } else if(n.label==='runs'){
+    } else if(n.label===Runs){
+      n.type = Runs;
       n.icon = 'timer';
     } else {
       n.type = 'node';
@@ -247,7 +381,7 @@ const readDir_ = async (path: string) => {
     });
   }
 
-  const enforced_order = ['studies','assays','workflows','runs'];
+  const enforced_order = [Studies, Assays, Workflows, Runs];
 
   nodes.sort((a,b)=>{
     const a_idx = enforced_order.indexOf(a.label);
@@ -269,17 +403,24 @@ const readDir = async ({ node, key, done, fail }) => {
   done( await readDir_(key) );
 };
 
-const triggerNode = (e,node) => {
-  const skip = e => {
+const triggerNode = (e: any, node: ArcTreeViewNode) => {
+  const skip = (e: any) => {
     e.preventDefault();
     e.stopPropagation();
   };
   const type = node ? node.type : null;
-  switch (type) {
+  switch (type?.toLowerCase()) {
+    case formatNodeEditString(Datamap):
+      skip(e);
+      if (!node.id_rel)
+        throw new Error("Node missing relative path for datamap: " + JSON.stringify(node));
+      const relParent = relPathToDatamapParentInfo(node.id_rel);
+      props.selection = node.id;
+      return SwateControlService.LoadSwateState(SCS.Type.Datamap, relParent);
     case formatNodeEditString(Investigation):
       skip(e);
       props.selection = node.id;
-      return SwateControlService.LoadSwateState(0);
+      return SwateControlService.LoadSwateState(SCS.Type.ArcInvestigation);
     case formatNodeEditString(Studies):
       skip(e);
       props.selection = node.id;
@@ -288,6 +429,14 @@ const triggerNode = (e,node) => {
       skip(e);
       props.selection = node.id;
       return SwateControlService.LoadSwateState(2,node.label);
+    case formatNodeEditString(Runs):
+      skip(e);
+      props.selection = node.id;
+      return SwateControlService.LoadSwateState(3,node.label);
+    case formatNodeEditString(Workflows):
+      skip(e);
+      props.selection = node.id;
+      return SwateControlService.LoadSwateState(4,node.label);
     case formatNodeEditString(Markdown):
       props.selection = node.id;
       AppProperties.active_markdown = node.id;
@@ -304,13 +453,22 @@ const triggerNode = (e,node) => {
 const updatePath = async ([path,type]) => {
   if (!arcTree.value || type==='file_ch')
     return;
-
   // check if swate view needs to be closed
   if(type==='dir_rm'){
-    const elements = path.replace(ArcControlService.props.arc_root+'/','').split('/');
+    const elements: string[] = path.replace(ArcControlService.props.arc_root+'/','').split('/');
     // if a study or assay was deleted/renamed that is currently opened in swate then close the view
-    if(elements.length===2 && ['assays','studies'].includes(elements[0]) && SwateControlService.props.object && SwateControlService.props.object.Identifier===elements[1])
+    if(elements.length===2 && [Assays,Studies,Runs,Workflows].includes(elements[0]) && SwateControlService.props.object && SwateControlService.props.object.Identifier===elements[1])
       AppProperties.state=AppProperties.STATES.HOME;
+  }
+
+  if(type==='file_rm' && path.endsWith(ArcDatamap_FileName)) {
+    if (SwateControlService.props.object && SwateControlService.props.datamapParentInfo) {
+      console.log(path.replace(ArcControlService.props.arc_root+'/', ''))
+      const relPath = datamapParentInfoToRelPath(SwateControlService.props.datamapParentInfo);
+      if (relPath === path.replace(ArcControlService.props.arc_root+'/', '')) {
+        AppProperties.state=AppProperties.STATES.HOME;
+      }
+    }
   }
 
   const parentPath = path.split('/').slice(0,-1).join('/');
@@ -445,7 +603,7 @@ const downloadLFSFiles = async paths => {
   dialogProps.state=1;
 };
 
-const onCellContextMenu = async (e,node) => {
+const onCellContextMenu = async (e,node: ArcTreeViewNode) => {
   if(node.type==='empty') return;
   e.preventDefault();
 
@@ -459,19 +617,47 @@ const onCellContextMenu = async (e,node) => {
 
   const rel_path_elements = (node.id_rel || '').split('/');
 
+  if([formatNodeEditString(Assays), formatNodeEditString(Studies), formatNodeEditString(Runs), formatNodeEditString(Workflows)].includes(node.type.toLowerCase())) {
+    items.push({
+      label: "Add Datamap",
+      icon: h( 'i', icon_style, ['note_add'] ),
+      onClick: async () => {
+        if (!ArcControlService.props.arc)
+          throw new Error("ARC not loaded");
+        const parent = getDatamapParentByPath(ArcControlService.props.arc, node.id_rel || '');
+        if (!parent)
+          throw new Error("Unable to determine datamap parent for path: " + node.id_rel);
+        const dm = new ArcDatamap([]);
+        addDatamap(node, dm, parent);
+      }
+    });
+  }
+
   if(node.isDirectory){
     if(rel_path_elements.length===1){
-      if(rel_path_elements[0]==='assays'){
+      if(rel_path_elements[0]===Assays){
         items.push({
           label: "Add Assay",
           icon: h( 'i', icon_style, ['add'] ),
-          onClick: ()=>addAssay()
+          onClick: ()=> addAssay()
         });
-      } else if (rel_path_elements[0]==='studies') {
+      } else if (rel_path_elements[0]===Studies) {
         items.push({
           label: "Add Study",
           icon: h( 'i', icon_style, ['add'] ),
-          onClick: ()=>addStudy()
+          onClick: ()=> addStudy()
+        });
+      } else if (rel_path_elements[0]===Workflows) {
+        items.push({
+          label: "Add Workflow",
+          icon: h( 'i', icon_style, ['add'] ),
+          onClick: ()=> addWorkflow()
+        });
+      } else if (rel_path_elements[0]===Runs) {
+        items.push({
+          label: "Add Run",
+          icon: h( 'i', icon_style, ['add'] ),
+          onClick: ()=> addRun()
         });
       }
     }
@@ -548,7 +734,7 @@ const onCellContextMenu = async (e,node) => {
     items.push({
       label: "Copy",
       icon: h( 'i', icon_style, ['content_copy'] ),
-      onClick: ()=>addAssay(null,null,ArcControlService.props.arc.ISA.GetAssay(node.label))
+      onClick: ()=>addAssay(null,null,ArcControlService.props.arc.GetAssay(node.label))
     });
     items.push({
       label: "Delete",
@@ -576,16 +762,86 @@ const onCellContextMenu = async (e,node) => {
     items.push({
       label: "Copy",
       icon: h( 'i', icon_style, ['content_copy'] ),
-      onClick: ()=>addStudy(null,null,ArcControlService.props.arc.ISA.GetStudy(node.label))
+      onClick: ()=>addStudy(null,null,ArcControlService.props.arc.GetStudy(node.label))
     });
     items.push({
       label: "Delete",
       icon: h( 'i', icon_style, ['delete'] ),
       onClick: ()=>confirm_delete(node,()=>ArcControlService.delete('GetStudyRemoveContracts',node.label))
     });
+  } else if (node.type===formatNodeEditString(Workflows)){
+    items.push({
+      label: "Rename",
+      icon: h( 'i', icon_style, ['edit_note'] ),
+      onClick: async () => {
+        $q.dialog({
+          component: StringDialog,
+          componentProps: {
+            title: 'Rename',
+            property: 'Name',
+            icon: 'edit_note',
+            initial_value: node.label,
+          }
+        }).onOk(
+          async new_identifier => ArcControlService.rename('GetWorkflowRenameContracts',node.label,new_identifier)
+        );
+      }
+    });
+    items.push({
+      label: "Copy",
+      icon: h( 'i', icon_style, ['content_copy'] ),
+      onClick: ()=>addWorkflow(null,null,ArcControlService.props.arc?.GetWorkflow(node.label))
+    });
+    items.push({
+      label: "Delete",
+      icon: h( 'i', icon_style, ['delete'] ),
+      onClick: ()=>confirm_delete(node,()=>ArcControlService.delete('GetWorkflowRemoveContracts',node.label))
+    });
+  } else if (node.type===formatNodeEditString(Runs)){
+    items.push({
+      label: "Rename",
+      icon: h( 'i', icon_style, ['edit_note'] ),
+      onClick: async () => {
+        $q.dialog({
+          component: StringDialog,
+          componentProps: {
+            title: 'Rename',
+            property: 'Name',
+            icon: 'edit_note',
+            initial_value: node.label,
+          }
+        }).onOk(
+          async new_identifier => ArcControlService.rename('GetRunRenameContracts',node.label,new_identifier)
+        );
+      }
+    });
+    items.push({
+      label: "Copy",
+      icon: h( 'i', icon_style, ['content_copy'] ),
+      onClick: ()=>addRun(null,null,ArcControlService.props.arc?.GetRun(node.label))
+    });
+    items.push({
+      label: "Delete",
+      icon: h( 'i', icon_style, ['delete'] ),
+      onClick: ()=>confirm_delete(node,()=>ArcControlService.delete('GetRunRemoveContracts',node.label))
+    });
+  } else if (node.type===formatNodeEditString(Datamap)){ 
+    items.push({
+        label: "Delete",
+        icon: h( 'i', icon_style, ['delete'] ),
+        onClick: ()=>
+          confirm_delete(node,()=> { // this is a workaround until ARCtrl has feature support for datamap removal
+            if (!ArcControlService.props.arc) return;
+            let parent = getDatamapParentByPath(ArcControlService.props.arc, node.id_rel || '');
+            if (!parent)
+              throw new Error("Unable to determine datamap parent for path: " + node.id_rel);
+            parent.DataMap = undefined;
+            window.ipc.invoke('LocalFileSystemService.remove', node.id)
+          })
+      });
   } else {
     //verify that the file/directory is not a MUST keep file/directory
-    if (["assays", "studies", "runs", "workflows", "dataset", "protocols", "resources"].includes(node.label.toLowerCase()) === false && node.type!=='node_edit_investigation') {
+    if ([Assays, Studies, Runs, Workflows, "dataset", "protocols", "resources"].includes(node.label.toLowerCase()) === false && node.type!=='node_edit_investigation') {
       items.push({
         label: "Rename",
         icon: h( 'i', icon_style, ['edit_note'] ),
@@ -735,8 +991,10 @@ watch(()=>AppProperties.state, async (newValue, oldValue) => {
               <span>{{ prop.node.label }}</span>
             </td>
             <td style="text-align:right;">
-              <q-icon v-if='prop.node.type==="assays"' name='add' class='tree_button' @click='e=>addAssay(e,prop.node)'></q-icon>
-              <q-icon v-if='prop.node.type==="studies"' name='add' class='tree_button' @click='e=>addStudy(e,prop.node)'></q-icon>
+              <q-icon v-if='prop.node.type===Assays' name='add' class='tree_button' @click='e=>addAssay(e,prop.node)'></q-icon>
+              <q-icon v-if='prop.node.type===Studies' name='add' class='tree_button' @click='e=>addStudy(e,prop.node)'></q-icon>
+              <q-icon v-if='prop.node.type===Runs' name='add' class='tree_button' @click='e=>addRun(e,prop.node)'></q-icon>
+              <q-icon v-if='prop.node.type===Workflows' name='add' class='tree_button' @click='e=>addWorkflow(e,prop.node)'></q-icon>
               <div v-if='prop.node.isLFS' style="display: flex; gap: 0.2em; align-items: center; justify-content: end;">
                 <q-btn :unelevated="prop.node.downloaded" size="sm" padding="none xs" dense :disable="prop.node.downloaded" color='secondary' label="LFS" @click="downloadLFSFiles([prop.node.id_rel])" />
                 <q-badge color='dark' text-color="white" :label="prop.node.size_formatted"/>

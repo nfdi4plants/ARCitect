@@ -3,10 +3,9 @@ import { onMounted, onUnmounted, ref, watch, reactive } from 'vue';
 import ArcControlService from '../ArcControlService.ts';
 import AppProperties from '../AppProperties.ts';
 import SwateControlService from '../SwateControlService.ts';
-// @ts-ignore
-import { ArcInvestigation, ArcAssay, ArcStudy, JsonController, type Person } from '@nfdi4plants/arctrl';
-// @ts-ignore
-import { ARCtrl_Person__Person_toJsonString_71136F3F as personToJson } from '@nfdi4plants/arctrl/JsonIO/Person.js'
+import * as SCS from '../SwateControlService.ts';
+import { ArcInvestigation, ArcAssay, ArcStudy, JsonController, type Person, ArcRun, ArcWorkflow, ARC, DataMap as ArcDatamap } from '@nfdi4plants/arctrl';
+import { ARCtrl_Person__Person_toJsonString_71136F3F as personToJson } from '@nfdi4plants/arctrl/JsonIO/Person'
 
 import a_btn from '../components/a_btn.vue';
 import ConfirmationDialog from '../dialogs/ConfirmationDialog.vue';
@@ -38,7 +37,7 @@ function sendMessageWithResponse<T extends keyof OutgoingMsg>(
           reject(new Error("Response timed out"));
       }, 5000); // Timeout after 5s
 
-      iProps.pendingRequests.set(requestId, { timeout, resolve, reject });
+      iProps.pendingRequests.set(requestId, { timeout, resolve, reject } as any);
       const content: MessagePayload = { swate: true, api: msg, data, requestId };
       iframe.value.contentWindow?.postMessage(content, '*');
     });
@@ -55,7 +54,7 @@ function messageListener(event: MessageEvent) {
 
     // Handle response to a previous request
     if (requestId && iProps.pendingRequests.has(requestId) && !api) {
-        const { timeout, resolve } = iProps.pendingRequests.get(requestId)!;
+        const { timeout, resolve } : any = iProps.pendingRequests.get(requestId)!;
         iProps.pendingRequests.delete(requestId);
         clearTimeout(timeout);
         resolve(data);
@@ -98,6 +97,9 @@ namespace InteropTypes {
     Study = "study",
     Investigation = "investigation",
     Template = "template",
+    Workflow = "workflow",
+    Run = "run",
+    Datamap = "datamap"
   }
 
   export interface ARCitectFileInfo {
@@ -127,7 +129,7 @@ type OutgoingMsg = {
   TestHello: { request: string; response: string },
   ResponsePaths: {request: string[]; response: boolean},
   ResponseFile: {request: InteropTypes.ARCitectFileInfo; response: boolean},
-  SetARCFile: {request: InteropTypes.ArcFiles; response: boolean}
+  SetARCFile: {request: [InteropTypes.ArcFiles, string, SCS.DatamapParentInfo | undefined] | undefined; response: boolean}
 };
 
 /// Update this to add more Swate initiated messages
@@ -136,31 +138,68 @@ const IncomingMsgHandlers: Record<string, (data: any) => Promise<any>> = {
   TestHello: async (data: string) => {
     return `Hello, ${data}!`;
   },
-  Save: async ([type, json]: [InteropTypes.ArcFiles, string]) => {
+  Save: async ([type, json, datamapParentInfo]: [InteropTypes.ArcFiles, string, SCS.DatamapParentInfo | undefined]) => {
+    if (!ArcControlService.props.arc) {
+      throw new Error("No ARC loaded");
+    }
     switch (type) {
+      case InteropTypes.ArcFiles.Datamap:
+          let nextDatamap = JsonController.Datamap.fromJsonString(json);
+          if(!datamapParentInfo) {
+            throw new Error("No parent info provided for datamap");
+          }
+          let parentObject = SCS.getDatamapParentByInfo(ArcControlService.props.arc, datamapParentInfo);
+          if(!parentObject) {
+            throw new Error("Parent object for datamap not found");
+          }
+          let oldDatamap = parentObject.DataMap;
+          if(oldDatamap) { 
+            nextDatamap.StaticHash = oldDatamap.StaticHash;
+          }
+          parentObject.DataMap = nextDatamap;
+        break;
       case InteropTypes.ArcFiles.Assay:
         let nextAssay = JsonController.Assay.fromJsonString(json);
-        let oldAssay = ArcControlService.props.arc.ISA.TryGetAssay(nextAssay.Identifier);
+        let oldAssay = ArcControlService.props.arc.TryGetAssay(nextAssay.Identifier) as ArcAssay | undefined;
         if(oldAssay) {
           nextAssay.StaticHash = oldAssay.StaticHash;
         }
-        ArcControlService.props.arc.ISA.SetAssay(nextAssay.Identifier, nextAssay);
+        ArcControlService.props.arc.SetAssay(nextAssay.Identifier, nextAssay);
         break;
       case InteropTypes.ArcFiles.Study:
         let nextStudy = JsonController.Study.fromJsonString(json);
-        let oldStudy : ArcStudy | undefined = ArcControlService.props.arc.ISA.TryGetStudy(nextStudy.Identifier)
+        let oldStudy = ArcControlService.props.arc.TryGetStudy(nextStudy.Identifier) as ArcStudy | undefined;
         if(oldStudy) {
           nextStudy.StaticHash = oldStudy.StaticHash;
         }
-        ArcControlService.props.arc.ISA.SetStudy(nextStudy.Identifier, nextStudy);
+        ArcControlService.props.arc.SetStudy(nextStudy.Identifier, nextStudy);
+        break;
+      case InteropTypes.ArcFiles.Run:
+        let nextRun = JsonController.Run.fromJsonString(json);
+        let oldRun = ArcControlService.props.arc.TryGetRun(nextRun.Identifier) as ArcRun | undefined;
+        if(oldRun) {
+          nextRun.StaticHash = oldRun.StaticHash;
+        }
+        ArcControlService.props.arc.SetRun(nextRun.Identifier, nextRun);
+        break;
+      case InteropTypes.ArcFiles.Workflow:
+        let nextWorkflow = JsonController.Workflow.fromJsonString(json);
+        let oldWorkflow = ArcControlService.props.arc.TryGetWorkflow(nextWorkflow.Identifier) as ArcWorkflow | undefined;
+        if(oldWorkflow) {
+          nextWorkflow.StaticHash = oldWorkflow.StaticHash;
+        }
+        ArcControlService.props.arc.SetWorkflow(nextWorkflow.Identifier, nextWorkflow);
         break;
       case InteropTypes.ArcFiles.Investigation:
         let nextInvestigation = JsonController.Investigation.fromJsonString(json);
-        let oldInvestigation = ArcControlService.props.arc.ISA
-        nextInvestigation.StaticHash = oldInvestigation.StaticHash;
-        nextInvestigation.Assays = oldInvestigation.Assays;
-        nextInvestigation.Studies = oldInvestigation.Studies;
-        ArcControlService.props.arc.ISA = nextInvestigation;
+        let oldArc = ArcControlService.props.arc
+        nextInvestigation.StaticHash = oldArc.StaticHash;
+        nextInvestigation.Assays = oldArc.Assays;
+        nextInvestigation.Studies = oldArc.Studies;
+        nextInvestigation.Runs = oldArc.Runs;
+        nextInvestigation.Workflows = oldArc.Workflows;
+        const newArc = ARC.fromArcInvestigation(nextInvestigation, oldArc.FileSystem, oldArc.License);
+        ArcControlService.props.arc = newArc;
         break;
       case InteropTypes.ArcFiles.Template:
         // Handle template
@@ -185,7 +224,10 @@ const IncomingMsgHandlers: Record<string, (data: any) => Promise<any>> = {
     return true
   },
   RequestPersons: async ([]) => {
-    const persons: Person[] = ArcControlService.props.arc.ISA.GetAllPersons();
+    if (!ArcControlService.props.arc) {
+      throw new Error("No ARC loaded");
+    }
+    const persons: Person[] = ArcControlService.props.arc.GetAllPersons();
     const personStrings: string[] =
       persons.map((p: Person) =>
         personToJson(p,0)
@@ -198,6 +240,16 @@ const selectFileAndSend = async () => {
   let file: undefined | InteropTypes.ARCitectFileInfo;
   file = await window.ipc.invoke("LocalFileSystemService.selectAndReadFile")
   if (!file) return;
+  if (!ArcControlService.props.arc_root) {
+    $q.dialog({
+      component: ConfirmationDialog,
+      componentProps: {
+        title: 'Error',
+        msg: 'No ARC is opened. Please open an ARC before selecting files.'
+      }
+    });
+    return;
+  }
   if(!file.name.startsWith(ArcControlService.props.arc_root)) {
     $q.dialog({
       component: ConfirmationDialog,
@@ -228,10 +280,10 @@ const selectPathsAndSend = async (selectDictionaries: boolean) => {
   let response = await sendMessageWithResponse("ResponsePaths", selection);
 }
 
-const serializeArcFile = ()=>{
-  let data: [InteropTypes.ArcFiles, string] | undefined;
+const serializeArcFile = () => {
+  let data: [InteropTypes.ArcFiles, string, SCS.DatamapParentInfo | undefined] | undefined;
   switch(SwateControlService.props.type){
-    case 0:
+    case SCS.Type.ArcInvestigation:
       let i = SwateControlService.props.object;
       if (i instanceof ArcInvestigation) {
         // rmv assays and studies. Not displayed in Swate.
@@ -245,35 +297,61 @@ const serializeArcFile = ()=>{
             i.OntologySourceReferences,
             i.Publications,
             i.Contacts,
-            null,
-            null,
-            null,
-            i.Comments
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            i.Comments,
+            undefined
         );
         const jsonString = JsonController.Investigation.toJsonString(iCopy,0);
-        data = [InteropTypes.ArcFiles.Investigation, jsonString];
+        data = [InteropTypes.ArcFiles.Investigation, jsonString, undefined];
       }
       break;
-    case 1:
+    case SCS.Type.ArcStudy:
       let s = SwateControlService.props.object;
       if (s instanceof ArcStudy) {
         const jsonString = JsonController.Study.toJsonString(s,0);
-        data = [InteropTypes.ArcFiles.Study, jsonString];
+        data = [InteropTypes.ArcFiles.Study, jsonString, undefined];
       }
       break;
-    case 2:
+    case SCS.Type.ArcAssay:
       let a = SwateControlService.props.object;
       if (a instanceof ArcAssay) {
         const jsonString = JsonController.Assay.toJsonString(a,0);
-        data = [InteropTypes.ArcFiles.Assay, jsonString];
+        data = [InteropTypes.ArcFiles.Assay, jsonString, undefined];
       }
+    case SCS.Type.ArcRun:
+      let r = SwateControlService.props.object;
+      if (r instanceof ArcRun) {
+        const jsonString = JsonController.Run.toJsonString(r,0);
+        data = [InteropTypes.ArcFiles.Run, jsonString, undefined];
+      }
+      break;
+    case SCS.Type.ArcWorkflow:
+      let w = SwateControlService.props.object;
+      if (w instanceof ArcWorkflow) {
+        const jsonString = JsonController.Workflow.toJsonString(w,0);
+        data = [InteropTypes.ArcFiles.Workflow, jsonString, undefined];
+      }
+      break;
+    case SCS.Type.Datamap:
+      let parent = SwateControlService.props.datamapParentInfo;
+      let d = SwateControlService.props.object;
+      if (d instanceof ArcDatamap && parent) {
+        const jsonString = JsonController.Datamap.toJsonString(d,0);
+        data = [InteropTypes.ArcFiles.Datamap, jsonString, {...parent}];
+      }
+      break;
   }
   return data;
 };
 
 const sendArcFile = async () => {
   if(!iProps.swateReady) return;
-  await sendMessageWithResponse("SetARCFile", serializeArcFile());
+  const serializedFile = serializeArcFile();
+  await sendMessageWithResponse("SetARCFile", serializedFile);
 };
 
 onMounted(() => {

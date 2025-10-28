@@ -1,6 +1,6 @@
 {
   "name": "ARCitect",
-  "version": "v1.1.5",
+  "version": "v1.2.0",
   "author": {
     "name": "nfdi4plants.org",
     "email": "info@nfdi4plants.org",
@@ -34,10 +34,10 @@
     "typecheck": "npm run typecheck:main && npm run typecheck:preload && npm run typecheck:renderer"
   },
   "dependencies": {
-    "@fslab/fsspreadsheet": "^6.2.0",
+    "@fslab/fsspreadsheet": "^7.0.0-alpha.1",
     "@imengyu/vue3-context-menu": "^1.3.5",
-    "@nfdi4plants/arctrl": "^2.4.0",
-    "@nfdi4plants/exceljs": "0.2.0",
+    "@nfdi4plants/arctrl": "^3.0.0-beta.9",
+    "@nfdi4plants/exceljs": "0.3.0",
     "@quasar/extras": "^1.16.9",
     "chokidar": "^3.5.3",
     "electron-context-menu": "^3.6.1",

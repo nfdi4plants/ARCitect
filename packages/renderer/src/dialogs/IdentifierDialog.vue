@@ -3,7 +3,7 @@ import { useDialogPluginComponent } from 'quasar';
 import { reactive, onMounted, watch, ref } from 'vue';
 
 import ArcControlService from '../ArcControlService';
-import {checkValidCharacters} from '@nfdi4plants/arctrl/Core/Helper/Identifier.js'
+import {checkValidCharacters} from '@nfdi4plants/arctrl/Core/Helper/Identifier'
 
 export interface Props {
   label: string,
