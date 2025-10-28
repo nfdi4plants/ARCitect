@@ -66,7 +66,7 @@ import ViewItem from '../components/ViewItem.vue';
         </q-item-section>
       </q-item>
 
-      <q-item clickable tag="a" href="https://helpdesk.nfdi4plants.org" target="_blank" v-ripple>
+      <q-item clickable tag="a" href="https://helpdesk.nfdi4plants.org/?topic=ToolsandServices_ARCitect" target="_blank" v-ripple>
         <q-item-section avatar>
           <q-icon name="support_agent" color="primary" />
         </q-item-section>
