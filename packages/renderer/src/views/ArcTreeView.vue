@@ -321,6 +321,10 @@ const readDir_ = async (path: string) => {
     return n.isDirectory && [Studies, Assays, Runs, Workflows].includes(p);
   };
 
+  const isLicense = (l: string) => {
+    return ['license.txt','licence.md','license'].includes(l.toLowerCase());
+  };
+
   for(const n of nodes){
     n.label = n.id.split('/').pop();
     n.id_rel = n.id.replace(ArcControlService.props.arc_root+'/', '');
@@ -346,7 +350,7 @@ const readDir_ = async (path: string) => {
     } else if(isDatamap(n.label)) {
       n.type = formatNodeEditString(Datamap);
       n.icon = "grid_on";
-    } else if(isMarkdown(n.label)){
+    } else if(isMarkdown(n.label) || isLicense(n.label)) {
       n.type = formatNodeEditString(Markdown);
       n.icon = 'edit_square';
     } else if(isImage(n.label)){
