@@ -72,8 +72,23 @@ const ArcControlService = {
     const arc = ARC.fromFilePaths(files);
     const contracts = arc.GetReadContracts();
     for(const contract of contracts){
-      const buffer = await window.ipc.invoke('LocalFileSystemService.readFile', [arc_root+'/'+contract.Path,{}]);
-      contract.DTO = await Xlsx.fromBytes(buffer);
+      switch (contract.DTOType) {
+        case 'ISA_Investigation':
+        case 'ISA_Study':
+        case 'ISA_Assay':
+        case 'ISA_Datamap':
+        case 'ISA_Run':
+        case 'ISA_Workflow':
+          const buffer = await window.ipc.invoke('LocalFileSystemService.readFile', [arc_root+'/'+contract.Path,{}]);
+          contract.DTO = await Xlsx.fromBytes(buffer);
+          break;
+        case 'PlainText':
+          contract.DTO = await window.ipc.invoke('LocalFileSystemService.readFile', [arc_root+'/'+contract.Path, {encoding: 'UTF-8'}]);
+          break;
+        default:
+          console.log('unable to resolve read contract', contract);
+          break;
+      }
     }
     arc.SetISAFromContracts(contracts);
     ArcControlService.props.arc = arc;
