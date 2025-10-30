@@ -1,6 +1,7 @@
 name: Tests
 on:
-  push:
+  # push:
+  workflow_dispatch: 
 
 jobs:
   tests-lnx:
