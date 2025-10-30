@@ -90,8 +90,10 @@ const trackChanges = async () => {
 
   // add entries
   for(let file of git_lfs)
-    if(!gitattributes.hasOwnProperty(file))
-      gitattributes[file] = `${file} filter=lfs diff=lfs merge=lfs -text`;
+    if(!gitattributes.hasOwnProperty(file)) {
+      const safe = file.replace(/\s/g, '[[:space:]]');
+      gitattributes[file] = `${safe} filter=lfs diff=lfs merge=lfs -text`;
+    }
 
   await window.ipc.invoke(
     'LocalFileSystemService.writeFile',

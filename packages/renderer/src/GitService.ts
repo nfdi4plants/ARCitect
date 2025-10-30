@@ -277,7 +277,8 @@ const GitService = {
       const gitattributesRaw = await window.ipc.invoke('LocalFileSystemService.readFile', ArcControlService.props.arc_root+'/.gitattributes');
       GitService._.lfs_files = new Map();
       gitattributesRaw.split('\n').map(r=>{
-        GitService._.lfs_files.set(r.split(' filter=lfs ')[0],false)
+        const next = r.split(' filter=lfs ')[0]
+        GitService._.lfs_files.set(next,false)
       });
     }
   },

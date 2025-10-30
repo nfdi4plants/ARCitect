@@ -218,7 +218,7 @@ const ArcControlService = {
     try {
       checkValidCharacters(arcName);
     } catch (error) {
-      throw error;
+      throw error;hit
     }
     const arc = new ARC(arcName);
     await ArcControlService.saveARC({
