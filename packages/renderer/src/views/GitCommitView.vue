@@ -91,6 +91,8 @@ const trackChanges = async () => {
   // add entries
   for(let file of git_lfs)
     if(!gitattributes.hasOwnProperty(file)) {
+      // https://github.com/nfdi4plants/ARCitect/issues/444
+      // https://github.com/nfdi4plants/ARCitect/issues/422
       const safe = file.replace(/\s/g, '[[:space:]]');
       gitattributes[file] = `${safe} filter=lfs diff=lfs merge=lfs -text`;
     }
