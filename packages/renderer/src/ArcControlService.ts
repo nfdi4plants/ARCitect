@@ -10,6 +10,7 @@ import { Xlsx } from '@fslab/fsspreadsheet/Xlsx.js';
 import {Contract} from '@nfdi4plants/arctrl/Contract/Contract'
 
 import pDebounce from 'p-debounce';
+import { checkValidCharacters, tryCheckValidCharacters } from '@nfdi4plants/arctrl/Core/Helper/Identifier';
 
 export const Investigation = "investigation";
 export const Studies = "studies";
@@ -214,6 +215,11 @@ const ArcControlService = {
     const arcName = path.split('/').pop();
     if (!arcName)
       throw new Error('Invalid ARC path provided');
+    try {
+      checkValidCharacters(arcName);
+    } catch (error) {
+      throw error;
+    }
     const arc = new ARC(arcName);
     await ArcControlService.saveARC({
       arc_root:path,

@@ -124,7 +124,13 @@ const newLocalArc = async ()=>{
     return;
 
   AppProperties.state=AppProperties.STATES.HOME;
-  await ArcControlService.newARC(path);
+  try {
+    await ArcControlService.newARC(path);
+  } catch (error) {
+    iProps.error_text = error.message;
+    iProps.error = true;
+    return;
+  }
   await openLocalArc(path);
 };
 
