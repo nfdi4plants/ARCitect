@@ -144,55 +144,95 @@ const IncomingMsgHandlers: Record<string, (data: any) => Promise<any>> = {
     }
     switch (type) {
       case InteropTypes.ArcFiles.Datamap:
-          let nextDatamap = JsonController.Datamap.fromJsonString(json);
+          const nextDatamap = JsonController.Datamap.fromJsonString(json);
           if(!datamapParentInfo) {
             throw new Error("No parent info provided for datamap");
           }
-          let parentObject = SCS.getDatamapParentByInfo(ArcControlService.props.arc, datamapParentInfo);
+          const parentObject = SCS.getDatamapParentByInfo(ArcControlService.props.arc, datamapParentInfo);
           if(!parentObject) {
             throw new Error("Parent object for datamap not found");
           }
-          let oldDatamap = parentObject.DataMap;
-          if(oldDatamap) { 
+          const oldDatamap = parentObject.DataMap;
+          if(oldDatamap) {
             nextDatamap.StaticHash = oldDatamap.StaticHash;
           }
           parentObject.DataMap = nextDatamap;
         break;
       case InteropTypes.ArcFiles.Assay:
-        let nextAssay = JsonController.Assay.fromJsonString(json);
-        let oldAssay = ArcControlService.props.arc.TryGetAssay(nextAssay.Identifier) as ArcAssay | undefined;
+        const nextAssay = JsonController.Assay.fromJsonString(json);
+        const oldAssay = ArcControlService.props.arc.TryGetAssay(nextAssay.Identifier) as ArcAssay | undefined;
         if(oldAssay) {
           nextAssay.StaticHash = oldAssay.StaticHash;
+          ArcControlService.props.arc.SetAssay(nextAssay.Identifier, nextAssay);
+        } else {
+          if (SwateControlService.props.type === SCS.Type.ArcAssay && SwateControlService.props.object instanceof ArcAssay) {
+            const contracts = ArcControlService.props.arc.GetAssayRemoveContracts(SwateControlService.props.object.Identifier);
+            console.warn("Deleting old assay: ", SwateControlService.props.object.Identifier);
+            for (const contract of contracts) {
+              ArcControlService.processContract(contract);
+            }
+          }
+          ArcControlService.props.arc.AddAssay(nextAssay);
+          SwateControlService.props.object = nextAssay;
         }
-        ArcControlService.props.arc.SetAssay(nextAssay.Identifier, nextAssay);
         break;
       case InteropTypes.ArcFiles.Study:
-        let nextStudy = JsonController.Study.fromJsonString(json);
-        let oldStudy = ArcControlService.props.arc.TryGetStudy(nextStudy.Identifier) as ArcStudy | undefined;
+        const nextStudy = JsonController.Study.fromJsonString(json);
+        const oldStudy = ArcControlService.props.arc.TryGetStudy(nextStudy.Identifier) as ArcStudy | undefined;
         if(oldStudy) {
           nextStudy.StaticHash = oldStudy.StaticHash;
+          ArcControlService.props.arc.SetStudy(nextStudy.Identifier, nextStudy);
+        } else {
+          if (SwateControlService.props.type === SCS.Type.ArcStudy && SwateControlService.props.object instanceof ArcStudy) {
+            const contracts = ArcControlService.props.arc.GetStudyRemoveContracts(SwateControlService.props.object.Identifier);
+            console.warn("Deleting old study: ", SwateControlService.props.object.Identifier);
+            for (const contract of contracts) {
+              ArcControlService.processContract(contract);
+            }
+          }
+          ArcControlService.props.arc.AddStudy(nextStudy);
+          SwateControlService.props.object = nextStudy;
         }
-        ArcControlService.props.arc.SetStudy(nextStudy.Identifier, nextStudy);
         break;
       case InteropTypes.ArcFiles.Run:
-        let nextRun = JsonController.Run.fromJsonString(json);
-        let oldRun = ArcControlService.props.arc.TryGetRun(nextRun.Identifier) as ArcRun | undefined;
+        const nextRun = JsonController.Run.fromJsonString(json);
+        const oldRun = ArcControlService.props.arc.TryGetRun(nextRun.Identifier) as ArcRun | undefined;
         if(oldRun) {
           nextRun.StaticHash = oldRun.StaticHash;
+          ArcControlService.props.arc.SetRun(nextRun.Identifier, nextRun);
+        } else {
+          if (SwateControlService.props.type === SCS.Type.ArcRun && SwateControlService.props.object instanceof ArcRun) {
+            const contracts = ArcControlService.props.arc.GetRunRemoveContracts(SwateControlService.props.object.Identifier);
+            console.warn("Deleting old run: ", SwateControlService.props.object.Identifier);
+            for (const contract of contracts) {
+              ArcControlService.processContract(contract);
+            }
+          }
+          ArcControlService.props.arc.AddRun(nextRun);
+          SwateControlService.props.object = nextRun;
         }
-        ArcControlService.props.arc.SetRun(nextRun.Identifier, nextRun);
         break;
       case InteropTypes.ArcFiles.Workflow:
-        let nextWorkflow = JsonController.Workflow.fromJsonString(json);
-        let oldWorkflow = ArcControlService.props.arc.TryGetWorkflow(nextWorkflow.Identifier) as ArcWorkflow | undefined;
+        const nextWorkflow = JsonController.Workflow.fromJsonString(json);
+        const oldWorkflow = ArcControlService.props.arc.TryGetWorkflow(nextWorkflow.Identifier) as ArcWorkflow | undefined;
         if(oldWorkflow) {
           nextWorkflow.StaticHash = oldWorkflow.StaticHash;
+          ArcControlService.props.arc.SetWorkflow(nextWorkflow.Identifier, nextWorkflow);
+        } else {
+          if (SwateControlService.props.type === SCS.Type.ArcWorkflow && SwateControlService.props.object instanceof ArcWorkflow) {
+            const contracts = ArcControlService.props.arc.GetWorkflowRemoveContracts(SwateControlService.props.object.Identifier);
+            console.warn("Deleting old workflow: ", SwateControlService.props.object.Identifier);
+            for (const contract of contracts) {
+              ArcControlService.processContract(contract);
+            }
+          }
+          ArcControlService.props.arc.AddWorkflow(nextWorkflow);
+          SwateControlService.props.object = nextWorkflow;
         }
-        ArcControlService.props.arc.SetWorkflow(nextWorkflow.Identifier, nextWorkflow);
         break;
       case InteropTypes.ArcFiles.Investigation:
-        let nextInvestigation = JsonController.Investigation.fromJsonString(json);
-        let oldArc = ArcControlService.props.arc
+        const nextInvestigation = JsonController.Investigation.fromJsonString(json);
+        const oldArc = ArcControlService.props.arc;
         nextInvestigation.StaticHash = oldArc.StaticHash;
         nextInvestigation.Assays = oldArc.Assays;
         nextInvestigation.Studies = oldArc.Studies;

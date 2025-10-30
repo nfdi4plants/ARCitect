@@ -107,13 +107,12 @@ const ArcControlService = {
     return true;
   },
 
-  processContract: async (contract: Contract, arc: ARC, arc_root: string) => {
-    arc = arc || ArcControlService.props.arc;
-    arc_root = arc_root || ArcControlService.props.arc_root;
+  processContract: async (contract: Contract, arc_?: ARC, arc_root_?: string) => {
+    const arc = arc_ || ArcControlService.props.arc;
+    const arc_root = arc_root_ || ArcControlService.props.arc_root;
     if(!arc || !arc_root)
       return;
     arc.UpdateFileSystem();
-    console.log('CONTRACT',contract);
     switch (contract.Operation) {
       case 'DELETE':
         await window.ipc.invoke(
