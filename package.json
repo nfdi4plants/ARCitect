@@ -1,6 +1,6 @@
 {
   "name": "ARCitect",
-  "version": "v1.2.4",
+  "version": "v1.2.5",
   "author": {
     "name": "nfdi4plants.org",
     "email": "info@nfdi4plants.org",
@@ -36,7 +36,7 @@
   "dependencies": {
     "@fslab/fsspreadsheet": "^7.0.0-alpha.1",
     "@imengyu/vue3-context-menu": "^1.3.5",
-    "@nfdi4plants/arctrl": "^3.0.0-beta.9",
+    "@nfdi4plants/arctrl": "^3.0.0-beta.11",
     "@nfdi4plants/exceljs": "0.3.0",
     "@quasar/extras": "^1.16.9",
     "chokidar": "^3.5.3",
