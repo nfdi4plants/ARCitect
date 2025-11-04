@@ -1,5 +1,5 @@
 
-name: "🧪 Test Protocol Feedback"
+name: "Test Protocol Feedback"
 description: "Help us test ARCitect by following this structured test protocol."
 title: "[Test] Feedback from ARCitect test session"
 labels: ["testing", "datasteward-feedback"]
@@ -9,18 +9,15 @@ body:
   - type: markdown
     attributes:
       value: |
-        ## 🧱 ARCitect Test Protocol
+        ## ARCitect Test Protocol
 
         Thank you for testing **ARCitect**!  
         Please follow the checklist and share your observations to help us improve.
 
-        ---
-        ⚙️ **Tip:** Labels like `os:windows` or `version:1.4.0` will be added automatically by our workflow bot based on your selections.
-
   - type: dropdown
     id: os
     attributes:
-      label: "🖥️ Operating System"
+      label: "Operating System"
       description: "Select the OS you used for testing ARCitect."
       options:
         - Windows 11
@@ -48,7 +45,7 @@ body:
   
   - type: markdown
     attributes:
-      value: "### 🧭 Test Protocol Steps"
+      value: "### Test Protocol Steps"
 
   - type: checkboxes
     id: test_steps
@@ -80,27 +77,20 @@ body:
   - type: textarea
     id: observations
     attributes:
-      label: "🧠 Observations & Notes"
+      label: "Observations & Notes"
       description: "Write down what you noticed during testing (performance, UI, usability, etc.)."
       placeholder: "Example: The app loads quickly; small delay when annotating a study."
 
   - type: textarea
     id: issues
     attributes:
-      label: "🐞 Problems Encountered"
+      label: "Problems Encountered"
       description: "List any bugs, crashes, or unexpected behavior. Include steps to reproduce if possible."
       placeholder: "Example: I run into an error when trying to push the ARC to the DataHUB."
 
   - type: textarea
     id: suggestions
     attributes:
-      label: "💡 Suggestions for Improvement"
+      label: "Suggestions for Improvement"
       description: "If you have any feature requests or usability feedback, describe them here."
       placeholder: "Example: Add progress indicator when downloading large ARCs."
-
-  - type: markdown
-    attributes:
-      value: |
-        ---
-        ✅ **Thank you for helping improve ARCitect!**  
-        Your detailed feedback is essential to making this tool better for everyone.
