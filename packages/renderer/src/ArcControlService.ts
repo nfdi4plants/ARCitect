@@ -65,6 +65,7 @@ const ArcControlService = {
     }
 
     ArcControlService.props.super_busy = true;
+    ArcControlService.props.skip_fs_updates = true;
 
     let files = await window.ipc.invoke('LocalFileSystemService.getAllFiles', arc_root);
     // prefilter files for arctrl
@@ -87,7 +88,7 @@ const ArcControlService = {
           contract.DTO = await window.ipc.invoke('LocalFileSystemService.readFile', [arc_root+'/'+contract.Path, {encoding: 'UTF-8'}]);
           break;
         default:
-          console.log('unable to resolve read contract', contract);
+          console.warn('unable to resolve read contract', contract);
           break;
       }
     }
@@ -104,6 +105,7 @@ const ArcControlService = {
     console.log(arc);
 
     ArcControlService.props.super_busy = false;
+    ArcControlService.props.skip_fs_updates = false;
 
     return true;
   },
@@ -122,6 +124,7 @@ const ArcControlService = {
         );
         break;
       case 'UPDATE': case 'CREATE':
+        ArcControlService.props.skip_fs_updates = true;
         if(['ISA_Investigation','ISA_Study','ISA_Assay', 'ISA_Datamap', 'ISA_Run', 'ISA_Workflow', 'ISA_Datamap'].includes(contract.DTOType)){
           const buffer = await Xlsx.toBytes(contract.DTO);
           const absolutePath = arc_root + '/' +contract.Path;
@@ -141,7 +144,7 @@ const ArcControlService = {
             {encoding:'UTF-8', flag: 'wx'}
           ]);
         } else {
-          return console.log('unable to resolve write contract', contract);
+          return console.warn('unable to resolve write contract', contract);
         }
         break;
       case 'RENAME':
@@ -154,7 +157,7 @@ const ArcControlService = {
         );
         break;
       default:
-        console.log(`Warning. 'processContract' hit unknown expression for contract type: ${contract.Operation} in ${contract}.`)
+        console.warn(`Warning. 'processContract' hit unknown expression for contract type: ${contract.Operation} in ${contract}.`)
         break;
     }
   },
@@ -197,7 +200,8 @@ const ArcControlService = {
 
     for(let c of contracts)
       await ArcControlService.processContract(c,arc,arc_root);
-
+    const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+    await sleep(100);
     ArcControlService.props.skip_fs_updates = false;
   },
 
@@ -252,7 +256,9 @@ const ArcControlService = {
   updateARCfromFS: async ([path,type]) => {
     if(ArcControlService.props.skip_fs_updates) return;
     // track add/rm assays/studies through file explorer
-    const requires_update = path.includes('isa.assay.xlsx') || path.includes('isa.study.xlsx') || path.includes('isa.investigation.xlsx') || path.includes('isa.run.xlsx') || path.includes('isa.workflow.xlsx') || path.includes('isa.datamap.xlsx');
+    const requires_update = 
+      !path.includes('~$') && // This is temp xlsx file
+      (path.includes('isa.assay.xlsx') || path.includes('isa.study.xlsx') || path.includes('isa.investigation.xlsx') || path.includes('isa.run.xlsx') || path.includes('isa.workflow.xlsx') || path.includes('isa.datamap.xlsx'));
     if(!requires_update) return;
     debouncedReadARC();
   },

@@ -204,7 +204,7 @@ export const LocalFileSystemService = {
     const listener = chokidar.watch(path,{ignoreInitial:true, usePolling: os.platform()==='win32'});
     changeListeners.set(path, listener);
 
-    const updatePath = (path,type) => {
+    const updatePath = async (path,type) => { 
       const window = BrowserWindow.getAllWindows().find(w => !w.isDestroyed());
       window?.webContents.send('LocalFileSystemService.updatePath', [path_to_arcitect(path),type]);
     };
@@ -215,9 +215,6 @@ export const LocalFileSystemService = {
       .on('change', path=>updatePath(path,'file_ch'))
       .on('addDir', path=>updatePath(path,'dir_add'))
       .on('unlinkDir', path=>updatePath(path,'dir_rm'))
-      // .on('all', (event, path) => {
-      //   // console.log(event,path);
-      // })
     ;
 
     return;
