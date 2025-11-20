@@ -1,7 +1,7 @@
 # Variables
 $Owner = "nfdi4plants"
 $Repo = "Swate"
-$TagName = "1.0.2"
+$TagName = "1.0.5"
 $AssetName = "SwateClient.zip"
 $DownloadUrl = "https://github.com/$Owner/$Repo/releases/download/$TagName/$AssetName"
 $DestDir = "./resources/swate"

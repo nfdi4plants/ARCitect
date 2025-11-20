@@ -151,7 +151,6 @@ const format_date = utcDateStr=>{
 };
 
 const filter_ = (list,pattern)=>{
-  console.log(list)
   return list.filter(x=>
     x.name.toLowerCase().includes(pattern.toLowerCase())
     || x.name_with_namespace.toLowerCase().includes(pattern.toLowerCase())
