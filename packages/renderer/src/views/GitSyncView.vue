@@ -24,7 +24,6 @@ import { useQuasar } from 'quasar'
 const $q = useQuasar();
 
 const iProps = reactive({
-  use_lfs: true,
   remote: '',
   userListener: ()=>{}
 });
@@ -108,9 +107,8 @@ const push = async()=>{
     iProps.remote,
     '"'+branches.current+'"'
   ];
-  if(!iProps.use_lfs)
-    args.push('--no-verify');
 
+  // Always use LFS for push
   response = await window.ipc.invoke('GitService.run', {
     args: args,
     cwd: ArcControlService.props.arc_root,
@@ -310,7 +308,7 @@ const pull = async()=>{
     args: [`pull`,iProps.remote,branches.current,'--progress'],
     cwd: ArcControlService.props.arc_root,
     env: {
-      GIT_LFS_SKIP_SMUDGE: iProps.use_lfs?0:1
+      GIT_LFS_SKIP_SMUDGE: 1 // Always skip smudge, never use LFS for pull
     },
     debug: AppProperties.config.gitDebug
   });
@@ -319,12 +317,6 @@ const pull = async()=>{
     dialogProps.ok_title = 'Merge';
     dialogProps.cancel_title = 'Cancel';
     dialogProps.ok_icon = 'merge';
-  } else if(iProps.use_lfs){
-    response = await window.ipc.invoke('GitService.run', {
-      args: [`lfs`,`pull`,iProps.remote,branches.current],
-      cwd: ArcControlService.props.arc_root,
-      debug: AppProperties.config.gitDebug
-    });
   }
 
   // unpatch
@@ -467,17 +459,6 @@ const inspectArc = url =>{
               There is an interactive git rebase in progress.<br>By aborting the merge process you revert back to the last commit.
             </a_tooltip>
           </a_btn>
-          <div>
-            <a_checkbox v-model='iProps.use_lfs' label="Use Large File Storage"/>
-            <a_tooltip>
-              <div>
-                Check this box to synchronize large files
-              </div>
-              <q-icon name="warning" color="grey-3" size="1.5em"/>
-              Data up- and downloads taking more than one hour require an access token.<br>
-              Click <q-icon name="add_circle" color="secondary" /> to add a remote with an access token.
-            </a_tooltip>
-          </div>
           <a_btn label="Push" @click="push" icon='cloud_upload' :disabled='!iProps.remote || !AppProperties.user'>
             <a_tooltip>
               Upload the current status of your ARC to the DataHUB
