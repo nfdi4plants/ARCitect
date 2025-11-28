@@ -183,8 +183,12 @@ onMounted(async ()=>{
 onUnmounted(()=>{
   observer.disconnect();
   iProps.container.removeEventListener("click", iProps.link_listener);
+  window.ipc.invoke('LocalFileSystemService.writeFile', [iProps.path,iProps.text || ' ']);
 });
-watch( ()=>AppProperties.active_markdown, init );
+watch(() => AppProperties.active_markdown, async (newPath, oldPath) => {
+  window.ipc.invoke('LocalFileSystemService.writeFile', [oldPath, iProps.text || ' ']);
+  await init(); // Load new file
+});
 
 </script>
 
