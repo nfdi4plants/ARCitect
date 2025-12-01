@@ -11,7 +11,7 @@ import ConfirmationDialog from '../dialogs/ConfirmationDialog.vue';
 import StringDialog from '../dialogs/StringDialog.vue';
 import AddProtocolDialog from '../dialogs/AddProtocolDialog.vue';
 import ProgressDialog from '../dialogs/ProgressDialog.vue';
-import GitDialog from '../dialogs/GitDialog.vue';
+import { useDownloadLFSFiles } from '../composables/useDownloadLFSFiles';
 import { useQuasar } from 'quasar'
 import {ArcStudy, ArcAssay, ArcRun, ArcWorkflow, DataMap as ArcDatamap, ArcInvestigation, ARC} from '@nfdi4plants/arctrl';
 import { setAssayIdentifier, setRunIdentifier, setStudyIdentifier, setWorkflowIdentifier } from "@nfdi4plants/arctrl/Core/IdentifierSetters";
@@ -558,86 +558,9 @@ const openFileWithDefaultApplication = async (node: ArcTreeViewNode) => {
   await window.ipc.invoke('LocalFileSystemService.openFileNative', p);
 };
 
+
 const downloadLFSFiles = async paths => {
-
-  if(!AppProperties.user)
-    return $q.dialog({
-      component: ConfirmationDialog,
-      componentProps: {
-        title: 'Authentication Error',
-        msg: 'You need to be logged in to download LFS files.'
-      }
-    });
-
-  let response = null;
-
-  // get remote name and url
-  response = await window.ipc.invoke('GitService.run', {
-    args: [`remote`],
-    cwd: ArcControlService.props.arc_root
-  });
-  if(!response[0]) return $q.dialog({
-    component: ConfirmationDialog,
-    componentProps: {
-      title: 'Error',
-      msg: 'Unable to determine remote name'
-    }
-  });
-  const remote_name = response[1].split('\n')[0];
-  response = await window.ipc.invoke('GitService.run', {
-    args: [`remote`,`get-url`,remote_name],
-    cwd: ArcControlService.props.arc_root
-  });
-  if(!response[0]) return $q.dialog({
-    component: ConfirmationDialog,
-    componentProps: {
-      title: 'Error',
-      msg: 'Unable to determine remote url'
-    }
-  });
-  const remote_url = response[1].split('\n')[0];
-
-  // patch remote
-  const patched_remote_url = GitService.patch_remote(remote_url);
-
-  response = await window.ipc.invoke('GitService.run', {
-    args: [`remote`,`set-url`,remote_name,patched_remote_url],
-    cwd: ArcControlService.props.arc_root
-  });
-  if(!response[0]) return;
-
-  const dialogProps = reactive({
-    title: 'Pulling Individual LFS Files',
-    ok_title: 'Ok',
-    cancel_title: null,
-    state: 0,
-  });
-
-  $q.dialog({
-    component: GitDialog,
-    componentProps: dialogProps
-  });
-
-  for(let path of paths)
-    await window.ipc.invoke('GitService.run', {
-      args: ['lfs','pull','--include',`"${path}"`],
-      cwd: ArcControlService.props.arc_root
-    });
-    
-  recUpdateNodes(n=>{
-    if(n.isLFS && paths.includes(n.id_rel)){
-      n.downloaded = true;
-      n.isLFSPointer = false;
-    }
-  },props.nodes);
-
-  // unpatch
-  response = await window.ipc.invoke('GitService.run', {
-    args: [`remote`,`set-url`,remote_name,remote_url],
-    cwd: ArcControlService.props.arc_root
-  });
-
-  dialogProps.state=1;
+  await useDownloadLFSFiles($q, paths, recUpdateNodes, props.nodes);
 };
 
 const onCellContextMenu = async (e,node: ArcTreeViewNode) => {
@@ -863,7 +786,7 @@ const onCellContextMenu = async (e,node: ArcTreeViewNode) => {
       icon: h( 'i', icon_style, ['delete'] ),
       onClick: ()=>confirm_delete(node,()=>ArcControlService.delete('GetRunRemoveContracts',node.label))
     });
-  } else if (node.type===formatNodeEditString(Datamap)){ 
+  } else if (node.type===formatNodeEditString(Datamap)){
     items.push({
         label: "Delete",
         icon: h( 'i', icon_style, ['delete'] ),
