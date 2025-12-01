@@ -653,7 +653,10 @@ const onCellContextMenu = async (e,node: ArcTreeViewNode) => {
       items.push({
         label: "Download LFS File",
         icon: h( 'i', icon_style, ['cloud_download'] ),
-        onClick: ()=>downloadLFSFiles([node.id_rel])
+        onClick: async () => {
+          await downloadLFSFiles([node.id_rel]);
+          triggerNode({}, node);
+        }
       });
     }
   }
