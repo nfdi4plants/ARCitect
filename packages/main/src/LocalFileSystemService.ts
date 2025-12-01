@@ -175,7 +175,7 @@ export const LocalFileSystemService = {
       if (!mimeType || !mimeType.startsWith('image/'))
         return null;
 
-      const imageData = fs.readFileSync(PATH.resolve(path));
+      const imageData = FS.readFileSync(PATH.resolve(path));
       const base64 = imageData.toString('base64');
       return `data:${mimeType};base64,${base64}`;
     } catch (err) {
