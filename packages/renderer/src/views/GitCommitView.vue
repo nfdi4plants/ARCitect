@@ -276,27 +276,6 @@ const formatFileSize = (size) => {
         <q-card-section style="padding-bottom:0;margin-bottom:-1.2em;">
           <div class='row' >
             <div class='col'>
-              <a_input v-model='iProps.commit.name' label="Name" readonly/>
-            </div>
-            <div class='col'>
-              <a_input v-model='iProps.commit.email' label="eMail" readonly/>
-            </div>
-            <a_tooltip>
-              Once logged in to the DataHUB your Name and eMail address are automatically filled out
-            </a_tooltip>
-          </div>
-
-          <div class='row' >
-            <div class='col'>
-              <a_select_git_branch />
-              <a_tooltip>
-                You can add (<q-icon name="add_circle" color="secondary" />), delete (<q-icon name="delete" color="grey-9" />), or switch between branches of your ARC
-              </a_tooltip>
-            </div>
-          </div>
-
-          <div class='row' >
-            <div class='col'>
               <a_input v-model='iProps.commit.msg' label='Commit Message' type="textarea" autogrow/>
               <a_tooltip>
                 Add a commit message to document and communicate your changes
@@ -304,14 +283,45 @@ const formatFileSize = (size) => {
             </div>
           </div>
 
-          <div class='row' >
-            <div class='col'>
-              <a_input type="number" v-model='GitService._.lfs_size_limit' label="Large File Storage Limit in MB"/>
+          <q-expansion-item
+            label="Advanced Options"
+            icon="settings"
+            dense
+            expand-separator
+            :default-opened="false"
+            class="q-mb-md"
+            style="color: #757575;"
+          >
+            <div class='row' >
+              <div class='col'>
+                <a_input v-model='iProps.commit.name' label="Name" readonly/>
+              </div>
+              <div class='col'>
+                <a_input v-model='iProps.commit.email' label="eMail" readonly/>
+              </div>
               <a_tooltip>
-                You can adapt the large file storage (LFS) Limit as needed
+                Once logged in to the DataHUB your Name and eMail address are automatically filled out
               </a_tooltip>
             </div>
-          </div>
+
+            <div class='row' >
+              <div class='col'>
+                <a_select_git_branch />
+                <a_tooltip>
+                  You can add (<q-icon name="add_circle" color="secondary" />), delete (<q-icon name="delete" color="grey-9" />), or switch between branches of your ARC
+                </a_tooltip>
+              </div>
+            </div>
+
+            <div class='row' >
+              <div class='col'>
+                <a_input type="number" v-model='GitService._.lfs_size_limit' label="Large File Storage Limit in MB"/>
+                <a_tooltip>
+                  You can adapt the large file storage (LFS) Limit as needed
+                </a_tooltip>
+              </div>
+            </div>
+          </q-expansion-item>
         </q-card-section>
 
         <br>
@@ -393,4 +403,3 @@ const formatFileSize = (size) => {
     </ViewItem>
   </q-list>
 </template>
-
