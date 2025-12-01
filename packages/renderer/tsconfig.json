@@ -9,7 +9,7 @@
     "isolatedModules": true,
     "allowImportingTsExtensions": true,
     "noEmit": true,
-    "types" : ["node"],
+    "types" : ["node", "../global.d.ts"],
     "paths": {
       "/@/*": [
         "./src/*"

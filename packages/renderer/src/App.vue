@@ -18,6 +18,7 @@ import ValidationView from './views/ValidationView.vue';
 import StatusView from './views/StatusView/StatusView.vue';
 import BugReportView from './views/BugReportView.vue';
 import SettingsView from './views/SettingsView.vue';
+import FallbackFileView from './views/FallbackFileView.vue';
 
 import ConfirmationDialog from './dialogs/ConfirmationDialog.vue';
 import GitDialog from './dialogs/GitDialog.vue';
@@ -410,6 +411,11 @@ const downloadArcitect = async ()=>{
               <BugReportView v-else-if='AppProperties.state===AppProperties.STATES.BUG_REPORT'></BugReportView>
               <SettingsView v-else-if='AppProperties.state===AppProperties.STATES.SETTINGS'></SettingsView>
               <HomeView v-else-if='AppProperties.state===AppProperties.STATES.HOME'></HomeView>
+              <FallbackFileView
+                v-else-if='AppProperties.state===AppProperties.STATES.EDIT_FALLBACK'
+                :filePath="AppProperties.active_fallback"
+              />
+
 
               <SwateView v-if='AppProperties.load_swate' v-show='AppProperties.state===AppProperties.STATES.EDIT_SWATE'></SwateView>
             </template>

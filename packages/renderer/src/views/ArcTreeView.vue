@@ -21,6 +21,7 @@ import {type LFSJsonFile} from '../GitService';
 const Image = 'image';
 const Markdown = 'markdown';
 const NodeEdit_PreFix = "node_edit_"
+const _NODE_TYPE_FALLBACK_ = "node_type_fallback"
 
 const ArcDatamap_FileName = "isa.datamap.xlsx"
 
@@ -35,13 +36,13 @@ interface ArcTreeViewNode {
     label: string | undefined;
     lazy: boolean;
     icon: string;
-    selectable: boolean;
+    isSelectable: boolean;
     isDirectory: boolean;
     children?: ArcTreeViewNode[];
     id_rel?: string;
     isLFS?: boolean;
     isLFSPointer?: boolean;
-    checkout?: string;
+    checkout?: boolean;
     downloaded?: boolean;
     size?: number;
     size_formatted?: string;
@@ -302,7 +303,7 @@ const importFilesOrDirectories = async (n,method)=>{
 };
 
 const readDir_ = async (path: string) => {
-  const nodes = await window.ipc.invoke('LocalFileSystemService.readDir', path);
+  const nodes: ArcTreeViewNode [] = await window.ipc.invoke('LocalFileSystemService.readDir', path);
   const parent = path.split('/').pop().toLowerCase();
 
   const isDatamap = (node: string) => {
@@ -329,7 +330,7 @@ const readDir_ = async (path: string) => {
     n.label = n.id.split('/').pop();
     n.id_rel = n.id.replace(ArcControlService.props.arc_root+'/', '');
     n.lazy = n.isDirectory;
-    n.selectable = false;
+    n.isSelectable = !n.isDirectory;
 
     let isLFS = props.lfsInfo && props.lfsInfo[n.id_rel]
 
@@ -347,27 +348,29 @@ const readDir_ = async (path: string) => {
     if(isEditable(n,parent)){
       n.type = formatNodeEditString(parent);
       n.icon = 'edit_square';
-    } else if(isDatamap(n.label)) {
+    } else if(n.label && isDatamap(n.label)) {
       n.type = formatNodeEditString(Datamap);
       n.icon = "grid_on";
-    } else if(isMarkdown(n.label) || isLicense(n.label)) {
+    } else if(n.label && (isMarkdown(n.label) || isLicense(n.label))) {
       n.type = formatNodeEditString(Markdown);
       n.icon = 'edit_square';
-    } else if(isImage(n.label)){
+    } else if(n.label && isImage(n.label)) {
       n.type = formatNodeEditString(Image);
       n.icon = 'image';
-    } else if(n.label===Assays){
+    } else if(n.label === Assays) {
       n.type = Assays;
       n.icon = 'storage';
-    } else if(n.label===Studies){
+    } else if(n.label === Studies) {
       n.type = Studies;
       n.icon = 'science';
-    } else if(n.label===Workflows){
+    } else if(n.label === Workflows) {
       n.type = Workflows;
       n.icon = 'settings';
-    } else if(n.label===Runs){
+    } else if(n.label === Runs) {
       n.type = Runs;
       n.icon = 'timer';
+    } else if(n.isSelectable) {
+      n.type = _NODE_TYPE_FALLBACK_;
     } else {
       n.type = 'node';
     }
@@ -375,13 +378,14 @@ const readDir_ = async (path: string) => {
 
   if(nodes.length<1){
     nodes.push({
+      header: "empty",
       type: 'empty',
       label: 'empty',
       isDirectory: false,
       lazy: false,
       icon: 'block',
       id: path+'/'+'empty$'+(uniqueLabelCounter++),
-      selectable: false
+      isSelectable: false
     });
   }
 
@@ -449,6 +453,11 @@ const triggerNode = (e: any, node: ArcTreeViewNode) => {
       props.selection = node.id;
       AppProperties.active_image = node.id;
       return AppProperties.state=AppProperties.STATES.EDIT_IMAGE;
+    case _NODE_TYPE_FALLBACK_:
+      props.selection = node.id;
+      AppProperties.active_fallback = node.id;
+      AppProperties.state = AppProperties.STATES.EDIT_FALLBACK
+      return;
     // default:
     //   return AppProperties.state=AppProperties.STATES.HOME;
   }
@@ -523,6 +532,10 @@ const createDirectory = async node=>{
     const path = node.id + '/' + name;
     await window.ipc.invoke('LocalFileSystemService.enforcePath', path);
   });
+};
+
+const openFileWithDefaultApplication = async (node: ArcTreeViewNode) => {
+  await window.ipc.invoke('LocalFileSystemService.openFileNative', node.id);
 };
 
 const downloadLFSFiles = async paths => {
@@ -877,6 +890,14 @@ const onCellContextMenu = async (e,node: ArcTreeViewNode) => {
         onClick: ()=>confirm_delete(node,()=>window.ipc.invoke('LocalFileSystemService.remove', node.id))
       });
     }
+  }
+
+  if(node.isSelectable) {
+    items.push({
+      label: "Open with default Application",
+      icon: h( 'i', icon_style, ['launch'] ),
+      onClick: () => openFileWithDefaultApplication(node)
+    });
   }
 
   if(items.length){

@@ -8,7 +8,7 @@
     "strict": true,
     "isolatedModules": true,
 
-    "types" : ["node"],
+    "types" : ["node", "../global.d.ts"],
 
     "baseUrl": "."
   },

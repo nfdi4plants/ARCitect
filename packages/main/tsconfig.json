@@ -8,7 +8,7 @@
     "strict": true,
     "isolatedModules": true,
     "allowSyntheticDefaultImports": true,
-    "types" : ["node", "vite/client"],
+    "types" : ["node", "vite/client", "../global.d.ts"],
 
     "baseUrl": ".",
     "paths": {

@@ -22,6 +22,7 @@ where applicable. Add your name in the style of `(by @github-username)` at the e
 
 ### ✨ Added
 
+- Files without view support by ARCitect will open a default view with a button allowing the user to open them with the default application. This feature was also added for all files in the context menu #455 (by @Thyra, @freymaurer)
 - Auto save changes via Markdown editor when switching files or closing Markdown editor #428 (by @Thyra)
 
 ### 🔄 Changed

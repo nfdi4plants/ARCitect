@@ -20,6 +20,7 @@ const AppProperties: {
     GIT_HISTORY: number,
     EDIT_MARKDOWN: number,
     EDIT_IMAGE: number,
+    EDIT_FALLBACK: number,
     VALIDATION: number,
     STATUS: number,
     BUG_REPORT: number,
@@ -27,6 +28,7 @@ const AppProperties: {
   },
   STATES_I: {[key: number]: string},
   user: null | {name: string, email: string},
+  active_fallback: string,
   state: number,
   config: Config,
   read_config: () => Promise<void>
@@ -54,7 +56,7 @@ const AppProperties: {
 
   user: null,
 
-
+  active_fallback: '',
   datahub_hosts : {},
   datahub_hosts_by_provider: {},
   datahub_hosts_msgs: {},

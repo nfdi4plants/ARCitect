@@ -309,11 +309,28 @@ export const LocalFileSystemService = {
     LocalFileSystemService.arc_root = path_to_system(path);
   },
 
+  openFileNative: async (e: Electron.IpcMainInvokeEvent, path:string): Promise<Result<string>> =>{
+    const p = path_to_system(path);
+
+    try {
+      const err = await shell.openPath(p);
+
+      // openPath returns "" on success, otherwise a *string error message*
+      if (err === "") {
+        return { ok: true };
+      } else {
+        return { ok: false, error: err };
+      }
+    } catch (err) {
+      return { ok: false, error: String(err) };
+    }
+  },
+
   init: async () => {
     process.on('unhandledRejection', (reason, p) => {
       console.error(`Unhandled Rejection at: ${util.inspect(p)} reason: ${reason}`);
     });
-
+    ipcMain.handle('LocalFileSystemService.openFileNative', LocalFileSystemService.openFileNative);
     ipcMain.handle('LocalFileSystemService.remove', LocalFileSystemService.remove);
     ipcMain.handle('LocalFileSystemService.readDir', LocalFileSystemService.readDir);
     ipcMain.handle('LocalFileSystemService.readFile', LocalFileSystemService.readFile);

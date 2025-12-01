@@ -1,4 +1,4 @@
-import {app,ipcMain,BrowserWindow} from 'electron';
+import {app,ipcMain,BrowserWindow,shell} from 'electron';
 import './security-restrictions';
 import {restoreOrCreateWindow} from '/@/mainWindow';
 import {LocalFileSystemService} from '/@/LocalFileSystemService';
