@@ -44,11 +44,14 @@ const GitService = {
     }
   }),
 
-  is_not_lfs_blacklisted: id=>
-       !GitService._.lfs_blacklist.starts.some(i=>id.startsWith(i))
-    && !GitService._.lfs_blacklist.ends.some(i=>id.endsWith(i))
-    && !GitService._.change_tree_map.get(id).types.includes('D')
-  ,
+  is_not_lfs_blacklisted: id=>{
+    const filename = id.replace(/\\/g, '/').split('/').pop();
+    return (
+      !GitService._.lfs_blacklist.starts.some(i=>filename.startsWith(i)) &&
+      !GitService._.lfs_blacklist.ends.some(i=>filename.endsWith(i)) &&
+      !GitService._.change_tree_map.get(id).types.includes('D')
+    );
+  },
 
   get_leaf_nodes: (nodes,node) => {
     node = node || GitService._.change_tree[0];
