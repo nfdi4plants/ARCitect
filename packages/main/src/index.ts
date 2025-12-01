@@ -80,6 +80,18 @@ const initCore = async () => {
     LocalFileSystemService.remove( null, app.getPath('userData') );
     initConfig();
   });
+
+  // Add IPC handler for opening files in default system viewer
+  const { shell } = require('electron');
+  ipcMain.handle('open-file', async (event, filePath) => {
+    try {
+      const result = await shell.openPath(filePath);
+      return result; // Returns empty string on success, error string on failure
+    } catch (err) {
+      return err.message || 'Failed to open file';
+    }
+  });
+
   initConfig();
 }
 

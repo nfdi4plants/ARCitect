@@ -76,7 +76,7 @@ function relPathToDatamapParentInfo(s: string): SCS.DatamapParentInfo {
   let parentIdentifier: string | null = null;
   if (parts.length === 3) {
       const [pt, pi, datamapFileName] = parts;
-      if (datamapFileName !== ArcDatamap_FileName) 
+      if (datamapFileName !== ArcDatamap_FileName)
         throw new Error("Invalid datamap file name: " + datamapFileName);
       parentType = pt;
       parentIdentifier = pi;
@@ -329,7 +329,7 @@ const readDir_ = async (path: string) => {
     n.label = n.id.split('/').pop();
     n.id_rel = n.id.replace(ArcControlService.props.arc_root+'/', '');
     n.lazy = n.isDirectory;
-    n.selectable = false;
+    n.selectable = !n.isDirectory;
 
     let isLFS = props.lfsInfo && props.lfsInfo[n.id_rel]
 
@@ -353,21 +353,23 @@ const readDir_ = async (path: string) => {
     } else if(isMarkdown(n.label) || isLicense(n.label)) {
       n.type = formatNodeEditString(Markdown);
       n.icon = 'edit_square';
-    } else if(isImage(n.label)){
+    } else if(isImage(n.label)) {
       n.type = formatNodeEditString(Image);
       n.icon = 'image';
-    } else if(n.label===Assays){
+    } else if(n.label === Assays) {
       n.type = Assays;
       n.icon = 'storage';
-    } else if(n.label===Studies){
+    } else if(n.label === Studies) {
       n.type = Studies;
       n.icon = 'science';
-    } else if(n.label===Workflows){
+    } else if(n.label === Workflows) {
       n.type = Workflows;
       n.icon = 'settings';
-    } else if(n.label===Runs){
+    } else if(n.label === Runs) {
       n.type = Runs;
       n.icon = 'timer';
+    } else if(n.selectable) {
+      n.type = 'fallback';
     } else {
       n.type = 'node';
     }
@@ -449,6 +451,10 @@ const triggerNode = (e: any, node: ArcTreeViewNode) => {
       props.selection = node.id;
       AppProperties.active_image = node.id;
       return AppProperties.state=AppProperties.STATES.EDIT_IMAGE;
+    case 'fallback':
+      props.selection = node.id;
+      AppProperties.active_fallback = node.id;
+      return AppProperties.state = AppProperties.STATES.EDIT_FALLBACK;
     // default:
     //   return AppProperties.state=AppProperties.STATES.HOME;
   }

@@ -43,6 +43,7 @@ const AppProperties: {
 
     EDIT_MARKDOWN: 600,
     EDIT_IMAGE: 601,
+    EDIT_FALLBACK: 602,
 
     VALIDATION: 700,
     BUG_REPORT: 750,
@@ -53,6 +54,8 @@ const AppProperties: {
   state: 0,
 
   user: null,
+
+  active_fallback: '',
 
 
   datahub_hosts : {},
