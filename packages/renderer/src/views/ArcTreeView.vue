@@ -448,18 +448,24 @@ const triggerNode = (e: any, node: ArcTreeViewNode) => {
     case formatNodeEditString(Markdown):
       props.selection = node.id;
       AppProperties.active_markdown = node.id;
-      return AppProperties.state=AppProperties.STATES.EDIT_MARKDOWN;
+      AppProperties.state = AppProperties.STATES.EDIT_MARKDOWN;
+      break;
     case formatNodeEditString(Image):
       props.selection = node.id;
       AppProperties.active_image = node.id;
-      return AppProperties.state=AppProperties.STATES.EDIT_IMAGE;
+      AppProperties.state = AppProperties.STATES.EDIT_IMAGE;
+      break;
     case _NODE_TYPE_FALLBACK_:
       props.selection = node.id;
       AppProperties.active_fallback = node.id;
-      AppProperties.state = AppProperties.STATES.EDIT_FALLBACK
-      return;
+      AppProperties.state = AppProperties.STATES.EDIT_FALLBACK;
+      break;
     // default:
     //   return AppProperties.state=AppProperties.STATES.HOME;
+  }
+  // LFS state takes precedence over other states
+  if (node.isLFSPointer) {
+    AppProperties.state = AppProperties.STATES.EDIT_LFS;
   }
 };
 

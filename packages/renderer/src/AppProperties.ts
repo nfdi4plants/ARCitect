@@ -20,6 +20,7 @@ const AppProperties: {
     GIT_HISTORY: number,
     EDIT_MARKDOWN: number,
     EDIT_IMAGE: number,
+    EDIT_LFS: number,
     EDIT_FALLBACK: number,
     VALIDATION: number,
     STATUS: number,
@@ -45,6 +46,7 @@ const AppProperties: {
 
     EDIT_MARKDOWN: 600,
     EDIT_IMAGE: 601,
+    EDIT_LFS: 602,
 
     VALIDATION: 700,
     BUG_REPORT: 750,
