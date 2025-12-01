@@ -200,9 +200,9 @@ const ArcControlService = {
 
     for(let c of contracts)
       await ArcControlService.processContract(c,arc,arc_root);
-    const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-    await sleep(100);
-    ArcControlService.props.skip_fs_updates = false;
+    setTimeout(() => {
+        ArcControlService.props.skip_fs_updates = false
+    }, 1000);
   },
 
   delete: async (method:string, identifier:string) => {
