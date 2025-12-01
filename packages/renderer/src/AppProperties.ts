@@ -20,6 +20,7 @@ const AppProperties: {
     GIT_HISTORY: number,
     EDIT_MARKDOWN: number,
     EDIT_IMAGE: number,
+    EDIT_FALLBACK: number,
     VALIDATION: number,
     STATUS: number,
     BUG_REPORT: number,
