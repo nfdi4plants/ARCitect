@@ -31,6 +31,7 @@ where applicable. Add your name in the style of `(by @github-username)` at the e
 ### 🐛 Fixed
 
 - Fixed issue where LFS blacklist was not being applied correctly #431, #453 (by @Thyra)
+- Fixed image reading from local file system (by @Thyra)
 
 ## 1.3.2 - 2024-10-26
 
