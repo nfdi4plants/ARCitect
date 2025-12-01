@@ -21,6 +21,14 @@ export interface LFSJsonResponse {
   files: LFSJsonFile[]
 }
 
+const lfs_blacklist : {
+  starts: string[],
+  ends: string[]
+} = {
+      starts:['isa.','.git'],
+      ends: ['.cwl','.yml','.yaml']
+    }
+
 const GitService = {
 
   _: reactive({
@@ -38,17 +46,14 @@ const GitService = {
     change_tree_selected: [],
     change_tree_selected_: [],
 
-    lfs_blacklist: {
-      starts:['isa.','.git'],
-      ends: ['.cwl','.yml','.yaml']
-    }
   }),
 
-  is_not_lfs_blacklisted: id=>{
+  is_not_lfs_blacklisted: (id: string) => {
     const filename = id.replace(/\\/g, '/').split('/').pop();
+    if (!filename) return false;
     return (
-      !GitService._.lfs_blacklist.starts.some(i=>filename.startsWith(i)) &&
-      !GitService._.lfs_blacklist.ends.some(i=>filename.endsWith(i)) &&
+      !lfs_blacklist.starts.some(i=> filename.startsWith(i)) &&
+      !lfs_blacklist.ends.some(i=> filename.endsWith(i)) &&
       !GitService._.change_tree_map.get(id).types.includes('D')
     );
   },
