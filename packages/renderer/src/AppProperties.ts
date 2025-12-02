@@ -1,4 +1,5 @@
 import { reactive, watch } from 'vue'
+import { ArcTreeViewNode } from './views/ArcTreeView.vue';
 
 interface Config {
   gitDebug: boolean,
@@ -20,6 +21,7 @@ const AppProperties: {
     GIT_HISTORY: number,
     EDIT_MARKDOWN: number,
     EDIT_IMAGE: number,
+    EDIT_LFS: number,
     EDIT_FALLBACK: number,
     VALIDATION: number,
     STATUS: number,
@@ -29,6 +31,9 @@ const AppProperties: {
   STATES_I: {[key: number]: string},
   user: null | {name: string, email: string},
   active_fallback: string,
+  active_lfs_file: string,
+  active_node: ArcTreeViewNode,
+  node_needs_refresh: boolean,
   state: number,
   config: Config,
   read_config: () => Promise<void>
@@ -45,6 +50,7 @@ const AppProperties: {
 
     EDIT_MARKDOWN: 600,
     EDIT_IMAGE: 601,
+    EDIT_LFS: 602,
 
     VALIDATION: 700,
     BUG_REPORT: 750,
@@ -57,6 +63,9 @@ const AppProperties: {
   user: null,
 
   active_fallback: '',
+  active_lfs_file: '',
+  active_node: null,
+  node_needs_refresh: false,
   datahub_hosts : {},
   datahub_hosts_by_provider: {},
   datahub_hosts_msgs: {},

@@ -19,6 +19,7 @@ import StatusView from './views/StatusView/StatusView.vue';
 import BugReportView from './views/BugReportView.vue';
 import SettingsView from './views/SettingsView.vue';
 import FallbackFileView from './views/FallbackFileView.vue';
+import LFSFileView from './views/LFSFileView.vue';
 
 import ConfirmationDialog from './dialogs/ConfirmationDialog.vue';
 import GitDialog from './dialogs/GitDialog.vue';
@@ -406,6 +407,10 @@ const downloadArcitect = async ()=>{
                 </q-card>
               </q-dialog>
               <DataHubView v-if='AppProperties.state===AppProperties.STATES.OPEN_DATAHUB'></DataHubView>
+              <LFSFileView
+                v-else-if='AppProperties.state===AppProperties.STATES.EDIT_LFS'
+                :filePath="AppProperties.active_lfs_file"
+              />
               <MarkdownView v-else-if='AppProperties.state===AppProperties.STATES.EDIT_MARKDOWN'></MarkdownView>
               <ImageView v-else-if='AppProperties.state===AppProperties.STATES.EDIT_IMAGE'></ImageView>
               <GitCommitView v-else-if='AppProperties.state===AppProperties.STATES.GIT_COMMIT' />
