@@ -315,6 +315,11 @@ const formatFileSize = (size) => {
                   label='Commit Message'
                   type="textarea"
                   autogrow
+                  outlined
+                  filled="false"
+                  autofocus
+                  color="teal"
+                  hint="Describe your changes"
                 />
               <a_tooltip>
                 Add a commit message to document and communicate your changes
