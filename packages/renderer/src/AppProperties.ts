@@ -34,6 +34,7 @@ const AppProperties: {
   active_lfs_file: string,
   active_node: ArcTreeViewNode,
   node_needs_refresh: boolean,
+  has_dirty_remote: boolean,
   state: number,
   config: Config,
   read_config: () => Promise<void>
@@ -66,6 +67,7 @@ const AppProperties: {
   active_lfs_file: '',
   active_node: null,
   node_needs_refresh: false,
+  has_dirty_remote: true,
   datahub_hosts : {},
   datahub_hosts_by_provider: {},
   datahub_hosts_msgs: {},

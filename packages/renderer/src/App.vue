@@ -23,6 +23,7 @@ import LFSFileView from './views/LFSFileView.vue';
 
 import ConfirmationDialog from './dialogs/ConfirmationDialog.vue';
 import GitDialog from './dialogs/GitDialog.vue';
+import GitService from './GitService';
 
 import DataHubView from './views/DataHubView.vue';
 
@@ -223,6 +224,31 @@ onMounted(async () => {
   const latest_version_ = latest_version.slice(1).split('.').map(x=>parseFloat(x));
   if(version_[0]<latest_version_[0] || version_[1]<latest_version_[1] || version_[2]<latest_version_[2])
     iProps.new_version = latest_version;
+
+  // Check remote dirty status every 5 minutes if ARC is open and user is logged in
+  setInterval(async () => {
+    if (
+      ArcControlService.props.arc_root &&
+      AppProperties.user
+    ) {
+      try {
+        await GitService.parse_status();
+        await GitService.get_remotes();
+        await GitService.check_remotes();
+        let dirty = false;
+        const remotes = GitService._.remotes || {};
+        for (const id in remotes) {
+          if (remotes[id].dirty) {
+            dirty = true;
+            break;
+          }
+        }
+        AppProperties.has_dirty_remote = dirty;
+      } catch (e) {
+        // Optionally handle error
+      }
+    }
+  }, 5 * 60 * 1000); // 5 minutes
 });
 
 const downloadArcitect = async ()=>{
@@ -316,6 +342,7 @@ const downloadArcitect = async ()=>{
             <a_tooltip>Track changes of the ARC with git</a_tooltip>
           </ToolbarButton>
           <ToolbarButton text='DataHUB Sync' icon='published_with_changes' requiresARC requiresUser requiresGit @clicked='AppProperties.state=AppProperties.STATES.GIT_SYNC'>
+            <q-icon color='red-9' name="error" v-if="AppProperties.has_dirty_remote" />
             <a_tooltip>Synchronize the ARC with a DataHUB</a_tooltip>
           </ToolbarButton>
           <ToolbarButton text='History' icon='history' requiresARC requiresGit @clicked='AppProperties.state=AppProperties.STATES.GIT_HISTORY'>
