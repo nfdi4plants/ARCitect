@@ -22,17 +22,21 @@ where applicable. Add your name in the style of `(by @github-username)` at the e
 
 ### ✨ Added
 
-- Files without view support by ARCitect will open a default view with a button allowing the user to open them with the default application. This feature was also added for all files in the context menu #455 (by @Thyra, @freymaurer)
+- Files without view support by ARCitect will open a default view with a button allowing the user to open them with the default application. This feature was also added for all files in the context menu #455 (by @Thyra, @Freymaurer)
 - Auto save changes via Markdown editor when switching files or closing Markdown editor #428 (by @Thyra)
+- Added error handling for file write operations. This will now show a modal if a file could not be written to disc, instead of printing to console. This can for example happen if a file should be written that is already open in another tool. (by @Freymaurer)
 
 ### 🔄 Changed
 
+- Increased file watcher timeout behavior after saving an ARC (by @Etschbeijer)
 - Changed opinionated LFS behavior. LFS will now always push and never default on pul #413 #458 (by @Thyra) 
 
 ### 🐛 Fixed
 
 - Fixed issue where LFS blacklist was not being applied correctly #431, #453 (by @Thyra)
 - Fixed image reading from local file system (by @Thyra)
+- Fixed update verification on investigation files (by @Freymaurer)
+- Fixed swate view update after external file changes to correctly reflect changes (by @Freymaurer)
 
 ## 1.3.2 - 2024-10-26
 

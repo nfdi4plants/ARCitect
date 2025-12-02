@@ -283,10 +283,6 @@ const downloadArcitect = async ()=>{
 
           <q-separator />
 
-          <div>
-            {{ArcControlService.props.skip_fs_updates}}
-          </div>
-
           <ToolbarButton text='New ARC' icon='note_add' @clicked='newLocalArc()'>
             <a_tooltip>
               Create a new ARC on your computer
