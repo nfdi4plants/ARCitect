@@ -29,7 +29,7 @@ const $q = useQuasar();
 
 type LFSJsonFileMap = Record<string, LFSJsonFile>
 
-interface ArcTreeViewNode {
+export interface ArcTreeViewNode {
     header: string;
     type: string;
     id: string;
@@ -77,7 +77,7 @@ function relPathToDatamapParentInfo(s: string): SCS.DatamapParentInfo {
   let parentIdentifier: string | null = null;
   if (parts.length === 3) {
       const [pt, pi, datamapFileName] = parts;
-      if (datamapFileName !== ArcDatamap_FileName) 
+      if (datamapFileName !== ArcDatamap_FileName)
         throw new Error("Invalid datamap file name: " + datamapFileName);
       parentType = pt;
       parentIdentifier = pi;
@@ -137,14 +137,6 @@ function datamapParentInfoToRelPath(info: SCS.DatamapParentInfo): string {
 function getDatamapParentByPath(arc: ARC, path: string): ArcAssay | ArcStudy | ArcRun | ArcWorkflow | null {
   const info = relPathToDatamapParentInfo(path);
   return SCS.getDatamapParentByInfo(arc, info.ParentId, info.Parent);
-}
-
-function recUpdateNodes(fn: (n: ArcTreeViewNode)=>void, nodes: ArcTreeViewNode[]) {
-  for(const n of nodes) {
-    fn(n);
-    if(n.children)
-      recUpdateNodes(fn,n.children);
-  }
 }
 
 let uniqueLabelCounter = 0;
@@ -465,8 +457,10 @@ const triggerNode = (e: any, node: ArcTreeViewNode) => {
   }
   // LFS state takes precedence over other states
   if (node.isLFSPointer) {
+    AppProperties.active_lfs_file = node.id;
     AppProperties.state = AppProperties.STATES.EDIT_LFS;
   }
+  AppProperties.active_node = node;
 };
 
 const updatePath = async ([path,type]) => {
@@ -560,7 +554,7 @@ const openFileWithDefaultApplication = async (node: ArcTreeViewNode) => {
 
 
 const downloadLFSFiles = async paths => {
-  await useDownloadLFSFiles($q, paths, recUpdateNodes, props.nodes);
+  await useDownloadLFSFiles($q, paths, props.nodes);
 };
 
 const onCellContextMenu = async (e,node: ArcTreeViewNode) => {
@@ -646,7 +640,7 @@ const onCellContextMenu = async (e,node: ArcTreeViewNode) => {
     items.push({
       label: "Download LFS Files",
       icon: h( 'i', icon_style, ['cloud_download'] ),
-      onClick: ()=>downloadLFSFiles([node.id_rel+'/**'])
+      onClick: () => downloadLFSFiles([node.id_rel ? node.id_rel + '/**' : ''])
     });
   } else {
     if(node.isLFSPointer){
@@ -928,6 +922,13 @@ watch(()=>AppProperties.state, async (newValue, oldValue) => {
     AppProperties.STATES.VALIDATION
   ].includes(newValue)){
     props.selection = '';
+  }
+});
+
+watch(()=> AppProperties.node_needs_refresh, async (newValue, oldValue) => {
+  if (newValue) {
+    triggerNode({}, AppProperties.active_node)
+    AppProperties.node_needs_refresh = false;
   }
 });
 

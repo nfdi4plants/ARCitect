@@ -409,7 +409,7 @@ const downloadArcitect = async ()=>{
               <DataHubView v-if='AppProperties.state===AppProperties.STATES.OPEN_DATAHUB'></DataHubView>
               <LFSFileView
                 v-else-if='AppProperties.state===AppProperties.STATES.EDIT_LFS'
-                :filePath="AppProperties.active_fallback"
+                :filePath="AppProperties.active_lfs_file"
               />
               <MarkdownView v-else-if='AppProperties.state===AppProperties.STATES.EDIT_MARKDOWN'></MarkdownView>
               <ImageView v-else-if='AppProperties.state===AppProperties.STATES.EDIT_IMAGE'></ImageView>

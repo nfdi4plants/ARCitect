@@ -4,7 +4,15 @@ import AppProperties from '../AppProperties';
 import GitService from '../GitService';
 import ConfirmationDialog from '../dialogs/ConfirmationDialog.vue';
 import GitDialog from '../dialogs/GitDialog.vue';
+import { ArcTreeViewNode } from '../views/ArcTreeView.vue';
 
+function recUpdateNodes(fn: (n: ArcTreeViewNode)=>void, nodes: ArcTreeViewNode[]) {
+  for(const n of nodes) {
+    fn(n);
+    if(n.children)
+      recUpdateNodes(fn,n.children);
+  }
+}
 
 /**
  * Composable for downloading LFS files from the frontend.
@@ -12,13 +20,12 @@ import GitDialog from '../dialogs/GitDialog.vue';
  *
  * @param paths Array of file paths to download via LFS
  * @param recUpdateNodes Optional function to update nodes after download
- * @param nodes Optional array of nodes to update
+ * @param updateNodes Optional array of nodes to update, will be filtered.
  */
 export async function useDownloadLFSFiles(
   $q: any,
   paths: string[],
-  recUpdateNodes?: (fn: (n: any) => void, nodes: any[]) => void,
-  nodes?: any[]
+  updateNodes?: any[]
 ) {
 
   if (!AppProperties.user) {
@@ -88,13 +95,15 @@ export async function useDownloadLFSFiles(
       cwd: ArcControlService.props.arc_root,
     });
 
-  if (recUpdateNodes && nodes) {
+  if (updateNodes) {
     recUpdateNodes((n: any) => {
-      if (n.isLFS && paths.includes(n.id_rel)) {
+      const cleanedPaths = paths.map(p => p.replace(/\*\*$/, ''));
+      if (n.isLFS && cleanedPaths.some(p => n.id_rel.includes(p))) {
         n.downloaded = true;
         n.isLFSPointer = false;
       }
-    }, nodes);
+    }, updateNodes);
+    AppProperties.node_needs_refresh = true; // in case a newly downloaded file is currently selected
   }
 
   // unpatch
