@@ -65,12 +65,9 @@ const ArcControlService = {
     }
 
     ArcControlService.props.super_busy = true;
-    ArcControlService.props.skip_fs_updates = true;
 
     let files = await window.ipc.invoke('LocalFileSystemService.getAllFiles', arc_root);
-    // prefilter files for arctrl
-    // files = files.filter(f=>f.endsWith('.xlsx')||f.endsWith('.cwl'));
-
+    
     const arc = ARC.fromFilePaths(files);
     const contracts = arc.GetReadContracts();
     for(const contract of contracts){
@@ -85,7 +82,11 @@ const ArcControlService = {
           contract.DTO = await Xlsx.fromBytes(buffer);
           break;
         case 'PlainText':
-          contract.DTO = await window.ipc.invoke('LocalFileSystemService.readFile', [arc_root+'/'+contract.Path, {encoding: 'UTF-8'}]);
+        // case 'YAML':
+        // case 'CWL': 
+        case 'JSON':
+          const data = await window.ipc.invoke('LocalFileSystemService.readFile', [arc_root+'/'+contract.Path, {encoding: 'UTF-8'}]);
+          contract.DTO = data;
           break;
         default:
           console.warn('unable to resolve read contract', contract);
@@ -105,7 +106,6 @@ const ArcControlService = {
     console.log(arc);
 
     ArcControlService.props.super_busy = false;
-    ArcControlService.props.skip_fs_updates = false;
 
     return true;
   },
@@ -113,9 +113,9 @@ const ArcControlService = {
   processContract: async (contract: Contract, arc_?: ARC, arc_root_?: string) => {
     const arc = arc_ || ArcControlService.props.arc;
     const arc_root = arc_root_ || ArcControlService.props.arc_root;
+    console.log('Processing contract:', contract);
     if(!arc || !arc_root)
       return;
-    arc.UpdateFileSystem();
     switch (contract.Operation) {
       case 'DELETE':
         await window.ipc.invoke(
@@ -124,20 +124,28 @@ const ArcControlService = {
         );
         break;
       case 'UPDATE': case 'CREATE':
-        ArcControlService.props.skip_fs_updates = true;
-        if(['ISA_Investigation','ISA_Study','ISA_Assay', 'ISA_Datamap', 'ISA_Run', 'ISA_Workflow', 'ISA_Datamap'].includes(contract.DTOType)){
+        if(['ISA_Investigation','ISA_Study','ISA_Assay', 'ISA_Datamap', 'ISA_Run', 'ISA_Workflow', 'ISA_Datamap'].includes(contract.DTOType)) {
+          console.log('writing xlsx file', arc_root+'/'+contract.Path);
           const buffer = await Xlsx.toBytes(contract.DTO);
           const absolutePath = arc_root + '/' +contract.Path;
-          await window.ipc.invoke(
-            'LocalFileSystemService.writeFile',
-            [
-              absolutePath,
-              buffer,
-              {}
-            ]
-          );
+          try {
+            // Error is handled via CORE.Error in App.vue
+            await window.ipc.invoke(
+              'LocalFileSystemService.writeFile',
+              [
+                absolutePath,
+                buffer,
+                {}
+              ]
+              
+            );
+          } catch (e) {
+            console.error(`Error writing file at ${absolutePath}:`, e);
+            throw e;
+          }
           break;
         } else if(contract.DTOType==='PlainText'){
+          // console.log('writing plain text file', arc_root+'/'+contract.Path);
           await window.ipc.invoke('LocalFileSystemService.writeFile', [
             arc_root+'/'+contract.Path,
             contract.DTO || '',
@@ -179,7 +187,6 @@ const ArcControlService = {
 
     arc.UpdateFileSystem();
     let contracts = options.force ? arc.GetWriteContracts() : arc.GetUpdateContracts();
-
     /// Add default .gitignore if it does not exist
     const ignore_exists = await window.ipc.invoke(
       'LocalFileSystemService.exists',
@@ -198,8 +205,23 @@ const ArcControlService = {
         [arc_root + '/.gitattributes','**/dataset/** filter=lfs diff=lfs merge=lfs -text\n']
       );
 
+    const license_exists = await window.ipc.invoke(
+      'LocalFileSystemService.exists',
+      arc_root + '/LICENSE'
+    );
+
+    const licence_md_exists = await window.ipc.invoke(
+      'LocalFileSystemService.exists',
+      arc_root + '/LICENSE.md'
+    );
+
+    if(license_exists || licence_md_exists){
+      contracts = contracts.filter(c=>c.Path!=='LICENSE.md' && c.Path!=='LICENSE');
+    }
+
     for(let c of contracts)
       await ArcControlService.processContract(c,arc,arc_root);
+
     setTimeout(() => {
         ArcControlService.props.skip_fs_updates = false
     }, 1000);
@@ -334,7 +356,13 @@ const ArcControlService = {
   }
 };
 
-const debouncedReadARC = pDebounce(ArcControlService.readARC, 300);
+const debouncedReadARC = pDebounce(async () => {
+  await ArcControlService.readARC()
+  // TODO: Have to be able to reproduce the current state by calling the function with existing variables again. 
+  // TODO: Refactor to use identifier + datamap optional bool to determine what to load.
+  await SwateControlService.LoadSwateState(SwateControlService.props.type, SwateControlService.props.identifier, SwateControlService.props.datamapParent);
+  return;
+}, 300);
 
 // https://github.com/nfdi4plants/ARCitect/issues/439
 window.ipc.on('LocalFileSystemService.updatePath', ArcControlService.updateARCfromFS);

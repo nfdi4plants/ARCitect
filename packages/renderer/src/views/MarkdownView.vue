@@ -49,7 +49,6 @@ const addImages = async ()=>{
 
   for(let path of images){
     const relPath = getRelativePath(iProps.path,path);
-    console.log(relPath);
     insertText(`![${relPath.split('/').pop().split('.')[0]}](${relPath})`);
   }
 };

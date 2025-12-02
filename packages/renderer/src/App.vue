@@ -153,6 +153,11 @@ const messagePrompt = msg => {
 
 onMounted(async () => {
   window.ipc.on('CORE.MSG', console.log);
+  window.ipc.on('CORE.Error', (r: Result<string>) => {
+    if (r.ok) return;
+    iProps.error_text = r.error;
+    iProps.error = true;
+  });
   window.ipc.on('CORE.messagePrompt', messagePrompt);
 
   // check git versions
@@ -277,6 +282,10 @@ const downloadArcitect = async ()=>{
           <LoginView />
 
           <q-separator />
+
+          <div>
+            {{ArcControlService.props.skip_fs_updates}}
+          </div>
 
           <ToolbarButton text='New ARC' icon='note_add' @clicked='newLocalArc()'>
             <a_tooltip>

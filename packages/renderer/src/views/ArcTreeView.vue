@@ -136,7 +136,7 @@ function datamapParentInfoToRelPath(info: SCS.DatamapParentInfo): string {
 
 function getDatamapParentByPath(arc: ARC, path: string): ArcAssay | ArcStudy | ArcRun | ArcWorkflow | null {
   const info = relPathToDatamapParentInfo(path);
-  return SCS.getDatamapParentByInfo(arc, info);
+  return SCS.getDatamapParentByInfo(arc, info.ParentId, info.Parent);
 }
 
 function recUpdateNodes(fn: (n: ArcTreeViewNode)=>void, nodes: ArcTreeViewNode[]) {
@@ -330,7 +330,7 @@ const readDir_ = async (path: string) => {
     n.label = n.id.split('/').pop();
     n.id_rel = n.id.replace(ArcControlService.props.arc_root+'/', '');
     n.lazy = n.isDirectory;
-    n.isSelectable = !n.isDirectory;
+    n.isSelectable = !n.isDirectory
 
     let isLFS = props.lfsInfo && props.lfsInfo[n.id_rel]
 
@@ -424,7 +424,7 @@ const triggerNode = (e: any, node: ArcTreeViewNode) => {
         throw new Error("Node missing relative path for datamap: " + JSON.stringify(node));
       const relParent = relPathToDatamapParentInfo(node.id_rel);
       props.selection = node.id;
-      return SwateControlService.LoadSwateState(SCS.Type.Datamap, relParent);
+      return SwateControlService.LoadSwateState(SCS.Type.Datamap, relParent.ParentId, relParent.Parent);
     case formatNodeEditString(Investigation):
       skip(e);
       props.selection = node.id;
@@ -476,7 +476,6 @@ const updatePath = async ([path,type]) => {
 
   if(type==='file_rm' && path.endsWith(ArcDatamap_FileName)) {
     if (SwateControlService.props.object && SwateControlService.props.datamapParentInfo) {
-      console.log(path.replace(ArcControlService.props.arc_root+'/', ''))
       const relPath = datamapParentInfoToRelPath(SwateControlService.props.datamapParentInfo);
       if (relPath === path.replace(ArcControlService.props.arc_root+'/', '')) {
         AppProperties.state=AppProperties.STATES.HOME;
@@ -535,7 +534,22 @@ const createDirectory = async node=>{
 };
 
 const openFileWithDefaultApplication = async (node: ArcTreeViewNode) => {
-  await window.ipc.invoke('LocalFileSystemService.openFileNative', node.id);
+  let p = node.id;
+  if (node.type === formatNodeEditString(Assays)) {
+    // for datamaps, open the parent directory
+    p = node.id + '/' + ArcAssay.FileName;
+  } else if (node.type === formatNodeEditString(Studies)) {
+    p = node.id + '/' + ArcStudy.FileName;
+  } else if (node.type === formatNodeEditString(Runs)) {
+    p = node.id + '/' + ArcRun.FileName;
+  } else if (node.type === formatNodeEditString(Workflows)) {
+    p = node.id + '/' + ArcWorkflow.FileName;
+  } else if (node.type === formatNodeEditString(Investigation)) {
+    p = node.id + '/' + ArcInvestigation.FileName;
+  } else if (node.type === formatNodeEditString(Datamap)) {
+    p = node.id;
+  }
+  await window.ipc.invoke('LocalFileSystemService.openFileNative', p);
 };
 
 const downloadLFSFiles = async paths => {
@@ -624,6 +638,7 @@ const onCellContextMenu = async (e,node: ArcTreeViewNode) => {
   if(node.type==='empty') return;
   e.preventDefault();
 
+  console.log("Context menu for node:", node);
   const items = [];
 
   const icon_style = {
@@ -892,7 +907,7 @@ const onCellContextMenu = async (e,node: ArcTreeViewNode) => {
     }
   }
 
-  if(node.isSelectable) {
+  if(node.isSelectable || node.type === formatNodeEditString(Assays) || node.type === formatNodeEditString(Studies) || node.type === formatNodeEditString(Runs) || node.type === formatNodeEditString(Workflows) || node.type === formatNodeEditString(Investigation) || node.type === formatNodeEditString(Datamap)){
     items.push({
       label: "Open with default Application",
       icon: h( 'i', icon_style, ['launch'] ),

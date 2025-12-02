@@ -25,7 +25,6 @@ const onSubmit = async () => {
 };
 
 onMounted(()=>{
-  console.log(props);
   iProps.value = props.initial_value || '';
 });
 

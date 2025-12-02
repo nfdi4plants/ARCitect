@@ -148,7 +148,7 @@ const IncomingMsgHandlers: Record<string, (data: any) => Promise<any>> = {
           if(!datamapParentInfo) {
             throw new Error("No parent info provided for datamap");
           }
-          const parentObject = SCS.getDatamapParentByInfo(ArcControlService.props.arc, datamapParentInfo);
+          const parentObject = SCS.getDatamapParentByInfo(ArcControlService.props.arc, datamapParentInfo.ParentId, datamapParentInfo.Parent);
           if(!parentObject) {
             throw new Error("Parent object for datamap not found");
           }
@@ -233,12 +233,12 @@ const IncomingMsgHandlers: Record<string, (data: any) => Promise<any>> = {
       case InteropTypes.ArcFiles.Investigation:
         const nextInvestigation = JsonController.Investigation.fromJsonString(json);
         const oldArc = ArcControlService.props.arc;
-        nextInvestigation.StaticHash = oldArc.StaticHash;
         nextInvestigation.Assays = oldArc.Assays;
         nextInvestigation.Studies = oldArc.Studies;
         nextInvestigation.Runs = oldArc.Runs;
         nextInvestigation.Workflows = oldArc.Workflows;
         const newArc = ARC.fromArcInvestigation(nextInvestigation, oldArc.FileSystem, oldArc.License);
+        newArc.StaticHash = oldArc.StaticHash;
         ArcControlService.props.arc = newArc;
         break;
       case InteropTypes.ArcFiles.Template:
@@ -377,7 +377,10 @@ const serializeArcFile = () => {
       }
       break;
     case SCS.Type.Datamap:
-      let parent = SwateControlService.props.datamapParentInfo;
+      let parent: SCS.DatamapParentInfo = {
+        ParentId: SwateControlService.props.identifier!,
+        Parent: SwateControlService.props.datamapParent!
+      };
       let d = SwateControlService.props.object;
       if (d instanceof ArcDatamap && parent) {
         const jsonString = JsonController.Datamap.toJsonString(d,0);
@@ -391,6 +394,7 @@ const serializeArcFile = () => {
 const sendArcFile = async () => {
   if(!iProps.swateReady) return;
   const serializedFile = serializeArcFile();
+  console.log("Sending ARC file to Swate:", serializedFile);
   await sendMessageWithResponse("SetARCFile", serializedFile);
 };
 

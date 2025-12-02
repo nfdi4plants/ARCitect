@@ -246,16 +246,19 @@ export const LocalFileSystemService = {
     }
   },
 
-  writeFile: async (e,[path,data,options])=>{
+  writeFile: async (e,[path,data,options]): Promise<Result<string>>=>{
     options = options || {encoding:'UTF-8'};
     path = path_to_system(path);
     FS.mkdirSync(PATH.dirname(path),{recursive:true});
-    if(data==='' && FS.existsSync(path)) return;
+    if(data==='' && FS.existsSync(path)) return { ok: false, error: 'File already exists and empty data was provided.' };
     try {
         FS.writeFileSync(path,data,options);
+        return { ok: true };
     } catch (err) {
         let window = BrowserWindow.getAllWindows().find(w => !w.isDestroyed());
-        window?.webContents.send('CORE.MSG', err);
+        const r = { ok: false, error: String(err) }
+        window?.webContents.send('CORE.Error', r);
+        return r;
     }
   },
 
