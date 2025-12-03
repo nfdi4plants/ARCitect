@@ -348,7 +348,12 @@ const downloadArcitect = async ()=>{
             <a_tooltip>Track changes of the ARC with git</a_tooltip>
           </ToolbarButton>
           <ToolbarButton text='DataHUB Sync' icon='published_with_changes' requiresARC requiresUser requiresGit @clicked='AppProperties.state=AppProperties.STATES.GIT_SYNC'>
-            <q-icon color='red-9' name="error" v-if="AppProperties.has_dirty_remote" />
+            <q-icon
+              color='red-9'
+              name="error"
+              v-if="AppProperties.has_dirty_remote"
+              style="vertical-align: middle; display: inline-flex; align-items: center; height: 24px;"
+            />
             <a_tooltip>Synchronize the ARC with a DataHUB</a_tooltip>
           </ToolbarButton>
           <ToolbarButton text='History' icon='history' requiresARC requiresGit @clicked='AppProperties.state=AppProperties.STATES.GIT_HISTORY'>
