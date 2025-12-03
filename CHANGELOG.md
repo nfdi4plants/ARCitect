@@ -31,6 +31,7 @@ where applicable. Add your name in the style of `(by @github-username)` at the e
 
 - Increased file watcher timeout behavior after saving an ARC (by @Etschbeijer)
 - Changed opinionated LFS behavior. LFS will now always push and never default on pul #413 #458 (by @Thyra) 
+- Simplified the commit user interface a bit (by @Thyra)
 
 ### 🐛 Fixed
 

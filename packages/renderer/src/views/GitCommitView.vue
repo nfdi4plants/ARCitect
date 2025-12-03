@@ -297,18 +297,32 @@ const formatFileSize = (size) => {
 
           <div class='row' >
             <div class='col'>
-              <a_input v-model='iProps.commit.msg' label='Commit Message' type="textarea" autogrow/>
+              <a_input
+                type="number"
+                v-model='GitService._.lfs_size_limit'
+                label="Large File Storage Limit in MB"
+              />
               <a_tooltip>
-                Add a commit message to document and communicate your changes
+                You can adapt the large file storage (LFS) Limit as needed
               </a_tooltip>
             </div>
           </div>
 
-          <div class='row' >
+          <div class='row' style="padding-top: 1.5em" >
             <div class='col'>
-              <a_input type="number" v-model='GitService._.lfs_size_limit' label="Large File Storage Limit in MB"/>
+                <a_input
+                  v-model='iProps.commit.msg'
+                  label='Commit Message'
+                  type="textarea"
+                  autogrow
+                  outlined
+                  filled="false"
+                  autofocus
+                  color="teal"
+                  hint="Describe your changes"
+                />
               <a_tooltip>
-                You can adapt the large file storage (LFS) Limit as needed
+                Add a commit message to document and communicate your changes
               </a_tooltip>
             </div>
           </div>
@@ -393,4 +407,3 @@ const formatFileSize = (size) => {
     </ViewItem>
   </q-list>
 </template>
-
