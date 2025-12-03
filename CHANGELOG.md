@@ -23,6 +23,7 @@ where applicable. Add your name in the style of `(by @github-username)` at the e
 ### ✨ Added
 
 - Added a button to the Bug Report View to open the developer console #454 (by @Thyra and @Brilator).
+- Regularly check if updates are available on a remote and notify user, related to #450 (by @Thyra)
 
 ## 1.4.0 - 2025-12-03
 

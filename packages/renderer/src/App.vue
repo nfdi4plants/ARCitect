@@ -23,6 +23,8 @@ import LFSFileView from './views/LFSFileView.vue';
 
 import ConfirmationDialog from './dialogs/ConfirmationDialog.vue';
 import GitDialog from './dialogs/GitDialog.vue';
+import { watch } from 'vue';
+import { checkRemoteDirtyStatus } from './utils/gitRemoteStatus';
 
 import DataHubView from './views/DataHubView.vue';
 
@@ -223,6 +225,36 @@ onMounted(async () => {
   const latest_version_ = latest_version.slice(1).split('.').map(x=>parseFloat(x));
   if(version_[0]<latest_version_[0] || version_[1]<latest_version_[1] || version_[2]<latest_version_[2])
     iProps.new_version = latest_version;
+
+  setInterval(checkRemoteDirtyStatus, 5 * 60 * 1000);
+
+  watch(
+    () => [ArcControlService.props.arc_root, AppProperties.user],
+    () => {
+      checkRemoteDirtyStatus();
+    }
+  );
+
+  watch(
+    () => AppProperties.has_dirty_remote,
+    (newVal, oldVal) => {
+      if (!oldVal && newVal) {
+        $q.notify({
+          type: 'warning',
+          message: 'New changes are available on a remote. You can pull them from the DataHUB Sync view.',
+          color: 'red-7',
+          textColor: 'white',
+          position: 'bottom-left',
+          timeout: 0,
+          actions: [
+            { label: 'X', color: 'white', handler: () => {} }
+          ]
+        });
+      }
+    }
+  );
+
+
 });
 
 const downloadArcitect = async ()=>{
@@ -316,6 +348,12 @@ const downloadArcitect = async ()=>{
             <a_tooltip>Track changes of the ARC with git</a_tooltip>
           </ToolbarButton>
           <ToolbarButton text='DataHUB Sync' icon='published_with_changes' requiresARC requiresUser requiresGit @clicked='AppProperties.state=AppProperties.STATES.GIT_SYNC'>
+            <q-icon
+              color='red-9'
+              name="error"
+              v-if="AppProperties.has_dirty_remote"
+              style="vertical-align: middle; display: inline-flex; align-items: center; height: 24px;"
+            />
             <a_tooltip>Synchronize the ARC with a DataHUB</a_tooltip>
           </ToolbarButton>
           <ToolbarButton text='History' icon='history' requiresARC requiresGit @clicked='AppProperties.state=AppProperties.STATES.GIT_HISTORY'>
