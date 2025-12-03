@@ -23,7 +23,8 @@ import LFSFileView from './views/LFSFileView.vue';
 
 import ConfirmationDialog from './dialogs/ConfirmationDialog.vue';
 import GitDialog from './dialogs/GitDialog.vue';
-import GitService from './GitService';
+import { watch } from 'vue';
+import { checkRemoteDirtyStatus } from './utils/gitRemoteStatus';
 
 import DataHubView from './views/DataHubView.vue';
 
@@ -225,30 +226,33 @@ onMounted(async () => {
   if(version_[0]<latest_version_[0] || version_[1]<latest_version_[1] || version_[2]<latest_version_[2])
     iProps.new_version = latest_version;
 
-  // Check remote dirty status every 5 minutes if ARC is open and user is logged in
-  setInterval(async () => {
-    if (
-      ArcControlService.props.arc_root &&
-      AppProperties.user
-    ) {
-      try {
-        await GitService.parse_status();
-        await GitService.get_remotes();
-        await GitService.check_remotes();
-        let dirty = false;
-        const remotes = GitService._.remotes || {};
-        for (const id in remotes) {
-          if (remotes[id].dirty) {
-            dirty = true;
-            break;
+  setInterval(checkRemoteDirtyStatus, 5 * 60 * 1000);
+
+  watch(
+    () => [ArcControlService.props.arc_root, AppProperties.user],
+    () => {
+      checkRemoteDirtyStatus();
+    }
+  );
+
+  watch(
+    () => AppProperties.has_dirty_remote,
+    (newVal, oldVal) => {
+      if (!oldVal && newVal) {
+        $q.dialog({
+          component: ConfirmationDialog,
+          componentProps: {
+            title: 'Remote Changes Detected',
+            msg: 'New changes are available on a remote. You can pull them from the DataHUB Sync view.',
+            ok_text: 'Ok',
+            ok_color: 'secondary',
           }
-        }
-        AppProperties.has_dirty_remote = dirty;
-      } catch (e) {
-        // Optionally handle error
+        });
       }
     }
-  }, 5 * 60 * 1000); // 5 minutes
+  );
+
+
 });
 
 const downloadArcitect = async ()=>{

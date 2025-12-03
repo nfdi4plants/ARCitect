@@ -67,7 +67,7 @@ const AppProperties: {
   active_lfs_file: '',
   active_node: null,
   node_needs_refresh: false,
-  has_dirty_remote: true,
+  has_dirty_remote: false,
   datahub_hosts : {},
   datahub_hosts_by_provider: {},
   datahub_hosts_msgs: {},

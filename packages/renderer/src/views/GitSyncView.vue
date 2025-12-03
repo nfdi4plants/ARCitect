@@ -8,6 +8,7 @@ import a_btn from '../components/a_btn.vue';
 import a_tooltip from '../components/a_tooltip.vue';
 import ArcControlService from '../ArcControlService.ts';
 import GitService from '../GitService.ts';
+import { checkRemoteDirtyStatus } from '../utils/gitRemoteStatus';
 
 import {abortMerge} from './GitCommitView.vue';
 
@@ -329,6 +330,7 @@ const pull = async()=>{
   dialogProps.state=1;
 
   GitService.update_lfs_files();
+  await checkRemoteDirtyStatus();
 };
 
 const init = async()=>{
