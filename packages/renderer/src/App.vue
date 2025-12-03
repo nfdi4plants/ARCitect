@@ -239,14 +239,16 @@ onMounted(async () => {
     () => AppProperties.has_dirty_remote,
     (newVal, oldVal) => {
       if (!oldVal && newVal) {
-        $q.dialog({
-          component: ConfirmationDialog,
-          componentProps: {
-            title: 'Remote Changes Detected',
-            msg: 'New changes are available on a remote. You can pull them from the DataHUB Sync view.',
-            ok_text: 'Ok',
-            ok_color: 'secondary',
-          }
+        $q.notify({
+          type: 'warning',
+          message: 'New changes are available on a remote. You can pull them from the DataHUB Sync view.',
+          color: 'red-7',
+          textColor: 'white',
+          position: 'bottom-left',
+          timeout: 0,
+          actions: [
+            { label: 'X', color: 'white', handler: () => {} }
+          ]
         });
       }
     }
