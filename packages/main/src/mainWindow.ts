@@ -148,6 +148,11 @@ export async function restoreOrCreateWindow() {
     });
   });
 
+  ipcMain.handle('DevTools.open', () => {
+    const win = BrowserWindow.getFocusedWindow();
+    if (win) win.webContents.openDevTools();
+  });
+
   ipcMain.handle('CORE.openTerminal', (e,path)=>{
     if(!path) return window.webContents.send('CORE.messagePrompt', 'No ARC Open');
 

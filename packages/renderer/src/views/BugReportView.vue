@@ -1,6 +1,11 @@
 <script lang="ts" setup>
 
 import ViewItem from '../components/ViewItem.vue';
+import a_btn from '../components/a_btn.vue';
+
+function openDevTools() {
+  window.ipc.invoke('DevTools.open');
+}
 
 </script>
 <template>
@@ -112,6 +117,28 @@ import ViewItem from '../components/ViewItem.vue';
         </q-item-section>
       </q-item>
 
+      <div style="margin-top: 32px; margin-bottom: 8px;">
+        <q-item>
+          <q-item-section>
+            <q-item-label>
+              <strong>Tip for reporting bugs:</strong>
+            </q-item-label>
+            <q-item-label caption>
+              When reporting bugs with ARCitect, it helps the data stewards and developers a lot to see possible error messages.
+              Take a screenshot of the console or copy the error messages encountered and include them in your bug report.
+            </q-item-label>
+            <div style="margin-top: 16px;">
+              <a_btn
+                label="Open Console"
+                icon="developer_mode"
+                @click="openDevTools"
+                color="teal"
+                style="font-weight:bold"
+              />
+            </div>
+          </q-item-section>
+        </q-item>
+      </div>
     </ViewItem>
   </q-list>
 </template>

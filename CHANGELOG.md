@@ -20,6 +20,10 @@ where applicable. Add your name in the style of `(by @github-username)` at the e
 
 ## [Unreleased]
 
+### ✨ Added
+
+- Added a button to the Bug Report View to open the developer console #454 (by @Thyra and @Brilator).
+
 ## 1.4.0 - 2025-12-03
 
 ### ✨ Added
