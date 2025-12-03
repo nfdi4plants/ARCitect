@@ -20,6 +20,8 @@ where applicable. Add your name in the style of `(by @github-username)` at the e
 
 ## [Unreleased]
 
+## 1.4.0 - 2025-12-03
+
 ### ✨ Added
 
 - Files without view support by ARCitect will open a default view with a button allowing the user to open them with the default application. This feature was also added for all files in the context menu #455 (by @Thyra, @Freymaurer)
@@ -40,7 +42,7 @@ where applicable. Add your name in the style of `(by @github-username)` at the e
 - Fixed update verification on investigation files (by @Freymaurer)
 - Fixed swate view update after external file changes to correctly reflect changes (by @Freymaurer)
 
-## 1.3.2 - 2024-10-26
+## 1.3.2 - 2025-11-20
 
 ### ✨ Added
 
