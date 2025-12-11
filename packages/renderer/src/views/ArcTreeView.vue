@@ -13,7 +13,7 @@ import AddProtocolDialog from '../dialogs/AddProtocolDialog.vue';
 import ProgressDialog from '../dialogs/ProgressDialog.vue';
 import { useDownloadLFSFiles } from '../composables/useDownloadLFSFiles';
 import { useQuasar } from 'quasar'
-import {ArcStudy, ArcAssay, ArcRun, ArcWorkflow, DataMap as ArcDatamap, ArcInvestigation, ARC} from '@nfdi4plants/arctrl';
+import {ArcStudy, ArcAssay, ArcRun, ArcWorkflow, Datamap as ArcDatamap, ArcInvestigation, ARC} from '@nfdi4plants/arctrl';
 import { setAssayIdentifier, setRunIdentifier, setStudyIdentifier, setWorkflowIdentifier } from "@nfdi4plants/arctrl/Core/IdentifierSetters";
 import IdentifierDialog from '../dialogs/IdentifierDialog.vue';
 import {type LFSJsonFile} from '../GitService';
