@@ -20,6 +20,14 @@ where applicable. Add your name in the style of `(by @github-username)` at the e
 
 ## [Unreleased]
 
+### ✨ Added
+
+- Image metadata browser component added to the ImageView component (by @kMutagene)
+
+### 🐛 Fixed
+
+- Datamap imports from arctrl spelling (older versions had capitalized M) (by @kMutagene)
+
 ## 1.4.0 - 2025-12-03
 
 ### ✨ Added
