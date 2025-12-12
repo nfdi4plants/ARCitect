@@ -27,6 +27,7 @@ where applicable. Add your name in the style of `(by @github-username)` at the e
 ### 🐛 Fixed
 
 - Datamap imports from arctrl spelling (older versions had capitalized M) (by @kMutagene)
+- ARC open failures now show detailed errors and release the loading overlay correctly (by @caroott)
 
 ## 1.4.0 - 2025-12-03
 

@@ -61,9 +61,16 @@ const openLocalArc = async (path: string | null | void) =>{
 
   AppProperties.state=AppProperties.STATES.HOME;
 
-  let isOpen = await ArcControlService.readARC(path);
-  if(!isOpen){
-    iProps.error_text = 'Invalid ARC format:<br>'+path;
+  try {
+    const isOpen = await ArcControlService.readARC(path);
+    if(!isOpen){
+      iProps.error_text = 'Invalid ARC format:<br>'+path;
+      iProps.error = true;
+      return;
+    }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    iProps.error_text = 'Failed to open ARC:<br>'+message;
     iProps.error = true;
     return;
   }
