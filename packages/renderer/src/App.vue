@@ -85,7 +85,7 @@ const openLocalArc = async (path: string | null | void) =>{
     }).onOk( async ()=>{
       const dialogProps = reactive({
         title: 'Initializing Git',
-        oik_title: 'Ok',
+        ok_title: 'Ok',
         cancel_title: null,
         state: 0
       });
@@ -268,12 +268,12 @@ const restoreGitDialog = ()=>{
     cancel_title: AppProperties.git_dialog_state.cancel_title,
     state: AppProperties.git_dialog_state.state
   });
-  
+
   // Watch for global state changes and sync to dialog
   watch(() => AppProperties.git_dialog_state.state, (newState) => {
     dialogProps.state = newState;
   });
-  
+
   $q.dialog({
     component: GitDialog,
     componentProps: dialogProps
@@ -512,8 +512,8 @@ const restoreGitDialog = ()=>{
       style="position: fixed; bottom: 20px; right: 20px; z-index: 9999;"
     >
       <q-tooltip>
-        {{ AppProperties.git_dialog_state.state === 0 ? 'Git operation running - Click to view' : 
-           AppProperties.git_dialog_state.state === 1 ? 'Git operation completed - Click to view' : 
+        {{ AppProperties.git_dialog_state.state === 0 ? 'Git operation running - Click to view' :
+           AppProperties.git_dialog_state.state === 1 ? 'Git operation completed - Click to view' :
            'Git operation failed - Click to view' }}
       </q-tooltip>
     </q-btn>
