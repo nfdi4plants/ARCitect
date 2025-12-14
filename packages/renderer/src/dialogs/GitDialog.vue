@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { useDialogPluginComponent } from 'quasar';
-import { ref, reactive, onMounted, onUnmounted } from 'vue';
+import { ref, reactive, onMounted, onUnmounted, watch } from 'vue';
+import AppProperties from '../AppProperties.ts';
 
 export interface Props {
   title: String,
@@ -8,7 +9,8 @@ export interface Props {
   ok_icon?: String,
   cancel_title: String,
   cancel_icon?: String,
-  state: Number
+  state: Number,
+  allowMinimize?: Boolean
 };
 const props = defineProps<Props>();
 
@@ -16,7 +18,8 @@ const iProps = reactive({
   height: 0,
   rows: [''],
   git_listener: null,
-  text: ''
+  text: '',
+  syncInterval: null
 });
 
 const msg_container = ref(null);
@@ -26,35 +29,11 @@ defineEmits([
 ]);
 
 const processGitStream = async data=>{
-  const rows = data.split('\n').filter(row=>row!=='');
-
-  for(let row of rows){
-    if(row==='') continue;
-    const last_row = iProps.rows[iProps.rows.length-1];
-    let replace = false;
-    for(let p of [
-      'POST ',
-      'Filtering content:',
-      'Receiving objects:',
-      'Resolving deltas:',
-      'Enumerating objects:',
-      'Counting objects:',
-      'Compressing objects:',
-      'Writing objects:',
-      'Uploading LFS objects:',
-      'Downloading LFS objects:',
-    ])
-      if(last_row.includes(p) && row.includes(p))
-        replace = true;
-
-    if(replace)
-      iProps.rows[iProps.rows.length-1] = row;
-    else
-      iProps.rows.push(row);
-  }
+  AppProperties.processGitStreamRows(data, iProps.rows);
   iProps.text = iProps.rows.join('<br>');
   setTimeout(()=>{
-    msg_container.value.scrollTop = msg_container.value.scrollHeight;
+    if(msg_container.value)
+      msg_container.value.scrollTop = msg_container.value.scrollHeight;
   },100);
 };
 
@@ -62,11 +41,54 @@ const copyGitOutput = () => {
   window.navigator.clipboard.writeText(iProps.rows.join('\n'));
 }
 
+const minimizeDialog = () => {
+  AppProperties.git_dialog_state.visible = true;
+  AppProperties.git_dialog_state.minimized = true;
+  AppProperties.git_dialog_state.title = props.title as string;
+  AppProperties.git_dialog_state.ok_title = props.ok_title as string;
+  AppProperties.git_dialog_state.cancel_title = props.cancel_title as string;
+  AppProperties.git_dialog_state.state = props.state as number;
+  onDialogCancel();
+};
+
 onMounted( ()=>{
-  iProps.rows = [''];
+  iProps.rows = AppProperties.git_dialog_state.minimized ? AppProperties.git_dialog_state.rows : [''];
+  iProps.text = iProps.rows.join('<br>');
+  AppProperties.git_dialog_state.visible = true;
+  AppProperties.git_dialog_state.minimized = false;
+  AppProperties.git_dialog_state.state = props.state as number;
   iProps.git_listener = window.ipc.on('GitService.MSG', processGitStream);
+  
+  // Watch props.state changes from parent and sync to global state
+  watch(() => props.state, (newState) => {
+    AppProperties.git_dialog_state.state = newState as number;
+  });
+  
+  // Sync with global listener updates (messages and state)
+  const syncInterval = setInterval(() => {
+    if (AppProperties.git_dialog_state.rows.length > iProps.rows.length) {
+      iProps.rows = [...AppProperties.git_dialog_state.rows];
+      iProps.text = iProps.rows.join('<br>');
+      setTimeout(() => {
+        if (msg_container.value)
+          msg_container.value.scrollTop = msg_container.value.scrollHeight;
+      }, 100);
+    }
+  }, 100);
+  
+  iProps.syncInterval = syncInterval;
 });
-onUnmounted( ()=>iProps.git_listener() );
+
+onUnmounted( ()=>{
+  if (iProps.syncInterval) {
+    clearInterval(iProps.syncInterval);
+  }
+  iProps.git_listener();
+  if(!AppProperties.git_dialog_state.minimized) {
+    AppProperties.git_dialog_state.visible = false;
+    AppProperties.git_dialog_state.rows = [''];
+  }
+});
 
 const { dialogRef, onDialogHide, onDialogOK, onDialogCancel } = useDialogPluginComponent();
 
@@ -84,12 +106,13 @@ const { dialogRef, onDialogHide, onDialogOK, onDialogCancel } = useDialogPluginC
         </div>
       </q-card-section>
 
-      <q-linear-progress :value='100' :indeterminate='props.state===0' color="secondary" class="q-mt-sm" track-color="grey-3" />
+      <q-linear-progress :value='100' :indeterminate='AppProperties.git_dialog_state.state===0' color="secondary" class="q-mt-sm" track-color="grey-3" />
 
       <q-card-actions align="right" style="margin:0 1.5em 1.5em;">
         <q-btn color="grey-6" label="Copy Git Output" @click="copyGitOutput" class='text-weight-bold' icon='content_paste'/>
-        <q-btn color="secondary" :loading='props.state===0' :disabled='props.state===0 || (props.state===2 && props.cancel_title)' :label="props.ok_title" @click="onDialogOK" type='submit' class='text-weight-bold' :icon='props.ok_icon || "check_circle"'/>
-        <q-btn v-if='props.cancel_title' color="secondary" :disabled='props.state===0' :label="props.cancel_title" @click="onDialogCancel" type='submit' class='text-weight-bold' :icon='props.cancel_icon || "cancel"'/>
+        <q-btn v-if='props.allowMinimize !== false' color="grey-6" label="Minimize" @click="minimizeDialog" class='text-weight-bold' icon='minimize' :disabled='AppProperties.git_dialog_state.state!==0'/>
+        <q-btn color="secondary" :loading='AppProperties.git_dialog_state.state===0' :disabled='AppProperties.git_dialog_state.state===0 || (AppProperties.git_dialog_state.state===2 && props.cancel_title)' :label="props.ok_title" @click="onDialogOK" type='submit' class='text-weight-bold' :icon='props.ok_icon || "check_circle"'/>
+        <q-btn v-if='props.cancel_title' color="secondary" :disabled='AppProperties.git_dialog_state.state===0' :label="props.cancel_title" @click="onDialogCancel" type='submit' class='text-weight-bold' :icon='props.cancel_icon || "cancel"'/>
       </q-card-actions>
     </q-card>
 

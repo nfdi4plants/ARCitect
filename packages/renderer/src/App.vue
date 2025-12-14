@@ -85,9 +85,9 @@ const openLocalArc = async (path: string | null | void) =>{
     }).onOk( async ()=>{
       const dialogProps = reactive({
         title: 'Initializing Git',
-        ok_title: 'Ok',
+        oik_title: 'Ok',
         cancel_title: null,
-        state: 0,
+        state: 0
       });
       $q.dialog({
         component: GitDialog,
@@ -259,6 +259,25 @@ onMounted(async () => {
 
 const downloadArcitect = async ()=>{
   await window.ipc.invoke('InternetService.openExternalURL','https://github.com/nfdi4plants/ARCitect/releases');
+};
+
+const restoreGitDialog = ()=>{
+  const dialogProps = reactive({
+    title: AppProperties.git_dialog_state.title,
+    ok_title: AppProperties.git_dialog_state.ok_title,
+    cancel_title: AppProperties.git_dialog_state.cancel_title,
+    state: AppProperties.git_dialog_state.state
+  });
+  
+  // Watch for global state changes and sync to dialog
+  watch(() => AppProperties.git_dialog_state.state, (newState) => {
+    dialogProps.state = newState;
+  });
+  
+  $q.dialog({
+    component: GitDialog,
+    componentProps: dialogProps
+  });
 };
 
 
@@ -483,6 +502,21 @@ const downloadArcitect = async ()=>{
         />
       </div>
     </div>
+
+    <q-btn
+      v-if='AppProperties.git_dialog_state.visible && AppProperties.git_dialog_state.minimized'
+      fab
+      :color="AppProperties.git_dialog_state.state === 0 ? 'secondary' : AppProperties.git_dialog_state.state === 1 ? 'positive' : 'negative'"
+      :icon="AppProperties.git_dialog_state.state === 0 ? 'hourglass_empty' : AppProperties.git_dialog_state.state === 1 ? 'check_circle' : 'error'"
+      @click="restoreGitDialog"
+      style="position: fixed; bottom: 20px; right: 20px; z-index: 9999;"
+    >
+      <q-tooltip>
+        {{ AppProperties.git_dialog_state.state === 0 ? 'Git operation running - Click to view' : 
+           AppProperties.git_dialog_state.state === 1 ? 'Git operation completed - Click to view' : 
+           'Git operation failed - Click to view' }}
+      </q-tooltip>
+    </q-btn>
 </template>
 
 <style>

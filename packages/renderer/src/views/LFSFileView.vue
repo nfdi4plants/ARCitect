@@ -17,7 +17,6 @@ const $q = useQuasar();
 const downloadFile = async () => {
   isDownloading.value = true;
   errorMsg.value = '';
-  console.log(AppProperties.active_node)
   try {
     await useDownloadLFSFiles($q, [AppProperties.active_node.id_rel]);
     if (AppProperties.active_node) {
@@ -58,6 +57,7 @@ const downloadFile = async () => {
         color="primary"
         class="q-mb-md"
         :loading="isDownloading"
+        :disabled="AppProperties.git_dialog_state.visible"
         @click="downloadFile"
         style="margin-left: 2.5em"
       />

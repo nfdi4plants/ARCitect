@@ -637,21 +637,23 @@ const onCellContextMenu = async (e,node: ArcTreeViewNode) => {
       icon: h( 'i', icon_style, ['drive_folder_upload'] ),
       onClick: ()=>importFilesOrDirectories(node,'selectAnyDirectories')
     });
-    items.push({
-      label: "Download LFS Files",
-      icon: h( 'i', icon_style, ['cloud_download'] ),
-      onClick: () => downloadLFSFiles([node.id_rel ? node.id_rel + '/**' : ''])
-    });
+    if(node.isLFSDirectory && !AppProperties.git_dialog_state.visible)
+      items.push({
+        label: "Download LFS Files",
+        icon: h( 'i', icon_style, ['cloud_download'] ),
+        onClick: () => downloadLFSFiles([node.id_rel ? node.id_rel + '/**' : ''])
+      });
   } else {
     if(node.isLFSPointer){
-      items.push({
-        label: "Download LFS File",
-        icon: h( 'i', icon_style, ['cloud_download'] ),
-        onClick: async () => {
-          await downloadLFSFiles([node.id_rel]);
-          triggerNode({}, node);
-        }
-      });
+      if(!node.downloaded && !AppProperties.git_dialog_state.visible)
+        items.push({
+          label: "Download LFS File",
+          icon: h( 'i', icon_style, ['cloud_download'] ),
+          onClick: async () => {
+            await downloadLFSFiles([node.id_rel]);
+            triggerNode({}, node);
+          }
+        });
     }
   }
 
@@ -969,7 +971,7 @@ watch(()=> AppProperties.node_needs_refresh, async (newValue, oldValue) => {
               <q-icon v-if='prop.node.type===Runs' name='add' class='tree_button' @click='e=>addRun(e,prop.node)'></q-icon>
               <q-icon v-if='prop.node.type===Workflows' name='add' class='tree_button' @click='e=>addWorkflow(e,prop.node)'></q-icon>
               <div v-if='prop.node.isLFS' style="display: flex; gap: 0.2em; align-items: center; justify-content: end;">
-                <q-btn :unelevated="prop.node.downloaded" size="sm" padding="none xs" dense :disable="prop.node.downloaded" color='secondary' label="LFS" @click="downloadLFSFiles([prop.node.id_rel])" />
+                <q-btn :unelevated="prop.node.downloaded" size="sm" padding="none xs" dense :disable="prop.node.downloaded || AppProperties.git_dialog_state.visible" color='secondary' label="LFS" @click="downloadLFSFiles([prop.node.id_rel])" />
                 <q-badge color='dark' text-color="white" :label="prop.node.size_formatted"/>
               </div>
             </td>
