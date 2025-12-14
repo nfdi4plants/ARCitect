@@ -25,6 +25,9 @@ where applicable. Add your name in the style of `(by @github-username)` at the e
 - Added a button to the Bug Report View to open the developer console #454 (by @Thyra and @Brilator).
 - Regularly check if updates are available on a remote and notify user, related to #450 (by @Thyra)
 
+### 🐛 Fixed
+- Fixed an issue where text files would be re-created after deleting them while they were open for editing #474 (by @Thyra who also caused this problem).
+
 ## 1.4.0 - 2025-12-03
 
 ### ✨ Added
