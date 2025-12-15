@@ -230,7 +230,20 @@ onMounted(async () => {
 
   watch(
     () => [ArcControlService.props.arc_root, AppProperties.user],
-    () => {
+    ([arcRoot, user], [oldArcRoot]) => {
+      if (arcRoot && arcRoot !== oldArcRoot && !user) {
+        $q.notify({
+          type: 'info',
+          message: 'You are not logged in. Log in to sync with remote repositories.',
+          color: 'yellow-8',
+          textColor: 'black',
+          position: 'bottom-left',
+          timeout: 5000,
+          actions: [
+            { label: 'X', color: 'black', handler: () => {} }
+          ]
+        });
+      }
       checkRemoteDirtyStatus();
     }
   );
