@@ -23,6 +23,8 @@ import LFSFileView from './views/LFSFileView.vue';
 
 import ConfirmationDialog from './dialogs/ConfirmationDialog.vue';
 import GitDialog from './dialogs/GitDialog.vue';
+import { watch } from 'vue';
+import { checkRemoteDirtyStatus } from './utils/gitRemoteStatus';
 
 import DataHubView from './views/DataHubView.vue';
 
@@ -92,7 +94,7 @@ const openLocalArc = async (path: string | null | void) =>{
         title: 'Initializing Git',
         ok_title: 'Ok',
         cancel_title: null,
-        state: 0,
+        state: 0
       });
       $q.dialog({
         component: GitDialog,
@@ -230,10 +232,80 @@ onMounted(async () => {
   const latest_version_ = latest_version.slice(1).split('.').map(x=>parseFloat(x));
   if(version_[0]<latest_version_[0] || version_[1]<latest_version_[1] || version_[2]<latest_version_[2])
     iProps.new_version = latest_version;
+
+  setInterval(checkRemoteDirtyStatus, 5 * 60 * 1000);
+
+  watch(
+    () => [ArcControlService.props.arc_root, AppProperties.user],
+    ([arcRoot, user], [oldArcRoot]) => {
+      if (arcRoot && arcRoot !== oldArcRoot && !user) {
+        $q.notify({
+          type: 'info',
+          message: 'You are not logged in. Log in to sync with remote repositories.',
+          color: 'yellow-8',
+          textColor: 'black',
+          position: 'bottom-left',
+          timeout: 5000,
+          actions: [
+            { label: 'X', color: 'black', handler: () => {} }
+          ]
+        });
+      }
+      checkRemoteDirtyStatus();
+    }
+  );
+
+  let dirtyRemoteNotification: (() => void) | null = null;
+
+  watch(
+    () => AppProperties.has_dirty_remote,
+    (newVal, oldVal) => {
+      if (!oldVal && newVal) {
+        dirtyRemoteNotification = $q.notify({
+          type: 'warning',
+          message: 'Your local ARC is out of sync with a remote. You can pull or push changes in the DataHUB Sync view.',
+          color: 'red-7',
+          textColor: 'white',
+          position: 'bottom-left',
+          timeout: 0,
+          actions: [
+            { label: 'X', color: 'white', handler: () => { dirtyRemoteNotification = null; } }
+          ]
+        });
+      } else if (oldVal && !newVal && dirtyRemoteNotification) {
+        dirtyRemoteNotification();
+        dirtyRemoteNotification = null;
+      }
+    }
+  );
+
+
 });
 
 const downloadArcitect = async ()=>{
   await window.ipc.invoke('InternetService.openExternalURL','https://github.com/nfdi4plants/ARCitect/releases');
+};
+
+const restoreGitDialog = ()=>{
+  const dialogProps = reactive({
+    title: AppProperties.git_dialog_state.title,
+    ok_title: AppProperties.git_dialog_state.ok_title,
+    cancel_title: AppProperties.git_dialog_state.cancel_title,
+    state: AppProperties.git_dialog_state.state
+  });
+
+  // Watch for global state changes and sync to dialog
+  const stopWatcher = watch(() => AppProperties.git_dialog_state.state, (newState) => {
+    dialogProps.state = newState;
+  });
+
+  $q.dialog({
+    component: GitDialog,
+    componentProps: dialogProps
+  })
+  .onOk(() => { stopWatcher(); })
+  .onCancel(() => { stopWatcher(); })
+  .onDismiss(() => { stopWatcher(); });
 };
 
 
@@ -323,6 +395,12 @@ const downloadArcitect = async ()=>{
             <a_tooltip>Track changes of the ARC with git</a_tooltip>
           </ToolbarButton>
           <ToolbarButton text='DataHUB Sync' icon='published_with_changes' requiresARC requiresUser requiresGit @clicked='AppProperties.state=AppProperties.STATES.GIT_SYNC'>
+            <q-icon
+              color='red-9'
+              name="error"
+              v-if="AppProperties.has_dirty_remote"
+              style="vertical-align: middle; display: inline-flex; align-items: center; height: 24px;"
+            />
             <a_tooltip>Synchronize the ARC with a DataHUB</a_tooltip>
           </ToolbarButton>
           <ToolbarButton text='History' icon='history' requiresARC requiresGit @clicked='AppProperties.state=AppProperties.STATES.GIT_HISTORY'>
@@ -452,6 +530,21 @@ const downloadArcitect = async ()=>{
         />
       </div>
     </div>
+
+    <q-btn
+      v-if='AppProperties.git_dialog_state.visible && AppProperties.git_dialog_state.minimized'
+      fab
+      :color="AppProperties.git_dialog_state.state === 0 ? 'secondary' : AppProperties.git_dialog_state.state === 1 ? 'positive' : 'negative'"
+      :icon="AppProperties.git_dialog_state.state === 0 ? 'hourglass_empty' : AppProperties.git_dialog_state.state === 1 ? 'check_circle' : 'error'"
+      @click="restoreGitDialog"
+      style="position: fixed; bottom: 20px; right: 20px; z-index: 9999;"
+    >
+      <q-tooltip>
+        {{ AppProperties.git_dialog_state.state === 0 ? 'Git operation running - Click to view' :
+           AppProperties.git_dialog_state.state === 1 ? 'Git operation completed - Click to view' :
+           'Git operation failed - Click to view' }}
+      </q-tooltip>
+    </q-btn>
 </template>
 
 <style>

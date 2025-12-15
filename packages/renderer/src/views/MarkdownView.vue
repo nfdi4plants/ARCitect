@@ -179,13 +179,17 @@ onMounted(async ()=>{
 
   iProps.container.addEventListener("click", iProps.link_listener);
 });
-onUnmounted(()=>{
+onUnmounted(async ()=>{
   observer.disconnect();
   iProps.container.removeEventListener("click", iProps.link_listener);
-  window.ipc.invoke('LocalFileSystemService.writeFile', [iProps.path,iProps.text || ' ']);
+  const fileExists = await window.ipc.invoke('LocalFileSystemService.exists', iProps.path);
+  if(fileExists)
+    await window.ipc.invoke('LocalFileSystemService.writeFile', [iProps.path,iProps.text || ' ']);
 });
 watch(() => AppProperties.active_markdown, async (newPath, oldPath) => {
-  window.ipc.invoke('LocalFileSystemService.writeFile', [oldPath, iProps.text || ' ']);
+  const fileExists = await window.ipc.invoke('LocalFileSystemService.exists', oldPath);
+  if(fileExists)
+    await window.ipc.invoke('LocalFileSystemService.writeFile', [oldPath, iProps.text || ' ']);
   await init(); // Load new file
 });
 

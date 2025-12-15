@@ -148,21 +148,31 @@ const commit = async()=>{
 
   let response=null;
   response = await GitService.set_git_user(name,email);
-  if(!response[0])
-    return dialogProps.state=2;
+  if(!response[0]) {
+    dialogProps.state=2;
+    AppProperties.updateGitDialogState(2);
+    return;
+  }
 
   response = await trackChanges();
-  if(!response[0])
-    return dialogProps.state=2;
+  if(!response[0]) {
+    dialogProps.state=2;
+    AppProperties.updateGitDialogState(2);
+    return;
+  }
 
   response = await window.ipc.invoke('GitService.run', {
     args: ['commit','-m','"'+msg+'"',AppProperties.config.gitDebug ? '--verbose' : '--quiet'],
     cwd: ArcControlService.props.arc_root,
     silent:false
   });
-  if(!response[0])
-    return dialogProps.state=2;
+  if(!response[0]) {
+    dialogProps.state=2;
+    AppProperties.updateGitDialogState(2);
+    return;
+  }
   dialogProps.state = 1;
+  AppProperties.updateGitDialogState(1);
 };
 
 const abortMerge = async()=>{
@@ -185,7 +195,9 @@ const abortMerge = async()=>{
     args: [`rebase`,`--abort`],
     cwd: ArcControlService.props.arc_root
   });
-  dialogProps.state = response[0] ? 1 : 2;
+  const finalState = response[0] ? 1 : 2;
+  dialogProps.state = finalState;
+  AppProperties.updateGitDialogState(finalState);
 };
 
 const reset = async()=>{
@@ -213,7 +225,11 @@ const reset = async()=>{
         args: [`reset`,`--hard`],
         cwd: ArcControlService.props.arc_root
       });
-      if(!response[0]) return dialogProps.state = 2;
+      if(!response[0]) {
+        dialogProps.state = 2;
+        AppProperties.updateGitDialogState(2);
+        return;
+      }
     }
 
     // optionally perform git clean
@@ -222,9 +238,14 @@ const reset = async()=>{
         args: [`clean`,`-d`, `-f`],
         cwd: ArcControlService.props.arc_root
       });
-      if(!response[0]) return dialogProps.state = 2;
+      if(!response[0]) {
+        dialogProps.state = 2;
+        AppProperties.updateGitDialogState(2);
+        return;
+      }
     }
     dialogProps.state = 1;
+    AppProperties.updateGitDialogState(1);
   });
 };
 
@@ -316,7 +337,6 @@ const formatFileSize = (size) => {
                   type="textarea"
                   autogrow
                   outlined
-                  filled="false"
                   autofocus
                   color="teal"
                   hint="Describe your changes"
@@ -386,17 +406,17 @@ const formatFileSize = (size) => {
         </q-card-section>
 
         <q-card-actions align='right' style="padding:0 2.1em 1em 2.1em;">
-          <a_btn v-if='GitService._.rebase_in_progress' label="Abort Merge" @click="abortMerge" icon='dangerous' color='red-10'>
+          <a_btn v-if='GitService._.rebase_in_progress' label="Abort Merge" @click="abortMerge" icon='dangerous' color='red-10' :disabled='AppProperties.git_dialog_state.visible'>
             <a_tooltip>
               There is an interactive git rebase in progress. You can abort the merge process by reverting back to the last commit.
             </a_tooltip>
           </a_btn>
-          <a_btn label="Reset" @click="reset" icon='change_circle'>
+          <a_btn label="Reset" @click="reset" icon='change_circle' :disabled='AppProperties.git_dialog_state.visible'>
             <a_tooltip>
               Click RESET to undo your latest changes and convert the ARC to the last saved commit
             </a_tooltip>
           </a_btn>
-          <a_btn label="Commit" @click="commit" icon='check_circle' :disabled='GitService._.change_tree.length<1 || GitService._.change_tree[0].children.length<1'>
+          <a_btn label="Commit" @click="commit" icon='check_circle' :disabled='GitService._.change_tree.length<1 || GitService._.change_tree[0].children.length<1 || AppProperties.git_dialog_state.visible'>
             <a_tooltip>
               Once ready, click COMMIT to store your changes locally
             </a_tooltip>

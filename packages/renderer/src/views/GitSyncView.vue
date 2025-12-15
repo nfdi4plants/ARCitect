@@ -8,6 +8,7 @@ import a_btn from '../components/a_btn.vue';
 import a_tooltip from '../components/a_tooltip.vue';
 import ArcControlService from '../ArcControlService.ts';
 import GitService from '../GitService.ts';
+import { checkRemoteDirtyStatus } from '../utils/gitRemoteStatus';
 
 import {abortMerge} from './GitCommitView.vue';
 
@@ -48,7 +49,9 @@ const abortMerge = async()=>{
     args: [`rebase`,`--abort`],
     cwd: ArcControlService.props.arc_root
   });
-  dialogProps.state = response[0] ? 1 : 2;
+  const finalState = response[0]?1:2;
+  dialogProps.state=finalState;
+  AppProperties.updateGitDialogState(finalState);
 };
 
 const showError = async msg=>{
@@ -83,9 +86,14 @@ const push = async()=>{
 
   // get current branch
   const branches = await GitService.get_branches();
-  if(!branches.current) return dialogProps.state=2;
+  if(!branches.current) {
+    dialogProps.state=2;
+    AppProperties.updateGitDialogState(2);
+    return;
+  }
   if(branches.current.startsWith('(HEAD detached at ')){
     dialogProps.state=2;
+    AppProperties.updateGitDialogState(2);
     return showError('No Branch Selected (Detached HEAD). Fix in Commit View.');
   }
 
@@ -123,6 +131,7 @@ const push = async()=>{
     });
 
   dialogProps.state=1;
+  AppProperties.updateGitDialogState(1);
 };
 
 const process_merged_json = (name,json) => {
@@ -256,12 +265,14 @@ const merge = async ()=>{
     console.log(merge_status);
     if(!merge_status){
       dialogProps.state=2;
+      AppProperties.updateGitDialogState(2);
       return;
     }
   }
   ArcControlService.props.skip_fs_updates = false;
 
   dialogProps.state=1;
+  AppProperties.updateGitDialogState(1);
 };
 
 const pull = async()=>{
@@ -292,7 +303,11 @@ const pull = async()=>{
 
   // get current branch
   const branches = await GitService.get_branches();
-  if(!branches.current) return dialogProps.state=2;
+  if(!branches.current) {
+    dialogProps.state=2;
+    AppProperties.updateGitDialogState(2);
+    return;
+  }
 
   // patch remote
   const remote = GitService._.remotes[iProps.remote].url;
@@ -327,8 +342,10 @@ const pull = async()=>{
     });
 
   dialogProps.state=1;
+  AppProperties.updateGitDialogState(1);
 
   GitService.update_lfs_files();
+  await checkRemoteDirtyStatus();
 };
 
 const init = async()=>{
@@ -459,12 +476,12 @@ const inspectArc = url =>{
               There is an interactive git rebase in progress.<br>By aborting the merge process you revert back to the last commit.
             </a_tooltip>
           </a_btn>
-          <a_btn label="Push" @click="push" icon='cloud_upload' :disabled='!iProps.remote || !AppProperties.user'>
+          <a_btn label="Push" @click="push" icon='cloud_upload' :disabled='!iProps.remote || !AppProperties.user || AppProperties.git_dialog_state.visible'>
             <a_tooltip>
               Upload the current status of your ARC to the DataHUB
             </a_tooltip>
           </a_btn>
-          <a_btn label="Pull" @click="pull" icon='cloud_download' :disabled='!iProps.remote'>
+          <a_btn label="Pull" @click="pull" icon='cloud_download' :disabled='!iProps.remote || AppProperties.git_dialog_state.visible'>
             <a_tooltip>
               Download the latest stage of your ARC from the DataHUB
             </a_tooltip>

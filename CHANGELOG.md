@@ -20,12 +20,18 @@ where applicable. Add your name in the style of `(by @github-username)` at the e
 
 ## [Unreleased]
 
+## 1.5.0 - 2025-12-15
+
 ### ✨ Added
 
-- Image metadata browser component added to the ImageView component (by @kMutagene)
+- Added a button to the Bug Report View to open the developer console #454 (by @Thyra and @Brilator).
+- Regularly check if updates are available on a remote and notify user, related to #450 (by @Thyra)
+- Git operations (push, pull, commit, etc.) can now be minimized to run in the background. A floating button appears in the bottom-right corner showing the operation status with visual indicators (hourglass for running, checkmark for success, error icon for failure). Users can continue working while long-running operations complete, and can restore the dialog at any time to view progress. All git operation and LFS file download buttons are disabled while another git operation is running to prevent conflicts (by @Thyra)
 
 ### 🐛 Fixed
 
+- Fixed an issue where text files would be re-created after deleting them while they were open for editing #474 (by @Thyra who also caused this problem).
+- Image metadata browser component added to the ImageView component (by @kMutagene)
 - Datamap imports from arctrl spelling (older versions had capitalized M) (by @kMutagene)
 - ARC open failures now show detailed errors and release the loading overlay correctly (by @caroott)
 

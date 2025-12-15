@@ -7,6 +7,7 @@ import a_btn from '../components/a_btn.vue';
 import a_select from '../components/a_select.vue';
 
 import ArcControlService from '../ArcControlService.ts';
+import AppProperties from '../AppProperties.ts';
 
 import { useQuasar } from 'quasar'
 import GitService from '../GitService.ts';
@@ -40,7 +41,9 @@ const switchBranch = async ()=>{
     cwd: ArcControlService.props.arc_root
   });
 
-  dialogProps.state = response[0] ? 1 : 2;
+  const finalState = response[0] ? 1 : 2;
+  dialogProps.state = finalState;
+  AppProperties.updateGitDialogState(finalState);
 };
 
 const addBranch = async ()=>{
@@ -70,7 +73,9 @@ const addBranch = async ()=>{
       cwd: ArcControlService.props.arc_root
     });
 
-    dialogProps.state = response[0] ? 1 : 2;
+    const finalState = response[0] ? 1 : 2;
+    dialogProps.state = finalState;
+    AppProperties.updateGitDialogState(finalState);
   });
 };
 
@@ -92,7 +97,9 @@ const deleteBranch = async name => {
     cwd: ArcControlService.props.arc_root
   });
 
-  dialogProps.state = response[0] ? 1 : 2;
+  const finalState = response[0] ? 1 : 2;
+  dialogProps.state = finalState;
+  AppProperties.updateGitDialogState(finalState);
 };
 
 
@@ -112,12 +119,13 @@ onMounted( init );
     v-model='iProps.branch'
     :options='iProps.branches'
     @update:model-value='switchBranch'
+    :disable='AppProperties.git_dialog_state.visible'
   >
     <template v-slot:no-option="scope">
-      <a_btn v-close-popup class='fit' label="Add Branch" @click="addBranch" icon='add_circle' flat no-caps size='12px'/>
+      <a_btn v-close-popup class='fit' label="Add Branch" @click="addBranch" icon='add_circle' flat no-caps size='12px' :disabled='AppProperties.git_dialog_state.visible'/>
     </template>
     <template v-slot:after-options="scope">
-      <a_btn v-close-popup class='fit' label="Add Branch" @click="addBranch" icon='add_circle' flat no-caps size='12px'/>
+      <a_btn v-close-popup class='fit' label="Add Branch" @click="addBranch" icon='add_circle' flat no-caps size='12px' :disabled='AppProperties.git_dialog_state.visible'/>
     </template>
     <template v-slot:option="{ itemProps, opt }">
       <q-item clickable dense>
@@ -125,7 +133,7 @@ onMounted( init );
           <q-item-label :class="opt===iProps.branch ? 'text-bold text-secondary' : ''" v-html="opt" />
         </q-item-section>
         <q-item-section side>
-          <q-btn class="gt-xs" size="12px" flat dense round icon="delete" color='grey-6' @click='deleteBranch(opt)'>
+          <q-btn class="gt-xs" size="12px" flat dense round icon="delete" color='grey-6' @click='deleteBranch(opt)' :disabled='AppProperties.git_dialog_state.visible'>
             <q-tooltip>
               Delete Branch
             </q-tooltip>

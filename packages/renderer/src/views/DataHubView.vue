@@ -47,7 +47,8 @@ const importArc = async url =>{
     title: 'Downloading ARC',
     ok_title: 'Open',
     cancel_title: 'Close',
-    state: 0
+    state: 0,
+    allowMinimize: false
   });
 
   $q.dialog({
@@ -66,6 +67,7 @@ const importArc = async url =>{
   });
   if(response[1].includes('fatal:')){
     dialogProps.state = 2;
+    AppProperties.updateGitDialogState(2);
     return;
   }
 
@@ -79,6 +81,7 @@ const importArc = async url =>{
     cwd: props.localUrl
   });
   dialogProps.state = 1;
+  AppProperties.updateGitDialogState(1);
 };
 
 const init = async () => {
