@@ -21,6 +21,8 @@ const iProps = reactive({
   syncInterval: null
 });
 
+let stopStateWatcher: (() => void) | null = null;
+
 const msg_container = ref(null);
 
 defineEmits([
@@ -50,7 +52,7 @@ onMounted( ()=>{
   AppProperties.git_dialog_state.state = props.state as number;
 
   // Watch props.state changes from parent and sync to global state
-  watch(() => props.state, (newState) => {
+  stopStateWatcher = watch(() => props.state, (newState) => {
     AppProperties.git_dialog_state.state = newState as number;
   });
 
@@ -72,6 +74,9 @@ onMounted( ()=>{
 onUnmounted( ()=>{
   if (iProps.syncInterval) {
     clearInterval(iProps.syncInterval);
+  }
+  if (stopStateWatcher) {
+    stopStateWatcher();
   }
   if(!AppProperties.git_dialog_state.minimized) {
     AppProperties.git_dialog_state.visible = false;

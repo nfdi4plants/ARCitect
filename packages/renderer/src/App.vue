@@ -270,14 +270,17 @@ const restoreGitDialog = ()=>{
   });
 
   // Watch for global state changes and sync to dialog
-  watch(() => AppProperties.git_dialog_state.state, (newState) => {
+  const stopWatcher = watch(() => AppProperties.git_dialog_state.state, (newState) => {
     dialogProps.state = newState;
   });
 
   $q.dialog({
     component: GitDialog,
     componentProps: dialogProps
-  });
+  })
+  .onOk(() => { stopWatcher(); })
+  .onCancel(() => { stopWatcher(); })
+  .onDismiss(() => { stopWatcher(); });
 };
 
 
