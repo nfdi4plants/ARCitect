@@ -41,6 +41,8 @@ const minimizeDialog = () => {
   AppProperties.git_dialog_state.title = props.title as string;
   AppProperties.git_dialog_state.ok_title = props.ok_title as string;
   AppProperties.git_dialog_state.cancel_title = props.cancel_title as string;
+  // Copy current rows to prevent data loss when minimizing
+  AppProperties.git_dialog_state.rows = [...iProps.rows];
   onDialogCancel();
 };
 
@@ -66,7 +68,7 @@ onMounted( ()=>{
           msg_container.value.scrollTop = msg_container.value.scrollHeight;
       }, 100);
     }
-  }, 100);
+  }, 500);
 
   iProps.syncInterval = syncInterval;
 });
