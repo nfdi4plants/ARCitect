@@ -262,7 +262,7 @@ onMounted(async () => {
           position: 'bottom-left',
           timeout: 0,
           actions: [
-            { label: 'X', color: 'white', handler: () => {} }
+            { label: 'X', color: 'white', handler: () => { dirtyRemoteNotification = null; } }
           ]
         });
       } else if (oldVal && !newVal && dirtyRemoteNotification) {
