@@ -10,7 +10,7 @@ import os from 'os';
 // @ts-ignore
 import mime from 'mime-types';
 import ExifReader from 'exifreader';
-import { DOMParser } from 'xmldom';
+import { DOMParser } from '@xmldom/xmldom';
 
 // Provide global DOMParser for ExifReader (needed for XMP)
 (global as any).DOMParser = DOMParser;
