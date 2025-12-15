@@ -248,11 +248,13 @@ onMounted(async () => {
     }
   );
 
+  let dirtyRemoteNotification: (() => void) | null = null;
+
   watch(
     () => AppProperties.has_dirty_remote,
     (newVal, oldVal) => {
       if (!oldVal && newVal) {
-        $q.notify({
+        dirtyRemoteNotification = $q.notify({
           type: 'warning',
           message: 'Your local ARC is out of sync with a remote. You can pull or push changes in the DataHUB Sync view.',
           color: 'red-7',
@@ -263,6 +265,9 @@ onMounted(async () => {
             { label: 'X', color: 'white', handler: () => {} }
           ]
         });
+      } else if (oldVal && !newVal && dirtyRemoteNotification) {
+        dirtyRemoteNotification();
+        dirtyRemoteNotification = null;
       }
     }
   );
