@@ -241,7 +241,7 @@ onMounted(async () => {
       if (!oldVal && newVal) {
         $q.notify({
           type: 'warning',
-          message: 'New changes are available on a remote. You can pull them from the DataHUB Sync view.',
+          message: 'Your local ARC is out of sync with a remote. You can pull or push changes in the DataHUB Sync view.',
           color: 'red-7',
           textColor: 'white',
           position: 'bottom-left',
