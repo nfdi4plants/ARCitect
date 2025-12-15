@@ -4,7 +4,7 @@ import ArcControlService from '../ArcControlService.ts';
 import AppProperties from '../AppProperties.ts';
 import SwateControlService from '../SwateControlService.ts';
 import * as SCS from '../SwateControlService.ts';
-import { ArcInvestigation, ArcAssay, ArcStudy, JsonController, type Person, ArcRun, ArcWorkflow, ARC, DataMap as ArcDatamap } from '@nfdi4plants/arctrl';
+import { ArcInvestigation, ArcAssay, ArcStudy, JsonController, type Person, ArcRun, ArcWorkflow, ARC, Datamap as ArcDatamap } from '@nfdi4plants/arctrl';
 import { ARCtrl_Person__Person_toJsonString_71136F3F as personToJson } from '@nfdi4plants/arctrl/JsonIO/Person'
 
 import a_btn from '../components/a_btn.vue';

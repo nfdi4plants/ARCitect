@@ -41,6 +41,7 @@
     "@quasar/extras": "^1.16.9",
     "chokidar": "^3.5.3",
     "electron-context-menu": "^3.6.1",
+    "exifreader": "^4.33.1",
     "express": "^4.18.2",
     "fs-extra": "^11.2.0",
     "image-type": "^5.2.0",
@@ -50,7 +51,8 @@
     "quasar": "^2.14.2",
     "query-string": "^8.1.0",
     "vue": "^v3.4.5",
-    "vue3-markdown": "^1.2.12"
+    "vue3-markdown": "^1.2.12",
+    "xmldom": "^0.6.0"
   },
   "devDependencies": {
     "@quasar/vite-plugin": "^1.10.0",

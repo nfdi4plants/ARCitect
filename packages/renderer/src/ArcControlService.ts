@@ -66,48 +66,50 @@ const ArcControlService = {
 
     ArcControlService.props.super_busy = true;
 
-    let files = await window.ipc.invoke('LocalFileSystemService.getAllFiles', arc_root);
-    
-    const arc = ARC.fromFilePaths(files);
-    const contracts = arc.GetReadContracts();
-    for(const contract of contracts){
-      switch (contract.DTOType) {
-        case 'ISA_Investigation':
-        case 'ISA_Study':
-        case 'ISA_Assay':
-        case 'ISA_Datamap':
-        case 'ISA_Run':
-        case 'ISA_Workflow':
-          const buffer = await window.ipc.invoke('LocalFileSystemService.readFile', [arc_root+'/'+contract.Path,{}]);
-          contract.DTO = await Xlsx.fromBytes(buffer);
-          break;
-        case 'PlainText':
-        // case 'YAML':
-        // case 'CWL': 
-        case 'JSON':
-          const data = await window.ipc.invoke('LocalFileSystemService.readFile', [arc_root+'/'+contract.Path, {encoding: 'UTF-8'}]);
-          contract.DTO = data;
-          break;
-        default:
-          console.warn('unable to resolve read contract', contract);
-          break;
+    try {
+      const files = await window.ipc.invoke('LocalFileSystemService.getAllFiles', arc_root);
+
+      const arc = ARC.fromFilePaths(files);
+      const contracts = arc.GetReadContracts();
+      for(const contract of contracts){
+        switch (contract.DTOType) {
+          case 'ISA_Investigation':
+          case 'ISA_Study':
+          case 'ISA_Assay':
+          case 'ISA_Datamap':
+          case 'ISA_Run':
+          case 'ISA_Workflow':
+            const buffer = await window.ipc.invoke('LocalFileSystemService.readFile', [arc_root+'/'+contract.Path,{}]);
+            contract.DTO = await Xlsx.fromBytes(buffer);
+            break;
+          case 'PlainText':
+          // case 'YAML':
+          // case 'CWL': 
+          case 'JSON':
+            const data = await window.ipc.invoke('LocalFileSystemService.readFile', [arc_root+'/'+contract.Path, {encoding: 'UTF-8'}]);
+            contract.DTO = data;
+            break;
+          default:
+            console.warn('unable to resolve read contract', contract);
+            break;
+        }
       }
+      arc.SetISAFromContracts(contracts);
+      ArcControlService.props.arc = arc;
+      ArcControlService.props.arc_root = arc_root;
+      await window.ipc.invoke('LocalFileSystemService.setArcRoot', arc_root);
+
+      const git_initialized = await window.ipc.invoke('GitService.run',{
+        args: [`remote`],
+        cwd: arc_root
+      });
+      ArcControlService.props.git_initialized = git_initialized[0];
+      console.log(arc);
+
+      return true;
+    } finally {
+      ArcControlService.props.super_busy = false;
     }
-    arc.SetISAFromContracts(contracts);
-    ArcControlService.props.arc = arc;
-    ArcControlService.props.arc_root = arc_root;
-    await window.ipc.invoke('LocalFileSystemService.setArcRoot', arc_root);
-
-    const git_initialized = await window.ipc.invoke('GitService.run',{
-      args: [`remote`],
-      cwd: arc_root
-    });
-    ArcControlService.props.git_initialized = git_initialized[0];
-    console.log(arc);
-
-    ArcControlService.props.super_busy = false;
-
-    return true;
   },
 
   processContract: async (contract: Contract, arc_?: ARC, arc_root_?: string) => {

@@ -9,6 +9,11 @@ import util from 'util';
 import os from 'os';
 // @ts-ignore
 import mime from 'mime-types';
+import ExifReader from 'exifreader';
+import { DOMParser } from 'xmldom';
+
+// Provide global DOMParser for ExifReader (needed for XMP)
+(global as any).DOMParser = DOMParser;
 
 const changeListeners = new Map<string,chokidar.FSWatcher>;
 
@@ -168,16 +173,88 @@ export const LocalFileSystemService = {
     ]);
   },
 
-  readImage: async (e,path)=>{
+  readImage: async (e, path) => {
     try {
       path = path_to_system(path);
+
       const mimeType = mime.lookup(path);
-      if (!mimeType || !mimeType.startsWith('image/'))
-        return null;
+      if (!mimeType || !mimeType.startsWith('image/')) return null;
 
       const imageData = FS.readFileSync(PATH.resolve(path));
       const base64 = imageData.toString('base64');
-      return `data:${mimeType};base64,${base64}`;
+      const dataUrl = `data:${mimeType};base64,${base64}`;
+
+      // Parse metadata (EXIF + XMP)
+      let metadata = {};
+      
+      try {
+        metadata = ExifReader.load(imageData, { expanded: true });
+      } catch (err) {
+        console.warn("Metadata parsing of image failed:", err);
+        metadata = {};
+      }
+
+
+      const sortDirs = ["exif", "xmp"]   // array defining sort priority
+      const filterDirs = ["Thumbnail"]   // dirs to remove entirely
+      const filterTags = {xmp: ["_raw"]} // { dirName: [tags...] }
+
+
+      let processed = {};
+
+      // ---- 1. FILTER DIRECTORIES ----
+      for (const [dirName, tags] of Object.entries(metadata)) {
+        const lower = dirName.toLowerCase();
+
+        if (filterDirs.map(d => d.toLowerCase()).includes(lower))
+          continue; // skip entire directory
+
+        processed[dirName] = { ...tags };
+      }
+
+      // ---- 2. FILTER TAGS INSIDE DIRECTORIES ----
+      for (const [dirName, tags] of Object.entries(processed)) {
+        const lower = dirName.toLowerCase();
+
+        if (filterTags[lower]) {
+          const filteredSet = new Set(filterTags[lower].map(t => t.toLowerCase()));
+
+          for (const tagName of Object.keys(tags)) {
+            if (filteredSet.has(tagName.toLowerCase())) {
+              delete processed[dirName][tagName];
+            }
+          }
+        }
+      }
+
+      // ---- 3. SORT DIRECTORIES ----
+      // convert to entries array to allow ordering
+      let entries = Object.entries(processed).map(([name, tags]) => ({
+        name,
+        tags
+      }));
+
+      entries.sort((a, b) => {
+        const aIndex = sortDirs.indexOf(a.name.toLowerCase());
+        const bIndex = sortDirs.indexOf(b.name.toLowerCase());
+
+        const aRank = aIndex === -1 ? 999 : aIndex;
+        const bRank = bIndex === -1 ? 999 : bIndex;
+
+        if (aRank !== bRank) return aRank - bRank;
+
+        return a.name.localeCompare(b.name);
+      });
+
+      // Convert back to object if needed
+      const sortedMetadata = {};
+      for (const e of entries) sortedMetadata[e.name] = e.tags;
+
+      return {
+        dataUrl,
+        metadata: sortedMetadata
+      };
+
     } catch (err) {
       console.error('Error:', err.message);
       return null;
