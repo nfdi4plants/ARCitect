@@ -39,7 +39,6 @@ const minimizeDialog = () => {
   AppProperties.git_dialog_state.title = props.title as string;
   AppProperties.git_dialog_state.ok_title = props.ok_title as string;
   AppProperties.git_dialog_state.cancel_title = props.cancel_title as string;
-  AppProperties.git_dialog_state.state = props.state as number;
   onDialogCancel();
 };
 
