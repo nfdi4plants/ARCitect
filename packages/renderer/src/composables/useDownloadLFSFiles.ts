@@ -113,4 +113,5 @@ export async function useDownloadLFSFiles(
   });
 
   dialogProps.state = 1;
+  AppProperties.updateGitDialogState(1);
 }

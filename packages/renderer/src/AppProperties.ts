@@ -37,7 +37,20 @@ const AppProperties: {
   has_dirty_remote: boolean,
   state: number,
   config: Config,
-  read_config: () => Promise<void>
+  read_config: () => Promise<void>,
+  git_dialog_state: {
+    visible: boolean,
+    minimized: boolean,
+    title: string,
+    ok_title: string,
+    cancel_title: string,
+    state: number,
+    rows: string[],
+    globalListener: any
+  },
+  processGitStreamRows: (data: string, rows: string[]) => void,
+  setupGlobalGitListener: () => void,
+  updateGitDialogState: (state: number) => void
 } = reactive({
   STATES: {
     HOME: 0,
@@ -52,6 +65,7 @@ const AppProperties: {
     EDIT_MARKDOWN: 600,
     EDIT_IMAGE: 601,
     EDIT_LFS: 602,
+    EDIT_FALLBACK: 603,
 
     VALIDATION: 700,
     BUG_REPORT: 750,
@@ -76,6 +90,52 @@ const AppProperties: {
 
   force_commit_update: 0,
 
+
+
+  processGitStreamRows: (data: string, rows: string[]) => {
+    const newRows = data.split('\n').filter((row: string) => row !== '');
+    
+    const progressPrefixes = [
+      'POST ',
+      'Filtering content:',
+      'Receiving objects:',
+      'Resolving deltas:',
+      'Enumerating objects:',
+      'Counting objects:',
+      'Compressing objects:',
+      'Writing objects:',
+      'Uploading LFS objects:',
+      'Downloading LFS objects:',
+    ];
+    
+    for (let row of newRows) {
+      if (row === '') continue;
+      
+      const last_row = rows[rows.length - 1];
+      const shouldReplace = progressPrefixes.some(p => 
+        last_row.includes(p) && row.includes(p)
+      );
+      
+      if (shouldReplace)
+        rows[rows.length - 1] = row;
+      else
+        rows.push(row);
+    }
+  },
+
+  setupGlobalGitListener: () => {
+    if (AppProperties.git_dialog_state.globalListener) return;
+    
+    AppProperties.git_dialog_state.globalListener = window.ipc.on('GitService.MSG', (data: string) => {
+      if (!AppProperties.git_dialog_state.visible) return;
+      AppProperties.processGitStreamRows(data, AppProperties.git_dialog_state.rows);
+    });
+  },
+
+  updateGitDialogState: (state: number) => {
+    AppProperties.git_dialog_state.state = state;
+  },
+
   config: {
     gitDebug: false,
     toolbarMinimized: false,
@@ -87,6 +147,17 @@ const AppProperties: {
   read_config: async ()=>{
     const config = await window.ipc.invoke('LocalFileSystemService.readConfig') as Partial<Config>;
     Object.assign(AppProperties.config, config);
+  },
+
+  git_dialog_state: {
+    visible: false,
+    minimized: false,
+    title: '',
+    ok_title: '',
+    cancel_title: '',
+    state: 0,
+    rows: [''],
+    globalListener: null
   }
 });
 
@@ -200,6 +271,7 @@ const init = async ()=>{
   });
   await get_datahubs();
   AppProperties.load_swate = true;
+  AppProperties.setupGlobalGitListener();
 }
 init();
 
