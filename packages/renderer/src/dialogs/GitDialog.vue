@@ -17,7 +17,6 @@ const props = defineProps<Props>();
 const iProps = reactive({
   height: 0,
   rows: [''],
-  git_listener: null,
   text: '',
   syncInterval: null
 });
@@ -28,14 +27,7 @@ defineEmits([
   ...useDialogPluginComponent.emits
 ]);
 
-const processGitStream = async data=>{
-  AppProperties.processGitStreamRows(data, iProps.rows);
-  iProps.text = iProps.rows.join('<br>');
-  setTimeout(()=>{
-    if(msg_container.value)
-      msg_container.value.scrollTop = msg_container.value.scrollHeight;
-  },100);
-};
+
 
 const copyGitOutput = () => {
   window.navigator.clipboard.writeText(iProps.rows.join('\n'));
@@ -57,13 +49,12 @@ onMounted( ()=>{
   AppProperties.git_dialog_state.visible = true;
   AppProperties.git_dialog_state.minimized = false;
   AppProperties.git_dialog_state.state = props.state as number;
-  iProps.git_listener = window.ipc.on('GitService.MSG', processGitStream);
-  
+
   // Watch props.state changes from parent and sync to global state
   watch(() => props.state, (newState) => {
     AppProperties.git_dialog_state.state = newState as number;
   });
-  
+
   // Sync with global listener updates (messages and state)
   const syncInterval = setInterval(() => {
     if (AppProperties.git_dialog_state.rows.length > iProps.rows.length) {
@@ -75,7 +66,7 @@ onMounted( ()=>{
       }, 100);
     }
   }, 100);
-  
+
   iProps.syncInterval = syncInterval;
 });
 
@@ -83,7 +74,6 @@ onUnmounted( ()=>{
   if (iProps.syncInterval) {
     clearInterval(iProps.syncInterval);
   }
-  iProps.git_listener();
   if(!AppProperties.git_dialog_state.minimized) {
     AppProperties.git_dialog_state.visible = false;
     AppProperties.git_dialog_state.rows = [''];
