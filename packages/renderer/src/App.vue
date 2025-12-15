@@ -230,26 +230,44 @@ onMounted(async () => {
 
   watch(
     () => [ArcControlService.props.arc_root, AppProperties.user],
-    () => {
+    ([arcRoot, user], [oldArcRoot]) => {
+      if (arcRoot && arcRoot !== oldArcRoot && !user) {
+        $q.notify({
+          type: 'info',
+          message: 'You are not logged in. Log in to sync with remote repositories.',
+          color: 'yellow-8',
+          textColor: 'black',
+          position: 'bottom-left',
+          timeout: 5000,
+          actions: [
+            { label: 'X', color: 'black', handler: () => {} }
+          ]
+        });
+      }
       checkRemoteDirtyStatus();
     }
   );
+
+  let dirtyRemoteNotification: (() => void) | null = null;
 
   watch(
     () => AppProperties.has_dirty_remote,
     (newVal, oldVal) => {
       if (!oldVal && newVal) {
-        $q.notify({
+        dirtyRemoteNotification = $q.notify({
           type: 'warning',
-          message: 'New changes are available on a remote. You can pull them from the DataHUB Sync view.',
+          message: 'Your local ARC is out of sync with a remote. You can pull or push changes in the DataHUB Sync view.',
           color: 'red-7',
           textColor: 'white',
           position: 'bottom-left',
           timeout: 0,
           actions: [
-            { label: 'X', color: 'white', handler: () => {} }
+            { label: 'X', color: 'white', handler: () => { dirtyRemoteNotification = null; } }
           ]
         });
+      } else if (oldVal && !newVal && dirtyRemoteNotification) {
+        dirtyRemoteNotification();
+        dirtyRemoteNotification = null;
       }
     }
   );
