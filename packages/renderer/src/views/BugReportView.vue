@@ -125,11 +125,11 @@ function openDevTools() {
             </q-item-label>
             <q-item-label caption>
               When reporting bugs with ARCitect, it helps the data stewards and developers a lot to see possible error messages.
-              Take a screenshot of the console or copy the error messages encountered and include them in your bug report.
+              Navigate to the `Console` tab to take a screenshot or copy the error messages encountered and please include them in your bug report.
             </q-item-label>
             <div style="margin-top: 16px;">
               <a_btn
-                label="Open Console"
+                label="Open Developer Tools"
                 icon="developer_mode"
                 @click="openDevTools"
                 color="teal"
