@@ -14,5 +14,9 @@
   "datahub.rz.rptu.de": {
     "id": "ba159fb4a6e49a399ca5c2b56b53f6c81e6d79304747fbd5e7187b77154784c3",
     "secret": "gloas-3e79746d2531abf5cc33efd7736cc4202b613120dc6c1db9cc5d7f4051e0b1da"
+  },
+  "datahub.hhu.de": {
+    "id": "63e8aea08892eac69df73eac8cbdc04a60d44f4c737ec8c0406d3fb15c900e08",
+    "secret": "gloas-755d9143778e23360f6e1fe2790c35b6648431ef08ab2cd252aa1172a31566e9"
   }
 }
