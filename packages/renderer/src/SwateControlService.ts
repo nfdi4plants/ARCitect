@@ -2,7 +2,7 @@ import { reactive, nextTick } from 'vue'
 
 import AppProperties from './AppProperties.ts';
 import ArcControlService from './ArcControlService.ts';
-import {ArcInvestigation, ArcAssay, ArcStudy, ArcRun, ArcWorkflow, DataMap, ARC} from "@nfdi4plants/arctrl";
+import {ArcInvestigation, ArcAssay, ArcStudy, ArcRun, ArcWorkflow, Datamap, ARC} from "@nfdi4plants/arctrl";
 
 const parents = ["Assay", "Study", "Run", "Workflow"] as const;
 
@@ -23,7 +23,7 @@ export interface DatamapParentInfo {
 }
 interface Props {
   cacheNumber: number,
-  object: null | ArcInvestigation | ArcAssay | ArcStudy | ArcRun | ArcWorkflow | DataMap,
+  object: null | ArcInvestigation | ArcAssay | ArcStudy | ArcRun | ArcWorkflow | Datamap,
   datamapParent?: Parent,
   identifier?: string,
   type: Type,
@@ -78,7 +78,7 @@ const SwateControlService = {
         if (!datamapParent) throw new Error("Datamap parent type is required for loading datamap Swate objects.");
         const parentObject: ArcAssay | ArcStudy | ArcRun | ArcWorkflow | null = getDatamapParentByInfo(ArcControlService.props.arc, identifier, datamapParent)
         if (!parentObject?.Identifier) throw new Error(`Parent object of type ${datamapParent} with ID ${identifier} not found in ARC.`);
-        const datamap = parentObject?.DataMap
+        const datamap = parentObject?.Datamap
         if (!datamap) throw new Error(`Datamap for parent object of type ${datamapParent} with ID ${identifier} not found.`);
         SwateControlService.props.object = datamap;
         SwateControlService.props.identifier = identifier;
