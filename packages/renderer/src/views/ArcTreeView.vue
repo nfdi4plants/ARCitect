@@ -167,7 +167,7 @@ const addStudy = async (event,node,study) => {
 };
 
 const addDatamap = async (node: ArcTreeViewNode, dm: ArcDatamap, parent: ArcStudy | ArcAssay | ArcRun | ArcWorkflow) => {
-  parent.DataMap = dm;
+  parent.Datamap = dm;
   await ArcControlService.saveARC({});
 }
 
@@ -795,7 +795,7 @@ const onCellContextMenu = async (e,node: ArcTreeViewNode) => {
             let parent = getDatamapParentByPath(ArcControlService.props.arc, node.id_rel || '');
             if (!parent)
               throw new Error("Unable to determine datamap parent for path: " + node.id_rel);
-            parent.DataMap = undefined;
+            parent.Datamap = undefined;
             window.ipc.invoke('LocalFileSystemService.remove', node.id)
           })
       });

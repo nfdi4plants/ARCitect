@@ -144,7 +144,30 @@ const IncomingMsgHandlers: Record<string, (data: any) => Promise<any>> = {
     }
     switch (type) {
       case InteropTypes.ArcFiles.Datamap:
-          const nextDatamap = JsonController.Datamap.fromJsonString(json);
+          // Fix: Swate sends format as boolean but ARCtrl expects string
+          let parsedJson = JSON.parse(json);
+          const fixFormatFields = (obj: any): void => {
+            if (!obj || typeof obj !== 'object') return;
+            
+            if ('format' in obj && typeof obj.format === 'boolean') {
+              obj.format = String(obj.format);
+            }
+            
+            if (Array.isArray(obj)) {
+              obj.forEach(item => fixFormatFields(item));
+            } else {
+              Object.values(obj).forEach(value => {
+                if (value && typeof value === 'object') {
+                  fixFormatFields(value);
+                }
+              });
+            }
+          };
+          
+          fixFormatFields(parsedJson);
+          const fixedJson = JSON.stringify(parsedJson);
+          
+          const nextDatamap = JsonController.Datamap.fromJsonString(fixedJson);
           if(!datamapParentInfo) {
             throw new Error("No parent info provided for datamap");
           }
@@ -152,11 +175,11 @@ const IncomingMsgHandlers: Record<string, (data: any) => Promise<any>> = {
           if(!parentObject) {
             throw new Error("Parent object for datamap not found");
           }
-          const oldDatamap = parentObject.DataMap;
+          const oldDatamap = parentObject.Datamap;
           if(oldDatamap) {
             nextDatamap.StaticHash = oldDatamap.StaticHash;
           }
-          parentObject.DataMap = nextDatamap;
+          parentObject.Datamap = nextDatamap;
         break;
       case InteropTypes.ArcFiles.Assay:
         const nextAssay = JsonController.Assay.fromJsonString(json);
