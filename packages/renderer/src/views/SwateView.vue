@@ -144,30 +144,7 @@ const IncomingMsgHandlers: Record<string, (data: any) => Promise<any>> = {
     }
     switch (type) {
       case InteropTypes.ArcFiles.Datamap:
-          // Fix: Swate sends format as boolean but ARCtrl expects string
-          let parsedJson = JSON.parse(json);
-          const fixFormatFields = (obj: any): void => {
-            if (!obj || typeof obj !== 'object') return;
-            
-            if ('format' in obj && typeof obj.format === 'boolean') {
-              obj.format = String(obj.format);
-            }
-            
-            if (Array.isArray(obj)) {
-              obj.forEach(item => fixFormatFields(item));
-            } else {
-              Object.values(obj).forEach(value => {
-                if (value && typeof value === 'object') {
-                  fixFormatFields(value);
-                }
-              });
-            }
-          };
-          
-          fixFormatFields(parsedJson);
-          const fixedJson = JSON.stringify(parsedJson);
-          
-          const nextDatamap = JsonController.Datamap.fromJsonString(fixedJson);
+          const nextDatamap = JsonController.Datamap.fromJsonString(json);
           if(!datamapParentInfo) {
             throw new Error("No parent info provided for datamap");
           }
