@@ -155,7 +155,7 @@ export const LocalFileSystemService = {
       name: path_to_arcitect(path),
       size: stats.size,
       content: content,
-      mimetype: mimeType
+      mimetype: mimeType || ""
     };
 
     return fileInfo;
