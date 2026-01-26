@@ -20,6 +20,7 @@ import BugReportView from './views/BugReportView.vue';
 import SettingsView from './views/SettingsView.vue';
 import FallbackFileView from './views/FallbackFileView.vue';
 import LFSFileView from './views/LFSFileView.vue';
+import LocalARCs from './views/LocalARCs.vue';
 
 import ConfirmationDialog from './dialogs/ConfirmationDialog.vue';
 import GitDialog from './dialogs/GitDialog.vue';
@@ -374,7 +375,10 @@ const restoreGitDialog = ()=>{
             </a_tooltip>
           </ToolbarButton>
           <ToolbarButton text='Download ARC' icon='cloud_download' @clicked='AppProperties.state=AppProperties.STATES.OPEN_DATAHUB'>
-            <a_tooltip> Download an ARC from the DataHUB</a_tooltip>
+            <a_tooltip>Download an ARC from the DataHUB</a_tooltip>
+          </ToolbarButton>
+          <ToolbarButton text='Local ARCs' icon='sym_o_hard_drive' @clicked='AppProperties.state=AppProperties.STATES.LOCAL_ARCS'>
+            <a_tooltip>Manage ARCs on the local file system</a_tooltip>
           </ToolbarButton>
 
           <q-separator />
@@ -505,6 +509,7 @@ const restoreGitDialog = ()=>{
               <StatusView v-else-if='AppProperties.state===AppProperties.STATES.STATUS'></StatusView>
               <BugReportView v-else-if='AppProperties.state===AppProperties.STATES.BUG_REPORT'></BugReportView>
               <SettingsView v-else-if='AppProperties.state===AppProperties.STATES.SETTINGS'></SettingsView>
+              <LocalARCs v-else-if='AppProperties.state===AppProperties.STATES.LOCAL_ARCS'></LocalARCs>
               <HomeView v-else-if='AppProperties.state===AppProperties.STATES.HOME'></HomeView>
               <FallbackFileView
                 v-else-if='AppProperties.state===AppProperties.STATES.EDIT_FALLBACK'
@@ -632,7 +637,7 @@ body {
   padding:0 0 0 0.2em;
 }
 
-.material-symbols-rounded {
+.material-symbols-rounded, .material-symbols-outlined {
   font-variation-settings:
   'FILL' 1,
   'wght' 400,

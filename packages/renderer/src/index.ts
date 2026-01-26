@@ -5,7 +5,7 @@ const app = createApp(App);
 
 import { Quasar, Dialog, Loading, Notify } from 'quasar';
 import '@quasar/extras/material-icons/material-icons.css'
-// import '@quasar/extras/material-symbols-outlined/material-symbols-outlined.css'
+import '@quasar/extras/material-symbols-outlined/material-symbols-outlined.css'
 import '@quasar/extras/material-symbols-rounded/material-symbols-rounded.css'
 import 'quasar/src/css/index.sass'
 app.use(Quasar, {

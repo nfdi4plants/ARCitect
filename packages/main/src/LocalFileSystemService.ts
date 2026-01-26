@@ -1,9 +1,8 @@
-
 import { app, BrowserWindow, ipcMain, dialog, shell } from 'electron';
 import PATH from 'path';
 import FS from 'fs';
 import FSP from 'fs/promises';
-import FSE from 'fs-extra'
+import FSE from 'fs-extra';
 import chokidar from 'chokidar';
 import util from 'util';
 import os from 'os';
@@ -15,38 +14,36 @@ import { DOMParser } from '@xmldom/xmldom';
 // Provide global DOMParser for ExifReader (needed for XMP)
 (global as any).DOMParser = DOMParser;
 
-const changeListeners = new Map<string,chokidar.FSWatcher>;
+const changeListeners = new Map<string, chokidar.FSWatcher>();
 
 const path_to_arcitect = (path: string) => path.split(PATH.sep).join('/');
 const path_to_system = (path: string) => path.split('/').join(PATH.sep);
 
 export const LocalFileSystemService = {
-
   LFS_POINTER_HEADER: 'version https://git-lfs.github.com/spec/',
 
-  getAllXLSX_: (files,directory) => {
+  getAllXLSX_: (files, directory) => {
     const filesInDirectory = FS.readdirSync(directory);
-    for(const file of filesInDirectory) {
+    for (const file of filesInDirectory) {
       const absolute = PATH.join(directory, file);
       if (FS.statSync(absolute).isDirectory()) {
-          LocalFileSystemService.getAllXLSX_(files,absolute);
-      } else if(file.endsWith('.xlsx')) {
-          files.push(absolute);
+        LocalFileSystemService.getAllXLSX_(files, absolute);
+      } else if (file.endsWith('.xlsx')) {
+        files.push(absolute);
       }
     }
   },
 
-  getAllXLSX: async (e,root) => {
+  getAllXLSX: async (e, root) => {
     root = path_to_system(root);
     let xlsx_files = [];
-    LocalFileSystemService.getAllXLSX_(xlsx_files,root);
-    return xlsx_files.map( p=>path_to_arcitect(p.replace(root+PATH.sep,'')) );
+    LocalFileSystemService.getAllXLSX_(xlsx_files, root);
+    return xlsx_files.map(p => path_to_arcitect(p.replace(root + PATH.sep, '')));
   },
 
-  getAllFiles: async (e,root) => {
+  getAllFiles: async (e, root) => {
     return FS.readdirSync(root, { recursive: true });
   },
-
 
   // isLFSPointer: async path => {
   //   const buffer = Buffer.alloc(LocalFileSystemService.LFS_POINTER_HEADER.length + 4);
@@ -63,15 +60,20 @@ export const LocalFileSystemService = {
   //   }
   // },
 
-  readDir: async (e,path) => {
-    path = path_to_system(path)
+  readDir: async (e, path) => {
+    path = path_to_system(path);
     const children = [];
 
     const labels = FS.readdirSync(path);
-    for(const l of labels){
-      const path_ = PATH.join(path,l);
+    for (const l of labels) {
+      const path_ = PATH.join(path, l);
       const stat = FS.lstatSync(path_);
-      if((l.startsWith('isa.') && !l.endsWith("datamap.xlsx")) || (l.startsWith('.git') && l!=='.gitignore' && l!=='.gitattributes') || l.startsWith('.arc') || l.startsWith('.DS_Store'))
+      if (
+        (l.startsWith('isa.') && !l.endsWith('datamap.xlsx')) ||
+        (l.startsWith('.git') && l !== '.gitignore' && l !== '.gitattributes') ||
+        l.startsWith('.arc') ||
+        l.startsWith('.DS_Store')
+      )
         continue;
 
       stat.id = path_to_arcitect(path_);
@@ -86,8 +88,8 @@ export const LocalFileSystemService = {
     return children;
   },
 
-  selectDir: async (e,[title,message])=>{
-    const window = BrowserWindow.getAllWindows().find(w => !w.isDestroyed())
+  selectDir: async (e, [title, message]) => {
+    const window = BrowserWindow.getAllWindows().find(w => !w.isDestroyed());
     const result = await dialog.showOpenDialog(window, {
       title: title,
       message: message,
@@ -99,31 +101,33 @@ export const LocalFileSystemService = {
   },
 
   selectAnyFiles: async (options: Electron.OpenDialogOptions = {}) => {
-    options.properties = options.properties || ['openFile','multiSelections'];
+    options.properties = options.properties || ['openFile', 'multiSelections'];
     options.defaultPath = options.defaultPath || LocalFileSystemService.arc_root;
     const window = BrowserWindow.getAllWindows().find(w => !w.isDestroyed());
     const result = await dialog.showOpenDialog(window, options);
     return result ? result.filePaths.map(path_to_arcitect) : null;
   },
 
-  selectAnyDirectories: async (options: Electron.OpenDialogOptions = {})=> {
-    options.properties = options.properties || ['openDirectory','multiSelections'];
+  selectAnyDirectories: async (options: Electron.OpenDialogOptions = {}) => {
+    options.properties = options.properties || ['openDirectory', 'multiSelections'];
     options.defaultPath = options.defaultPath || LocalFileSystemService.arc_root;
     const window = BrowserWindow.getAllWindows().find(w => !w.isDestroyed());
     const result = await dialog.showOpenDialog(window, options);
     return result ? result.filePaths.map(path_to_arcitect) : null;
   },
 
-  saveFile: async ()=>{
+  saveFile: async () => {
     const window = BrowserWindow.getAllWindows().find(w => !w.isDestroyed());
-    const result = await dialog.showSaveDialog(window,{defaultPath:LocalFileSystemService.arc_root});
+    const result = await dialog.showSaveDialog(window, {
+      defaultPath: LocalFileSystemService.arc_root,
+    });
     return path_to_arcitect(result.filePath);
   },
 
-  readFile: (e,parameters)=>{
-    let path=null;
-    let options={encoding:'UTF8'};
-    if(typeof parameters === 'string'){
+  readFile: (e, parameters) => {
+    let path = null;
+    let options = { encoding: 'UTF8' };
+    if (typeof parameters === 'string') {
       path = parameters;
     } else {
       path = parameters[0];
@@ -131,7 +135,7 @@ export const LocalFileSystemService = {
     }
     path = path_to_system(path);
     try {
-      return FS.readFileSync(path,options);
+      return FS.readFileSync(path, options);
     } catch (err) {
       return null;
     }
@@ -155,22 +159,19 @@ export const LocalFileSystemService = {
       name: path_to_arcitect(path),
       size: stats.size,
       content: content,
-      mimetype: mimeType || ""
+      mimetype: mimeType || '',
     };
 
     return fileInfo;
   },
 
-  readConfig: ()=>{
-    const config = LocalFileSystemService.readFile(null,app.getPath('userData')+'/ARCitect.json');
+  readConfig: () => {
+    const config = LocalFileSystemService.readFile(null, app.getPath('userData') + '/ARCitect.json');
     return JSON.parse(config as string) || {};
   },
 
-  writeConfig: (e,config)=>{
-    LocalFileSystemService.writeFile(null,[
-      app.getPath('userData')+'/ARCitect.json',
-      config
-    ]);
+  writeConfig: (e, config) => {
+    LocalFileSystemService.writeFile(null, [app.getPath('userData') + '/ARCitect.json', config]);
   },
 
   readImage: async (e, path) => {
@@ -186,19 +187,17 @@ export const LocalFileSystemService = {
 
       // Parse metadata (EXIF + XMP)
       let metadata = {};
-      
+
       try {
         metadata = ExifReader.load(imageData, { expanded: true });
       } catch (err) {
-        console.warn("Metadata parsing of image failed:", err);
+        console.warn('Metadata parsing of image failed:', err);
         metadata = {};
       }
 
-
-      const sortDirs = ["exif", "xmp"]   // array defining sort priority
-      const filterDirs = ["Thumbnail"]   // dirs to remove entirely
-      const filterTags = {xmp: ["_raw"]} // { dirName: [tags...] }
-
+      const sortDirs = ['exif', 'xmp']; // array defining sort priority
+      const filterDirs = ['Thumbnail']; // dirs to remove entirely
+      const filterTags = { xmp: ['_raw'] }; // { dirName: [tags...] }
 
       let processed = {};
 
@@ -206,8 +205,7 @@ export const LocalFileSystemService = {
       for (const [dirName, tags] of Object.entries(metadata)) {
         const lower = dirName.toLowerCase();
 
-        if (filterDirs.map(d => d.toLowerCase()).includes(lower))
-          continue; // skip entire directory
+        if (filterDirs.map(d => d.toLowerCase()).includes(lower)) continue; // skip entire directory
 
         processed[dirName] = { ...tags };
       }
@@ -231,7 +229,7 @@ export const LocalFileSystemService = {
       // convert to entries array to allow ordering
       let entries = Object.entries(processed).map(([name, tags]) => ({
         name,
-        tags
+        tags,
       }));
 
       entries.sort((a, b) => {
@@ -252,20 +250,21 @@ export const LocalFileSystemService = {
 
       return {
         dataUrl,
-        metadata: sortedMetadata
+        metadata: sortedMetadata,
       };
-
     } catch (err) {
       console.error('Error:', err.message);
       return null;
     }
   },
 
-  copy: async (e,[src,dst])=>{
-    src = path_to_system(src)
-    dst = path_to_system(dst)
+  copy: async (e, [src, dst]) => {
+    src = path_to_system(src);
+    dst = path_to_system(dst);
     try {
-      FSE.copySync(src, PATH.join(dst,PATH.basename(src)), { overwrite: true });
+      FSE.copySync(src, PATH.join(dst, PATH.basename(src)), {
+        overwrite: true,
+      });
       return 1;
     } catch (err) {
       console.error(err);
@@ -273,130 +272,141 @@ export const LocalFileSystemService = {
     }
   },
 
-  registerChangeListener: async (e,path)=>{
+  registerChangeListener: async (e, path) => {
     path = path_to_system(path);
 
-    if(changeListeners.has(path))
-      await LocalFileSystemService.unregisterChangeListener(null,path);
-    const listener = chokidar.watch(path,{ignoreInitial:true, usePolling: os.platform()==='win32'});
+    if (changeListeners.has(path)) await LocalFileSystemService.unregisterChangeListener(null, path);
+    const listener = chokidar.watch(path, {
+      ignoreInitial: true,
+      usePolling: os.platform() === 'win32',
+    });
     changeListeners.set(path, listener);
 
-    const updatePath = async (path,type) => { 
+    const updatePath = async (path, type) => {
       const window = BrowserWindow.getAllWindows().find(w => !w.isDestroyed());
-      window?.webContents.send('LocalFileSystemService.updatePath', [path_to_arcitect(path),type]);
+      window?.webContents.send('LocalFileSystemService.updatePath', [path_to_arcitect(path), type]);
     };
 
     listener
-      .on('add', path=>updatePath(path,'file_add'))
-      .on('unlink', path=>updatePath(path,'file_rm'))
-      .on('change', path=>updatePath(path,'file_ch'))
-      .on('addDir', path=>updatePath(path,'dir_add'))
-      .on('unlinkDir', path=>updatePath(path,'dir_rm'))
-    ;
+      .on('add', path => updatePath(path, 'file_add'))
+      .on('unlink', path => updatePath(path, 'file_rm'))
+      .on('change', path => updatePath(path, 'file_ch'))
+      .on('addDir', path => updatePath(path, 'dir_add'))
+      .on('unlinkDir', path => updatePath(path, 'dir_rm'));
 
     return;
   },
 
-  unregisterChangeListener: async (e,path)=>{
+  unregisterChangeListener: async (e, path) => {
     // console.log('ul',path)
-    path = path_to_system(path)
+    path = path_to_system(path);
     const watcher = changeListeners.get(path);
-    if(!watcher)
-      return;
+    if (!watcher) return;
 
     await watcher.unwatch(path);
     changeListeners.delete(path);
     return;
   },
 
-  createEmptyFile: async (e,path)=>{
-    path = path_to_system(path)
-    const fpath = (path.slice(-3)==='.md' || path.slice(-4)==='.txt') ? path : path +'.md';
-    FS.writeFileSync(fpath,"");
+  createEmptyFile: async (e, path) => {
+    path = path_to_system(path);
+    const fpath = path.slice(-3) === '.md' || path.slice(-4) === '.txt' ? path : path + '.md';
+    FS.writeFileSync(fpath, '');
     return fpath;
   },
 
-  enforcePath: async (e,path)=>{
+  enforcePath: async (e, path) => {
     try {
-      FS.mkdirSync(path_to_system(path),{recursive:true});
-    } catch (err) {
-    }
+      FS.mkdirSync(path_to_system(path), { recursive: true });
+    } catch (err) {}
   },
 
-  writeFile: async (e,[path,data,options]): Promise<Result<string>>=>{
-    options = options || {encoding:'UTF-8'};
+  writeFile: async (e, [path, data, options]): Promise<Result<string>> => {
+    options = options || { encoding: 'UTF-8' };
     path = path_to_system(path);
-    FS.mkdirSync(PATH.dirname(path),{recursive:true});
-    if(data==='' && FS.existsSync(path)) return { ok: false, error: 'File already exists and empty data was provided.' };
+    FS.mkdirSync(PATH.dirname(path), { recursive: true });
+    if (data === '' && FS.existsSync(path))
+      return {
+        ok: false,
+        error: 'File already exists and empty data was provided.',
+      };
     try {
-        FS.writeFileSync(path,data,options);
-        return { ok: true };
+      FS.writeFileSync(path, data, options);
+      return { ok: true };
     } catch (err) {
-        let window = BrowserWindow.getAllWindows().find(w => !w.isDestroyed());
-        const r = { ok: false, error: String(err) }
-        window?.webContents.send('CORE.Error', r);
-        return r;
+      let window = BrowserWindow.getAllWindows().find(w => !w.isDestroyed());
+      const r = { ok: false, error: String(err) };
+      window?.webContents.send('CORE.Error', r);
+      return r;
     }
   },
 
-  getPathSeparator: async e=>{
+  getPathSeparator: async e => {
     return PATH.sep;
   },
 
-  getFileSizes: async (e,file_paths)=>{
+  getFileSizes: async (e, file_paths) => {
     const sizes = [];
-    for(let file_path of file_paths){
+    for (let file_path of file_paths) {
       file_path = path_to_system(file_path);
       let size = 0;
       try {
         size = FS.statSync(file_path).size;
       } catch {}
-      sizes.push( size );
+      sizes.push(size);
     }
     return sizes;
   },
 
-  rename: async (e,[oldPath,newPath])=>{
+  rename: async (e, [oldPath, newPath]) => {
     try {
-      FS.renameSync( oldPath, newPath );
+      FS.renameSync(oldPath, newPath);
       return true;
-    } catch {return false;}
+    } catch {
+      return false;
+    }
   },
 
-  exists: async (e,path)=>{
+  exists: async (e, path) => {
     try {
       FS.statSync(path_to_system(path));
       return true;
-    } catch {return false;}
+    } catch {
+      return false;
+    }
   },
 
-  remove: (e,path)=>{
+  remove: (e, path) => {
     try {
-      FS.rmSync(path_to_system(path), {recursive:true,force:true});
+      FS.rmSync(path_to_system(path), { recursive: true, force: true });
       return true;
-    } catch {return false;}
+    } catch {
+      return false;
+    }
   },
 
-  openPath: async (e, path:string)=>{
+  openPath: async (e, path: string) => {
     path = path_to_system(path);
     try {
-        shell.openPath(path);
-        return true;
-    } catch {return false;}
+      shell.openPath(path);
+      return true;
+    } catch {
+      return false;
+    }
   },
 
-  setArcRoot: async (e, path:string)=>{
+  setArcRoot: async (e, path: string) => {
     LocalFileSystemService.arc_root = path_to_system(path);
   },
 
-  openFileNative: async (e: Electron.IpcMainInvokeEvent, path:string): Promise<Result<string>> =>{
+  openFileNative: async (e: Electron.IpcMainInvokeEvent, path: string): Promise<Result<string>> => {
     const p = path_to_system(path);
 
     try {
       const err = await shell.openPath(p);
 
       // openPath returns "" on success, otherwise a *string error message*
-      if (err === "") {
+      if (err === '') {
         return { ok: true };
       } else {
         return { ok: false, error: err };
@@ -436,5 +446,5 @@ export const LocalFileSystemService = {
     ipcMain.handle('LocalFileSystemService.openPath', LocalFileSystemService.openPath);
     ipcMain.handle('LocalFileSystemService.rename', LocalFileSystemService.rename);
     ipcMain.handle('LocalFileSystemService.setArcRoot', LocalFileSystemService.setArcRoot);
-  }
-}
+  },
+};

@@ -64,6 +64,10 @@ const ArcControlService = {
       return false;
     }
 
+    // add arc to list of local arcs
+    if(AppProperties.config.localARCs.indexOf(arc_root)<0)
+      AppProperties.config.localARCs.push(arc_root);
+
     ArcControlService.props.super_busy = true;
 
     try {
@@ -84,7 +88,7 @@ const ArcControlService = {
             break;
           case 'PlainText':
           // case 'YAML':
-          // case 'CWL': 
+          // case 'CWL':
           case 'JSON':
             const data = await window.ipc.invoke('LocalFileSystemService.readFile', [arc_root+'/'+contract.Path, {encoding: 'UTF-8'}]);
             contract.DTO = data;
@@ -139,7 +143,7 @@ const ArcControlService = {
                 buffer,
                 {}
               ]
-              
+
             );
           } catch (e) {
             console.error(`Error writing file at ${absolutePath}:`, e);
@@ -280,7 +284,7 @@ const ArcControlService = {
   updateARCfromFS: async ([path,type]) => {
     if(ArcControlService.props.skip_fs_updates) return;
     // track add/rm assays/studies through file explorer
-    const requires_update = 
+    const requires_update =
       !path.includes('~$') && // This is temp xlsx file
       (path.includes('isa.assay.xlsx') || path.includes('isa.study.xlsx') || path.includes('isa.investigation.xlsx') || path.includes('isa.run.xlsx') || path.includes('isa.workflow.xlsx') || path.includes('isa.datamap.xlsx'));
     if(!requires_update) return;
@@ -321,7 +325,7 @@ const ArcControlService = {
 
   test: async ()=>{
     const testArcPath = '/tmp/testARC';
-    if (!ArcControlService.props.arc) 
+    if (!ArcControlService.props.arc)
         throw new Error('No ARC loaded for testing.');
     try {
       await window.ipc.invoke('LocalFileSystemService.remove', testArcPath);
@@ -360,7 +364,7 @@ const ArcControlService = {
 
 const debouncedReadARC = pDebounce(async () => {
   await ArcControlService.readARC()
-  // TODO: Have to be able to reproduce the current state by calling the function with existing variables again. 
+  // TODO: Have to be able to reproduce the current state by calling the function with existing variables again.
   // TODO: Refactor to use identifier + datamap optional bool to determine what to load.
   await SwateControlService.LoadSwateState(SwateControlService.props.type, SwateControlService.props.identifier, SwateControlService.props.datamapParent);
   return;

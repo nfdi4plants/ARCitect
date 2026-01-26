@@ -6,6 +6,7 @@ interface Config {
   toolbarMinimized: boolean,
   showHelp: boolean,
   showTooltips: boolean,
+  localARCs: [string],
   swate_url: string | null
 }
 
@@ -94,7 +95,7 @@ const AppProperties: {
 
   processGitStreamRows: (data: string, rows: string[]) => {
     const newRows = data.split('\n').filter((row: string) => row !== '');
-    
+
     const progressPrefixes = [
       'POST ',
       'Filtering content:',
@@ -107,15 +108,15 @@ const AppProperties: {
       'Uploading LFS objects:',
       'Downloading LFS objects:',
     ];
-    
+
     for (let row of newRows) {
       if (row === '') continue;
-      
+
       const last_row = rows[rows.length - 1];
-      const shouldReplace = progressPrefixes.some(p => 
+      const shouldReplace = progressPrefixes.some(p =>
         last_row.includes(p) && row.includes(p)
       );
-      
+
       if (shouldReplace)
         rows[rows.length - 1] = row;
       else
@@ -125,7 +126,7 @@ const AppProperties: {
 
   setupGlobalGitListener: () => {
     if (AppProperties.git_dialog_state.globalListener) return;
-    
+
     AppProperties.git_dialog_state.globalListener = window.ipc.on('GitService.MSG', (data: string) => {
       if (!AppProperties.git_dialog_state.visible) return;
       AppProperties.processGitStreamRows(data, AppProperties.git_dialog_state.rows);
@@ -141,6 +142,7 @@ const AppProperties: {
     toolbarMinimized: false,
     showHelp: false,
     showTooltips: false,
+    localARCs: [],
     swate_url: ''
   },
 
@@ -268,7 +270,7 @@ const init = async ()=>{
   await AppProperties.read_config();
   watch(AppProperties.config, ()=>{
     window.ipc.invoke('LocalFileSystemService.writeConfig', JSON.stringify(AppProperties.config));
-  });
+  },{deep:true});
   await get_datahubs();
   AppProperties.load_swate = true;
   AppProperties.setupGlobalGitListener();
