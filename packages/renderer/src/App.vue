@@ -232,14 +232,27 @@ onMounted(async () => {
     .slice(1)
     .split('.')
     .map(x => parseFloat(x));
-  const versions = await window.ipc.invoke('InternetService.getArcitectVersions');
+  const all_versions = await window.ipc.invoke('InternetService.getArcitectVersions');
+  const versions = all_versions.filter(v => !v.draft && !v.prerelease); // filter drafts and prereleases
   const latest_version = versions[0].tag_name;
   const latest_version_ = latest_version
     .slice(1)
     .split('.')
     .map(x => parseFloat(x));
-  if (version_[0] < latest_version_[0] || version_[1] < latest_version_[1] || version_[2] < latest_version_[2])
+  if (version_[0] < latest_version_[0] || version_[1] < latest_version_[1] || version_[2] < latest_version_[2]) {
     iProps.new_version = latest_version;
+    $q.notify({
+      type: 'info',
+      message: 'There is a new version of ARCitect available!',
+      color: 'primary',
+      position: 'bottom-left',
+      timeout: 5000,
+      actions: [
+        { label: 'Download', icon: 'download', color: 'white', handler: downloadArcitect },
+        { label: 'Dismiss', icon: 'close', color: 'white', handler: () => {} },
+      ],
+    });
+  }
 
   setInterval(checkRemoteDirtyStatus, 5 * 60 * 1000);
 
