@@ -38,19 +38,19 @@ function randomString(alphabet: Array<string>, string_length: number): string {
 }
 
 export const CREDENTIALS_DATAPLANT = app.getPath('userData')+'/DataHubs.json'
-export const CREDENTIALS_ADDITIONAL = app.getPath('userData')+'/AdditionalDataHubs.json' 
+export const CREDENTIALS_ADDITIONAL = app.getPath('userData')+'/AdditionalDataHubs.json'
 
 export const CredentialStore: CredentialStoreType = {
   /** manage credentials for different datahubs */
-  credential_file_dataplant: CREDENTIALS_DATAPLANT, 
-  credential_file_additional: CREDENTIALS_ADDITIONAL, 
+  credential_file_dataplant: CREDENTIALS_DATAPLANT,
+  credential_file_additional: CREDENTIALS_ADDITIONAL,
   credentials: {dataplant: {}, additional: {}},
 
   init: ()=>{
     // read credentials from files
     // read dataplant credentials
     CredentialStore.credentials.dataplant = JSON.parse(fs.readFileSync(CredentialStore.credential_file_dataplant, 'utf-8'));
-    
+
     // read additional credentials if file does not exist create it and credentials are empty
     if (fs.existsSync(CredentialStore.credential_file_additional)) {
       CredentialStore.credentials.additional = JSON.parse(fs.readFileSync(CredentialStore.credential_file_additional, 'utf-8'));
@@ -246,7 +246,7 @@ export const DataHubService = {
           host: host,
           path: `/api/v4/groups/?${querystring.stringify({
             access_token: token,
-            all_available: true,
+            all_available: false,
             per_page: 100,
             page: page
           })}`,
@@ -282,7 +282,7 @@ export const DataHubService = {
     }
   },
 
-  
+
   deleteHost: ( e: IpcMainInvokeEvent, host: string ) => {
     /** delete host  by URL*/
     try {
