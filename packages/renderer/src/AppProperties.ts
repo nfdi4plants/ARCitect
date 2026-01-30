@@ -90,11 +90,21 @@ const AppProperties: {
 
   force_commit_update: 0,
 
+  wait: time => new Promise(resolve => setTimeout(resolve, time)),
 
+  debounce: (callback, wait) => {
+    let timeoutId = null;
+    return (...args) => {
+      window.clearTimeout(timeoutId);
+      timeoutId = window.setTimeout(() => {
+        callback(...args);
+      }, wait);
+    };
+  },
 
   processGitStreamRows: (data: string, rows: string[]) => {
     const newRows = data.split('\n').filter((row: string) => row !== '');
-    
+
     const progressPrefixes = [
       'POST ',
       'Filtering content:',
@@ -107,15 +117,15 @@ const AppProperties: {
       'Uploading LFS objects:',
       'Downloading LFS objects:',
     ];
-    
+
     for (let row of newRows) {
       if (row === '') continue;
-      
+
       const last_row = rows[rows.length - 1];
-      const shouldReplace = progressPrefixes.some(p => 
+      const shouldReplace = progressPrefixes.some(p =>
         last_row.includes(p) && row.includes(p)
       );
-      
+
       if (shouldReplace)
         rows[rows.length - 1] = row;
       else
@@ -125,7 +135,7 @@ const AppProperties: {
 
   setupGlobalGitListener: () => {
     if (AppProperties.git_dialog_state.globalListener) return;
-    
+
     AppProperties.git_dialog_state.globalListener = window.ipc.on('GitService.MSG', (data: string) => {
       if (!AppProperties.git_dialog_state.visible) return;
       AppProperties.processGitStreamRows(data, AppProperties.git_dialog_state.rows);

@@ -39,7 +39,8 @@ export const InternetService = {
                 output += chunk;
               });
               response.on('end', () => {
-                resolve(JSON.parse(output));
+                const res = JSON.parse(output);
+                resolve(options.with_header? [res,response._responseHead.headers] : res);
               });
             } else {
               resolve(null);
@@ -47,7 +48,7 @@ export const InternetService = {
           })
           /** net.request does not throw error on ERR_CONNECTION_TIMED_OUT and similar,
            * there will me a rather interuptive, non helpful message to the user, that there is a connection error
-           * in a case like that the promise will not be resolved 
+           * in a case like that the promise will not be resolved
            * as an intermediate we "catch" the error in .on('error') and resolve the promise with null
            */
           request.on('error', err => {resolve(null);});
