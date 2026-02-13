@@ -242,6 +242,20 @@ export const DataHubService = {
     });
   },
 
+
+
+  getProjectMembers: async (e: IpcMainInvokeEvent, [host, token, projectId]: [string, string, string | number]) => {
+    const result = await InternetService.getWebPageAsJson(null, {
+      host: host,
+      path: `/api/v4/projects/${encodeURIComponent(projectId)}/members/all?access_token=${token}`,
+      port: 443,
+      method: 'GET',
+    });
+    return result;
+  },
+
+
+
   getHosts: () => {
     return CredentialStore.getHosts();
   },
@@ -277,6 +291,7 @@ export const DataHubService = {
     ipcMain.handle('DataHubService.getHosts', DataHubService.getHosts);
     ipcMain.handle('DataHubService.addHost', DataHubService.addHost);
     ipcMain.handle('DataHubService.deleteHost', DataHubService.deleteHost);
+    ipcMain.handle('DataHubService.getProjectMembers', DataHubService.getProjectMembers);
 
     authApp = express();
     authApp.get('/', async (req: Request, res: Response) => {
