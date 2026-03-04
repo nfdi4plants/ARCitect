@@ -27,14 +27,21 @@ let init: {
     super_busy: boolean, // ui is blocking
     arc: null | ARC,
     git_initialized: boolean,
-    skip_fs_updates: boolean
+  skip_fs_updates: Set<string>
 } = {
     arc_root: undefined ,
     busy: false,
     super_busy: false,
     arc: null,
     git_initialized: false,
-    skip_fs_updates: false
+  skip_fs_updates: new Set<string>()
+}
+
+let skipFsUpdateCounter = 0;
+
+function createSkipFsUpdateId(prefix: string = 'skip-fs-update') {
+  skipFsUpdateCounter += 1;
+  return `${prefix}-${Date.now()}-${skipFsUpdateCounter}`;
 }
 
 function relative_to_absolute_path(relativePath: string) {
@@ -44,6 +51,16 @@ function relative_to_absolute_path(relativePath: string) {
 const ArcControlService = {
 
   props: reactive(init),
+
+  beginSkipFsUpdates: (prefix: string = 'skip-fs-update') => {
+    const requestId = createSkipFsUpdateId(prefix);
+    ArcControlService.props.skip_fs_updates.add(requestId);
+    return requestId;
+  },
+
+  endSkipFsUpdates: (requestId: string) => {
+    ArcControlService.props.skip_fs_updates.delete(requestId);
+  },
 
   closeARC: async() => {
     ArcControlService.props.arc_root = undefined;
@@ -185,48 +202,50 @@ const ArcControlService = {
     if(!arc_root)
       return;
 
-    ArcControlService.props.skip_fs_updates = true;
+    const skipRequestId = ArcControlService.beginSkipFsUpdates('save-arc');
 
-    arc.UpdateFileSystem();
-    let contracts = options.force ? arc.GetWriteContracts() : arc.GetUpdateContracts();
-    /// Add default .gitignore if it does not exist
-    const ignore_exists = await window.ipc.invoke(
-      'LocalFileSystemService.exists',
-      arc_root + '/.gitignore'
-    );
-    if(!ignore_exists)
-      contracts.push( gitignoreContract );
+    try {
+      arc.UpdateFileSystem();
+      let contracts = options.force ? arc.GetWriteContracts() : arc.GetUpdateContracts();
+      /// Add default .gitignore if it does not exist
+      const ignore_exists = await window.ipc.invoke(
+        'LocalFileSystemService.exists',
+        arc_root + '/.gitignore'
+      );
+      if(!ignore_exists)
+        contracts.push( gitignoreContract );
 
-    const attributes_exists = await window.ipc.invoke(
-      'LocalFileSystemService.exists',
-      arc_root + '/.gitattributes'
-    );
-    if(!attributes_exists)
-      await window.ipc.invoke(
-        'LocalFileSystemService.writeFile',
-        [arc_root + '/.gitattributes','**/dataset/** filter=lfs diff=lfs merge=lfs -text\n']
+      const attributes_exists = await window.ipc.invoke(
+        'LocalFileSystemService.exists',
+        arc_root + '/.gitattributes'
+      );
+      if(!attributes_exists)
+        await window.ipc.invoke(
+          'LocalFileSystemService.writeFile',
+          [arc_root + '/.gitattributes','**/dataset/** filter=lfs diff=lfs merge=lfs -text\n']
+        );
+
+      const license_exists = await window.ipc.invoke(
+        'LocalFileSystemService.exists',
+        arc_root + '/LICENSE'
       );
 
-    const license_exists = await window.ipc.invoke(
-      'LocalFileSystemService.exists',
-      arc_root + '/LICENSE'
-    );
+      const licence_md_exists = await window.ipc.invoke(
+        'LocalFileSystemService.exists',
+        arc_root + '/LICENSE.md'
+      );
 
-    const licence_md_exists = await window.ipc.invoke(
-      'LocalFileSystemService.exists',
-      arc_root + '/LICENSE.md'
-    );
+      if(license_exists || licence_md_exists){
+        contracts = contracts.filter(c=>c.Path!=='LICENSE.md' && c.Path!=='LICENSE');
+      }
 
-    if(license_exists || licence_md_exists){
-      contracts = contracts.filter(c=>c.Path!=='LICENSE.md' && c.Path!=='LICENSE');
+      for(let c of contracts)
+        await ArcControlService.processContract(c,arc,arc_root);
+    } finally {
+      setTimeout(() => {
+          ArcControlService.endSkipFsUpdates(skipRequestId)
+      }, 1000);
     }
-
-    for(let c of contracts)
-      await ArcControlService.processContract(c,arc,arc_root);
-
-    setTimeout(() => {
-        ArcControlService.props.skip_fs_updates = false
-    }, 1000);
   },
 
   delete: async (method:string, identifier:string) => {
@@ -278,7 +297,8 @@ const ArcControlService = {
   },
 
   updateARCfromFS: async ([path,type]) => {
-    if(ArcControlService.props.skip_fs_updates) return;
+    console.log("Updating ARC from FS, checking skip_fs_update:", ArcControlService.props.skip_fs_updates);
+    if(ArcControlService.props.skip_fs_updates.size > 0) return;
     // track add/rm assays/studies through file explorer
     const requires_update = 
       !path.includes('~$') && // This is temp xlsx file

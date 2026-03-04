@@ -259,17 +259,20 @@ const merge = async ()=>{
   const conflicts = rebase[1].split('\n').filter(r=>r.startsWith('CONFLICT')).map(r=>r.split('Merge conflict in ').pop());
 
   // attempt to resolve conflicts
-  ArcControlService.props.skip_fs_updates = true;
-  for(let file of conflicts.filter(f=>f.endsWith('.xlsx'))){
-    const merge_status = await merge_xlsx(file,[local_commit,common_ancestor,iProps.remote+'/'+branches.current]);
-    console.log(merge_status);
-    if(!merge_status){
-      dialogProps.state=2;
-      AppProperties.updateGitDialogState(2);
-      return;
+  const skipRequestId = ArcControlService.beginSkipFsUpdates('git-merge');
+  try {
+    for(let file of conflicts.filter(f=>f.endsWith('.xlsx'))){
+      const merge_status = await merge_xlsx(file,[local_commit,common_ancestor,iProps.remote+'/'+branches.current]);
+      console.log(merge_status);
+      if(!merge_status){
+        dialogProps.state=2;
+        AppProperties.updateGitDialogState(2);
+        return;
+      }
     }
+  } finally {
+    ArcControlService.endSkipFsUpdates(skipRequestId);
   }
-  ArcControlService.props.skip_fs_updates = false;
 
   dialogProps.state=1;
   AppProperties.updateGitDialogState(1);

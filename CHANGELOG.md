@@ -20,6 +20,28 @@ where applicable. Add your name in the style of `(by @github-username)` at the e
 
 ## [Unreleased]
 
+## 1.6.1 - 2026-03-04
+
+### 🐛 Fixed
+
+- Improve filewatcher handling when ARC files update. This should fix some issues with the file watcher updating the UI even after editing a ARC file with ARCitect. (by @Freymaurer)
+
+## 1.6.0 - 2026-01-30
+
+### ✨ Added
+- Add new datahub entry for datahub.hhu.de by @Brilator in #489
+
+### 🔄 Changed
+
+- DataHUB view is now paginated to improve performance by @JonasLukasczyk
+- Release notifications are only shown for releases that are not marked as drafts or prereleases @JonasLukasczyk
+- The AddRemoteDialog now only shows DataHUB groups the current user is a member of @JonasLukasczyk
+- Improve bug reporting instructions and button label by @Brilator in #487
+
+### 🐛 Fixed
+
+- Fix Datamap Functionality by @caroott in #494, #495
+
 ## 1.5.0 - 2025-12-15
 
 ### ✨ Added
