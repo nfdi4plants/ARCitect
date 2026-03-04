@@ -59,7 +59,10 @@ const ArcControlService = {
   },
 
   endSkipFsUpdates: (requestId: string) => {
-    ArcControlService.props.skip_fs_updates.delete(requestId);
+    // ArcControlService.props.skip_fs_updates.delete(requestId);
+    setTimeout(() => {
+      ArcControlService.props.skip_fs_updates.delete(requestId);
+    }, 5000);
   },
 
   closeARC: async() => {

@@ -24,7 +24,7 @@ where applicable. Add your name in the style of `(by @github-username)` at the e
 
 ### 🐛 Fixed
 
-- Improve filewatcher handling when ARC files update. This should fix some issues with the file watcher updating the UI even after editing a ARC file with ARCitect. (by @Freymaurer)
+- Improve filewatcher handling when ARC files update. This should fix some issues with the file watcher updating the UI even after editing a ARC file with ARCitect. (by @Freymaurer and @Brilator)
 
 ## 1.6.0 - 2026-01-30
 
