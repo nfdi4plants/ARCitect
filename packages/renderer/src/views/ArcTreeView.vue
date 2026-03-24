@@ -422,19 +422,15 @@ const triggerNode = (e: any, node: ArcTreeViewNode) => {
       props.selection = node.id;
       return SwateControlService.LoadSwateState(SCS.Type.ArcInvestigation);
     case formatNodeEditString(Studies):
-      skip(e);
       props.selection = node.id;
       return SwateControlService.LoadSwateState(1,node.label);
     case formatNodeEditString(Assays):
-      skip(e);
       props.selection = node.id;
       return SwateControlService.LoadSwateState(2,node.label);
     case formatNodeEditString(Runs):
-      skip(e);
       props.selection = node.id;
       return SwateControlService.LoadSwateState(3,node.label);
     case formatNodeEditString(Workflows):
-      skip(e);
       props.selection = node.id;
       return SwateControlService.LoadSwateState(4,node.label);
     case formatNodeEditString(Markdown):

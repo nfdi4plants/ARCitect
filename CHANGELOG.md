@@ -20,6 +20,10 @@ where applicable. Add your name in the style of `(by @github-username)` at the e
 
 ## [Unreleased]
 
+### 🔄 Changed
+
+- Toggle tree collapse when clicking on the name of a study, assay, workflow, or run (by @Thyra).
+
 ## 1.6.1 - 2026-03-04
 
 ### 🐛 Fixed
