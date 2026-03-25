@@ -24,9 +24,20 @@ import GitMergeTextDialog from '../dialogs/GitMergeTextDialog.vue';
 import { useQuasar } from 'quasar'
 const $q = useQuasar();
 
+interface ProjectMember {
+  id: number;
+  name: string;
+  username: string;
+  email?: string;
+  access_level: number;
+}
+
 const iProps = reactive({
   remote: '',
-  userListener: ()=>{}
+  userListener: ()=>{},
+  collaborators: [] as ProjectMember[],
+  loadingCollaborators: false,
+  collaboratorsError: null as string | null
 });
 
 const abortMerge = async()=>{
@@ -351,15 +362,168 @@ const pull = async()=>{
   await checkRemoteDirtyStatus();
 };
 
+// GitLab access level constants
+const ACCESS_LEVEL_NAMES: Record<number, string> = {
+  10: 'Guest',
+  20: 'Reporter',
+  30: 'Developer',
+  40: 'Maintainer',
+  50: 'Owner'
+};
+
+// Extract GitLab host from various git remote URL formats and return https://host
+const getGitLabWebUrlFromRemote = (remoteUrl: string): string | null => {
+  try {
+    const cleanUrl = remoteUrl.replace(GitService.get_url_credentials(remoteUrl), '');
+
+    let host = '';
+
+    if (cleanUrl.includes('://')) {
+      // URL format with explicit scheme (e.g., ssh://, https://, git://)
+      const urlObj = new URL(cleanUrl);
+      host = urlObj.hostname;
+    } else if (cleanUrl.includes('@') && cleanUrl.includes(':')) {
+      // SCP-style SSH format: git@host:path/to/project.git
+      const parts = cleanUrl.split(':', 2);
+      const hostPart = parts[0];
+      host = hostPart.split('@')[1];
+    }
+
+    return host ? `https://${host}` : null;
+  } catch (error) {
+    console.error('Error extracting GitLab host from remote URL:', error);
+    return null;
+  }
+};
+
+const parseProjectIdFromUrl = (url: string): string | null => {
+  try {
+    // Remove credentials from URL
+    const cleanUrl = url.replace(GitService.get_url_credentials(url), '');
+
+    // Handle different URL formats:
+    // git@host:group/project.git
+    // https://host/group/project.git
+    // https://host/group/subgroup/project.git
+
+    let projectPath = '';
+    if (cleanUrl.includes('://')) {
+      // URL format with explicit scheme (e.g., ssh://, https://, git://)
+      const urlObj = new URL(cleanUrl);
+      // Remove leading slashes from pathname
+      projectPath = urlObj.pathname.replace(/^\/+/, '');
+    } else if (cleanUrl.includes('@') && cleanUrl.includes(':')) {
+      // SCP-style SSH format: git@host:path/to/project.git
+      const parts = cleanUrl.split(':', 2);
+      if (parts.length === 2) {
+        projectPath = parts[1].replace(/^\/+/, '');
+      }
+    } else {
+      // Host/path format, optionally with http(s) scheme
+      const urlObj = new URL(cleanUrl.startsWith('http') ? cleanUrl : 'https://' + cleanUrl);
+      projectPath = urlObj.pathname.replace(/^\/+/, '');
+    }
+
+    // Remove .git extension
+    projectPath = projectPath.replace(/\.git$/, '');
+
+    return projectPath || null;
+  } catch (error) {
+    console.error('Error parsing project ID from URL:', error);
+    return null;
+  }
+};
+
+// Load collaborators for the current remote
+const loadCollaborators = async () => {
+  if (!iProps.remote || !AppProperties.user) {
+    return;
+  }
+
+  // Guard against missing remote entry
+  if (!GitService._.remotes[iProps.remote]) {
+    iProps.collaborators = [];
+    iProps.collaboratorsError = 'Remote no longer exists';
+    return;
+  }
+
+  iProps.loadingCollaborators = true;
+  iProps.collaboratorsError = null;
+  const remoteUrl = GitService._.remotes[iProps.remote].url;
+  const host = AppProperties.user.host;
+  const token = AppProperties.user.token.access_token;
+  const projectId = parseProjectIdFromUrl(remoteUrl);
+
+
+  if (!projectId) {
+    iProps.collaboratorsError = 'Could not determine project from remote URL';
+    iProps.loadingCollaborators = false;
+    return;
+  }
+
+  try {
+    const members = await window.ipc.invoke('DataHubService.getProjectMembers', [host, token, projectId]);
+
+    if (members && Array.isArray(members)) {
+      iProps.collaborators = members;
+      iProps.collaboratorsError = null;
+    } else {
+      iProps.collaborators = [];
+      iProps.collaboratorsError = 'Repository does not exist on remote or you lack permission to view members';
+    }
+  } catch (error) {
+    console.error('loadCollaborators: Error loading collaborators', error);
+    iProps.collaborators = [];
+    iProps.collaboratorsError = error instanceof Error ? error.message : String(error);
+  }
+
+  iProps.loadingCollaborators = false;
+};
+
+// Open GitLab project members page
+const openProjectMembersPage = () => {
+  if (!iProps.remote) return;
+
+  // Guard against missing remote entry
+  if (!GitService._.remotes[iProps.remote]) {
+    showError('Remote no longer exists');
+    return;
+  }
+
+  const remoteUrl = GitService._.remotes[iProps.remote].url;
+  const projectId = parseProjectIdFromUrl(remoteUrl);
+
+  if (!projectId) {
+    showError('Could not determine project from remote URL');
+    return;
+  }
+
+  const baseUrl = getGitLabWebUrlFromRemote(remoteUrl);
+  if (!baseUrl) {
+    showError('Could not parse GitLab host from remote URL');
+    return;
+  }
+
+  const membersUrl = `${baseUrl}/${projectId}/-/project_members`;
+  window.ipc.invoke('InternetService.openExternalURL', membersUrl);
+};
+
 const init = async()=>{
   await GitService.parse_status();
   await GitService.get_remotes();
-  await GitService.check_remotes();
   iProps.remote = Object.keys(GitService._.remotes)[0];
+  await GitService.check_remotes();
 };
 
 onMounted( init );
 watch(()=>AppProperties.user, init);
+watch(()=>iProps.remote, async ()=>{
+  iProps.collaborators = [];
+  iProps.collaboratorsError = null;
+  if (iProps.remote && AppProperties.user) {
+    await loadCollaborators();
+  }
+});
 
 const addRemote = e=>{
   $q.dialog({
@@ -382,7 +546,9 @@ const removeRemote = async remote=>{
     args: [`remote`,`remove`,remote],
     cwd: ArcControlService.props.arc_root
   });
-  GitService.get_remotes();
+  await GitService.get_remotes();
+  // Reset to first available remote or clear if none exist
+  iProps.remote = Object.keys(GitService._.remotes)[0] || null;
 };
 
 const inspectArc = url =>{
@@ -490,6 +656,83 @@ const inspectArc = url =>{
             </a_tooltip>
           </a_btn>
         </q-card-actions>
+
+        <q-card-section v-if="iProps.remote && AppProperties.user">
+          <div class='row'>
+            <div class='col'>
+              <div class='bg-grey-3' style="border-radius:0.3em; margin:0.4em; padding:0.5em;">
+                <div style="padding:0 0.5em 0.5em 0.5em; display:flex; justify-content:space-between; align-items:center;">
+                  <div>
+                    <q-item-label>
+                      Collaborators on <strong>{{ iProps.remote }}</strong>
+                    </q-item-label>
+                    <q-item-label caption>
+                      Current members and their access levels
+                    </q-item-label>
+                  </div>
+                  <div style="display:flex; gap:0.5em;">
+                    <a_btn
+                      label="Manage on DataHUB"
+                      icon="open_in_new"
+                      size="sm"
+                      color="primary"
+                      @click="openProjectMembersPage"
+                    >
+                      <q-tooltip>Open project members page in GitLab to add/remove collaborators</q-tooltip>
+                    </a_btn>
+                    <a_btn
+                      label="Refresh"
+                      icon="refresh"
+                      size="sm"
+                      :loading="iProps.loadingCollaborators"
+                      @click="loadCollaborators"
+                    >
+                      <q-tooltip>Reload collaborators list</q-tooltip>
+                    </a_btn>
+                  </div>
+                </div>
+
+                <q-table
+                  v-if="iProps.collaborators.length > 0"
+                  :rows="iProps.collaborators"
+                  :columns="[
+                    { name: 'name', label: 'Name', field: 'name', align: 'left' },
+                    { name: 'username', label: 'Username', field: 'username', align: 'left' },
+                    { name: 'access', label: 'Access Level', field: (row) => ACCESS_LEVEL_NAMES[row.access_level] || 'Unknown', align: 'center' }
+                  ]"
+                  row-key="id"
+                  flat
+                  bordered
+                  dense
+                  :rows-per-page-options="[10]"
+                >
+                  <template v-slot:body-cell-access="props">
+                    <q-td :props="props">
+                      <q-badge
+                        :color="props.row.access_level >= 40 ? 'primary' : 'secondary'"
+                        :label="ACCESS_LEVEL_NAMES[props.row.access_level] || 'Unknown'"
+                      />
+                    </q-td>
+                  </template>
+                </q-table>
+
+                <div v-else-if="iProps.collaboratorsError" style="padding:1em; text-align:center; color:var(--q-color-grey-6);">
+                  <q-icon name="warning" size="sm" color="orange" />
+                  <div style="margin-top:0.5em;">{{ iProps.collaboratorsError }}</div>
+                </div>
+
+                <div v-else-if="!iProps.loadingCollaborators" style="padding:1em; text-align:center; color:var(--q-color-grey-6);">
+                  No collaborators loaded. Click refresh to load.
+                </div>
+
+                <div v-if="iProps.loadingCollaborators" style="padding:1em; text-align:center;">
+                  <q-spinner size="md" color="primary" />
+                </div>
+
+              </div>
+            </div>
+          </div>
+        </q-card-section>
 
       </q-card>
     </ViewItem>

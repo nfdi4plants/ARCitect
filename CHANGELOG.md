@@ -20,6 +20,10 @@ where applicable. Add your name in the style of `(by @github-username)` at the e
 
 ## [Unreleased]
 
+### ✨ Added
+
+- Display collaborators in DataHUB Sync view and provide a direct link to manage them (by @Thyra).
+
 ## 1.6.1 - 2026-03-04
 
 ### 🐛 Fixed
