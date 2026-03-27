@@ -92,7 +92,7 @@ export const LocalFileSystemService = {
       title: title,
       message: message,
       properties: ['openDirectory'],
-      defaultPath: LocalFileSystemService.arc_root,
+      defaultPath: LocalFileSystemService.arc_root ? PATH.dirname(LocalFileSystemService.arc_root) : undefined,
     });
     const path = result.filePaths[0];
     return path ? path_to_arcitect(path) : null;
@@ -116,8 +116,9 @@ export const LocalFileSystemService = {
 
   saveFile: async ()=>{
     const window = BrowserWindow.getAllWindows().find(w => !w.isDestroyed());
-    const result = await dialog.showSaveDialog(window,{defaultPath:LocalFileSystemService.arc_root});
-    return path_to_arcitect(result.filePath);
+    const defaultPath = LocalFileSystemService.arc_root ? PATH.dirname(LocalFileSystemService.arc_root) : undefined;
+    const result = await dialog.showSaveDialog(window,{defaultPath});
+    return result.filePath ? path_to_arcitect(result.filePath) : null;
   },
 
   readFile: (e,parameters)=>{
