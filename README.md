@@ -1,3 +1,16 @@
+> [!CAUTION]
+> **ARCitect is no longer actively developed or maintained.**
+>
+> Development of ARCitect and ARCitISA has been consolidated into a single codebase. All future development will focus on [ARCitISA](https://github.com/nfdi4plants/ARCitISA), which combines ARC management and ISA file editing.
+>
+> **For existing ARCitect users:** We recommend switching to ARCitISA to benefit from future updates, bug fixes, and new features. You can download the new application from the [ARCitISA Releases page](https://github.com/nfdi4plants/ARCitISA/releases). Please back up your existing ARCs before switching.
+>
+> We are very thankful for all the user reports on this repo, and will investigate the issues to transfer them to the [ARCitISA](https://github.com/nfdi4plants/ARCitISA) repo when applicable.
+>
+> Should there be any questions regarding this shift, feel free to open new issues on the [ARCitISA](https://github.com/nfdi4plants/ARCitISA) repo, we will be more than happy to answer 🙂
+>
+> ~ Kevin (@Freymaurer)
+
 # ARCitect
 
 The **ARCitect** is a cross-platform app to create and manage your **ARCs** and synchronize them with the **DataHUB**.
